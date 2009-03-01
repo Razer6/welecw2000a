@@ -1,0 +1,4 @@
+VGA-p.vhd
+StrobeGen_var-e.vhd
+StrobeGen_var-a.vhd
+SimpleVGA-ea.vhd

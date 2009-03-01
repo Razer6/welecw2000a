@@ -1,0 +1,2 @@
+SpecialFunctionRegister-p.vhd
+SpecialFunctionRegister-ea.vhd

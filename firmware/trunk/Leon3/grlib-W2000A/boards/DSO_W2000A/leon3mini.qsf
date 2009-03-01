@@ -1,0 +1,125 @@
+
+set_global_assignment -name FAMILY "Cyclone II"
+set_global_assignment -name DEVICE EP2C70F896I8
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id "3.3-V LVTTL"
+set_global_assignment -name OUTPUT_PIN_LOAD 3 -section_id "1.8 V"
+set_global_assignment -name FMAX_REQUIREMENT "250 MHz"
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[0]
+set_instance_assignment -name IO_STANDARD LVDS -to "iCh2ADC1[0](n)"
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 2
+set_instance_assignment -name IO_STANDARD LVDS -to oADC3CLK
+set_instance_assignment -name IO_STANDARD LVDS -to oADC1CLK
+set_instance_assignment -name IO_STANDARD LVDS -to oADC2CLK
+set_instance_assignment -name IO_STANDARD LVDS -to oADC4CLK
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[0]
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 1
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 5
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 6
+set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id "2.5 V"
+set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id LVDS
+set_global_assignment -name ENABLE_CLOCK_LATENCY ON
+set_global_assignment -name END_TIME "400 us"
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE v2.vwf
+set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name FMAX_REQUIREMENT "250 MHz" -section_id 250
+
+set_global_assignment -name HDL_MESSAGE_LEVEL LEVEL3
+
+
+
+
+set_global_assignment -name NUMBER_OF_PATHS_TO_REPORT 2000
+
+
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name ENABLE_DA_RULE "C101, C102, C103, C104, C105, C106, R101, R102, R103, R104, R105, T101, T102, A101, A102, A103, A104, A105, A106, A107, A108, A109, A110, S101, S102, S103, S104, D101, D102, D103, H101, H102, M101, M102, M103, M104"
+set_global_assignment -name DISABLE_DA_RULE M105
+set_global_assignment -name FLOW_ENABLE_RTL_VIEWER ON
+set_global_assignment -name AUTO_RAM_RECOGNITION OFF
+set_global_assignment -name HDL_MESSAGE_OFF 10862
+set_global_assignment -name AUTO_RAM_TO_LCELL_CONVERSION ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC1CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC2CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC3CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC4CLK
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_2
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_7
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_10
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_15
+set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_2
+set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_7

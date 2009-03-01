@@ -1,0 +1,3 @@
+ADC-ea.vhd
+SignalSelector-ea.vhd
+SignalCapture-ea.vhd

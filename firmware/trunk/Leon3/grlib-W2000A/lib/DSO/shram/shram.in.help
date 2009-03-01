@@ -1,0 +1,20 @@
+Enable DSO specific hardware units access
+CONFIG_DSO_ENABLE
+  The DSO specific hardware units access via special function registers is nessesary for all types of the scope!
+
+Plattform
+CONFIG_DSO_PLATTFORM
+  This is the information for the scope software on which hardware it is running.
+
+Channels
+CONFIG_DSO_CHANNELS
+  Number of input channels
+
+Sampling Frequency
+CONFIG_DSO_SAMPLING_FREQUENCY
+  This core is designed to use one high fixed sampling frequency. Lower sampling frequencys are reduced digital with or without Anti Aliasing Filters.
+
+AD-Converter Resolution
+CONFIG_DSO_INPUT_BIT_WIDTH
+  It is informative for the scope software and it is used to set the bit width of the Anti Aliasing Filters before the trigger.
+

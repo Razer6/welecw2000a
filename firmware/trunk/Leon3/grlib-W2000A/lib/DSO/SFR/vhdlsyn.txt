@@ -1,0 +1,4 @@
+SFR-p.vhd
+SFR-ea.vhd
+SignalAccess-p.vhd
+SignalAccess-ea.vhd

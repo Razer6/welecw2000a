@@ -1,0 +1,12 @@
+../../../Altera/src
+../../../Scope/src
+../../../DownSampler/Octave
+../../../DownSampler/src
+../../../Trigger/src
+../../../SignalCapture/src
+../../../ExtRAM/src
+../../../VGA/src
+../../../LedsKeys/src
+../../../CPU/src
+SFR
+shramc

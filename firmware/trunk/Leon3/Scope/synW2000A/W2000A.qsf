@@ -1,0 +1,380 @@
+# Copyright (C) 1991-2008 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+
+
+# The default values for assignments are stored in the file
+#		W2000A_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+set_global_assignment -name FAMILY "Cyclone II"
+set_global_assignment -name DEVICE EP2C70F896I8
+set_global_assignment -name TOP_LEVEL_ENTITY leon3mini
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "7.1 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:07:45  MAY 15, 2008"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id "3.3-V LVTTL"
+set_global_assignment -name OUTPUT_PIN_LOAD 3 -section_id "1.8 V"
+set_global_assignment -name FMAX_REQUIREMENT "250 MHz"
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[0]
+set_instance_assignment -name IO_STANDARD LVDS -to "iCh2ADC1[0](n)"
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 2
+set_instance_assignment -name IO_STANDARD LVDS -to oADC3CLK
+set_instance_assignment -name IO_STANDARD LVDS -to oADC1CLK
+set_instance_assignment -name IO_STANDARD LVDS -to oADC2CLK
+set_instance_assignment -name IO_STANDARD LVDS -to oADC4CLK
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC2[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC3[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC4[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC1[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC2[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC3[0]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[7]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[6]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[5]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[4]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[3]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[2]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[1]
+set_instance_assignment -name IO_STANDARD LVDS -to iCh2ADC4[0]
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 1
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 5
+set_global_assignment -name IOBANK_VCCIO 2.5V -section_id 6
+set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id "2.5 V"
+set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id LVDS
+set_global_assignment -name ENABLE_CLOCK_LATENCY ON
+set_global_assignment -name END_TIME "400 us"
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE v2.vwf
+set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name FMAX_REQUIREMENT "250 MHz" -section_id 250
+
+set_global_assignment -name HDL_MESSAGE_LEVEL LEVEL3
+
+
+
+
+set_global_assignment -name NUMBER_OF_PATHS_TO_REPORT 2000
+
+
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name ENABLE_DA_RULE "C101, C102, C103, C104, C105, C106, R101, R102, R103, R104, R105, T101, T102, A101, A102, A103, A104, A105, A106, A107, A108, A109, A110, S101, S102, S103, S104, D101, D102, D103, H101, H102, M101, M102, M103, M104"
+set_global_assignment -name DISABLE_DA_RULE M105
+set_global_assignment -name FLOW_ENABLE_RTL_VIEWER ON
+set_global_assignment -name AUTO_RAM_RECOGNITION OFF
+set_global_assignment -name HDL_MESSAGE_OFF 10862
+set_global_assignment -name AUTO_RAM_TO_LCELL_CONVERSION ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+#set_global_assignment -name VHDL_FILE "../../Scope/src/TopScope-ea.vhd"
+
+
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/version.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/stdlib.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/sparc/sparc.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/modgen/multlib.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/modgen/leaves.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/amba.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/devices.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/defmst.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/apbctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/ahbctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/gencomp/gencomp.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/memory_inferred.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/tap_inferred.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/ddr_inferred.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/mul_inferred.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/altera_mf/memory_altera_mf.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/altera_mf/clkgen_altera_mf.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/altera_mf/tap_altera_mf.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allclkgen.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allddr.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allmem.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allpads.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/alltap.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkgen.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkmux.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkand.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ddr_ireg.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ddr_oreg.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ddrphy.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram64.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram_2p.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram_dp.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncfifo.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/regfile_3p.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/tap.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/techbuf.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkpad.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkpad_ds.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/inpad.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/inpad_ds.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/iodpad.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/iopad.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/iopad_ds.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/lvds_combo.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/odpad.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/outpad.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/outpad_ds.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/toutpad.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/grspwc_net.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/mul_61x61.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/cpu_disas_net.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/usbhc_net.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ringosc.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ssrctrl_net.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/comp/ethcomp.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/greth_pkg.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/eth_rstgen.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/eth_ahb_mst.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/greth_tx.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/greth_rx.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/grethc.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/wrapper/greth_gen.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/wrapper/greth_gbit_gen.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/occomp/occomp.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/can/cancomp.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/can/can_top.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/can/can_top_core_sync.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/i2c/i2c_master_bit_ctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/i2c/i2c_master_byte_ctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/i2c/i2coc.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/ud_cnt.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/ro_cnt.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_dma_fifo.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_dma_actrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_dma_tctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_pio_tctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_pio_actrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_controller.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_pio_controller.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/ocidec2_controller.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/arith/arith.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/arith/mul32.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/arith/div32.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/memctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/sdctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/sdmctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/srctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmuconfig.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmuiface.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libmmu.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libiu.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libcache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libproc3.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/cachemem.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_icache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_dcache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_acache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmutlbcam.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmulrue.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmulru.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmutlb.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmutw.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_cache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/acache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/dcache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/icache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/cache.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/cpu_disasx.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/iu3.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mfpwx.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/tbufmem.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/dsu3x.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/dsu3.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/proc3.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3s.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3cg.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/irqmp.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/grfpwxsh.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/grfpushwx.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3sh.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_mod.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_oc.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_mc.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/canmux.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_rd.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/misc.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/rstgen.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/gptimer.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbram.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbtrace.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbmst.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/grgpio.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbstat.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/logan.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/apbps2.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/charrom_package.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/charrom.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/apbvga.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbdma.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/svgactrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/i2cmst.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/spictrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/i2cslv.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/net/net.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/net/eth_arb.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/uart.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/libdcom.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/apbuart.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/dcom.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/dcom_uart.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/ahbuart.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/jtag.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/libjtagcom.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/jtagcom.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/ahbjtag.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/ahbjtag_bsd.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/ethernet_mac.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/greth.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/greth_gbit.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/grethm.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/usb/usb.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/usb/usbdcl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/ata.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/ata_inf.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atahost_amba_slave.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atahost_ahbmst.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/ocidec2_amba_slave.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atactrl_nodma.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atactrl_dma.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atactrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/hapstrak.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/test_1x2.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/sram_1x1.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/flash_1x1.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/esa/memoryctrl/memoryctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/esa/memoryctrl/mctrl.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/config.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/ahbrom.vhd"
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL0.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL1.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL2.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL3.vhd
+set_global_assignment -name VHDL_FILE "../../Scope/src/Global-p.vhd"
+set_global_assignment -name VHDL_FILE "../../VGA/src/StrobeGen_var-e.vhd"
+set_global_assignment -name VHDL_FILE "../../VGA/src/StrobeGen_var-a.vhd"
+set_global_assignment -name VHDL_FILE ../../Altera/src/SyncRam1Gs.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/TriggerMemory.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/DelayMemory.vhd
+set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FastFirCoeff-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FirCoeff-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyphaseDecimator-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastAverage-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/DownSampler-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopDownSampler-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/Trigger-p.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/NormalTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/ExternalTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/TopTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalSelector-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../SignalCapture/src/ADC-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalCapture-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../LedsKeys/src/LedsKeys-p.vhd"
+set_global_assignment -name VHDL_FILE "../../LedsKeys/src/StrobeGen-e.vhd"
+set_global_assignment -name VHDL_FILE "../../LedsKeys/src/StrobeGen-Rtl-a.vhd"
+set_global_assignment -name VHDL_FILE "../../LedsKeys/src/LedsKeys-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../VGA/src/VGA-p.vhd"
+set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-p.vhd"
+set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../VGA/src/SimpleVGA-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../CPU/src/SpecialFunctionRegister-p.vhd"
+set_global_assignment -name VHDL_FILE "../../CPU/src/SpecialFunctionRegister-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SFR-p.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SFR-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAccess-p.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAccess-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/W2000ROM.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/leon3mini.vhd"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC1CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC2CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC3CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC4CLK
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_2
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_7
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_10
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_15
+set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_2
+set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_7

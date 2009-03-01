@@ -1,0 +1,9 @@
+
+    bool 'Enable SFR (must be y for all scopes) ' CONFIG_DSO_ENABLE y
+    if [ "$CONFIG_DSO_ENABLE" = "y" ]; then
+      int 'Plattform                  '   CONFIG_DSO_PLATTFORM 2024
+      int 'Input Channels             '   CONFIG_DSO_CHANNELS 2
+      int 'Input Sampling Frequency   '   CONFIG_DSO_SAMPLING_FREQUENCY 1000000000
+      int 'Input bit width            '   CONFIG_DSO_INPUT_BIT_WIDTH 8
+    fi
+

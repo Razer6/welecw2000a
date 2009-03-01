@@ -1,0 +1,80 @@
+# Copyright (C) 1991-2008 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+
+
+# The default values for assignments are stored in the file
+#		TopTrigger_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+set_global_assignment -name FAMILY "Cyclone II"
+set_global_assignment -name DEVICE EP2C70F896C7
+set_global_assignment -name TOP_LEVEL_ENTITY SignalCapture
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:12:27  AUGUST 28, 2008"
+set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+
+
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+
+set_global_assignment -name DO_COMBINED_ANALYSIS ON
+set_global_assignment -name ENABLE_RECOVERY_REMOVAL_ANALYSIS ON
+set_global_assignment -name ENABLE_CLOCK_LATENCY ON
+set_global_assignment -name REPORT_IO_PATHS_SEPARATELY ON
+
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL0.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL1.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL2.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/PLL3.vhd
+set_global_assignment -name VHDL_FILE "../../Scope/src/Global-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FastFirCoeff-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FirCoeff-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyphaseDecimator-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastAverage-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE ../../Altera/src/DelayMemory.vhd
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/DownSampler-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopDownSampler-ea.vhd"
+set_global_assignment -name VHDL_FILE ../../Altera/src/SyncRam1Gs.vhd
+set_global_assignment -name VHDL_FILE ../../Altera/src/TriggerMemory.vhd
+set_global_assignment -name VHDL_FILE "../../Trigger/src/Trigger-p.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/NormalTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/ExternalTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/TopTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalSelector-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../SignalCapture/src/ADC-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalCapture-ea.vhd"
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ON
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_GATE_RETIME ON
+set_global_assignment -name ENABLE_DA_RULE "C101, C102, C103, C104, C105, C106, R101, R102, R103, R104, R105, T101, T102, A101, A102, A103, A104, A105, A106, A107, A108, A109, A110, S101, S102, S103, S104, D101, D102, D103, H101, H102, M104"
+set_global_assignment -name DISABLE_DA_RULE "M101, M102, M103, M105"
