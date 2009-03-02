@@ -4,7 +4,7 @@
 -- File       : PolyphaseDecimator-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-07
--- Last update: 2009-02-19
+-- Last update: 2009-03-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -52,7 +52,7 @@ package pPolyphaseDecimator is
   constant cDecimationStages : natural := 4;
 
   type aDownSampler is record
-                         SampleTime   : integer;
+                         Stages       : aDword;
                          EnableFilter : std_ulogic_vector(0 to 3);
                        end record;
   type aStage is record
@@ -67,7 +67,9 @@ package pPolyphaseDecimator is
                         Valid : std_ulogic;
                       end record;
   type aStageInputs is array (0 to cDecimationStages-1) of aStageInput;
-  type aStagesChannels is array (0 to cChannels-1) of aStageInputs;
+  type aStageOutputs is array (0 to cDecimationStages-2) of aStageInput;
+  type aStagesInCh is array (0 to cChannels-1) of aStageInputs;
+  type aStagesOutCh is array (0 to cChannels-1) of aStageOutputs;
   type aDownSampled is array (0 to cChannels-1) of aLongValues(0 to cCoefficients-1);
   function Avg9Bit (A, B : aValue) return aValue;
   function toValues(A    : aInputValues) return aValues;
@@ -126,7 +128,7 @@ package pPolyphaseDecimator is
       iStageValid0  : in  std_ulogic;
       iStageData0   : in  aFastData;
       iStage        : in  aStageInputs;
-      oStage        : out aStageInputs;
+      oStage        : out aStageOutputs;
       oData         : out aLongValues(0 to cCoefficients-1);
       oValid        : out std_ulogic);
   end component;

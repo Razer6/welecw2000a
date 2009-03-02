@@ -4,7 +4,7 @@
 -- File       : DownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-16
--- Last update: 2009-02-21
+-- Last update: 2009-03-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -51,7 +51,7 @@ entity DownSampler is
     iStageValid0  : in  std_ulogic;
     iStageData0   : in  aFastData;
     iStage        : in  aStageInputs;
-    oStage        : out aStageInputs;
+    oStage        : out aStageOutputs;
     oData         : out aLongValues(0 to cCoefficients-1);
     oValid        : out std_ulogic);
 end entity;
@@ -62,7 +62,7 @@ architecture RTL of DownSampler is
   signal AliasAvg        : aFastData;
   signal AliasAvgValid   : std_ulogic;
 
-  signal StageData0     : aLongValues(0 to cCoefficients-1);
+  signal StageData0     : aValues(0 to cCoefficients-1);
   signal StageValid0    : std_ulogic;
   signal Stage          : aStageInputs;
   signal Aliasing       : aStages;
@@ -108,23 +108,19 @@ begin
       if iEnableFilter(0) = '1' then
         StageValid0 <= iStageValid0;
         for i in StageData0'range loop
-          StageData0(i)(cBitWidth*2-1 downto cBitWidth) <=
-            iStageData0(i);
-          StageData0(i)(cBitWidth-1 downto 0) <=
-            (others => '0');
+          StageData0(i) <= iStageData0(i);
         end loop;
       else
         StageValid0 <= AliasAvgValid;
         for i in StageData0'range loop
-          StageData0(i)(cBitWidth*2-1 downto cBitWidth) <= signed(AliasAvg(i));
-          StageData0(i)(cBitWidth-1 downto 0)           <= (others => '0');
+          StageData0(i) <= signed(AliasAvg(i));
         end loop;
       end if;
 
 
       if iEnableFilter(0) = '1' then
         Stage(0) <= iStage(0);
-     else
+      else
         Stage(0).Data(cBitWidth*2-1 downto cBitWidth) <= AliasAvg(0);
         Stage(0).Data(cBitWidth-1 downto 0)           <= (others => '0');
         Stage(0).Valid                                <= AliasAvgValid;
@@ -161,8 +157,11 @@ begin
 
       -- downsampler output
       if iDecimation(1 to cDecimationStages-1) = (1 => M1, 2 => M1, 3 => M1) then
-        DataOut <= StageData0;
-        oValid  <= StageValid0;
+        for i in DataOut'range loop
+          DataOut(i)(cBitWidth*2-1 downto cBitWidth) <= StageData0(i);
+          DataOut(i)(cBitWidth-1 downto 0)           <= (others => '0');
+        end loop;
+        oValid <= StageValid0;
       else
         oValid <= '0';
         if Stage(Stage'high).Valid = '1' then
@@ -216,8 +215,8 @@ begin
             when 4 | 9 => AliasAvg(7)   <= iStageData0(7);
           end case;
           case AliasAvgCounter is
-            when 0 | 5 =>  AliasAvg <= AliasAvg;
-            when others => AliasAvg(0 to 6) <=  AliasAvg(1 to 7);
+            when 0 | 5  => AliasAvg         <= AliasAvg;
+            when others => AliasAvg(0 to 6) <= AliasAvg(1 to 7);
           end case;
       end case;
     end if;

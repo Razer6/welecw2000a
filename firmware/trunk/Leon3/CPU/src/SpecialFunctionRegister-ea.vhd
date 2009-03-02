@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-01
+-- Last update: 2009-03-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -79,7 +79,7 @@ begin
   oSFRControl.Trigger        <= Trigger;
   -- oSFRControl.Uart            <= UartOut;
   oSFRControl.Leds           <= Leds;
-  Addr                       <= to_integer(unsigned(iAddr(8 downto 2)));
+  Addr                       <= to_integer(unsigned(iAddr(7 downto 2)));
 
 
   pInterrupt : process (iClk, iResetAsync)
@@ -122,7 +122,7 @@ begin
     if iResetAsync = cResetActive then
       InterruptMask <= (others => '0');
       Decimator <= (
-        SampleTime   => 0,
+        Stages   => (others => '0'),
         EnableFilter => (others => '0'));
       case cCurrentDevice is
         when cWelec2012 =>
@@ -260,8 +260,8 @@ begin
             end loop;
             
           when cSamplingFreqAddr =>
-            vData                := iData(31 downto 12)& X"000";
-            Decimator.SampleTime <= to_integer(unsigned(vData));
+          --  vData                := iData(31 downto 12)& X"000";
+            Decimator.Stages <= iData;
           when cFilterEnableAddr =>
             Decimator.EnableFilter <= iData(Decimator.EnableFilter'length-1 downto 0);
           when cInputCh0Addr =>
@@ -341,7 +341,7 @@ begin
     end if;
   end process;
 
-  pRead : process (iAddr, iSFRControl, InterruptVector,
+  pRead : process (Addr, iSFRControl, InterruptVector,
                    InterruptMask, Decimator,
                    SignalSelector, Trigger, Leds)
   begin
@@ -354,7 +354,8 @@ begin
       when cInterruptMaskAddr =>
         oData <= InterruptMask;
       when cSamplingFreqAddr =>
-        oData <= std_ulogic_vector(to_unsigned(Decimator.SampleTime, oData'length));
+        -- oData <= std_ulogic_vector(to_unsigned(Decimator.SampleTime, oData'length));
+        oData <= Decimator.Stages;
       when cFilterEnableAddr =>
         oData(Decimator.EnableFilter'length-1 downto 0) <= Decimator.EnableFilter;
       when cInputCh0Addr =>

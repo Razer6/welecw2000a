@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-02-25
+-- Last update: 2009-03-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -58,6 +58,7 @@ architecture RTL of TopTrigger is
   signal R              : aTopTriggerFSM;
   signal TriggerStrobes : aTrigger2D(0 to cDiffTriggers-1);
   signal TriggerData    : aBytes(0 to cCoefficients-1);
+  signal TriggerInValid : std_ulogic;
 --  signal WrEn           : std_ulogic;
   signal aclr           : std_ulogic;
 
@@ -79,7 +80,8 @@ begin
   Convert : process (iData, iCPUPort.TriggerChannel, DataOutCh0, DataOutCh1, DataOutCh2, DataOutCh3)
   begin
     for i in 0 to cCoefficients-1 loop
-      TriggerData(i)                  <= std_ulogic_vector(iData(iCPUPort.TriggerChannel)(i));
+      --   TriggerData(i)                  <= std_ulogic_vector(iData(iCPUPort.TriggerChannel)(i));
+     -- TriggerData(i)                  <= std_ulogic_vector(iData(0)(i));
       DataInCh0(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(0)(i));
       DataInCh1(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(1)(i));
       DataInCh2(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(2)(i));
@@ -92,10 +94,21 @@ begin
     end loop;
   end process;
 
+  TriggerOnCh : process (iClk, iResetAsync)
+  begin
+    if iResetAsync = cResetActive then
+      TriggerData    <= (others => (others => '0'));
+      TriggerInValid <= '0';
+    elsif rising_edge(iClk) then
+      TriggerInValid <= iValid;
+      TriggerData    <= iData(iCPUPort.TriggerChannel);
+    end if;
+  end process;
+
+
 
   Top : process (iClk, iResetAsync)
     variable i    : natural;
-    variable data : aBytes(0 to 3);
     constant cInit : aTopTriggerFSM := (
       State       => Idle,
       PrevTrigger => '0',
@@ -116,10 +129,6 @@ begin
       
       R.ReadAlign                    <= iTriggerMem.Addr(cTriggerAlign-1 downto 0);
       i                              := to_integer(unsigned(R.ReadAlign));
-      data(0)                        := AlignDataCh0(i);
-      data(1)                        := AlignDataCh1(i);
-      data(2)                        := AlignDataCh2(i);
-      data(3)                        := AlignDataCh3(i);
       oTriggerMem.Data(7 downto 0)   <= std_ulogic_vector(AlignDataCh0(i));
       oTriggerMem.Data(15 downto 8)  <= std_ulogic_vector(AlignDataCh1(i));
       oTriggerMem.Data(23 downto 16) <= std_ulogic_vector(AlignDataCh2(i));
@@ -257,10 +266,10 @@ begin
     end if;
   end process;
 
-  oCPUPort.ReadOffset      <= R.StartAddr;
+  oCPUPort.ReadOffset         <= R.StartAddr;
   oCPUPort.CurrentTriggerAddr <= R.Addr(oCPUPort.CurrentTriggerAddr'range);
-  oCPUPort.Busy            <= R.Busy;
-  oTriggerMem.ACK          <= R.DataValid(2);
+  oCPUPort.Busy               <= R.Busy;
+  oTriggerMem.ACK             <= R.DataValid(2);
 
   -- WrEn <= R.WrEn and iValid;
   aclr <= iResetAsync when cResetActive = '1' else
@@ -317,7 +326,7 @@ begin
     port map (
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iValid      => iValid,
+      iValid      => TriggerInValid,
       iExtTrigger => iExtTrigger,
       oLHStrobe   => TriggerStrobes(0)(0),
       oHLStrobe   => TriggerStrobes(1)(0),
@@ -333,7 +342,7 @@ begin
     port map (
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iValid      => iValid,
+      iValid      => TriggerInValid,
       iData       => TriggerData,
       iLowValue   => iCPUPort.LowValue,
       iLowTime    => iCPUPort.LowTime,

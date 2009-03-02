@@ -4,7 +4,7 @@
 -- File       : TopDownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-17
--- Last update: 2009-02-21
+-- Last update: 2009-03-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -43,23 +43,28 @@ use DSO.Global.all;
 use DSO.pPolyphaseDecimator.all;
 
 entity TopDownSampler is
+  generic (
+    gUseStage0 : boolean := true);
   port (
     iClk        : in  std_ulogic;
     iResetAsync : in  std_ulogic;
     iADC        : in  aAllData;         -- fixpoint 1.x range -0.5 to 0.5
+    iData       : in  aLongValues(0 to cChannels-1);
+    iValid      : in  std_ulogic;
     iCPU        : in  aDownSampler;
     oData       : out aDownSampled;     -- fixpoint 1.x range -1 to <1
     oValid      : out std_ulogic);
 end entity;
 
 architecture RTL of TopDownSampler is
-  
-  signal Decimator          : aM(0 to 3);
+  type   aDecimatorBits is array (0 to cDecimationStages-1) of std_ulogic_vector(3 downto 0);
+  signal DecimatorBits      : aDecimatorBits;
+  signal Decimator          : aM(0 to cDecimationStages-1);
   signal Stage0AvgDecimator : aDecimator;
   signal StageData0         : aAllData;
   signal StageValid0        : std_ulogic_vector(0 to cChannels-1);
-  signal StageInput         : aStagesChannels;
-  signal StageOutput        : aStagesChannels;
+  signal StageInput         : aStagesOutCh;
+  signal StageOutput        : aStagesInCh;
   signal ValidOut           : std_ulogic_vector(0 to cChannels-1);
   signal FastFirData        : aValues(0 to cChannels-1);
   type   aFirData is array (natural range <>) of aLongValues(0 to cChannels-1);
@@ -96,21 +101,35 @@ begin
       end loop;
     end loop;
   end process;
-  FirValid(0) <= AvgValid(0);
 
-  Stage0 : for i in 0 to cChannels-1 generate
-    FastAvg : FastAverage
-      port map (
-        iClk        => iClk,
-        iResetAsync => iResetAsync,
-        iDecimator  => Stage0AvgDecimator,
-        iData       => iADC(i),         -- fixpoint 1.x range -0.5 to 0.5
-        oData       => StageData0(i),   -- fixpoint 1.x range -1 to <1
-        oValid      => StageValid0(i),
-        oStageData  => FirDataOut(0)(i),
-        oStageValid => AvgValid(i));
+  ParallelStage : if gUseStage0 = true generate
+    FirValid(0) <= AvgValid(0);
+    Stage0 : for i in 0 to cChannels-1 generate
+      FastAvg : FastAverage
+        port map (
+          iClk        => iClk,
+          iResetAsync => iResetAsync,
+          iDecimator  => Stage0AvgDecimator,
+          iData       => iADC(i),        -- fixpoint 1.x range -0.5 to 0.5
+          oData       => StageData0(i),  -- fixpoint 1.x range -1 to <1
+          oValid      => StageValid0(i),
+          oStageData  => FirDataOut(0)(i),
+          oStageValid => AvgValid(i));
+    end generate;
   end generate;
 
+  NoParallelStage : if gUseStage0 = false generate
+    StageData0  <= (others => (others => (others => '0')));
+    StageValid0 <= (others => '0');
+    process (iData, iValid)
+    begin
+      for i in 0 to cChannels-1 loop
+        FirDataOut(0)(i) <= iData(i);
+        FirValid(0)      <= iValid;
+      end loop;
+    end process;
+    --  AvgValid(i)   <= (others => iValid);
+  end generate;
 
   Stage1 : entity DSO.TopFastPolyPhaseDecimator
     port map (
@@ -134,6 +153,13 @@ begin
         oValid      => FirValid(i));
   end generate;
 
+  dBits : process (iCPU.Stages)
+  begin
+    for i in 0 to cDecimationStages-1 loop
+      DecimatorBits(i) <= iCPU.Stages((i+1)*4-1 downto i*4);
+    end loop;
+  end process;
+
   M : process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
@@ -142,63 +168,96 @@ begin
     elsif rising_edge(iClk) then
       Decimator          <= (others => M1);
       Stage0AvgDecimator <= M10;
-
-      case iCPU.SampleTime is
-        when 1e9 =>
-          Decimator          <= (others => M1);
-          Stage0AvgDecimator <= M1;
-        when 500e6 =>
-          Decimator(0)       <= M2;
-          Stage0AvgDecimator <= M2;
-        when 250e6 =>
-          Decimator(0)       <= M4;
-          Stage0AvgDecimator <= M4;
-        when 100e6 =>
-          Stage0AvgDecimator <= M10;
-        when 50e6 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M2;
-        when 25e6 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M4;
-        when 10e6 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M10;
-        when 5e6 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M10;
-          Decimator(2) <= M2;
-        when 2500e3 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M10;
-          Decimator(2) <= M4;
-        when 1e6 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M10;
-          Decimator(2) <= M10;
-        when 500e3 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M10;
-          Decimator(2) <= M10;
-          Decimator(3) <= M2;
-        when 250e3 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M10;
-          Decimator(2) <= M10;
-          Decimator(3) <= M4;
-        when 100e3 =>
-          Decimator(0) <= M10;
-          Decimator(1) <= M10;
-          Decimator(2) <= M10;
-          Decimator(3) <= M10;
-        when others =>
-          null;
-      end case;
+      for i in 0 to cDecimationStages-1 loop
+        case DecimatorBits(i) is
+          when X"1"   => Decimator(i) <= M1;
+          when X"2"   => Decimator(i) <= M2;
+          when X"4"   => Decimator(i) <= M4;
+          when X"A"   => Decimator(i) <= M10;
+          when others => Decimator(i) <= M1;
+        end case;
+      end loop;
       if iCPU.EnableFilter(0) = '0' then
         Stage0AvgDecimator <= M1;
+      else
+        case DecimatorBits(0) is
+          when X"1"   => Stage0AvgDecimator <= M1;
+          when X"2"   => Stage0AvgDecimator <= M2;
+          when X"4"   => Stage0AvgDecimator <= M4;
+          when X"A"   => Stage0AvgDecimator <= M10;
+          when others => Stage0AvgDecimator <= M1;
+        end case;
       end if;
     end if;
   end process;
+
+
+
+--  M : process (iClk, iResetAsync)
+--  begin
+--    if iResetAsync = cResetActive then
+--      Decimator          <= (others => M1);
+--      Stage0AvgDecimator <= M10;
+--    elsif rising_edge(iClk) then
+--      Decimator          <= (others => M1);
+--      Stage0AvgDecimator <= M10;
+
+--      case iCPU.SampleTime is
+--        when 1e9 =>
+--          Decimator          <= (others => M1);
+--          Stage0AvgDecimator <= M1;
+--        when 500e6 =>
+--          Decimator(0)       <= M2;
+--          Stage0AvgDecimator <= M2;
+--        when 250e6 =>
+--          Decimator(0)       <= M4;
+--          Stage0AvgDecimator <= M4;
+--        when 100e6 =>
+--          Stage0AvgDecimator <= M10;
+--        when 50e6 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M2;
+--        when 25e6 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M4;
+--        when 10e6 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M10;
+--        when 5e6 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M10;
+--          Decimator(2) <= M2;
+--        when 2500e3 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M10;
+--          Decimator(2) <= M4;
+--        when 1e6 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M10;
+--          Decimator(2) <= M10;
+--        when 500e3 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M10;
+--          Decimator(2) <= M10;
+--          Decimator(3) <= M2;
+--        when 250e3 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M10;
+--          Decimator(2) <= M10;
+--          Decimator(3) <= M4;
+--        when 100e3 =>
+--          Decimator(0) <= M10;
+--          Decimator(1) <= M10;
+--          Decimator(2) <= M10;
+--          Decimator(3) <= M10;
+--        when others =>
+--          null;
+--      end case;
+--      if iCPU.EnableFilter(0) = '0' then
+--        Stage0AvgDecimator <= M1;
+--      end if;
+--    end if;
+--  end process;
 
   Control : for i in 0 to cChannels-1 generate
     C : DownSampler

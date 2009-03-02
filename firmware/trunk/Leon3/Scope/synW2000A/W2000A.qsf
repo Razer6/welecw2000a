@@ -138,6 +138,22 @@ set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 #set_global_assignment -name VHDL_FILE "../../Scope/src/TopScope-ea.vhd"
 
 
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC1CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC2CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC3CLK
+set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC4CLK
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_2
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_7
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_10
+set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_15
+set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_2
+set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_7
+
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/version.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/stdlib.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/sparc/sparc.vhd"
@@ -363,18 +379,11 @@ set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAcce
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAccess-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/W2000ROM.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/leon3mini.vhd"
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
-set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
-set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC1CLK
-set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC2CLK
-set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC3CLK
-set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC4CLK
-set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_2
-set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_7
-set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_10
-set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_15
-set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_2
-set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_7
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA

@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-02-21
+-- Last update: 2009-03-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -58,7 +58,7 @@ entity SignalCapture is
     iDownSampler : aDownSampler;
 
     -- SignalSelector
-    iSignalSelector      : in  aSignalSelector;
+    iSignalSelector : in aSignalSelector;
 
     -- Trigger
     iTriggerCPUPort : in  aTriggerInput;
@@ -80,6 +80,8 @@ architecture RTL of SignalCapture is
   signal DecimatorOutValid : std_ulogic;
   signal SelectorOut       : aTriggerData;
   signal SelectorOutValid  : std_ulogic;
+  signal SlowInputData     : aLongValues(0 to cChannels-1);
+  signal SlowInputValid    : std_ulogic;
 begin
 
   oClkDesign  <= ClkDesign;
@@ -111,24 +113,29 @@ begin
     end if;
   end process;
 
+  SlowInputData  <= (others => (others => '0'));
+  SlowInputValid <= '0';
+
   Decimator : entity work.TopDownSampler
     port map (
       iClk        => ClkDesign,
       iResetAsync => ResetAsync,
       iADC        => DecimatorIn,       -- fixpoint 1.x range -0.5 to 0.5
       iCPU        => iDownSampler,
+      iData       => SlowInputData,
+      iValid      => SlowInputValid,
       oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
       oValid      => DecimatorOutValid);
 
   Selector : entity work.SignalSelector
     port map (
-      iClk                 => ClkDesign,
-      iResetAsync          => ResetAsync,
-      iSignalSelector      => iSignalSelector,
-      iData                => DecimatorOut,  -- 18 bit values
-      iValid               => DecimatorOutValid,
-      oData                => SelectorOut,   -- 8 bit values
-      oValid               => SelectorOutValid);
+      iClk            => ClkDesign,
+      iResetAsync     => ResetAsync,
+      iSignalSelector => iSignalSelector,
+      iData           => DecimatorOut,  -- 18 bit values
+      iValid          => DecimatorOutValid,
+      oData           => SelectorOut,   -- 8 bit values
+      oValid          => SelectorOutValid);
 
   Trigger : entity work.TopTrigger
     port map (

@@ -115,7 +115,7 @@ package config is
   constant CFG_TLB_REP : integer := 1;
   constant CFG_DSU : integer := 1;
   constant CFG_ITBSZ : integer := 1;
-  constant CFG_ATBSZ : integer := 1;
+  constant CFG_ATBSZ : integer := 0;
   constant CFG_LEON3FT_EN : integer := 0;
   constant CFG_IUFT_EN : integer := 0;
   constant CFG_FPUFT_EN : integer := 0;
