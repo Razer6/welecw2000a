@@ -642,27 +642,28 @@ begin
 --                 rwen(0), ramoen(0));
 --  end generate;
   
---  sram0 : entity work.AsyncSRAM
---    generic map (
---      gFileName  => "sram.bin",
---      gAddrWidth => oA_SRAM'length-2)
---    port map (
---      iAddr  => oA_SRAM(18 downto 2),
---      bData  => bD_SRAM,
---      inCE   => oCE_SRAM,
---      inWE   => oWE_SRAM,
---      inOE   => oOE_SRAM,
---      inMask => "1111");
+  sram0 : entity work.AsyncSRAM
+    generic map (
+      gFileName  => "sram.bin",
+      gReverseEndian => true,
+      gAddrWidth => oA_SRAM'length-2)
+    port map (
+      iAddr  => oA_SRAM(18 downto 2),
+      bData  => bD_SRAM,
+      inCE   => oCE_SRAM,
+      inWE   => oWE_SRAM,
+      inOE   => oOE_SRAM,
+      inMask => "1111");
 
-  sram0 : for i in 0 to (sramwidth/8)-1 generate
-    sr0 : sram generic map (index => i, abits => 17, fname => sramfile)
-      port map (
-        a   => std_logic_vector(oA_SRAM(18 downto 2)),
-        d   => bD_SRAM(31-i*8 downto 24-i*8),
-        ce1 => oCE_SRAM,
-        we  => oWE_SRAM,
-        oe  => oOE_SRAM);
-  end generate;
+--  sram0 : for i in 0 to (sramwidth/8)-1 generate
+--    sr0 : sram generic map (index => i, abits => 17, fname => sramfile)
+--      port map (
+--        a   => std_logic_vector(oA_SRAM(18 downto 2)),
+--        d   => bD_SRAM(31-i*8 downto 24-i*8),
+--        ce1 => oCE_SRAM,
+--        we  => oWE_SRAM,
+--        oe  => oOE_SRAM);
+--  end generate;
 
   -- phy0 : if CFG_GRETH > 0 generate
   --   p0 : phy

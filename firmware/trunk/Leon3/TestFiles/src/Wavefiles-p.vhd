@@ -15,8 +15,6 @@
 -------------------------------------------------------------------------------
 --    GNU Lesser General Public License Version 3
 --    =============================================
---    Copyright 2005 by Sun Microsystems, Inc.
---    901 San Antonio Road, Palo Alto, CA 94303, USA
 --
 --    This library is free software; you can redistribute it and/or
 --    modify it under the terms of the GNU Lesser General Public

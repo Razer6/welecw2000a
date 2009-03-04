@@ -12,8 +12,8 @@ add wave -noupdate -format Logic /testbench/d3/irb_flash
 add wave -noupdate -format Logic /testbench/d3/ooe_flash
 add wave -noupdate -format Logic /testbench/d3/oce_flash
 add wave -noupdate -format Logic /testbench/d3/owe_flash
-add wave -noupdate -format Literal /testbench/d3/oa_sram
-add wave -noupdate -format Literal /testbench/d3/bd_sram
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/oa_sram
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/bd_sram
 add wave -noupdate -format Logic /testbench/d3/oce_sram
 add wave -noupdate -format Logic /testbench/d3/owe_sram
 add wave -noupdate -format Logic /testbench/d3/ooe_sram
@@ -187,24 +187,29 @@ add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rd
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/wr
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
 add wave -noupdate -divider {6 Bit VGA}
-add wave -noupdate -format Literal /testbench/d3/display/omem
-add wave -noupdate -format Literal /testbench/d3/display/imem
-add wave -noupdate -format Logic /testbench/d3/display/odclk
-add wave -noupdate -format Logic /testbench/d3/display/ohd
-add wave -noupdate -format Logic /testbench/d3/display/ovd
-add wave -noupdate -format Logic /testbench/d3/display/odena
-add wave -noupdate -format Literal /testbench/d3/display/ored
-add wave -noupdate -format Literal /testbench/d3/display/ogreen
-add wave -noupdate -format Literal /testbench/d3/display/oblue
-add wave -noupdate -format Literal /testbench/d3/display/vgarow
-add wave -noupdate -format Literal /testbench/d3/display/vgaline
-add wave -noupdate -format Logic /testbench/d3/display/ngenvgasignals
-add wave -noupdate -format Logic /testbench/d3/display/pixelstrobe
-add wave -noupdate -format Literal /testbench/d3/display/pixelclockcounter
-add wave -noupdate -format Logic /testbench/d3/display/prevmembusy
-add wave -noupdate -format Literal /testbench/d3/display/cache
+add wave -noupdate -format Logic /testbench/d3/mg2/sr1/rst
+add wave -noupdate -format Logic /testbench/d3/mg2/sr1/clk
+add wave -noupdate -format Literal -expand /testbench/d3/mg2/sr1/memi
+add wave -noupdate -format Literal -expand /testbench/d3/mg2/sr1/memo
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/ahbsi
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/ahbso
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/apbi
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/apbo
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/wpo
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/sdo
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/r
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/ri
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/sdmo
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/sdi
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/lsdo
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/rbdrive
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/ribdrive
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/rrsbdrive
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/rsbdrive
+add wave -noupdate -format Literal /testbench/d3/mg2/sr1/risbdrive
+add wave -noupdate -format Logic /testbench/d3/mg2/sr1/arst
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {28023000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {57445000 ps} 0}
 configure wave -namecolwidth 375
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -218,4 +223,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ps} {31879050 ps}
+WaveRestoreZoom {59978590 ps} {60974812 ps}

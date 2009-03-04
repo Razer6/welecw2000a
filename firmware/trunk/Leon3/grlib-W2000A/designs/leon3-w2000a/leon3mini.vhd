@@ -624,8 +624,8 @@ begin
 ----------------------------------------------------------------------
 
   mg2 : if CFG_MCTRL_LEON2 = 1 generate  -- LEON2 memory controller
-    -- sr1 : mctrl generic map (hindex => 0, pindex => 0,
-    --                          paddr  => 0, fast => 0, srbanks => 1, sden => CFG_MCTRL_SDEN)
+--     sr1 : mctrl generic map (hindex => 0, pindex => 0,
+--                              paddr  => 0, fast => 0, srbanks => 1, sden => CFG_MCTRL_SDEN)
     --   port map (rstn, clkm, memi, memo, ahbsi, ahbso(0), apbi, apbo(0), wpo, sdo);
     sr1 : mctrl
       generic map (
@@ -683,7 +683,7 @@ begin
 --                  memo.bdrive(i), memi.data(31-i*8 downto 24-i*8));
 --    end generate;
     
-    bD_SRAM <= memi.data after 1 ns when
+    bD_SRAM <= memo.data after 1 ns when
                (memo.writen = '0' and memo.ramsn(0) = '0')
                else (others => 'Z');--  when others;
     memi.data <= bD_SRAM after 1 ns when
@@ -707,8 +707,8 @@ begin
 --      port map (sdcsn, sdo3.sdcsn);
 --  end generate;
 
---  memi.brdyn  <= '1'; memi.bexcn <= '1';
---  memi.writen <= '1'; memi.wrn <= "1111"; memi.bwidth <= "10";
+  memi.brdyn  <= '1'; memi.bexcn <= '1';
+  memi.writen <= '1'; memi.wrn <= "1111"; memi.bwidth <= "10";
 
 
 -- pragma translate_off
