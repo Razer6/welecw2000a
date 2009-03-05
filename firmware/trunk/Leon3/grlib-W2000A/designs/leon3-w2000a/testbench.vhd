@@ -32,6 +32,7 @@ library gleichmann;
 use gleichmann.hpi.all;
 
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 --use DSO.pshram.all;
 use DSO.pVGA.all;
@@ -106,7 +107,7 @@ architecture behav of testbench is
   --ACC_FLASH :out std_ulogic;
 
   --SRAM
-  signal oA_SRAM   : std_ulogic_vector (cSRAMAddrWidth-1 downto 0);
+  signal A_SRAM   : std_ulogic_vector (cSRAMAddrWidth+1 downto 0);
   signal bD_SRAM   : std_logic_vector (31 downto 0);  --inout
   signal oCE_SRAM  : std_ulogic;
   signal oWE_SRAM  : std_ulogic;
@@ -350,7 +351,7 @@ begin
       BHV : BhvADC
         generic map (
           gFileName => cWaveFileNames(i)(j),
-          gBitWidth => 8)
+          gBitWidth => cADCBitWidth)
         port map (
           iClk        => ADCClk(j),
           iResetAsync => resoutn,
@@ -423,7 +424,7 @@ begin
       --ACC_FLASH :out std_ulogic;
 
       --SRAM
-      oA_SRAM   => oA_SRAM,
+      oA_SRAM   => A_SRAM(A_SRAM'high downto 2),
       bD_SRAM   => bD_SRAM,
       oCE_SRAM  => oCE_SRAM,
       oWE_SRAM  => oWE_SRAM,
@@ -646,9 +647,9 @@ begin
     generic map (
       gFileName  => "sram.bin",
       gReverseEndian => true,
-      gAddrWidth => oA_SRAM'length-2)
+      gAddrWidth => A_SRAM'length-2)
     port map (
-      iAddr  => oA_SRAM(18 downto 2),
+      iAddr  => A_SRAM(A_SRAM'high downto 2),
       bData  => bD_SRAM,
       inCE   => oCE_SRAM,
       inWE   => oWE_SRAM,
@@ -656,9 +657,9 @@ begin
       inMask => "1111");
 
 --  sram0 : for i in 0 to (sramwidth/8)-1 generate
---    sr0 : sram generic map (index => i, abits => 17, fname => sramfile)
+--    sr0 : sram generic map (index => i, abits => A_SRAM'length-2, fname => sramfile)
 --      port map (
---        a   => std_logic_vector(oA_SRAM(18 downto 2)),
+--        a   => std_logic_vector(A_SRAM(A_SRAM'high downto 2)),
 --        d   => bD_SRAM(31-i*8 downto 24-i*8),
 --        ce1 => oCE_SRAM,
 --        we  => oWE_SRAM,

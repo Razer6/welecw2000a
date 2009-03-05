@@ -4,7 +4,7 @@
 -- File       : PolyphaseDecimator-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-07
--- Last update: 2009-03-02
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -37,8 +37,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.Global.all;
+
 library DSO;
+use DSO.pDSOConfig.all;
+use DSO.Global.all;
 use DSO.pFastFirCoeff.all;
 use DSO.pFirCoeff.all;
 
@@ -46,14 +48,14 @@ package pPolyphaseDecimator is
   
   type     aDecimator is (M1, M2, M4, M10);
   type     aM is array (natural range<>) of aDecimator;
+  constant cM1        : aM(1 to cDecimationStages-1) := (others => M1);
   subtype  aFirAddr is natural range 0 to cFirCoeff'length-1;
   subtype  aFastFirAddr is natural range 0 to cFastFirCoeff'length/cCoefficients-1;
-  constant cDecAvgMax        : natural := 10;
-  constant cDecimationStages : natural := 4;
+  constant cDecAvgMax : natural                      := 10;
 
   type aDownSampler is record
                          Stages       : aDword;
-                         EnableFilter : std_ulogic_vector(0 to 3);
+                         EnableFilter : std_ulogic_vector(0 to cDecimationStages-1);
                        end record;
   type aStage is record
                    Counter : integer range 0 to 9;

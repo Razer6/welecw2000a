@@ -4,7 +4,7 @@
 -- File       : TopDownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-17
--- Last update: 2009-03-02
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -38,6 +38,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 --use work.pInputValues.all;
 use DSO.pPolyphaseDecimator.all;

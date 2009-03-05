@@ -1,5 +1,7 @@
 vlib work
 vmap work work
+vlib DSO
+vmap DSO DSO
 #vcom -work work ../../Altera/altera_mf_components.vhd
 #vcom -work work ../../Altera/altera_mf.vhd
 #vcom -work work  ../../Altera/cycloneii_atoms.vhd

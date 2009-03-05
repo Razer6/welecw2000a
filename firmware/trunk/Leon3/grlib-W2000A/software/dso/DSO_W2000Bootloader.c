@@ -6,13 +6,14 @@
 #include "DSO_SignalCapture.h"
 #include "DSO_Debugprint.h"
 
-Debugprint Print;
+
 
 int main () {
 	int CurrDevice;
-	InitDebugprint(&Print,PrintF,English);
+	Debugprint * Print;
+	InitDebugprint(Print,PrintF,English);
 	//printf("Access Test of the DSO specific registers!\n");
-	Print.Target();
+	Print->Target();
 
 	
 	return 0;

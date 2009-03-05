@@ -4,7 +4,7 @@
 -- File       : DownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-16
--- Last update: 2009-03-02
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -38,6 +38,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 use DSO.pFastFirCoeff.all;
 use DSO.pPolyphaseDecimator.all;
@@ -156,7 +157,7 @@ begin
       end loop;
 
       -- downsampler output
-      if iDecimation(1 to cDecimationStages-1) = (1 => M1, 2 => M1, 3 => M1) then
+      if iDecimation(1 to cDecimationStages-1) = cM1 then
         for i in DataOut'range loop
           DataOut(i)(cBitWidth*2-1 downto cBitWidth) <= StageData0(i);
           DataOut(i)(cBitWidth-1 downto 0)           <= (others => '0');

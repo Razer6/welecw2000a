@@ -4,7 +4,7 @@
 -- File       : DelayMemory.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-15
--- Last update: 2009-02-15
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -39,21 +39,24 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library DSO;
+use DSO.pDSOConfig.all;
+
 entity DelayMemory is
   port
     (
   --    aclr      : in  std_logic := '0';
       clock     : in  std_logic;
-      data      : in  std_logic_vector (17 downto 0);
+      data      : in  std_logic_vector (cBitWidth*2-1 downto 0);
       rdaddress : in  std_logic_vector (7 downto 0);
       wraddress : in  std_logic_vector (7 downto 0);
       wren      : in  std_logic := '1';
-      q         : out std_logic_vector (17 downto 0)
+      q         : out std_logic_vector (cBitWidth*2-1 downto 0)
       );
 end DelayMemory;
 
 architecture RTL of DelayMemory is
-  type   aRam is array (2**8-1 downto 0) of std_ulogic_vector (17 downto 0);
+  type   aRam is array (2**8-1 downto 0) of std_ulogic_vector (cBitWidth*2-1 downto 0);
   signal Ram : aRam := (others => (others =>  '0'));
 begin
   

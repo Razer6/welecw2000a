@@ -4,13 +4,6 @@ add wave -noupdate -format Logic /testbenchsimplevga/dut/iclk
 add wave -noupdate -format Logic /testbenchsimplevga/dut/iresetasync
 add wave -noupdate -format Literal -radix unsigned /testbenchsimplevga/dut/omem
 add wave -noupdate -format Literal -radix unsigned /testbenchsimplevga/dut/imem
-add wave -noupdate -format Logic /testbenchsimplevga/dut/odclk
-add wave -noupdate -format Logic /testbenchsimplevga/dut/ohd
-add wave -noupdate -format Logic /testbenchsimplevga/dut/ovd
-add wave -noupdate -format Logic /testbenchsimplevga/dut/odena
-add wave -noupdate -format Literal /testbenchsimplevga/dut/ored
-add wave -noupdate -format Literal /testbenchsimplevga/dut/ogreen
-add wave -noupdate -format Literal /testbenchsimplevga/dut/oblue
 add wave -noupdate -format Literal -radix unsigned -expand /testbenchsimplevga/dut/vgarow
 add wave -noupdate -format Literal -radix unsigned -expand /testbenchsimplevga/dut/vgaline
 add wave -noupdate -format Logic /testbenchsimplevga/dut/ngenvgasignals
@@ -24,6 +17,8 @@ add wave -noupdate -format Logic /testbenchsimplevga/ram/ince
 add wave -noupdate -format Logic /testbenchsimplevga/ram/inwe
 add wave -noupdate -format Logic /testbenchsimplevga/ram/inoe
 add wave -noupdate -format Literal -radix unsigned /testbenchsimplevga/ram/bdata
+add wave -noupdate -divider {VGA port}
+add wave -noupdate -format Literal /testbenchsimplevga/vgasignal
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {12341600 ns} 0}
 configure wave -namecolwidth 329

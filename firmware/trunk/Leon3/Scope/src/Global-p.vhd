@@ -4,7 +4,7 @@
 -- File       : Global-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-14
--- Last update: 2009-02-20
+-- Last update: 2009-03-05
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -38,20 +38,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library DSO;
+use DSO.pDSOConfig.all;
+
 package Global is
-  constant cADCClkRate     : natural    := 250E6;
-  constant cDesignClkRate  : natural    := 125E6;
-  constant cCPUClkRate     : natural    := 626E5;
-  constant cResetActive    : std_ulogic := '0';
-  constant cLowActive      : std_ulogic := '0';
-  constant cHighInactive   : std_ulogic := '1';
-  constant cChannels       : natural    := 2;
-  constant cADCsperChannel : natural    := 4;
-  constant cCoefficients   : natural    := 8;   -- ADC input width on 125 MHz
-  constant cBitWidth       : natural    := 9;
-  constant cDecimatorMax   : natural    := 100;
-  constant cSRAMAddrWidth  : natural    := 19;  -- DwordAddr
-  constant cFLASHAddrWidth : natural    := 23;  -- byte address
+
+  constant cLowActive    : std_ulogic := '0';
+  constant cHighInactive : std_ulogic := '1';
+  constant cCoefficients : natural    := 8;  -- ADC input width on 125 MHz
+  -- constant cDecimatorMax   : natural    := 100;
 
   subtype aByte is std_ulogic_vector(7 downto 0);
   type    aBytes is array (natural range<>) of aByte;
@@ -61,9 +56,11 @@ package Global is
   type    aDwords is array (natural range<>) of aDword;
 
   -- typedefs for the ADC inputs
-  type aADCInPhase is array (natural range <>) of aBytes(0 to cChannels-1);
-  type aADCIn is array (0 to cADCsperChannel-1) of aBytes(0 to cChannels-1);
-  type aADCOut is array (0 to cChannels-1) of aBytes(0 to cCoefficients-1);
+  subtype aADCX is std_ulogic_vector(cADCBitWidth-1 downto 0);
+  type aADCData is array (natural range <>) of aADCX;
+  type aADCInPhase is array (natural range <>) of aADCData(0 to cChannels-1);
+  type aADCIn is array (0 to cADCsperChannel-1) of aADCData(0 to cChannels-1);
+  type aADCOut is array (0 to cChannels-1) of aADCData(0 to cCoefficients-1);
 
   -- typedefs for the DownSampler 
   subtype aValue is signed (cBitWidth-1 downto 0);

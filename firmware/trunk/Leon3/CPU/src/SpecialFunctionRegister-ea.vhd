@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-02
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -39,12 +39,14 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-use work.pSpecialFunctionRegister.all;
-use work.Global.all;
-use work.pTrigger.all;
-use work.pPolyphaseDecimator.all;
---use work.pUart.all;
-use work.pLedsKeys.all;
+library DSO;
+use DSO.pDSOConfig.all;
+use DSO.Global.all;
+use DSO.pSpecialFunctionRegister.all;
+use DSO.pTrigger.all;
+use DSO.pPolyphaseDecimator.all;
+--use DSO.pUart.all;
+use DSO.pLedsKeys.all;
 
 entity SpecialFunctionRegister is
   port (
@@ -122,7 +124,7 @@ begin
     if iResetAsync = cResetActive then
       InterruptMask <= (others => '0');
       Decimator <= (
-        Stages   => (others => '0'),
+        Stages       => (others => '0'),
         EnableFilter => (others => '0'));
       case cCurrentDevice is
         when cWelec2012 =>
@@ -260,7 +262,7 @@ begin
             end loop;
             
           when cSamplingFreqAddr =>
-          --  vData                := iData(31 downto 12)& X"000";
+            --  vData                := iData(31 downto 12)& X"000";
             Decimator.Stages <= iData;
           when cFilterEnableAddr =>
             Decimator.EnableFilter <= iData(Decimator.EnableFilter'length-1 downto 0);

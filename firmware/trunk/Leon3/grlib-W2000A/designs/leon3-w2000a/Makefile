@@ -28,7 +28,7 @@ LIBSKIP = core1553bbc core1553brm core1553brt gr1553 corePCIF \
 	ec ecp2 tmtc openchip hynix cypress ihp stratixii usbhc spw  
 DIRSKIP = b1553 pcif leon2 leon2ft crypto satcan pci leon3ft ambatest ddr \
 	grusbhc spacewire
-
+FILESKIP = ../../grlib-W2000A/designs/leon3-sandboxx/DSOConfig-p.vhd
 
 
 

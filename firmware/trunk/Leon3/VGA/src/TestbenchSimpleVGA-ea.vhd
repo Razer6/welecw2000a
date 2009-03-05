@@ -4,6 +4,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 use DSO.pSRamPriorityAccess.all;
 use DSO.pVGA.all;
@@ -18,6 +19,7 @@ architecture bhv of TestbenchSimpleVGA is
   signal   oMem        : aSharedRamAccess;
   signal   CPU         : aSharedRamAccess;
   signal   iMem        : aSharedRamReturn;
+  signal   VGASignal   : aVGASignal;
   signal   oDCLK       : std_ulogic;
   signal   oHD         : std_ulogic;
   signal   oVD         : std_ulogic;
@@ -45,13 +47,7 @@ begin
       iResetAsync => iResetAsync,
       oMem        => oMem,
       iMem        => iMem,
-      oDCLK       => oDCLK,
-      oHD         => oHD,
-      oVD         => oVD,
-      oDENA       => oDENA,
-      oRed        => oRed,
-      oGreen      => oGreen,
-      oBlue       => oBlue);
+      oVGASignal  => VGASignal);
 
   A : entity DSO.SRamPriorityAccess
     port map(

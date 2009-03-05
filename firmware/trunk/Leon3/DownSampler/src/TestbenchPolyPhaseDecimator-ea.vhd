@@ -4,7 +4,7 @@
 -- File       : TestbenchPolyPhaseDecimator-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-02-17
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -37,11 +37,13 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 use DSO.pFirCoeff.all;
-use DSO.pLongInputValues.all;
 use DSO.pPolyphaseDecimator.all;
+use work.pLongInputValues.all;
 
 entity Testbench is
 end entity;

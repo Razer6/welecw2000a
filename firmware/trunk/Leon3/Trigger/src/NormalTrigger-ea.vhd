@@ -4,7 +4,7 @@
 -- File       : NormalTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-28
--- Last update: 2009-02-14
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -37,8 +37,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.Global.all;
-use work.pTrigger.all;
+
+library DSO;
+use DSO.pDSOConfig.all;
+use DSO.Global.all;
+use DSO.pTrigger.all;
 
 entity NormalTrigger is
   port (
@@ -46,10 +49,10 @@ entity NormalTrigger is
     iResetAsync : in  std_ulogic;
     iValid      : in  std_ulogic;
     iData       : in  aBytes(0 to cCoefficients-1);
-    iLowValue   :     aByte;
-    iLowTime    :     aWord;
-    iHighValue  :     aByte;
-    iHighTime   :     aWord;
+    iLowValue   : in  aByte;
+    iLowTime    : in  aWord;
+    iHighValue  : in  aByte;
+    iHighTime   : in  aWord;
     oLHStrobe   : out aTrigger1D;
     oHLStrobe   : out aTrigger1D;
     oHigh       : out aTrigger1D);

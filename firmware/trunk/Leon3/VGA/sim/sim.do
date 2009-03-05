@@ -2,7 +2,8 @@ vlib work
 vmap work work
 vlib DSO
 vmap DSO DSO
-
+vcom -quiet -work DSO  {../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd}
+#vcom -quiet -work DSO  {../../grlib-W2000A/designs/leon3-sandboxx/DSOConfig-p.vhd}
 vcom -quiet -93 -work DSO {../../Scope/src/Global-p.vhd}
 vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-p.vhd}
 vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-ea.vhd}

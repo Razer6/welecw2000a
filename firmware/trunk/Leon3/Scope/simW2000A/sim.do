@@ -1,4 +1,5 @@
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/config.vhd
+vcom -quiet -93 -work DSO  {../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd}
 vcom -quiet -93 -work DSO {../../Scope/src/Global-p.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/SyncRam1Gs.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/TriggerMemory.vhd}
@@ -30,12 +31,12 @@ vcom -quiet -93 -work DSO {../../uart16550/src/Uart-p.vhd}
 #vcom -quiet -93 -work DSO {../../uart16550/src/UartWrapper-e.vhd}
 #vcom -quiet -93 -work DSO {../../uart16550/src/UartWrapper-Empty-a.vhd}
 #vcom -quiet -93 -work DSO {../../uart16550/src/UartWrapper-RTL-a.vhd}
-vcom -quiet -93 -work DSO {../../SignalCapture/src/SignalSelector-ea.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/PLL0.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/PLL1.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/PLL2.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/PLL3.vhd}
 vcom -quiet -93 -work DSO {../../SignalCapture/src/ADC-ea.vhd}
+vcom -quiet -93 -work DSO {../../SignalCapture/src/SignalSelector-ea.vhd}
 vcom -quiet -93 -work DSO {../../SignalCapture/src/SignalCapture-ea.vhd}
 vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-p.vhd}
 vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-ea.vhd}

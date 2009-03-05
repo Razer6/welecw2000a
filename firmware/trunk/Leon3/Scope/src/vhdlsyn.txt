@@ -1,1 +1,3 @@
+../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd
+../../grlib-W2000A/designs/leon3-sandboxx/DSOConfig-p.vhd
 Global-p.vhd

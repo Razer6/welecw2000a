@@ -9,7 +9,7 @@ TINYFLAGS= -msoft-float -nostdlib  -nostartfiles
 TX= -Tlinkprom -N -L./ -Ttext=0
 
 DSOSRC=$(VPATH)/apbuart $(VPATH)/report_device $(VPATH)/mptest  $(DSOPATH)/DSO_Debugprint  $(DSOPATH)/DSO_SignalCapture 
-W2000SRC=$(DSOPATH)/DSO_W2000Bootloader  $(DSOPATH)/DSO_Screen $(DSOSRC)
+W2000SRC=$(DSOPATH)/DSO_SignalCTest  $(DSOPATH)/DSO_Screen $(DSOSRC)
 SBXSRC=$(DSOPATH)/SandboxXBootloader $(DSOSRC)
 
 WCFILES=$(W2000SRC:%=%.c)
@@ -49,6 +49,9 @@ $(WOFILES): $(WCFILES)
 W2000SREC:
 	sparc-elf-objcopy -O srec   W2000ROM.exe sram.srec
 	sparc-elf-objcopy -O binary W2000ROM.exe sram.bin
+	cp sram.srec sdram.srec
+	cp sram.srec ../../../Scope/simSandboxX/sram.srec 
+	cp sram.srec ../../../Scope/simSandboxX/sdram.srec 
 
 W2000ROM.vhd: BootRomGen $(WOFILES)
 	sparc-elf-mkprom $(XCFLAGS) $(BOOTOPT) $(MKPROMOPT) W2000ROM.exe -o W2000ROM.prom

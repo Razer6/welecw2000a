@@ -46,6 +46,7 @@ use esa.memoryctrl.all;
 --use gleichmann.hpi.all;
 --use gleichmann.dac.all;
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 --use DSO.pshram.all;
 use DSO.pVGA.all;
@@ -156,14 +157,14 @@ entity leon3mini is
     oADC2CLK : out std_ulogic;
     oADC3CLK : out std_ulogic;
     oADC4CLK : out std_ulogic;
-    iCh1ADC1 : in  std_ulogic_vector (7 downto 0);
-    iCh1ADC2 : in  std_ulogic_vector (7 downto 0);
-    iCh1ADC3 : in  std_ulogic_vector (7 downto 0);
-    iCh1ADC4 : in  std_ulogic_vector (7 downto 0);
-    iCh2ADC1 : in  std_ulogic_vector (7 downto 0);
-    iCh2ADC2 : in  std_ulogic_vector (7 downto 0);
-    iCh2ADC3 : in  std_ulogic_vector (7 downto 0);
-    iCh2ADC4 : in  std_ulogic_vector (7 downto 0);
+    iCh1ADC1 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+    iCh1ADC2 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+    iCh1ADC3 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+    iCh1ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+    iCh2ADC1 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+    iCh2ADC2 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+    iCh2ADC3 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+    iCh2ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
 
     --CLK
 --    iResetAsync : in  std_ulogic;       -- Where is the async reset input pin ?

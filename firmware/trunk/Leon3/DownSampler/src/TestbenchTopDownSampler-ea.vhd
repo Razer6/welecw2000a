@@ -4,7 +4,7 @@
 -- File       : TestbenchTopDownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-17
--- Last update: 2009-02-21
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -37,10 +37,12 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 use DSO.pPolyphaseDecimator.all;
-use DSO.pShortInputValues.all;
+use work.pShortInputValues.all;
 use work.WaveFiles.all;
 
 entity Testbench is
@@ -61,20 +63,27 @@ architecture bhv of Testbench is
   constant cSimClks : aInputValues(0 to 10) :=
     (0 => 30, 1 => 60, 2 => 150, 3 => 300, 4 => 600,
      5 => 1500, 6 => 3e3, 7 => 6e3, 8 => 15e3, 9 => 30e3, 10 => 300e3);
-  signal Control     : aDownSampler;
-  signal i           : natural range 0 to cCoefficients-1;
-  signal j           : natural;
-  signal DrawCounter : natural range 0 to cCoefficients-1;
-  signal DrawValid   : std_ulogic;
-  signal Drawed      : natural := 0;
+  signal Control           : aDownSampler;
+  signal i                 : natural range 0 to cCoefficients-1;
+  signal j                 : natural;
+  signal DrawCounter       : natural range 0 to cCoefficients-1;
+  signal DrawValid         : std_ulogic;
+  signal Drawed            : natural := 0;
+  signal LowSpeedData      : aLongValues(0 to cChannels-1);
+  signal LowSpeedDataValid : std_ulogic;
   
 begin
+  
+  LowSpeedData      <= (others => (others => '0'));
+  LowSpeedDataValid <= '0';
 
   DUT : entity DSO.TopDownSampler
     port map (
       iClk        => Clk125,
       iResetAsync => ResetAsync,
       iADC        => Input,             -- fixpoint 1.x range -0.5 to 0.5
+      iData       => LowSpeedData,
+      iValid      => LowSpeedDataValid,
       iCPU        => Control,
       oData       => Output,            -- fixpoint 1.x range -1 to <1
       oValid      => Valid);
@@ -93,7 +102,7 @@ begin
     for e in 0 to 4 loop
       Control.EnableFilter <= std_ulogic_vector(to_signed(-e, Control.EnableFilter'length));
       for d in M'range loop
-        Control.SampleTime <= M(d);
+        Control.Stage <= M(d);
         for i in 0 to cSimClks(d) loop
           Input(0) <= (others => to_signed(0, cBitWidth));
           wait until Clk125 = '1';
@@ -132,18 +141,18 @@ begin
       i           <= 0;
       j           <= 0;
       DrawCounter <= 0;
-      vValid := '0';
+      vValid      := '0';
     elsif rising_edge(Clk1000) then
       i         <= (i+1) mod cCoefficients;
       DrawInput <= Input(0)(i);
       DrawValid <= '0';
-      
+
       if Valid = '1' and vValid = '0' then
         DrawCounter <= 0;
         j           <= 1;
       end if;
       vValid := Valid;
-      j <= (j + 1);
+      j      <= (j + 1);
       if j = (1e9/Control.SampleTime) then
         DrawCounter <= (DrawCounter +1) mod cCoefficients;
         j           <= 1;
@@ -154,4 +163,4 @@ begin
     
   end process;
 
- end architecture;
+end architecture;

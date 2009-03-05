@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 use work.Wavefiles.all;
 

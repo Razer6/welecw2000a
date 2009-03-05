@@ -4,7 +4,7 @@
 -- File       : TestbenchTopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-28
--- Last update: 2009-02-14
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -37,8 +37,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.Global.all;
-use work.pTrigger.all;
+
+library DSO;
+use DSO.pDSOConfig.all;
+use DSO.Global.all;
+use DSO.pTrigger.all;
 use work.WaveFiles.all;
 
 entity Testbench is
@@ -51,14 +54,15 @@ architecture bhv of Testbench is
   signal TOut         : aTriggerOutput;
   signal ReadEn       : std_ulogic;
   signal ReadAddr     : aTriggerReadAddr;
-  signal DataOut      : aBytes(0 to cChannels-1);
+  signal DataOut      : aBytes(0 to 3);
   signal DataOutValid : std_ulogic;
   signal DataIn       : aTriggerData;
   signal Valid        : std_ulogic;
   signal ExtTrigger   : std_ulogic;
-
-  signal FileInfo : aWaveFileInfo;
-  signal FileName : string(1 to 10);
+  signal MemIn        : aTriggerMemIn;
+  signal Memout       : aTriggerMemOut;
+  signal FileInfo     : aWaveFileInfo;
+  signal FileName     : string(1 to 10);
 
   signal DrawOutput : integer;
   signal IntVal     : integer := 0;
@@ -67,19 +71,29 @@ begin
   Clk        <= not Clk          after 1 sec / 250E6;
   ResetAsync <= not cResetActive after 10 ns;
 
-  DUT : entity work.TopTrigger
+  MemIn <= (
+    Addr => ReadAddr,
+    Rd   => Valid);
+
+  DataOut <= (
+    0 => MemOut.Data(31 downto 24),
+    1 => MemOut.Data(23 downto 16),
+    2 => MemOut.Data(15 downto 8),
+    3 => MemOut.Data(7 downto 0));
+  
+  DataOutValid <= MemOut.ACK;
+
+  DUT : entity DSO.TopTrigger
     port map (
       iClk        => Clk,
       iResetAsync => ResetAsync,
-      iCPUPort    => TIn,
-      oCPUPort    => TOut,
-      iReadEn     => ReadEn,
-      iReadAddr   => ReadAddr,
-      oData       => DataOut,
-      oDataValid  => DataOutValid,
       iData       => DataIn,
       iValid      => Valid,
-      iExtTrigger => ExtTrigger);
+      iExtTrigger => ExtTrigger,
+      iTriggerMem => MemIn,
+      oTriggerMem => MemOut,
+      iCPUPort    => Tin,
+      oCPUPort    => Tout); 
 
   Stimuli : process
     file Handle        : aFileHandle;

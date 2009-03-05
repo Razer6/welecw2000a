@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-03-02
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -37,8 +37,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.Global.all;
-use work.pTrigger.all;
+
+library DSO;
+use DSO.pDSOConfig.all;
+use DSO.Global.all;
+use DSO.pTrigger.all;
 
 entity TopTrigger is
   port (
@@ -80,8 +83,6 @@ begin
   Convert : process (iData, iCPUPort.TriggerChannel, DataOutCh0, DataOutCh1, DataOutCh2, DataOutCh3)
   begin
     for i in 0 to cCoefficients-1 loop
-      --   TriggerData(i)                  <= std_ulogic_vector(iData(iCPUPort.TriggerChannel)(i));
-     -- TriggerData(i)                  <= std_ulogic_vector(iData(0)(i));
       DataInCh0(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(0)(i));
       DataInCh1(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(1)(i));
       DataInCh2(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(2)(i));

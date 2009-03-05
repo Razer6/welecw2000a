@@ -4,7 +4,7 @@
 -- File       : FastAverage-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-09
--- Last update: 2009-02-21
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description:
@@ -42,8 +42,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.Global.all;
-use work.pPolyphaseDecimator.all;
+
+library DSO;
+use DSO.pDSOConfig.all;
+use DSO.Global.all;
+use DSO.pPolyphaseDecimator.all;
 
 entity FastAverage is
   port (

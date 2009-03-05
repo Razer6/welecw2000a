@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-02-24
+-- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -39,6 +39,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 library DSO;
+use DSO.pDSOConfig.all;
 use DSO.Global.all;
 use DSO.pTrigger.all;
 use DSO.pPolyphaseDecimator.all;
@@ -93,20 +94,5 @@ package pSpecialFunctionRegister is
   constant cKeyAddr0               : natural := 49;
   constant cKeyAddr1               : natural := 50;
   constant cLastAddr               : natural := 51;
-
-
-  -- values and bit addresses of SFR addresses 
-  -- DeviceAddr:
-  constant cWelec2012 : natural := 2012;
-  constant cWelec2014 : natural := 2014;
-  constant cWelec2022 : natural := 2022;
-  constant cWelec2024 : natural := 2024;
-  -- common for all minimal solutions with 1 Ch 14 Bit
-  -- and no VGA
-  constant cSandboxX  : natural := 1014;
-
-  constant cCurrentDevice : natural := cWelec2022;
-
-  --
-  --
+  
 end package;

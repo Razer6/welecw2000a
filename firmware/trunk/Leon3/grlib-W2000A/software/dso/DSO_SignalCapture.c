@@ -17,15 +17,16 @@ int FastMode(const unsigned int SamplingFrequency,
 	return SamplingFrequency > (CPUFrequency*FASTMODEFACTOR);
 }
 
-bool InitSignalCapture(){
+bool InitSignalCapture(Debugprint * Init, Target T, Language L){
 	CaptureR = (CaptureRegs *)DEVICEADDR;
 	TriggerR = (TriggerRegs *)TRIGGERONCHADDR;
-	return InitDebugprint(&Print,PrintF,English);
+	Init = &Print;
+	return InitDebugprint(&Print,T,L);
 }
 
 bool SetTriggerInput (const unsigned int noChannels, 
 					  const unsigned int SampleSize, 
-					  const unsigned int SamplingFrequency,
+					        unsigned int SamplingFrequency,
 					  const unsigned int CPUFrequency,
 					  const unsigned int Ch0, 
 					  const unsigned int Ch1, 
@@ -33,13 +34,27 @@ bool SetTriggerInput (const unsigned int noChannels,
 					  const unsigned int Ch3)
 {
 	const int FMode = FastMode(SamplingFrequency,CPUFrequency);
-
+	int Stage = 0;
+	int M = 0;
 	if ((Ch0 > 3) || (Ch1 > 3) || (Ch2 > 3) || (Ch3 > 3)) {
-		Print.ChannelsNotSupported();
+	//	Print.ChannelsNotSupported();
 		return false;
 	}
 	TriggerR->TriggerStorageModeAddr = TRIGGERSTORAGEMODE4CH;
-	CaptureR->SamplingFrequency = SamplingFrequency;
+	
+	do {
+		if (SamplingFrequency >= 10) {
+			M |= (10<<Stage);
+		} else {
+			switch (SamplingFrequency) {
+				case 2 : M |= (2<<Stage); break;
+				case 4 : M |= (4<<Stage); break;
+				default: M |= (1<<Stage); break;
+			}
+		}
+		SamplingFrequency = SamplingFrequency/10;
+		Stage += 4;
+	} while (SamplingFrequency > 10); 
 
 	switch (SampleSize) {
 		case 8:
@@ -69,7 +84,7 @@ bool SetTriggerInput (const unsigned int noChannels,
 					CaptureR->InputCh3Addr = Ch3;
 					break;
 				default : 
-					Print.NotAvialbe();
+				//	Print.NotAvialbe();
 					return false;
 			       break;
 			}
@@ -92,13 +107,13 @@ bool SetTriggerInput (const unsigned int noChannels,
 					CaptureR->InputCh3Addr = Ch1+4;
 					break;
 				default : 
-					Print.NotAvialbe();
+				//	Print.NotAvialbe();
 					return false;
 			       break;
 			}
 			break;
 		default : 
-			Print.NotAvialbe();
+		//	Print.NotAvialbe();
 			return false;
 			break;
 	}
@@ -115,11 +130,11 @@ bool SetTrigger(const unsigned int Trigger,
 				const unsigned int HighReferenceTime) 
 {
 	if (TriggerChannel > 3) {
-		Print.ChannelsNotSupported();
+	//	Print.ChannelsNotSupported();
 		return false;
 	}
 	if (TriggerPrefetchSamples >= (TRIGGER_MEM_SIZE-16)){
-		Print.ToMuchPrefetchSamples();
+	//	Print.ToMuchPrefetchSamples();
 	}
 	TriggerR->TriggerLowValueAddr  = LowReference;
 	TriggerR->TriggerLowTimeAddr   = LowReferenceTime;
@@ -146,10 +161,40 @@ bool SetAnalogInputRange(const unsigned int Ch0,
 	CaptureR->InputCh1Gain = 0;      
 	CaptureR->InputCh2Gain = 0;        
 	CaptureR->InputCh3Gain = 0;
-	Print.AnalogInputGainNotSupported();
+//	Print.AnalogInputGainNotSupported();
 	return false;
 }
 
+int FastCapture(const unsigned int WaitTime, // just a integer 
+				unsigned int CaptureSize,    // size in DWORDs
+				unsigned int * RawData) 
+{
+	unsigned int i = 0;
+	int * StartAddr = 0;
+	int * Addr = 0;
+	TriggerR->TriggerOnceAddr = 0;
+	TriggerR->TriggerOnceAddr = 1;
+	while ((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) == 0){
+		i = i + 1;
+		if (WaitTime > i) {
+			return 0;
+		}
+		
+	}// busy wait
+		i = 0;
+	while((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) == 1);
+	StartAddr = (int *)(TRIGGER_MEM_BASE_ADDR + TriggerR->TriggerReadOffSetAddr);
+	Addr = StartAddr +1;
+	while ((i < CaptureSize) && (Addr != StartAddr)){
+		RawData[i] = *Addr;
+		i++;
+		Addr++;
+		if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
+		}
+	}
+	return i;
+}
 
 // returns read DWORDS
 unsigned int CaptureData(const unsigned int WaitTime, // just a integer 
@@ -184,17 +229,7 @@ unsigned int CaptureData(const unsigned int WaitTime, // just a integer
 			}
 		}// busy wait
 		if (FMode != 0) {
-			i = 0;
-			while((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) == 1);
-			while ((i < CaptureSize) && ((int)Addr != StartAddr)){
-				RawData[i] = *Addr;
-				i++;
-				Addr++;
-				if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-					Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
-				}
-			}
-			return i;
+			return FastCapture(WaitTime,CaptureSize, RawData);
 		}
 	}
 	i = 0;
