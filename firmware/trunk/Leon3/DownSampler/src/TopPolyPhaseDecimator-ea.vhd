@@ -4,7 +4,7 @@
 -- File       : TopPolyPhaseDecimator-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-04
+-- Last update: 2009-03-06
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -97,11 +97,11 @@ begin
     if iResetAsync = cResetActive then
       R <= cInit;
     elsif rising_edge(iClk) then
-      if iValid = '1' then
-        assert(R.FirCounter = 0)
-          report "This Polyphase FIR filter requires FirCounter+1 clock cycles between" &
-          " each input sample!" severity failure;
-      end if;
+ --     if iValid = '1' then
+ --       assert(R.FirCounter = 0)
+ --         report "This Polyphase FIR filter requires FirCounter+1 clock cycles between" &
+ --         " each input sample!" severity failure;
+ --     end if;
       R.ShiftEnable <= '0';
       if R.ShiftEnable = '1' then
         R.WriteAddr <= R.ReadAddr + R.Delay;

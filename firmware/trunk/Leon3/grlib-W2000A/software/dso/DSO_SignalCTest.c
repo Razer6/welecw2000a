@@ -12,7 +12,7 @@ int main () {
 	Debugprint * Debug;
 //	printf("Starting SFR Test\n");
 	InitSignalCapture(Debug,PrintF,English);
-	SetTriggerInput(4,8,1000000000,FIXED_CPU_FREQUENCY,0,1,2,3);
+	SetTriggerInput(4,8,100000000,FIXED_CPU_FREQUENCY,0,1,2,3);
 	SetTrigger(2,0,64,-16,3,16,3);
 	SetAnalogInputRange(10000,10000,10000,10000);
 	ReadData = CaptureData(1000000, true, CAPTURESIZE, Data, 512, 1000000000, FIXED_CPU_FREQUENCY);

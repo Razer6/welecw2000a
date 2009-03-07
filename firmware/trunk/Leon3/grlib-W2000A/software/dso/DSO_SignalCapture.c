@@ -7,8 +7,8 @@
 #include "DSO_Debugprint.h"
 
 Debugprint Print;
-CaptureRegs * CaptureR;
-TriggerRegs * TriggerR;
+volatile CaptureRegs * CaptureR;
+volatile TriggerRegs * TriggerR;
 
 
 int FastMode(const unsigned int SamplingFrequency, 
@@ -26,7 +26,7 @@ bool InitSignalCapture(Debugprint * Init, Target T, Language L){
 
 bool SetTriggerInput (const unsigned int noChannels, 
 					  const unsigned int SampleSize, 
-					        unsigned int SamplingFrequency,
+					  const unsigned int SamplingFrequency,
 					  const unsigned int CPUFrequency,
 					  const unsigned int Ch0, 
 					  const unsigned int Ch1, 
@@ -34,27 +34,36 @@ bool SetTriggerInput (const unsigned int noChannels,
 					  const unsigned int Ch3)
 {
 	const int FMode = FastMode(SamplingFrequency,CPUFrequency);
+	int Decimaton = 0;
 	int Stage = 0;
 	int M = 0;
 	if ((Ch0 > 3) || (Ch1 > 3) || (Ch2 > 3) || (Ch3 > 3)) {
-	//	Print.ChannelsNotSupported();
+//		Print.ChannelsNotSupported();
 		return false;
 	}
 	TriggerR->TriggerStorageModeAddr = TRIGGERSTORAGEMODE4CH;
-	
+	switch(CaptureR->DeviceAddr){
+		case WELEC2012:
+		case WELEC2014:
+		case WELEC2022:
+		case WELEC2024:	Decimaton = WELECMAXFS/SamplingFrequency; break;
+		case SANDBOXX:	Decimaton = SANDBOXXFS/SamplingFrequency; break;
+		default:		Decimaton = WELECMAXFS/SamplingFrequency; break;
+	}
 	do {
-		if (SamplingFrequency >= 10) {
+		if (Decimaton >= 10) {
 			M |= (10<<Stage);
 		} else {
-			switch (SamplingFrequency) {
+			switch (Decimaton) {
 				case 2 : M |= (2<<Stage); break;
 				case 4 : M |= (4<<Stage); break;
 				default: M |= (1<<Stage); break;
 			}
 		}
-		SamplingFrequency = SamplingFrequency/10;
+		Decimaton = Decimaton/10;
 		Stage += 4;
-	} while (SamplingFrequency > 10); 
+	} while (Decimaton > 10); 
+	CaptureR->Decimator = M;
 
 	switch (SampleSize) {
 		case 8:
@@ -146,7 +155,7 @@ bool SetTrigger(const unsigned int Trigger,
 		(TriggerR->TriggerHighValueAddr != HighReference)    ||
 		(TriggerR->TriggerHighTimeAddr  != HighReferenceTime))
 	{
-		Print.TriggerSettingsOutofRange();
+	//	Print.TriggerSettingsOutofRange();
 	}
 }
 
@@ -161,7 +170,7 @@ bool SetAnalogInputRange(const unsigned int Ch0,
 	CaptureR->InputCh1Gain = 0;      
 	CaptureR->InputCh2Gain = 0;        
 	CaptureR->InputCh3Gain = 0;
-//	Print.AnalogInputGainNotSupported();
+	Print.AnalogInputGainNotSupported();
 	return false;
 }
 
@@ -174,7 +183,7 @@ int FastCapture(const unsigned int WaitTime, // just a integer
 	int * Addr = 0;
 	TriggerR->TriggerOnceAddr = 0;
 	TriggerR->TriggerOnceAddr = 1;
-	while ((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) == 0){
+	while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){
 		i = i + 1;
 		if (WaitTime > i) {
 			return 0;
@@ -182,7 +191,7 @@ int FastCapture(const unsigned int WaitTime, // just a integer
 		
 	}// busy wait
 		i = 0;
-	while((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) == 1);
+	while(((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 1);
 	StartAddr = (int *)(TRIGGER_MEM_BASE_ADDR + TriggerR->TriggerReadOffSetAddr);
 	Addr = StartAddr +1;
 	while ((i < CaptureSize) && (Addr != StartAddr)){
@@ -216,21 +225,24 @@ unsigned int CaptureData(const unsigned int WaitTime, // just a integer
 	unsigned int ChCounter = 0;
 
 	if (Start == false && (FMode == 0)){
-		if ((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) == 0){
+		if (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){
 			return 0;
 		}
 	} else {
-		TriggerR->TriggerOnceAddr = 0;
-		TriggerR->TriggerOnceAddr = 1;
-		while ((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) == 0){
-			i = i + 1;
-			if (WaitTime > i) {
-				return 0;
-			}
-		}// busy wait
+		
 		if (FMode != 0) {
 			return FastCapture(WaitTime,CaptureSize, RawData);
+		} else {
+			TriggerR->TriggerOnceAddr = 0;
+			TriggerR->TriggerOnceAddr = 1;
+			while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0)		{
+				i = i + 1;
+				if (WaitTime > i) {
+					return 0;
+				}
+			}// busy wait
 		}
+
 	}
 	i = 0;
 	StartAddr = (TriggerR->TriggerReadOffSetAddr);

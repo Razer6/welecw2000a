@@ -4,7 +4,7 @@
 -- File       : SBxXSignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-03-05
+-- Last update: 2009-03-06
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -51,10 +51,10 @@ entity SbxXSignalCapture is
     iResetAsync : in  std_ulogic;
     -- ADC
     iClkADC     : in  std_ulogic_vector (0 to cADCsperChannel-1);  -- for SbxX 100 MHz
-    oResetAsync : out std_ulogic;  -- pll locked as asyncronous reset
+    oResetAsync : out std_ulogic;       -- pll locked as asyncronous reset
     iADC        : in  aADCIn;
 
-    iDownSampler : aDownSampler;
+    iDownSampler    :     aDownSampler;
     -- Trigger
     iTriggerCPUPort : in  aTriggerInput;
     oTriggerCPUPort : out aTriggerOutput;
@@ -80,6 +80,7 @@ begin
 
   -- oResetAsync <= ResetAsync;
   ResetAsync <= not iResetAsync;
+  ClkDesign  <= iCLKADC(0);
 
   DesignClk : entity DSO.SbXPLL
     port map (
@@ -92,15 +93,15 @@ begin
   process (ResetAsync, ClkDesign)
   begin
     if iResetAsync = cResetActive then
-      SlowInputData  <= (others => (others => '0'));
-      SlowInputValid <= '0';
+      SlowInputData <= (others => (others => '0'));
     elsif rising_edge(ClkDesign) then
-      SlowInputData(0)(SlowInputData(0)'high downto SlowInputData(0)'high-iADC(0)(0)'length+1) <= 
-      signed(iADC(0)(0));
+      SlowInputData(0)(SlowInputData(0)'high downto SlowInputData(0)'high-iADC(0)(0)'length+1) <=
+        signed(iADC(0)(0));
     end if;
   end process;
 
-  DecimatorIn <= (others => (others => (others => '0')));
+  DecimatorIn    <= (others => (others => (others => '0')));
+  SlowInputValid <= '1';
 
   Decimator : entity work.TopDownSampler
     generic map (gUseStage0 => false)
@@ -114,19 +115,19 @@ begin
       oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
       oValid      => DecimatorOutValid);
 
-SignalSelector: process (DecimatorOut)
-begin
+  SignalSelector : process (DecimatorOut)
+  begin
     for i in 0 to cCoefficients-1 loop
-   SelectorOut(0)(i) <= std_ulogic_vector(DecimatorOut(0)(i)(27 downto 20));
-   SelectorOut(1)(i) <= std_ulogic_vector(DecimatorOut(0)(i)(19 downto 12));
-   SelectorOut(2)(i) <= std_ulogic_vector(DecimatorOut(0)(i)(11 downto 4));
-   SelectorOut(3)(i)(7 downto 4) <= std_ulogic_vector(DecimatorOut(0)(i)(3 downto 0));
-   SelectorOut(0)(i)(3 downto 0) <= (others => '0');
-  end loop; 
-end process;  
-      
-   SelectorOutValid <= '1';
-      
+      SelectorOut(0)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(27 downto 20));
+      SelectorOut(1)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(19 downto 12));
+      SelectorOut(2)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(11 downto 4));
+      SelectorOut(3)(i)(7 downto 4) <= std_ulogic_vector(DecimatorOut(0)(i)(3 downto 0));
+      SelectorOut(3)(i)(3 downto 0) <= (others => '0');
+    end loop;
+  end process;
+
+  SelectorOutValid <= DecimatorOutValid;
+
 
   Trigger : entity work.TopTrigger
     port map (

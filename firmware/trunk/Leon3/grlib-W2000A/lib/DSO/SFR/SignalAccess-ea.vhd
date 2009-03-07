@@ -4,7 +4,7 @@
 -- File       : SignalAccess-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-02-28
+-- Last update: 2009-03-06
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -149,7 +149,7 @@ begin  -- rtl
     hconfig => hconfig,
     hindex  => hindex);
 
-  hready <= iTriggerMem.ACK or (not ahbsi.hsel(hindex));
+--  hready <= iTriggerMem.ACK or (not ahbsi.hsel(hindex));
 --  ahbso       <= AHBout;
 --  oTriggerMem <= MemIn;
 
@@ -168,7 +168,9 @@ begin  -- rtl
       oTriggerMem <= (
         Addr => (others => '0'),
         Rd   => '0');
+      hready <= '1';
     elsif rising_edge(clk_i) then
+      hready      <= iTriggerMem.ACK or (not ahbsi.hsel(hindex));
       ahbso       <= AHBout;
       oTriggerMem <= MemIn;
     end if;

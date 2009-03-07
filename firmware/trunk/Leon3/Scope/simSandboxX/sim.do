@@ -1,4 +1,4 @@
-vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/config.vhd
+vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/config.vhd
 vcom -quiet -93 -work DSO {../../grlib-W2000A/designs/leon3-sandboxx/DSOConfig-p.vhd}
 vcom -quiet -93 -work DSO {../../Scope/src/Global-p.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/SyncRam1Gs.vhd}
@@ -61,7 +61,7 @@ vcom -quiet -93 -work DSO  ../../grlib-W2000A/lib/DSO/SFR/SignalAccess-p.vhd
 vcom -quiet -93 -work DSO  ../../grlib-W2000A/lib/DSO/SFR/SignalAccess-ea.vhd
 vcom -quiet -93 -work DSO  ../../grlib-W2000A/lib/DSO/shram/shram-p.vhd
 #vcom -quiet -93 -work DSO  ../../grlib-W2000A/lib/DSO/shram/shram-ea.vhd
-#vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/ahbrom.vhd
+vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/ahbrom.vhd
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/W2000ROM.vhd
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/leon3mini.vhd
 
@@ -71,7 +71,6 @@ vcom -quiet -93 -work work {../../TestFiles/src/BhvADC-ea.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/AsyncSRAM-ea.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/BhvDisplay-ea.vhd}
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/Testbench.vhd
-#vcom -quiet -93 -work work {../../Scope/src/TestbenchTopScope-ea.vhd} # out of date
 
 vsim -t ps -suppress 3473 -gdisas=1 Testbench
 do wave.do

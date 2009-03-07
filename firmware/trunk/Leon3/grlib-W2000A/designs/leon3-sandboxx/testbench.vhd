@@ -265,6 +265,7 @@ architecture behav of testbench is
   
   
 begin
+  ADCClk <= (others => clk);
   
   ADC : for i in 0 to cChannels-1 generate
     CH : for j in 0 to cADCsperChannel-1 generate
@@ -315,28 +316,28 @@ begin
     port map (
       iCh1ADC1 => ADCData(0)(0),
 
-      iResetAsync => rst,
+      resetn => rst,
       resoutn     => resoutn,
       clk         => clk,
       errorn      => error,
       address     => address(address'high downto 2),
       data        => data,
       sdclk       => sdclk,
-      sdcke       => sdcke,
-      sdcsn       => sdcsn,
+      sdcke       => sdcke(0),
+      sdcsn       => sdcsn(0),
       sdwen       => sdwen,
       sdrasn      => sdrasn,
       sdcasn      => sdcasn,
       sddqm       => sddqm(3 downto 0),  -- topmost bits are undriven
       sdba        => sa(14 downto 13),
 
-   --   sertx     => dsutx,
-    --  serrx     => dsurx,
-      sersrcsel => gnd,                 -- select serial DCL
+--      sertx     => dsutx,
+--      serrx     => dsurx,
+--      sersrcsel => gnd,                 -- select serial DCL
 
-      dsuen   => dsuen,
+--      dsuen   => dsuen,
       dsubre  => dsubre,
-      dsuactn => dsuactn,
+--      dsuactn => dsuactn,
       dsutx => dsutx,
       dsurx => dsurx,
       txd1 => txd1,
@@ -523,7 +524,7 @@ begin
   end process;
 
   -- data <= buskeep(data), (others => 'H') after 250 ns;
-  sd   <= buskeep(sd), (others   => 'H') after 250 ns;
+     sd   <= buskeep(sd), (others   => 'H') after 250 ns;
 
   -- test0 : grtestmod
   --   port map (rst, clk, error, address(21 downto 2), data,

@@ -71,13 +71,7 @@ entity leon3mini is
     freq    : integer := 25000          -- frequency of main clock (used for PLLs)
     );
   port (
-    --  iClkDesign  : in std_ulogic;
-    --  iResetAsync : in std_ulogic;
-
-    -- external ram
-    --  oExtRam   : out   aRamAccess;
-    --  bSRAMData : inout std_logic_vector(31 downto 0);
-
+   
     --RS232
     iRXD : in  std_ulogic;              --RS232 
     oTXD : out std_ulogic;
