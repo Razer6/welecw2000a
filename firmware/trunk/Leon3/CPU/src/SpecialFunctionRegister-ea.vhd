@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-04
+-- Last update: 2009-03-08
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -96,8 +96,8 @@ begin
       if PrevTriggerBusy = '1' and iSFRControl.Trigger.Busy = '0' then
         InterruptVector(0) <= '1';
       end if;
-      PrevTriggerStartRecording <= iSFRControl.Trigger.StartRecording;
-      if PrevTriggerStartRecording = '1' and iSFRControl.Trigger.StartRecording = '0' then
+      PrevTriggerStartRecording <= iSFRControl.Trigger.Recording;
+      if PrevTriggerStartRecording = '1' and iSFRControl.Trigger.Recording = '0' then
         InterruptVector(1) <= '1';
       end if;
       InterruptVector(2) <= iSFRControl.KeyInterruptLH;
@@ -403,7 +403,7 @@ begin
         oData(Trigger.HighTime'range) <= Trigger.HighTime;
       when cTriggerStatusRegister =>
         oData(0) <= iSFRControl.Trigger.Busy;
-        oData(1) <= iSFRControl.Trigger.StartRecording;
+        oData(1) <= iSFRControl.Trigger.Recording;
       when cTriggerCurrentAddr =>
         oData(iSFRControl.Trigger.CurrentTriggerAddr'high+3 downto 3) <=
           std_ulogic_vector(iSFRControl.Trigger.CurrentTriggerAddr);

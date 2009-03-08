@@ -4,7 +4,7 @@
 -- File       : DownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-16
--- Last update: 2009-03-04
+-- Last update: 2009-03-08
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -127,7 +127,7 @@ begin
         Stage(0).Valid                                <= AliasAvgValid;
       end if;
 
-      for m in 1 to 3 loop
+      for m in 1 to cDecimationStages-1 loop
         -- Stage output
         if iEnableFilter(m) = '1' and iDecimation(m) /= M1 then
           Stage(m) <= iStage(m);
@@ -157,7 +157,8 @@ begin
       end loop;
 
       -- downsampler output
-      if iDecimation(1 to cDecimationStages-1) = cM1 then
+      --   if iDecimation(1 to cDecimationStages-1) = cM1 then
+      if iDecimation(0) /= M10 then
         for i in DataOut'range loop
           DataOut(i)(cBitWidth*2-1 downto cBitWidth) <= StageData0(i);
           DataOut(i)(cBitWidth-1 downto 0)           <= (others => '0');

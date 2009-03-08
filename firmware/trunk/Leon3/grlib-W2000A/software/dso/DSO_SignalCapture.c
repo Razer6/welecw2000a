@@ -7,8 +7,8 @@
 #include "DSO_Debugprint.h"
 
 Debugprint Print;
-volatile CaptureRegs * CaptureR;
-volatile TriggerRegs * TriggerR;
+volatile CaptureRegs * volatile CaptureR;
+volatile TriggerRegs * volatile TriggerR;
 
 
 int FastMode(const unsigned int SamplingFrequency, 
@@ -180,20 +180,49 @@ int FastCapture(const unsigned int WaitTime, // just a integer
 {
 	unsigned int i = 0;
 	int * StartAddr = 0;
-	int * Addr = 0;
+	volatile int * Addr = 0;
 	TriggerR->TriggerOnceAddr = 0;
 	TriggerR->TriggerOnceAddr = 1;
-	while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){
-		i = i + 1;
+	//while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){
+	//	i = i + 1;
+	//	if (WaitTime > i) {
+	//		return 0;
+	//	}
+	//	
+	//}// busy wait
+	while(1){
+		i++;
+		if (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) != 0){
+			break;
+		}
 		if (WaitTime > i) {
 			return 0;
 		}
-		
-	}// busy wait
-		i = 0;
-	while(((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 1);
+	}
 	StartAddr = (int *)(TRIGGER_MEM_BASE_ADDR + TriggerR->TriggerReadOffSetAddr);
-	Addr = StartAddr +1;
+
+	// The folowing 5 lines solve a feature (bug) in the hardware trigger, 
+	// which is overwriting the first 16 samples at the end!
+	//while(((int)StartAddr + 8*3) < TriggerR->TriggerCurrentAddr);
+	while(1){
+		if (((int)StartAddr + 8*3) < TriggerR->TriggerCurrentAddr){
+			break;
+		}
+	}
+	StartAddr--;
+	StartAddr--;
+	TriggerR->TriggerReadOffSetAddr = (int)StartAddr; // masking is done by the SFR itself!
+	StartAddr++;
+
+	//while(((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) != 0);
+	while(1){
+		if (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){
+			break;
+		}
+	}
+	
+	Addr = StartAddr+1;
+	i = 0;
 	while ((i < CaptureSize) && (Addr != StartAddr)){
 		RawData[i] = *Addr;
 		i++;
@@ -218,37 +247,34 @@ unsigned int CaptureData(const unsigned int WaitTime, // just a integer
 	const int FMode = FastMode(SamplingFrequency,CPUFrequency);
     unsigned int i = 0;
 	unsigned int StartAddr = 0;
-	unsigned int * Addr = 0;
+	volatile unsigned int * Addr = 0;
 	unsigned int Frame = 0;
 	unsigned int ForwardStartAddr = 0;
 	unsigned int ChMode = 0;
 	unsigned int ChCounter = 0;
-
-	if (Start == false && (FMode == 0)){
+	
+	if (FMode != 0) {
+		return FastCapture(WaitTime,CaptureSize, RawData);
+	} 
+	if (Start == false){
 		if (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){
 			return 0;
 		}
 	} else {
-		
-		if (FMode != 0) {
-			return FastCapture(WaitTime,CaptureSize, RawData);
-		} else {
-			TriggerR->TriggerOnceAddr = 0;
-			TriggerR->TriggerOnceAddr = 1;
-			while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0)		{
-				i = i + 1;
-				if (WaitTime > i) {
-					return 0;
-				}
-			}// busy wait
-		}
-
+		TriggerR->TriggerOnceAddr = 0;
+		TriggerR->TriggerOnceAddr = 1;
+		while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0)		{
+			i = i + 1;
+			if (WaitTime > i) {
+				return 0;
+			}
+		}// busy wait
 	}
 	i = 0;
 	StartAddr = (TriggerR->TriggerReadOffSetAddr);
 	Addr = (int *)TRIGGER_MEM_BASE_ADDR + StartAddr;
 	// abort if the trigger 
-	while ((1 << TRIGGERRECORDINGBIT) & (TriggerR->TriggerStatusRegister) != 0){
+	while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) != 0){
 //	while(i < CaptureSize) {
 		if (i == CaptureSize) {
 			return i;
@@ -256,23 +282,14 @@ unsigned int CaptureData(const unsigned int WaitTime, // just a integer
 		ForwardStartAddr = (int)TriggerR->TriggerCurrentAddr;
 		ForwardStartAddr = ForwardStartAddr - (int)Addr - FrameSize;
         ForwardStartAddr &= (TRIGGER_MEM_SIZE-1);
-		if (ForwardStartAddr > (TRIGGER_MEM_SIZE/2)) {
+	//	if (ForwardStartAddr > (TRIGGER_MEM_SIZE/2)) {
+		if (ForwardStartAddr > 0) {
 			StartAddr = StartAddr + FrameSize;
 			TriggerR->TriggerReadOffSetAddr = StartAddr;
 		} else {
 			// here the race condition gets active if the ratio of 
 			// FastMode is wrong!
 			continue;
-			//StartAddr = (TriggerR->TriggerReadOffSetAddr + TRIGGER_MEM_BASE_ADDR);
-			//while ( (i < CaptureSize) && ((int)Addr != StartAddr)){
-			//	RawData[i] = *Addr;
-			//	i++;
-			//	Addr++;
-			//	if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-			//		Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
-			//	}
-			//}
-			//return i;
 		}
 		Frame = Frame + FrameSize; 
 		if (Frame > CaptureSize) {

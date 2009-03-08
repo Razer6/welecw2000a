@@ -74,4 +74,4 @@ vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/Testbench.v
 
 vsim -t ps -suppress 3473 -gdisas=1 Testbench
 do wave.do
-run 100 us
+run -all

@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-03-04
+-- Last update: 2009-03-08
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -125,7 +125,7 @@ begin
     if iResetAsync = cResetActive then
       R                       <= cInit;
       oTriggerMem.Data        <= (others => '0');
-      oCPUPort.StartRecording <= '0';
+      oCPUPort.Recording <= '0';
     elsif rising_edge(iClk) then
       
       R.ReadAlign                    <= iTriggerMem.Addr(cTriggerAlign-1 downto 0);
@@ -134,7 +134,7 @@ begin
       oTriggerMem.Data(15 downto 8)  <= std_ulogic_vector(AlignDataCh1(i));
       oTriggerMem.Data(23 downto 16) <= std_ulogic_vector(AlignDataCh2(i));
       oTriggerMem.Data(31 downto 24) <= std_ulogic_vector(AlignDataCh3(i));
-      oCPUPort.StartRecording        <= '0';
+      oCPUPort.Recording        <= '0';
       R.PrevTrigger                  <= iCPUPort.TriggerOnce;
       --    R.WrEn         <= '1';
       R.Busy                         <= '1';
@@ -226,11 +226,12 @@ begin
         when PreRecording =>
           if iValid = '1' then
             R.State                 <= Recording;
-            oCPUPort.StartRecording <= '1';
+            oCPUPort.Recording <= '1';
           end if;
           --     R.StartAddr(R.StartAddr'high downto cTriggerAlign) <=
           --       std_ulogic_vector(unsigned(R.Addr) - unsigned(R.Counter));
         when Recording =>
+          oCPUPort.Recording <= '1';
           if iValid = '1' then
             case iCPUPort.StorageMode is
               -- when cStorageMode4CH =>

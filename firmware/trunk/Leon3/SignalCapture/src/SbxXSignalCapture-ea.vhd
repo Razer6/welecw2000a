@@ -4,7 +4,7 @@
 -- File       : SBxXSignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-03-06
+-- Last update: 2009-03-08
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -76,6 +76,7 @@ architecture RTL of SbxXSignalCapture is
   signal SelectorOutValid  : std_ulogic;
   signal SlowInputData     : aLongValues(0 to cChannels-1);
   signal SlowInputValid    : std_ulogic;
+  signal DownSampler    :     aDownSampler;
 begin
 
   -- oResetAsync <= ResetAsync;
@@ -102,14 +103,21 @@ begin
 
   DecimatorIn    <= (others => (others => (others => '0')));
   SlowInputValid <= '1';
-
+  
+  process (iDownSampler)
+  begin
+    DownSampler <= iDownSampler;
+    DownSampler.EnableFilter(0) <= '1';
+    DownSampler.Stages(3 downto 0) <= X"A";
+  end process;
+  
   Decimator : entity work.TopDownSampler
     generic map (gUseStage0 => false)
     port map (
       iClk        => ClkDesign,
       iResetAsync => iResetAsync,
       iADC        => DecimatorIn,       -- fixpoint 1.x range -0.5 to 0.5
-      iCPU        => iDownSampler,
+      iCPU        => DownSampler,
       iData       => SlowInputData,
       iValid      => SlowInputValid,
       oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
