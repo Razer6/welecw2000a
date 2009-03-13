@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-08
+-- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -46,7 +46,7 @@ use DSO.pSpecialFunctionRegister.all;
 use DSO.pTrigger.all;
 use DSO.pPolyphaseDecimator.all;
 --use DSO.pUart.all;
-use DSO.pLedsKeys.all;
+use DSO.pLedsKeysAnalogSettings.all;
 
 entity SpecialFunctionRegister is
   port (
@@ -68,9 +68,11 @@ architecture RTL of SpecialFunctionRegister is
   signal InterruptVector           : aDword;
   signal Decimator                 : aDownSampler;
   signal SignalSelector            : aSignalSelector;
+  signal ExtTriggerSrc             : aExtTriggerInput;
   signal Trigger                   : aTriggerInput;
   --signal UartOut                   : aCPUtoUart;
   signal Leds                      : aLeds;
+  signal AnalogSettings            : aAnalogSettings;
   signal PrevTriggerBusy           : std_ulogic;
   signal PrevTriggerStartRecording : std_ulogic;
   signal Addr                      : natural;
@@ -78,9 +80,11 @@ begin
   
   oSFRControl.Decimator      <= Decimator;
   oSFRControl.SignalSelector <= SignalSelector;
+  oSFRControl.ExtTriggerSrc  <= ExtTriggerSrc;
   oSFRControl.Trigger        <= Trigger;
   -- oSFRControl.Uart            <= UartOut;
   oSFRControl.Leds           <= Leds;
+  oSFRControl.AnalogSettings <= AnalogSettings;
   Addr                       <= to_integer(unsigned(iAddr(7 downto 2)));
 
 
@@ -100,8 +104,8 @@ begin
       if PrevTriggerStartRecording = '1' and iSFRControl.Trigger.Recording = '0' then
         InterruptVector(1) <= '1';
       end if;
-      InterruptVector(2) <= iSFRControl.KeyInterruptLH;
-      InterruptVector(3) <= iSFRControl.KeyInterruptHL;
+--      InterruptVector(2) <= iSFRControl.KeyInterruptLH;
+--      InterruptVector(3) <= iSFRControl.KeyInterruptHL;
       --  InterruptVector(4) <= iSFRControl.Uart.Interrupt;
 
       if Addr = cInterruptAddr then
@@ -212,6 +216,11 @@ begin
               TriggerCh      => O"0",
               Gain10Exponent => 4));
       end case;
+      
+      ExtTriggerSrc <= (
+        Addr   => 0,
+        others => (others => (others => '0')));
+
       Trigger <= (
         TriggerOnce     => '0',
         ForceIdle       => '0',
@@ -224,21 +233,20 @@ begin
         HighValue       => std_ulogic_vector(to_signed(16, Trigger.HighValue'length)),
         LowTime         => std_ulogic_vector(to_signed(50, Trigger.LowTime'length)),
         HighTime        => std_ulogic_vector(to_signed(50, Trigger.HighTime'length)),
-
-        SetReadOffset => '0',
-        ReadOffset    => (others => '0'));
+        SetReadOffset   => '0',
+        ReadOffset      => (others => '0'));
       --    UartOut <= (WriteEn => '0',
       --                Addr    => (others => '0'),
       --                Data    => (others => '0'));
       Leds <= (
-        BTN_CH4        => '0',
+        BTN_CH3        => '0',
         Beam1On        => '0',
         BTN_MATH       => '0',
         Beam2On        => '0',
         BTN_QUICKMEAS  => '0',
         CURSORS        => '0',
         BTN_F1         => '0',
-        BTN_CH3        => '0',
+        BTN_CH2        => '0',
         BTN_PULSEWIDTH => '0',
         EDGE           => '0',
         RUNSTOP        => '0',
@@ -246,10 +254,23 @@ begin
         BTN_F3         => '0',
         SINGLE         => '0');
 
+      AnalogSettings <= (
+        Addr          => (others => '0'),
+        CH0_src2_addr => (others => '0'),
+        CH1_src2_addr => (others => '0'),
+        CH2_src2_addr => (others => '0'),
+        CH3_src2_addr => (others => '0'),
+        CH0_Offset    => (others => '0'),
+        CH1_Offset    => (others => '0'),
+        PWM_Offset    => (others => '0'),
+        others        => '0');
+
+
     elsif rising_edge(iClk) then
       Trigger.TriggerOnce   <= '0';
       Trigger.ForceIdle     <= '0';
       Trigger.SetReadOffset <= '0';
+      AnalogSettings.Set    <= '0';
       --  UartOut.WriteEn     <= '0';
 
       if iWr = '1' then
@@ -313,17 +334,23 @@ begin
             null;
           when cTriggerCurrentAddr =>
             null;
-            
+          when cExtTriggerSrcAddr =>
+            -- a software bug can here cause a simulation failure! :-)
+            ExtTriggerSrc.Addr <= to_integer(unsigned(iData));
+          when cExtTriggerPWMAddr =>
+            for i in 1 to cExtTriggers loop
+              ExtTriggerSrc.PWM(i) <= iData(i*8-1 downto (i-1)*8);
+            end loop;
           when cLedAddr =>
             Leds <= (
-              BTN_CH4        => iData(0),
+              BTN_CH3        => iData(0),
               Beam1On        => iData(1),
               BTN_MATH       => iData(2),
               Beam2On        => iData(3),
               BTN_QUICKMEAS  => iData(4),
               CURSORS        => iData(5),
               BTN_F1         => iData(6),
-              BTN_CH3        => iData(7),
+              BTN_CH2        => iData(7),
               BTN_PULSEWIDTH => iData(8),
               EDGE           => iData(9),
               RUNSTOP        => iData(10),
@@ -331,6 +358,50 @@ begin
               BTN_F3         => iData(12),
               SINGLE         => iData(13));
 
+	  when cAnalogSettingsPWMAddr =>
+	       AnalogSettings.PWM_Offset <= iData(AnalogSettings.PWM_Offset'range);
+
+            -----------------------------------------------------------------
+            -- You must not change any bits between the AnalogSettingsBanks!
+            -----------------------------------------------------------------
+          when cAnalogSettingsBank7 =>
+            AnalogSettings.Addr         <= O"7";
+            AnalogSettings.Set          <= '1';
+            AnalogSettings.CH0_K1_ON    <= iData(0);
+            AnalogSettings.CH0_K1_OFF   <= iData(1);
+            AnalogSettings.CH0_K2_ON    <= iData(2);
+            AnalogSettings.CH0_K2_OFF   <= iData(3);
+            AnalogSettings.CH0_OPA656   <= iData(4);
+            AnalogSettings.CH0_BW_Limit <= iData(5);
+            AnalogSettings.CH0_U14      <= iData(6);
+            AnalogSettings.CH0_U13      <= iData(7);
+            AnalogSettings.CH0_DC       <= iData(8);
+            AnalogSettings.CH1_DC       <= iData(9);
+            AnalogSettings.CH2_DC       <= iData(10);
+            AnalogSettings.CH3_DC       <= iData(11);
+            
+          when cAnalogSettingsBank5 =>
+            AnalogSettings.Addr          <= O"5";
+            AnalogSettings.Set           <= '1';
+            AnalogSettings.CH1_K1_ON     <= iData(0);
+            AnalogSettings.CH1_K1_OFF    <= iData(1);
+            AnalogSettings.CH1_K2_ON     <= iData(2);
+            AnalogSettings.CH1_K2_OFF    <= iData(3);
+            AnalogSettings.CH1_OPA656    <= iData(4);
+            AnalogSettings.CH1_BW_Limit  <= iData(5);
+            AnalogSettings.CH1_U14       <= iData(6);
+            AnalogSettings.CH1_U13       <= iData(7);
+            AnalogSettings.CH0_src2_addr <= iData(9 downto 8);
+            AnalogSettings.CH1_src2_addr <= iData(11 downto 10);
+            AnalogSettings.CH2_src2_addr <= iData(13 downto 12);
+            AnalogSettings.CH3_src2_addr <= iData(15 downto 14);
+            
+          when cAnalogSettingsBank6 =>
+            AnalogSettings.Addr       <= O"6";
+            AnalogSettings.Set        <= '1';
+            AnalogSettings.CH0_Offset <= iData(7 downto 0);
+            AnalogSettings.CH1_Offset <= iData(15 downto 8);
+            
           when cUart16550Addr =>
             --     UartOut.Addr <= iData(cUART_ADDR_WIDTH-1 downto 0);
           when cUart16550Data =>
@@ -345,7 +416,7 @@ begin
 
   pRead : process (Addr, iSFRControl, InterruptVector,
                    InterruptMask, Decimator,
-                   SignalSelector, Trigger, Leds)
+                   SignalSelector, Trigger, Leds, ExtTriggerSrc, AnalogSettings)
   begin
     oData <= (others => '0');
     case Addr is
@@ -407,20 +478,26 @@ begin
       when cTriggerCurrentAddr =>
         oData(iSFRControl.Trigger.CurrentTriggerAddr'high+3 downto 3) <=
           std_ulogic_vector(iSFRControl.Trigger.CurrentTriggerAddr);
+        
+      when cExtTriggerPWMAddr =>
+        for i in 1 to cExtTriggers loop
+          oData(i*8-1 downto (i-1)*8) <= ExtTriggerSrc.PWM(i);
+        end loop;
+        
       when cUart16550Addr =>
         --     oData(cUART_ADDR_WIDTH-1 downto 0) <= UartOut.Addr;
       when cUart16550Data =>
         --     oData(cUART_DATA_WIDTH-1 downto 0) <= iSFRControl.Uart.Data;
 
       when cLedAddr =>
-        oData(0)  <= Leds.BTN_CH4;
+        oData(0)  <= Leds.BTN_CH3;
         oData(1)  <= Leds.Beam1On;
         oData(2)  <= Leds.BTN_MATH;
         oData(3)  <= Leds.Beam2On;
         oData(4)  <= Leds.BTN_QUICKMEAS;
         oData(5)  <= Leds.CURSORS;
         oData(6)  <= Leds.BTN_F1;
-        oData(7)  <= Leds.BTN_CH3;
+        oData(7)  <= Leds.BTN_CH2;
         oData(8)  <= Leds.BTN_PULSEWIDTH;
         oData(9)  <= Leds.EDGE;
         oData(10) <= Leds.RUNSTOP;
@@ -435,10 +512,10 @@ begin
         oData(4)  <= iSFRControl.Keys.BTN_F5;
         oData(5)  <= iSFRControl.Keys.BTN_F6;
         oData(6)  <= iSFRControl.Keys.BTN_MATH;
-        oData(7)  <= iSFRControl.Keys.BTN_CH1;
-        oData(8)  <= iSFRControl.Keys.BTN_CH2;
-        oData(9)  <= iSFRControl.Keys.BTN_CH3;
-        oData(10) <= iSFRControl.Keys.BTN_CH4;
+        oData(7)  <= iSFRControl.Keys.BTN_CH0;
+        oData(8)  <= iSFRControl.Keys.BTN_CH1;
+        oData(9)  <= iSFRControl.Keys.BTN_CH2;
+        oData(10) <= iSFRControl.Keys.BTN_CH3;
         oData(11) <= iSFRControl.Keys.BTN_MAINDEL;
         oData(12) <= iSFRControl.Keys.BTN_RUNSTOP;
         oData(13) <= iSFRControl.Keys.BTN_SINGLE;
@@ -455,33 +532,69 @@ begin
         oData(24) <= iSFRControl.Keys.BTN_PULSEWIDTH;
         oData(26) <= iSFRControl.Keys.BTN_X1;
         oData(27) <= iSFRControl.Keys.BTN_X2;
-        oData(28) <= iSFRControl.Keys.ENCI_TIME_DIV;
-        oData(29) <= iSFRControl.Keys.ENCD_TIME_DIV;
-        oData(30) <= iSFRControl.Keys.ENCI_F;
-        oData(31) <= iSFRControl.Keys.ENCD_F;
+        oData(28) <= iSFRControl.Keys.ENX_TIME_DIV;
+        oData(29) <= iSFRControl.Keys.ENY_TIME_DIV;
+        oData(30) <= iSFRControl.Keys.ENX_F;
+        oData(31) <= iSFRControl.Keys.ENY_F;
       when cKeyAddr1 =>
-        oData(0)  <= iSFRControl.Keys.ENCI_LEFT_RIGHT;
-        oData(1)  <= iSFRControl.Keys.ENCD_LEFT_RIGHT;
-        oData(2)  <= iSFRControl.Keys.ENCI_LEVEL;
-        oData(3)  <= iSFRControl.Keys.ENCD_LEVEL;
-        oData(4)  <= iSFRControl.Keys.ENCI_CH1_UPDN;
-        oData(5)  <= iSFRControl.Keys.ENCD_CH1_UPDN;
-        oData(6)  <= iSFRControl.Keys.ENCI_CH2_UPDN;
-        oData(7)  <= iSFRControl.Keys.ENCD_CH2_UPDN;
-        oData(8)  <= iSFRControl.Keys.ENCI_CH3_UPDN;
-        oData(9)  <= iSFRControl.Keys.ENCD_CH3_UPDN;
-        oData(10) <= iSFRControl.Keys.ENCI_CH4_UPDN;
-        oData(11) <= iSFRControl.Keys.ENCD_CH4_UPDN;
-        oData(12) <= iSFRControl.Keys.ENCI_CH1_VDIV;
-        oData(13) <= iSFRControl.Keys.ENCD_CH1_VDIV;
-        oData(14) <= iSFRControl.Keys.ENCI_CH2_VDIV;
-        oData(15) <= iSFRControl.Keys.ENCD_CH2_VDIV;
-        oData(16) <= iSFRControl.Keys.ENCI_CH3_VDIV;
-        oData(17) <= iSFRControl.Keys.ENCD_CH3_VDIV;
-        oData(18) <= iSFRControl.Keys.ENCI_CH4_VDIV;
-        oData(19) <= iSFRControl.Keys.ENCD_CH4_VDIV;
+        oData(0)  <= iSFRControl.Keys.ENX_LEFT_RIGHT;
+        oData(1)  <= iSFRControl.Keys.ENY_LEFT_RIGHT;
+        oData(2)  <= iSFRControl.Keys.ENX_LEVEL;
+        oData(3)  <= iSFRControl.Keys.ENY_LEVEL;
+        oData(4)  <= iSFRControl.Keys.ENX_CH0_UPDN;
+        oData(5)  <= iSFRControl.Keys.ENY_CH0_UPDN;
+        oData(6)  <= iSFRControl.Keys.ENX_CH1_UPDN;
+        oData(7)  <= iSFRControl.Keys.ENY_CH1_UPDN;
+        oData(8)  <= iSFRControl.Keys.ENX_CH2_UPDN;
+        oData(9)  <= iSFRControl.Keys.ENY_CH2_UPDN;
+        oData(10) <= iSFRControl.Keys.ENX_CH3_UPDN;
+        oData(11) <= iSFRControl.Keys.ENY_CH3_UPDN;
+        oData(12) <= iSFRControl.Keys.ENX_CH0_VDIV;
+        oData(13) <= iSFRControl.Keys.ENY_CH0_VDIV;
+        oData(14) <= iSFRControl.Keys.ENX_CH1_VDIV;
+        oData(15) <= iSFRControl.Keys.ENY_CH1_VDIV;
+        oData(16) <= iSFRControl.Keys.ENX_CH2_VDIV;
+        oData(17) <= iSFRControl.Keys.ENY_CH2_VDIV;
+        oData(18) <= iSFRControl.Keys.ENX_CH3_VDIV;
+        oData(19) <= iSFRControl.Keys.ENY_CH3_VDIV;
+
+	when cAnalogSettingsPWMAddr =>
+	       oData(AnalogSettings.PWM_Offset'range) <= AnalogSettings.PWM_Offset;
+        
+      when cAnalogSettingsBank7 =>
+        oData(0)  <= AnalogSettings.CH0_K1_ON;
+        oData(1)  <= AnalogSettings.CH0_K1_OFF;
+        oData(2)  <= AnalogSettings.CH0_K2_ON;
+        oData(3)  <= AnalogSettings.CH0_K2_OFF;
+        oData(4)  <= AnalogSettings.CH0_OPA656;
+        oData(5)  <= AnalogSettings.CH0_BW_Limit;
+        oData(6)  <= AnalogSettings.CH0_U14;
+        oData(7)  <= AnalogSettings.CH0_U13;
+        oData(8)  <= AnalogSettings.CH0_DC;
+        oData(9)  <= AnalogSettings.CH1_DC;
+        oData(10) <= AnalogSettings.CH2_DC;
+        oData(11) <= AnalogSettings.CH3_DC;
+        
+      when cAnalogSettingsBank5 =>
+        oData(0)            <= AnalogSettings.CH1_K1_ON;
+        oData(1)            <= AnalogSettings.CH1_K1_OFF;
+        oData(2)            <= AnalogSettings.CH1_K2_ON;
+        oData(3)            <= AnalogSettings.CH1_K2_OFF;
+        oData(4)            <= AnalogSettings.CH1_OPA656;
+        oData(5)            <= AnalogSettings.CH1_BW_Limit;
+        oData(6)            <= AnalogSettings.CH1_U14;
+        oData(7)            <= AnalogSettings.CH1_U13;
+        oData(9 downto 8)   <= AnalogSettings.CH0_src2_addr;
+        oData(11 downto 10) <= AnalogSettings.CH1_src2_addr;
+        oData(13 downto 12) <= AnalogSettings.CH2_src2_addr;
+        oData(15 downto 14) <= AnalogSettings.CH3_src2_addr;
+        
+      when cAnalogSettingsBank6 =>
+        oData(7 downto 0)  <= AnalogSettings.CH0_Offset;
+        oData(15 downto 8) <= AnalogSettings.CH1_Offset;
+        
       when others =>
-        if Addr = cLastAddr then
+        if Addr >= cLastAddr then
           oData <= (others => '-');
         end if;
     end case;

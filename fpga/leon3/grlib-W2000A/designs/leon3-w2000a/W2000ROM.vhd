@@ -34,7 +34,7 @@ end;
 
 architecture rtl of BootRom is
 constant abits   : integer := 9;
-constant bytes   : integer := 464;
+constant bytes   : integer := 432;
 signal   romdata, data : std_logic_vector(31 downto 0);
 signal   addr    : std_logic_vector(abits-1 downto 2);
 signal   ACK     : std_ulogic;
@@ -172,21 +172,13 @@ begin
     when 16#00063# => romdata <= X"BC278001";
     when 16#00064# => romdata <= X"9C27A060";
     when 16#00065# => romdata <= X"03100000";
-    when 16#00066# => romdata <= X"03100004";
-    when 16#00067# => romdata <= X"82106168";
-    when 16#00068# => romdata <= X"03100004";
-    when 16#00069# => romdata <= X"82106268";
-    when 16#0006A# => romdata <= X"81C04000";
-    when 16#0006B# => romdata <= X"01000000";
-    when 16#0006C# => romdata <= X"01000000";
-    when 16#0006D# => romdata <= X"01000000";
-    when 16#0006E# => romdata <= X"01000000";
-    when 16#0006F# => romdata <= X"01000000";
-    when 16#00070# => romdata <= X"00000000";
-    when 16#00071# => romdata <= X"00000000";
-    when 16#00072# => romdata <= X"00000000";
-    when 16#00073# => romdata <= X"00000000";
-    when 16#00074# => romdata <= X"00000000";
+    when 16#00066# => romdata <= X"81C04000";
+    when 16#00067# => romdata <= X"01000000";
+    when 16#00068# => romdata <= X"00000000";
+    when 16#00069# => romdata <= X"00000000";
+    when 16#0006A# => romdata <= X"00000000";
+    when 16#0006B# => romdata <= X"00000000";
+    when 16#0006C# => romdata <= X"00000000";
     when others => romdata <= (others => '-');
     end case;
   end process;

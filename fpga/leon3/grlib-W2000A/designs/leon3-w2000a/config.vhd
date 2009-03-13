@@ -137,10 +137,10 @@ package config is
   constant CFG_AHB_MONWAR : integer := 1;
 
 -- DSU UART
-  constant CFG_AHB_UART : integer := 1;
+  constant CFG_AHB_UART : integer := 0;
 
 -- JTAG based DSU interface
-  constant CFG_AHB_JTAG : integer := 0;
+  constant CFG_AHB_JTAG : integer := 1;
 
 -- Ethernet DSU
   constant CFG_DSU_ETH : integer := 0 + 0;

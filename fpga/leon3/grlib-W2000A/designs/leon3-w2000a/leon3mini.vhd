@@ -55,7 +55,7 @@ use DSO.pSpecialFunctionRegister.all;
 use DSO.pTrigger.all;
 use DSO.pSignalAccess.all;
 use DSO.pSRamPriorityAccess.all;
-use DSO.pLedsKeys.all;
+use DSO.pLedsKeysAnalogSettings.all;
 use work.config.all;
 
 
@@ -68,10 +68,9 @@ entity leon3mini is
     disas   : integer := CFG_DISAS;     -- Enable disassembly to console
     dbguart : integer := CFG_DUART;     -- Print UART on console
     pclow   : integer := CFG_PCLOW;
-    freq    : integer := 25000          -- frequency of main clock (used for PLLs)
+    freq    : integer := 25000       -- frequency of main clock (used for PLLs)
     );
   port (
-   
     --RS232
     iRXD : in  std_ulogic;              --RS232 
     oTXD : out std_ulogic;
@@ -133,14 +132,14 @@ entity leon3mini is
     iFPGA2_T7   : in std_ulogic;
 
     --CONTROL of inputs
-    iUx6        : in  std_ulogic;       -- not soldering register channels 1,2 è 3,4
+    iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
     iUx11       : in  std_ulogic;       -- not soldering register channels 1,2
-    iAAQpin5    : in  std_ulogic;
+    oAAQpin5    : out std_ulogic;
     oCalibrator : out std_ulogic;
 
     -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-    oPWMout  : out std_ulogic;                     --Level Of External Syncro
-    iSinhcro : in  std_ulogic;                     --Comparator external syncro.
+    oPWMout  : out std_ulogic;          --Level Of External Syncro
+    iSinhcro : in  std_ulogic;          --Comparator external syncro.
     oDesh    : out std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
     oDeshENA : out std_ulogic;
     oRegCLK  : out std_ulogic;
@@ -168,14 +167,14 @@ entity leon3mini is
     iclk25_15 : in  std_ulogic;
     iclk13inp : in  std_ulogic;         --wire W12-U15
     oclk13out : out std_ulogic;         --W12-U15
-    iclk12_5  : in  std_ulogic;
+    iclk12_5  : in  std_ulogic
 
     -- original ports from leon3mini board
     --   resetn  : in  std_ulogic;
-    resoutn : out std_logic;
+    -- resoutn : out std_logic;
     --   clk     : in  std_ulogic;
 
-    errorn : out std_ulogic;
+--    errorn : out std_ulogic;
 --    address : out   std_logic_vector(15 downto 2);
 --    data    : inout std_logic_vector(31 downto 0);
 
@@ -202,14 +201,14 @@ entity leon3mini is
 --    sdba   : out std_logic_vector(1 downto 0);   -- sdram bank address
 
     -- debug support unit
-    dsuen   : in  std_ulogic;
-    dsubre  : in  std_ulogic;
-    dsuactn : out std_ulogic;
+--    dsuen   : in  std_ulogic;
+--    dsubre : in std_ulogic
+--    dsuactn : out std_ulogic;
 
     -- UART for serial DCL/console I/O
-    serrx     : in  std_ulogic;
-    sertx     : out std_ulogic;
-    sersrcsel : in  std_ulogic
+--    serrx     : in  std_ulogic;
+--    sertx     : out std_ulogic;
+--    sersrcsel : in  std_ulogic
 
 --    dsutx   : out std_ulogic;           -- DSU tx data
 --    dsurx   : in  std_ulogic;           -- DSU rx data
@@ -278,10 +277,7 @@ architecture rtl of leon3mini is
   signal ClkADC250  : std_ulogic_vector(0 to cADCsperChannel-1);
   signal ClkLocked  : std_ulogic;
 
-  signal ADCIn               : aADCIn;
-  signal AnalogAmplification : aAnalogAmplification;
-
-  signal ExtTrigger        : std_ulogic;
+  signal ADCIn             : aADCIn;
   signal TriggerMemtoCPU   : aTriggerMemOut;
   signal CPUtoTriggerMem   : aTriggerMemIn;
   signal SFRControltoCPU   : aSFR_in;
@@ -291,8 +287,7 @@ architecture rtl of leon3mini is
   signal LedstoPanel    : aShiftOut;
   -- signal KeystoCPU      : aKeys;
   signal KeysFromPanel  : aShiftIn;
-  signal KeyInterruptLH : std_ulogic;
-  signal KeyInterruptHL : std_ulogic;
+  signal AnalogSettings : aAnalogSettingsOut;
   signal BootRomRd      : std_ulogic;
   signal BootACK        : std_ulogic;
 --  signal RamtoVGA       : aSharedRamReturn;
@@ -354,9 +349,9 @@ architecture rtl of leon3mini is
 
   signal tck, tms, tdi, tdo : std_ulogic;
 
--- Adaptions for HPE Compact
-
+  signal errorn         : std_ulogic;
   signal dsuact         : std_logic;
+  signal dsuen          : std_ulogic;
   signal oen_ctrl       : std_logic;
   signal sdram_selected : std_logic;
 
@@ -364,11 +359,11 @@ architecture rtl of leon3mini is
   signal rx       : std_logic;
   signal tx       : std_logic;
 
-  signal rxd1  : std_logic;
-  signal txd1  : std_logic;
-  signal dsutx : std_ulogic;            -- DSU tx data
-  signal dsurx : std_ulogic;            -- DSU rx data
-
+  signal rxd1   : std_logic;
+  signal txd1   : std_logic;
+  signal dsutx  : std_ulogic;           -- DSU tx data
+  signal dsurx  : std_ulogic;           -- DSU rx data
+  signal dsubre : std_ulogic;
   ---------------------------------------------------------------------------------------
   -- HPI SIGNALS
   ---------------------------------------------------------------------------------------
@@ -394,11 +389,28 @@ architecture rtl of leon3mini is
 
   constant BOARD_FREQ : integer := freq;  -- input frequency in KHz
   constant CPU_FREQ   : integer := BOARD_FREQ * CFG_CLKMUL / CFG_CLKDIV;  -- cpu frequency in KHz
+  
+                                   signal resoutn : std_ulogic;
 begin
 
 ---------------------------------------------------------------------------------------
 -- DSO: Scope Components without direct AHB or APB access
 ---------------------------------------------------------------------------------------
+  oA_FLASH  <= (others => '1');
+  bD_FLASH  <= (others => '1');
+  --   iRB_FLASH : in    std_ulogic;
+  oOE_FLASH <= '1';
+  oCE_FLASH <= '1';
+  oWE_FLASH <= '1';
+
+  oTXD    <= txd1;
+  rxd1    <= iRXD;
+  dsurx   <= iUSBRX;                    -- Receive from USB
+  oUSBTX  <= dsutx;                     -- Tratsmit to USB
+  dsubre  <= '1';
+  -- dsuactn <= not dsuact;
+  dsuen   <= '1';
+  resoutn <= rstn;
 
   ClkADC25(0) <= iclk25_2;
   ClkADC25(1) <= iclk25_7;
@@ -425,22 +437,24 @@ begin
 
   CaptureSignals : entity DSO.SignalCapture
     port map (
-      oClkDesign      => ClkDesign,
-      oClkCPU         => ClkCPU,
+      oClkDesign        => ClkDesign,
+      oClkCPU           => ClkCPU,
       --    iResetAsync          => iResetAsync,
-      iClkADC         => ClkADC25,
-      oClkADC         => ClkADC250,
-      oResetAsync     => ResetAsync,
-      iADC            => ADCIn,
-      iDownSampler    => SFRControlfromCPU.Decimator,
-      iSignalSelector => SFRControlfromCPU.SignalSelector,
-      iTriggerCPUPort => SFRControlfromCPU.Trigger,
-      oTriggerCPUPort => SFRControltoCPU.Trigger,
-      iTriggerMem     => CPUtoTriggerMem,
-      oTriggerMem     => TriggerMemtoCPU,
-      iExtTrigger     => ExtTrigger);
+      iClkADC           => ClkADC25,
+      oClkADC           => ClkADC250,
+      oResetAsync       => ResetAsync,
+      iADC              => ADCIn,
+      iDownSampler      => SFRControlfromCPU.Decimator,
+      iSignalSelector   => SFRControlfromCPU.SignalSelector,
+      iTriggerCPUPort   => SFRControlfromCPU.Trigger,
+      oTriggerCPUPort   => SFRControltoCPU.Trigger,
+      iTriggerMem       => CPUtoTriggerMem,
+      oTriggerMem       => TriggerMemtoCPU,
+      iExtTriggerSrc    => SFRControlfromCPU.ExtTriggerSrc,
+      iExtTrigger       => iSinhcro,
+      oExtTriggerPWM(1) => oPWMout);
 
-  FrontPanel : entity DSO.LedsKeys
+  FrontPanel : entity DSO.LedsKeysAnalogSettings
     port map (
       iClk            => ClkCPU,
       iResetAsync     => ResetAsync,
@@ -449,8 +463,8 @@ begin
       iKeysData       => iFPSW_DOUT,
       onFetchKeys     => KeysfromPanel,
       oKeys           => SFRControltoCPU.Keys,
-      oKeyInterruptLH => SFRControltoCPU.KeyInterruptLH,
-      oKeyInterruptHL => SFRControltoCPU.KeyInterruptHL);
+      iCPUtoAnalog    => SFRControlfromCPU.AnalogSettings,
+      oAnalogSettings => AnalogSettings);
 
   oFPSW_PE    <= KeysFromPanel.nFetchStrobe;
   oFPSW_CLK   <= LedstoPanel.SerialClk;
@@ -462,6 +476,11 @@ begin
   oFPLED_CLK  <= LedstoPanel.SerialClk;
   oCalibrator <= LedstoPanel.SerialClk;  -- 1 KHz Clk
 
+  oDesh    <= AnalogSettings.Addr;      --demux. write strob for 4094
+  oDeshENA <= AnalogSettings.Enable;
+  oRegCLK  <= LedstoPanel.SerialClk;
+  oRegData <= AnalogSettings.Data;
+
   BootRomRd <= memo.romsn(0) or memo.oen;
   Bootloader : entity work.BootRom
     generic map (
@@ -471,6 +490,7 @@ begin
       clk   => clkm,
       ren   => BootRomRd,
       iaddr => memo.address(31 downto 2),
+      -- odata => bD_SRAM,
       odata => memi.data,
       oACK  => BootACK);
 
@@ -680,10 +700,10 @@ begin
     
     bD_SRAM <= memo.data after 1 ns when
                (memo.writen = '0' and memo.ramsn(0) = '0')
-               else (others => 'Z');--  when others;
+               else (others => 'Z');    --  when others;
     memi.data <= bD_SRAM after 1 ns when
                  (memo.writen = '1' and memo.ramsn(0) = '0')
-               else  (others =>  'Z'); -- when others;
+                 else (others => 'Z');  -- when others;
     oA_SRAM   <= std_ulogic_vector(memo.address(oA_SRAM'length+1 downto 2));
     oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
     oOE_SRAM  <= memo.ramoen(0);
@@ -839,8 +859,8 @@ begin
                                  clk2    => 20000, clk3 => 15385, burstlen => 6)
       port map(rstn, clkm, video_clk, apbi, apbo(6), vgao, ahbmi,
                ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG), clk_sel);
-    --   video_clk <= clk when clk_sel = "00" else clkm;
-    video_clk <= iclk25_2; -- when clk_sel = "00" else ClkCPU;
+    --   video_clk <= clk when clk_sel = "00"      else clkm;
+    video_clk <= iclk25_2;              -- when clk_sel = "00" else ClkCPU;
   end generate;
 
   novga : if CFG_VGA_ENABLE+CFG_SVGA_ENABLE = 0 generate
@@ -918,7 +938,7 @@ begin
         PIO_mode0_T1   => 6,            -- 70ns
         PIO_mode0_T2   => 28,           -- 290ns
         PIO_mode0_T4   => 2,            -- 30ns
-        PIO_mode0_Teoc => 23            -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
+        PIO_mode0_Teoc => 23   -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
         )
       port map(
         rst   => rstn,
@@ -1044,40 +1064,6 @@ begin
   end generate;
   nap0 : for i in 7 to NAPBSLV-1-CFG_GRETH generate apbo(i) <= apb_none; end generate;
   nah0 : for i in 8 to NAHBSLV-1 generate ahbso(i)          <= ahbs_none; end generate;
-
-
------------------------------------------------------------------------
----  Adaptions for HPE Mini -- ----------------------------------------
------------------------------------------------------------------------
-
-  dsuactn <= not dsuact;
-
-  -- sdba <= memo.address(16 downto 15);   -- the bank address
-
-  resoutn <= rstn;
-  dual_uart : if CFG_AHB_UART /= 0 and CFG_UART1_ENABLE /= 0 generate
-    with sersrcsel select
-      sertx <= txd1 when '1', dsutx when others;
-
-    rxd1  <= serrx when sersrcsel = '1' else '-';
-    dsurx <= serrx when sersrcsel = '0' else '-';
-  end generate dual_uart;
-
-  console_uart : if CFG_AHB_UART = 0 and CFG_UART1_ENABLE /= 0 generate
-    sertx <= txd1;
-    rxd1  <= serrx;
-  end generate console_uart;
-
-  dcl_uart : if CFG_AHB_UART /= 0 and CFG_UART1_ENABLE = 0 generate
-    sertx <= dsutx;
-    dsurx <= serrx;
-  end generate dcl_uart;
-
-  no_uart : if CFG_AHB_UART = 0 and CFG_UART1_ENABLE = 0 generate
-    sertx <= '-';
-    dsurx <= '-';
-    rxd1  <= '-';
-  end generate no_uart;
 
 -----------------------------------------------------------------------
 ---  Boot message  ----------------------------------------------------

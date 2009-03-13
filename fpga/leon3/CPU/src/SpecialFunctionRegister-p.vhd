@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-04
+-- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -44,7 +44,7 @@ use DSO.Global.all;
 use DSO.pTrigger.all;
 use DSO.pPolyphaseDecimator.all;
 --use work.pUart.all;
-use DSO.pLedsKeys.all;
+use DSO.pLedsKeysAnalogSettings.all;
 
 package pSpecialFunctionRegister is
   
@@ -52,15 +52,15 @@ package pSpecialFunctionRegister is
                     Trigger        : aTriggerOutput;
                     --                  Uart           : aUarttoCPU;
                     Keys           : aKeys;
-                    KeyInterruptLH : std_ulogic;
-                    KeyInterruptHL : std_ulogic;
                   end record;
   type aSFR_out is record
                      Decimator      : aDownSampler;
                      SignalSelector : aSignalSelector;
+                     ExtTriggerSrc  : aExtTriggerInput;
                      Trigger        : aTriggerInput;
                      --                  Uart            : aCPUtoUart;
                      Leds           : aLeds;
+                     AnalogSettings : aAnalogSettings;
                    end record;
   -- addresses
   constant cDeviceAddr             : natural := 0;
@@ -88,11 +88,17 @@ package pSpecialFunctionRegister is
   constant cTriggerHighTimeAddr    : natural := 33;
   constant cTriggerStatusRegister  : natural := 34;
   constant cTriggerCurrentAddr     : natural := 35;
-  constant cUart16550Addr          : natural := 40;
-  constant cUart16550Data          : natural := 41;
+  constant cExtTriggerSrcAddr      : natural := 36;
+  constant cExtTriggerPWMAddr      : natural := 37;
+  constant cUart16550Addr          : natural := 41;
+  constant cUart16550Data          : natural := 42;
   constant cLedAddr                : natural := 48;
   constant cKeyAddr0               : natural := 49;
   constant cKeyAddr1               : natural := 50;
-  constant cLastAddr               : natural := 51;
+  constant cAnalogSettingsPWMAddr  : natural := 51;
+  constant cAnalogSettingsBank7    : natural := 52;
+  constant cAnalogSettingsBank6    : natural := 53;
+  constant cAnalogSettingsBank5    : natural := 54;
+  constant cLastAddr               : natural := 55;
   
 end package;

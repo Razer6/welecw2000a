@@ -4,7 +4,7 @@
 -- File       : DSOConfig-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-03-05
+-- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -61,6 +61,7 @@ package pDSOConfig is
   constant cResetActive      : std_ulogic := '0';
   constant cADCBitWidth      : natural    := 14;
   constant cBitWidth         : natural    := cADCBitWidth;
+  constant cExtTriggers      : natural    := 1;
   constant cSRAMAddrWidth    : natural    := 19;  -- DwordAddr
   constant cFLASHAddrWidth   : natural    := 23;  -- byte address
   

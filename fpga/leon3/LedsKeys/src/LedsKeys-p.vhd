@@ -4,7 +4,7 @@
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-02-14
+-- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -39,10 +39,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package pLedsKeys is
+library DSO;
+use DSO.Global.all;
+
+package pLedsKeysAnalogSettings is
   
-  constant cKeyShiftLength : natural := 54;
-  constant cLedShiftLength : natural := 16;
+  constant cKeyShiftLength       : natural := 54;
+  constant cLedShiftLength       : natural := 16;
+  constant cAnalogSetAddrLength  : natural := 3;
+  constant cAnalogSetShiftLength : natural := 16;
 
   type aShiftOut is record
                       SerialClk     : std_ulogic;
@@ -65,10 +70,10 @@ package pLedsKeys is
                   BTN_F5           : std_ulogic;
                   BTN_F6           : std_ulogic;
                   BTN_MATH         : std_ulogic;
+                  BTN_CH0          : std_ulogic;
                   BTN_CH1          : std_ulogic;
                   BTN_CH2          : std_ulogic;
                   BTN_CH3          : std_ulogic;
-                  BTN_CH4          : std_ulogic;
                   BTN_MAINDEL      : std_ulogic;
                   BTN_RUNSTOP      : std_ulogic;
                   BTN_SINGLE       : std_ulogic;
@@ -85,41 +90,41 @@ package pLedsKeys is
                   BTN_PULSEWIDTH   : std_ulogic;
                   BTN_X1           : std_ulogic;
                   BTN_X2           : std_ulogic;
-                  ENCI_TIME_DIV    : std_ulogic;
-                  ENCD_TIME_DIV    : std_ulogic;
-                  ENCI_F           : std_ulogic;
-                  ENCD_F           : std_ulogic;
-                  ENCI_LEFT_RIGHT  : std_ulogic;
-                  ENCD_LEFT_RIGHT  : std_ulogic;
-                  ENCI_LEVEL       : std_ulogic;
-                  ENCD_LEVEL       : std_ulogic;
-                  ENCI_CH1_UPDN    : std_ulogic;
-                  ENCD_CH1_UPDN    : std_ulogic;
-                  ENCI_CH2_UPDN    : std_ulogic;
-                  ENCD_CH2_UPDN    : std_ulogic;
-                  ENCI_CH3_UPDN    : std_ulogic;
-                  ENCD_CH3_UPDN    : std_ulogic;
-                  ENCI_CH4_UPDN    : std_ulogic;
-                  ENCD_CH4_UPDN    : std_ulogic;
-                  ENCI_CH1_VDIV    : std_ulogic;
-                  ENCD_CH1_VDIV    : std_ulogic;
-                  ENCI_CH2_VDIV    : std_ulogic;
-                  ENCD_CH2_VDIV    : std_ulogic;
-                  ENCI_CH3_VDIV    : std_ulogic;
-                  ENCD_CH3_VDIV    : std_ulogic;
-                  ENCI_CH4_VDIV    : std_ulogic;
-                  ENCD_CH4_VDIV    : std_ulogic;
+                  ENX_TIME_DIV     : std_ulogic;
+                  ENY_TIME_DIV     : std_ulogic;
+                  ENX_F            : std_ulogic;
+                  ENY_F            : std_ulogic;
+                  ENX_LEFT_RIGHT   : std_ulogic;
+                  ENY_LEFT_RIGHT   : std_ulogic;
+                  ENX_LEVEL        : std_ulogic;
+                  ENY_LEVEL        : std_ulogic;
+                  ENX_CH0_UPDN     : std_ulogic;
+                  ENY_CH0_UPDN     : std_ulogic;
+                  ENX_CH1_UPDN     : std_ulogic;
+                  ENY_CH1_UPDN     : std_ulogic;
+                  ENX_CH2_UPDN     : std_ulogic;
+                  ENY_CH2_UPDN     : std_ulogic;
+                  ENX_CH3_UPDN     : std_ulogic;
+                  ENY_CH3_UPDN     : std_ulogic;
+                  ENX_CH0_VDIV     : std_ulogic;
+                  ENY_CH0_VDIV     : std_ulogic;
+                  ENX_CH1_VDIV     : std_ulogic;
+                  ENY_CH1_VDIV     : std_ulogic;
+                  ENX_CH2_VDIV     : std_ulogic;
+                  ENY_CH2_VDIV     : std_ulogic;
+                  ENX_CH3_VDIV     : std_ulogic;
+                  ENY_CH3_VDIV     : std_ulogic;
                 end record;
   
   type aLeds is record
-                  BTN_CH4        : std_ulogic;  -- Button [Channel 4]
+                  BTN_CH3        : std_ulogic;  -- Button [Channel 4]
                   Beam1On        : std_ulogic;  -- Button [Channel 1]
                   BTN_MATH       : std_ulogic;  -- Button [Math]         (not work?)
                   Beam2On        : std_ulogic;  -- Button [Channel 2]
                   BTN_QUICKMEAS  : std_ulogic;  -- Button [Quick Meass]
                   CURSORS        : std_ulogic;  -- Button [Cursors]
                   BTN_F1         : std_ulogic;  -- Function Knob
-                  BTN_CH3        : std_ulogic;  -- Button [Channel 3]
+                  BTN_CH2        : std_ulogic;  -- Button [Channel 3]
                   BTN_PULSEWIDTH : std_ulogic;  -- Button [Pulse Width]
                   EDGE           : std_ulogic;  -- Button [Edge]
                   RUNSTOP        : std_ulogic;  -- Button [Run/Stop] Red Led
@@ -127,4 +132,55 @@ package pLedsKeys is
                   BTN_F3         : std_ulogic;  -- Button [Single] Red Led
                   SINGLE         : std_ulogic;  -- Button [Single] Green Led
                 end record;
+  
+  type aAnalogSettings is record
+                            Set           : std_ulogic;
+                            Addr          : std_ulogic_vector(cAnalogSetAddrLength-1 downto 0);
+                            CH0_K1_ON     : std_ulogic;
+                            CH0_K1_OFF    : std_ulogic;
+                            CH0_K2_ON     : std_ulogic;
+                            CH0_K2_OFF    : std_ulogic;
+                            CH0_OPA656    : std_ulogic;
+                            CH0_BW_Limit  : std_ulogic;
+                            CH0_U14       : std_ulogic;
+                            CH0_U13       : std_ulogic;
+                            CH0_DC        : std_ulogic;
+                            CH1_DC        : std_ulogic;
+                            CH2_DC        : std_ulogic;
+                            CH3_DC        : std_ulogic;
+                            CH1_K1_ON     : std_ulogic;
+                            CH1_K1_OFF    : std_ulogic;
+                            CH1_K2_ON     : std_ulogic;
+                            CH1_K2_OFF    : std_ulogic;
+                            CH1_OPA656    : std_ulogic;
+                            CH1_BW_Limit  : std_ulogic;
+                            CH1_U14       : std_ulogic;
+                            CH1_U13       : std_ulogic;
+                            CH0_src2_addr : std_ulogic_vector(1 downto 0);
+                            CH1_src2_addr : std_ulogic_vector(1 downto 0);
+                            CH2_src2_addr : std_ulogic_vector(1 downto 0);
+                            CH3_src2_addr : std_ulogic_vector(1 downto 0);
+                            CH0_Offset    : aByte;
+                            CH1_Offset    : aByte;
+                            PWM_Offset    : aByte;
+                          end record;
+  
+  type aAnalogSettingsOut is record
+                               Addr   : std_ulogic_vector(cAnalogSetAddrLength-1 downto 0);
+                               Enable : std_ulogic;
+                               Data   : std_ulogic;
+                               PWM    : std_ulogic;
+                             end record;
+  
+  component PWM is
+    generic (
+      gBitWidth : natural := 7);
+    port (
+      iClk        : in  std_ulogic;
+      iResetAsync : in  std_ulogic;
+      iRefON      : in  std_ulogic_vector(gBitWidth-1 downto 0);
+      iRefOff     : in  std_ulogic_vector(gBitWidth-1 downto 0);
+      oPWM        : out std_ulogic);
+  end component;
+  
 end;

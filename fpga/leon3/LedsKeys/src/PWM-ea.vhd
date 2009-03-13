@@ -1,9 +1,9 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : DSOConfig-p.vhd
+-- File       : PWM-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
--- Created    : 2009-03-04
+-- Created    : 2009-03-11
 -- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
@@ -31,38 +31,47 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-03-04  1.0      
+-- 2009-03-11  1.0      
 -------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package pDSOConfig is
+library DSO;
+use DSO.pDSOConfig.all;
+use DSO.Global.all;
 
-  -- DeviceAddr:
-  constant cWelec2012 : natural := 2012;
-  constant cWelec2014 : natural := 2014;
-  constant cWelec2022 : natural := 2022;
-  constant cWelec2024 : natural := 2024;
-  -- common for all minimal solutions with 1 Ch 14 Bit
-  -- and no VGA
-  constant cSandboxX  : natural := 1011;
+entity PWM is
+  generic (
+    gBitWidth : natural := 8);
+  port (
+    iClk        : in  std_ulogic;
+    iResetAsync : in  std_ulogic;
+    iRefON      : in  std_ulogic_vector(gBitWidth-1 downto 0);
+    iRefOff     : in  std_ulogic_vector(gBitWidth-1 downto 0);
+    oPWM        : out std_ulogic);
+end entity;
 
-  constant cCurrentDevice : natural := cSandboxX;  -- can be read in the SFR(0)
 
-  -- downsampler settings
-  constant cDecimationStages : natural    := 5;
-  constant cChannels         : natural    := 2;
-  constant cADCsperChannel   : natural    := 4;
-  constant cADCClkRate       : natural    := 250E6;
-  constant cDesignClkRate    : natural    := 125E6;
-  constant cCPUClkRate       : natural    := 31250E3;
-  constant cResetActive      : std_ulogic := '0';
-  constant cADCBitWidth      : natural    := 8;
-  constant cBitWidth         : natural    := 9;
-  constant cExtTriggers      : natural    := 1;
-  constant cSRAMAddrWidth    : natural    := 19;  -- DwordAddr
-  constant cFLASHAddrWidth   : natural    := 23;  -- byte address
+architecture RTL of PWM is
+  signal Counter : unsigned(gBitWidth-1 downto 0);
+begin
   
-end;
+  pPWM : process (iClk, iResetAsync)
+  begin
+    if iResetAsync = cResetActive then
+      Counter <= (others => '0');
+      oPWM    <= '0';
+    elsif rising_edge(iClk) then
+      Counter <= Counter + to_unsigned(1, gBitWidth);
+      if Counter = unsigned(iRefOn) then
+        oPWM <= '1';
+      end if;
+      if Counter = unsigned(iRefOff) then
+        oPWM <= '0';
+      end if;
+    end if;
+  end process;
+  
+end architecture;

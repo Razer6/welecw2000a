@@ -4,7 +4,7 @@
 -- File       : Trigger-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-03-08
+-- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -106,6 +106,11 @@ package pTrigger is
                            Recording          : std_ulogic;  -- for on the fly recording with e.g. PCI (SandboxX)
                            CurrentTriggerAddr : unsigned(cStorageModeLength+cTriggerAddrLength-cTriggerAlign-1 downto 0);
                          end record;
+  
+  type aExtTriggerInput is record
+                             Addr : natural range 0 to cExtTriggers;
+                             PWM  : aBytes(1 to cExtTriggers);
+                           end record;
   
   type aTriggerMemOut is record
                            Data : aDword;

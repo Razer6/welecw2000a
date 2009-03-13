@@ -4,7 +4,7 @@
 -- File       : AsyncSRAM-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-25
--- Last update: 2009-03-04
+-- Last update: 2009-03-10
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: You can initialisize this ram with a raw binary file!
@@ -115,7 +115,7 @@ architecture RTL of AsyncSRam is
 begin
   
   R : process (iAddr, inCE, inWE, inOE, inMask)
-    variable vStore : unsigned(32-1 downto 0);
+    variable vStore : signed(32-1 downto 0);
   begin
     bData <= (others => 'Z');
     if inCE = '0' then
@@ -123,10 +123,10 @@ begin
         bData <= (others => '0');
       else
         if inWE = '0' then
-          vStore := to_unsigned(Ram(to_integer(unsigned(iAddr))), 32);
+          vStore := to_signed(Ram(to_integer(unsigned(iAddr))), 32);
           for i in inMask'range loop
             if inMask(i) = '0' then
-              vStore((i+1)*8-1 downto i*8) := unsigned(bData((i+1)*8-1 downto i*8));
+              vStore((i+1)*8-1 downto i*8) := signed(bData((i+1)*8-1 downto i*8));
             end if;
           end loop;
           Ram(to_integer(unsigned(iAddr))) <= to_integer(vStore);

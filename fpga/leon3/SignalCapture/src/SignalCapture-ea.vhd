@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-04
+-- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -67,7 +67,10 @@ entity SignalCapture is
     oTriggerCPUPort : out aTriggerOutput;
     iTriggerMem     : in  aTriggerMemIn;
     oTriggerMem     : out aTriggerMemOut;
-    iExtTrigger     : in  std_ulogic
+
+    iExtTriggerSrc : in  aExtTriggerInput;
+    iExtTrigger    : in  std_ulogic;
+    oExtTriggerPWM : out std_ulogic_vector(1 to cExtTriggers)
     );
 
 end entity;
@@ -84,12 +87,13 @@ architecture RTL of SignalCapture is
   signal SelectorOutValid  : std_ulogic;
   signal SlowInputData     : aLongValues(0 to cChannels-1);
   signal SlowInputValid    : std_ulogic;
+  signal ExtTrigger        : std_ulogic;
 begin
 
   oClkDesign  <= ClkDesign;
   oResetAsync <= ResetAsync;
 
-  ADCs : entity work.ADC
+  ADCs : entity DSO.ADC
     port map (
 --    iClkDesign  : in std_ulogic;
 --      iResetAsync => iResetAsync,
@@ -118,7 +122,7 @@ begin
   SlowInputData  <= (others => (others => '0'));
   SlowInputValid <= '0';
 
-  Decimator : entity work.TopDownSampler
+  Decimator : entity DSO.TopDownSampler
     port map (
       iClk        => ClkDesign,
       iResetAsync => ResetAsync,
@@ -129,7 +133,7 @@ begin
       oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
       oValid      => DecimatorOutValid);
 
-  Selector : entity work.SignalSelector
+  Selector : entity DSO.SignalSelector
     port map (
       iClk            => ClkDesign,
       iResetAsync     => ResetAsync,
@@ -139,7 +143,16 @@ begin
       oData           => SelectorOut,   -- 8 bit values
       oValid          => SelectorOutValid);
 
-  Trigger : entity work.TopTrigger
+  ExtTriggerInput : entity DSO.ExtTriggerInput
+    port map(
+      iClk           => ClkDesign,
+      iResetAsync    => ResetAsync,
+      iExtTrigger(1) => iExtTrigger,
+      iExtTriggerSrc => iExtTriggerSrc,
+      oTrigger       => ExtTrigger,
+      oPWM           => oExtTriggerPWM);
+
+  Trigger : entity DSO.TopTrigger
     port map (
       iClk        => ClkDesign,
       iResetAsync => ResetAsync,
@@ -149,7 +162,7 @@ begin
       oTriggerMem => oTriggerMem,
       iData       => SelectorOut,
       iValid      => SelectorOutValid,
-      iExtTrigger => iExtTrigger);
+      iExtTrigger => ExtTrigger);
 
 end architecture;
 

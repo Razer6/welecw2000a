@@ -85,6 +85,10 @@ entity testbench is
 end;
 
 architecture behav of testbench is
+   signal    tck  :   std_ulogic;
+  signal  tms  :   std_ulogic;
+  signal  tdi  :   std_ulogic;
+ signal   tdo  :  std_ulogic;
   signal iRXD : std_ulogic;             --RS232 
   signal oTXD : std_ulogic;
 
@@ -400,7 +404,10 @@ begin
       clktech => clktech, disas => disas, dbguart => dbguart,
       pclow   => pclow)
     port map (
-
+      tck  => tck,
+    tms   => tms,
+    tdi   => tdi,
+    tdo   => tdo,
       --RS232
       iRXD => iRXD,                     --RS232 
       oTXD => oTXD,
@@ -515,13 +522,13 @@ begin
 --      sddqm   => sddqm(3 downto 0),     -- topmost bits are undriven
 --      sdba    => sa(14 downto 13),
 
-      sertx     => dsutx,
-      serrx     => dsurx,
-      sersrcsel => gnd,                 -- select serial DCL
+--      sertx     => dsutx,
+--      serrx     => dsurx,
+--      sersrcsel => gnd,                 -- select serial DCL
 
-      dsuen   => dsuen,
-      dsubre  => dsubre,
-      dsuactn => dsuactn
+--      dsuen   => dsuen,
+      dsubre  => dsubre
+--      dsuactn => dsuactn
 
 --      txd1    => txd1,
 --      rxd1    => rxd1,
@@ -643,28 +650,28 @@ begin
 --                 rwen(0), ramoen(0));
 --  end generate;
   
-  sram0 : entity work.AsyncSRAM
-    generic map (
-      gFileName  => "sram.bin",
-      gReverseEndian => true,
-      gAddrWidth => A_SRAM'length-2)
-    port map (
-      iAddr  => A_SRAM(A_SRAM'high downto 2),
-      bData  => bD_SRAM,
-      inCE   => oCE_SRAM,
-      inWE   => oWE_SRAM,
-      inOE   => oOE_SRAM,
-      inMask => "1111");
+--  sram0 : entity work.AsyncSRAM
+--    generic map (
+--      gFileName  => "sram.bin",
+--      gReverseEndian => true,
+--      gAddrWidth => A_SRAM'length-2)
+--    port map (
+--      iAddr  => A_SRAM(A_SRAM'high downto 2),
+--      bData  => bD_SRAM,
+--      inCE   => oCE_SRAM,
+--      inWE   => oWE_SRAM,
+--      inOE   => oOE_SRAM,
+--      inMask => "1111");
 
---  sram0 : for i in 0 to (sramwidth/8)-1 generate
---    sr0 : sram generic map (index => i, abits => A_SRAM'length-2, fname => sramfile)
---      port map (
---        a   => std_logic_vector(A_SRAM(A_SRAM'high downto 2)),
---        d   => bD_SRAM(31-i*8 downto 24-i*8),
---        ce1 => oCE_SRAM,
---        we  => oWE_SRAM,
---        oe  => oOE_SRAM);
---  end generate;
+  sram0 : for i in 0 to (sramwidth/8)-1 generate
+    sr0 : sram generic map (index => i, abits => A_SRAM'length-2, fname => sramfile)
+      port map (
+        a   => std_logic_vector(A_SRAM(A_SRAM'high downto 2)),
+        d   => bD_SRAM(31-i*8 downto 24-i*8),
+        ce1 => oCE_SRAM,
+        we  => oWE_SRAM,
+        oe  => oOE_SRAM);
+  end generate;
 
   -- phy0 : if CFG_GRETH > 0 generate
   --   p0 : phy

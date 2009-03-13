@@ -53,4 +53,5 @@ bool InitDebugprint (Debugprint * Init, Target T, Language L){
 	(*Init).ToMuchPrefetchSamples       = &En_PrintfToMuchPrefetchSamples;
 	(*Init).AnalogInputGainNotSupported = &En_PrintfAnalogInputGainNotSupported;
 	(*Init).TriggerSettingsOutofRange   = &En_PrintfTriggerSettingsOutofRange;
+	return 0;
 }

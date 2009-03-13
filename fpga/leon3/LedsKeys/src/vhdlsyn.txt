@@ -1,4 +1,5 @@
 LedsKeys-p.vhd
 StrobeGen-e.vhd
 StrobeGen-Rtl-a.vhd
+PWM-ea.vhd
 LedsKeys-ea.vhd

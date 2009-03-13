@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : LedsKeys-ea.vhd
+-- File       : LedsKeysAnalogSettings-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-04
+-- Last update: 2009-03-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -41,28 +41,37 @@ use ieee.numeric_std.all;
 library DSO;
 use DSO.pDSOConfig.all;
 use DSO.Global.all;
-use DSO.pLedsKeys.all;
+use DSO.pLedsKeysAnalogSettings.all;
 
-entity LedsKeys is
-    port (
-  iClk              : in  std_ulogic;
-  iResetAsync       : in  std_ulogic;
-  iLeds             : in  aLeds;
-  oLeds             : out aShiftOut;
-  iKeysData         : in  std_ulogic;
-  onFetchKeys       : out aShiftIn;
-  oKeys             : out aKeys;
-  oKeyInterruptLH   : out std_ulogic;
-  oKeyInterruptHL   : out std_ulogic);
+entity LedsKeysAnalogSettings is
+  port (
+    iClk            : in  std_ulogic;
+    iResetAsync     : in  std_ulogic;
+    iLeds           : in  aLeds;
+    oLeds           : out aShiftOut;
+    iKeysData       : in  std_ulogic;
+    onFetchKeys     : out aShiftIn;
+    oKeys           : out aKeys;
+    iCPUtoAnalog    : in  aAnalogSettings;
+    oAnalogSettings : out aAnalogSettingsOut);
 end entity;
 
-architecture RTL of LedsKeys is
+architecture RTL of LedsKeysAnalogSettings is
   signal Strobe, SerialClk : std_ulogic;
   signal LedShiftReg       : std_ulogic_vector(cLedShiftLength-1 downto 0);
   signal LedCounter        : natural range 0 to cLedShiftLength-1;
-  signal KeyShiftReg       : std_ulogic_vector(cKeyShiftLength-1 downto 0);
+  signal KeyShiftReg       : std_ulogic_vector(cKeyShiftLength downto 1);
   signal KeyCounter        : natural range 0 to cKeyShiftLength-1;
   signal Keys, PrevKeys    : aKeys;
+
+  type aAnalogState is record
+                         Counter   : natural range 0 to 17;
+                         Addr      : std_ulogic_vector(cAnalogSetAddrLength-1 downto 0);
+                         ShiftReg  : std_ulogic_vector(cAnalogSetShiftLength-1 downto 0);
+                         Enable    : std_ulogic;
+                       end record;
+  
+  signal AnalogSettings : aAnalogState;
   
 begin
 
@@ -73,15 +82,15 @@ begin
                                         -- avoids unstable key values
                                         -- 1 KHz probe output
     port map (
-      iClk         => iClk,
+      iClk        => iClk,
       iResetAsync => iResetAsync,
-      iResetSync   => '0',
-      oStrobe      => Strobe);
+      iResetSync  => '0',
+      oStrobe     => Strobe);
 
   pLeds : process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
-        SerialClk <= '0';
+      SerialClk   <= '0';
       LedShiftReg <= (others => '0');
       LedCounter  <= 0;
       oLeds <= (
@@ -92,34 +101,50 @@ begin
       oLeds.nOutputEnable <= cLowActive;
 
       if Strobe = '1' then
-        SerialClk                                                <= not SerialClk;
-        if SerialClk = '0' then 
-        LedCounter                                               <= (LedCounter +1) mod cLedShiftLength;  -- mod 2**n
-        LedShiftReg(LedShiftReg'left-1 downto LedShiftReg'right) <=
-          LedShiftReg(LedShiftReg'left downto LedShiftReg'right+1);
-        oLeds.Data                    <= LedShiftReg(LedShiftReg'right);
-        LedShiftReg(LedShiftReg'left) <= '-';
-        oLeds.ValidStrobe             <= '0';
+        SerialClk <= not SerialClk;
+        if SerialClk = '0' then
+          LedCounter                                               <= (LedCounter +1) mod cLedShiftLength;  -- mod 2**n
+          LedShiftReg(LedShiftReg'left-1 downto LedShiftReg'right) <=
+            LedShiftReg(LedShiftReg'left downto LedShiftReg'right+1);
+          oLeds.Data                    <= LedShiftReg(LedShiftReg'right);
+          LedShiftReg(LedShiftReg'left) <= '-';
+          oLeds.ValidStrobe             <= '0';
 
-        if LedCounter = 0 then
-          LedShiftReg <= (
-            0      => iLeds.BTN_CH4,
-            1      => iLeds.Beam1On,
-            2      => iLeds.BTN_MATH,
-            3      => iLeds.Beam2On,
-            4      => iLeds.BTN_QUICKMEAS,
-            5      => iLeds.CURSORS,
-            6      => iLeds.BTN_F1,
-            7      => iLeds.BTN_CH3,
-            8      => iLeds.BTN_PULSEWIDTH,
-            9      => iLeds.EDGE,
-            10     => iLeds.RUNSTOP,
-            11     => iLeds.BTN_F2,
-            12     => iLeds.BTN_F3,
-            13     => iLeds.SINGLE,
-            others => '0');
-          oLeds.ValidStrobe <= '1';
-        end if;
+          if LedCounter = 0 then
+            LedShiftReg <= (
+              0      => iLeds.BTN_CH3,
+              1      => iLeds.Beam1On,
+              2      => iLeds.BTN_MATH,
+              3      => iLeds.Beam2On,
+              4      => iLeds.BTN_QUICKMEAS,
+              5      => iLeds.CURSORS,
+              6      => iLeds.BTN_F1,
+              7      => iLeds.BTN_CH2,
+              8      => iLeds.BTN_PULSEWIDTH,
+              9      => iLeds.EDGE,
+              10     => iLeds.RUNSTOP,
+              11     => iLeds.BTN_F2,
+              12     => iLeds.BTN_F3,
+              13     => iLeds.SINGLE,
+              others => '0');
+--           LedShiftReg <= (
+--            0      => iLeds.BTN_CH3,
+--            1      => iLeds.BTN_CH0,
+--            2      => iLeds.BTN_MATH,
+--            3      => iLeds.BTN_CH1,
+--            4      => iLeds.BTN_QUICKMEAS,
+--            5      => iLeds.CURSORS,
+--            6      => iLeds.BTN_F1,
+--            7      => iLeds.BTN_CH2,
+--            8      => iLeds.BTN_PULSEWIDTH,
+--            9      => iLeds.EDGE,
+--            10     => iLeds.RUNSTOP,
+--            11     => iLeds.BTN_F2,
+--            12     => iLeds.BTN_F3,
+--            13     => iLeds.SINGLE,
+--            others => '0');
+            oLeds.ValidStrobe <= '1';
+          end if;
         end if;
       end if;
     end if;
@@ -129,21 +154,17 @@ begin
   pKeys : process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
-      KeyShiftReg       <= (others => '0');
-      KeyCounter        <= 0;
+      KeyShiftReg <= (others => '0');
+      KeyCounter  <= 0;
       onFetchKeys <= (
-      nFetchStrobe => cHighInactive,
-      nChipEnable => cHighInactive);
-      Keys              <= (others => '0');
-      PrevKeys          <= (others => '0');
-      oKeyInterruptLH   <= '0';
-      oKeyInterruptHL   <= '0';
+        nFetchStrobe => cHighInactive,
+        nChipEnable  => cHighInactive);
+      Keys     <= (others => '0');
+      PrevKeys <= (others => '0');
       
     elsif rising_edge(iClk) then
-    onFetchKeys.nChipEnable <= cLowActive;
-    onFetchKeys.nFetchStrobe <= cHighInactive;
-      oKeyInterruptLH   <= '0';
-      oKeyInterruptHL   <= '0';
+      onFetchKeys.nChipEnable  <= cLowActive;
+      onFetchKeys.nFetchStrobe <= cHighInactive;
 
       if Strobe = '1' and SerialClk = '1' then
         onFetchKeys.nFetchStrobe <= cHighInactive;
@@ -158,70 +179,156 @@ begin
         
         if KeyCounter = 0 then
           onFetchKeys.nFetchStrobe <= cLowActive;
-          PrevKeys          <= Keys;
-          if Keys /= PrevKeys then
-            oKeyInterruptLH <= '1';
-       --   elsif Keys < PrevKeys then
-            oKeyInterruptHL <= '1';
-          else
-            null;
-          end if;
+          PrevKeys                 <= Keys;
+          
           Keys <= (
-            BTN_F1           => KeyShiftReg(15),
-            BTN_F2           => KeyShiftReg(16),
-            BTN_F3           => KeyShiftReg(17),
-            BTN_F4           => KeyShiftReg(18),
-            BTN_F5           => KeyShiftReg(12),
-            BTN_F6           => KeyShiftReg(14),
-            BTN_MATH         => KeyShiftReg(0),
-            BTN_CH1          => KeyShiftReg(13),
-            BTN_CH2          => KeyShiftReg(11),
+            BTN_F1           => KeyShiftReg(19),
+            BTN_F2           => KeyShiftReg(20),
+            BTN_F3           => KeyShiftReg(21),
+            BTN_F4           => KeyShiftReg(22),
+            BTN_F5           => KeyShiftReg(16),
+            BTN_F6           => KeyShiftReg(18),
+            BTN_MATH         => KeyShiftReg(1),
+            BTN_CH0          => KeyShiftReg(17),
+            BTN_CH1          => KeyShiftReg(15),
+            BTN_CH2          => KeyShiftReg(3),
             BTN_CH3          => KeyShiftReg(2),
-            BTN_CH4          => KeyShiftReg(1),
-            BTN_MAINDEL      => KeyShiftReg(35),
-            BTN_RUNSTOP      => KeyShiftReg(40),
-            BTN_SINGLE       => KeyShiftReg(39),
-            BTN_CURSORS      => KeyShiftReg(28),
-            BTN_QUICKMEAS    => KeyShiftReg(33),
-            BTN_ACQUIRE      => KeyShiftReg(32),
-            BTN_DISPLAY      => KeyShiftReg(30),
-            BTN_EDGE         => KeyShiftReg(38),
-            BTN_MODECOUPLING => KeyShiftReg(36),
-            BTN_AUTOSCALE    => KeyShiftReg(27),
-            BTN_SAVERECALL   => KeyShiftReg(34),
-            BTN_QUICKPRINT   => KeyShiftReg(31),
-            BTN_UTILITY      => KeyShiftReg(29),
-            BTN_PULSEWIDTH   => KeyShiftReg(42),
-            BTN_X1           => KeyShiftReg(37),
-            BTN_X2           => KeyShiftReg(41),
-            ENCI_TIME_DIV    => KeyShiftReg(44),
-            ENCD_TIME_DIV    => KeyShiftReg(43),
-            ENCI_F           => KeyShiftReg(46),
-            ENCD_F           => KeyShiftReg(45),
-            ENCI_LEFT_RIGHT  => KeyShiftReg(50),
-            ENCD_LEFT_RIGHT  => KeyShiftReg(49),
-            ENCI_LEVEL       => KeyShiftReg(48),
-            ENCD_LEVEL       => KeyShiftReg(47),
-            ENCI_CH1_UPDN    => KeyShiftReg(20),
-            ENCD_CH1_UPDN    => KeyShiftReg(19),
-            ENCI_CH2_UPDN    => KeyShiftReg(26),
-            ENCD_CH2_UPDN    => KeyShiftReg(25),
-            ENCI_CH3_UPDN    => KeyShiftReg(4),
-            ENCD_CH3_UPDN    => KeyShiftReg(3),
-            ENCI_CH4_UPDN    => KeyShiftReg(10),
-            ENCD_CH4_UPDN    => KeyShiftReg(9),
-            ENCI_CH1_VDIV    => KeyShiftReg(22),
-            ENCD_CH1_VDIV    => KeyShiftReg(21),
-            ENCI_CH2_VDIV    => KeyShiftReg(24),
-            ENCD_CH2_VDIV    => KeyShiftReg(23),
-            ENCI_CH3_VDIV    => KeyShiftReg(6),
-            ENCD_CH3_VDIV    => KeyShiftReg(5),
-            ENCI_CH4_VDIV    => KeyShiftReg(8),
-            ENCD_CH4_VDIV    => KeyShiftReg(7));
+            BTN_MAINDEL      => KeyShiftReg(39),
+            BTN_RUNSTOP      => KeyShiftReg(44),
+            BTN_SINGLE       => KeyShiftReg(43),
+            BTN_CURSORS      => KeyShiftReg(32),
+            BTN_QUICKMEAS    => KeyShiftReg(37),
+            BTN_ACQUIRE      => KeyShiftReg(36),
+            BTN_DISPLAY      => KeyShiftReg(34),
+            BTN_EDGE         => KeyShiftReg(42),
+            BTN_MODECOUPLING => KeyShiftReg(40),
+            BTN_AUTOSCALE    => KeyShiftReg(31),
+            BTN_SAVERECALL   => KeyShiftReg(38),
+            BTN_QUICKPRINT   => KeyShiftReg(35),
+            BTN_UTILITY      => KeyShiftReg(33),
+            BTN_PULSEWIDTH   => KeyShiftReg(46),
+            BTN_X1           => KeyShiftReg(41),
+            BTN_X2           => KeyShiftReg(45),
+            ENX_TIME_DIV     => KeyShiftReg(48),
+            ENY_TIME_DIV     => KeyShiftReg(47),
+            ENX_F            => KeyShiftReg(50),
+            ENY_F            => KeyShiftReg(49),
+            ENX_LEFT_RIGHT   => KeyShiftReg(54),
+            ENY_LEFT_RIGHT   => KeyShiftReg(53),
+            ENX_LEVEL        => KeyShiftReg(52),
+            ENY_LEVEL        => KeyShiftReg(51),
+            ENX_CH0_UPDN     => KeyShiftReg(24),
+            ENY_CH0_UPDN     => KeyShiftReg(23),
+            ENX_CH1_UPDN     => KeyShiftReg(30),
+            ENY_CH1_UPDN     => KeyShiftReg(29),
+            ENX_CH2_UPDN     => KeyShiftReg(8),
+            ENY_CH2_UPDN     => KeyShiftReg(7),
+            ENX_CH3_UPDN     => KeyShiftReg(14),
+            ENY_CH3_UPDN     => KeyShiftReg(13),
+            ENX_CH0_VDIV     => KeyShiftReg(26),
+            ENY_CH0_VDIV     => KeyShiftReg(25),
+            ENX_CH1_VDIV     => KeyShiftReg(28),
+            ENY_CH1_VDIV     => KeyShiftReg(27),
+            ENX_CH2_VDIV     => KeyShiftReg(10),
+            ENY_CH2_VDIV     => KeyShiftReg(9),
+            ENX_CH3_VDIV     => KeyShiftReg(12),
+            ENY_CH3_VDIV     => KeyShiftReg(11));
         end if;
       end if;
     end if;
   end process;
+
+  pAnalogSettings : process (iClk, iResetAsync)
+  begin
+    if iResetAsync = cResetActive then
+      AnalogSettings <= (
+        Counter  => 0,
+        ShiftReg => (others => '0'),
+        Addr     => (others => '0'),
+        Enable   => '0');
+    elsif rising_edge(iClk) then
+      if iCPUtoAnalog.Set = '1' then
+        AnalogSettings.Counter <= cAnalogSetShiftLength+1;
+        AnalogSettings.Addr    <= iCPUtoAnalog.Addr;
+        case iCPUtoAnalog.Addr is
+          when O"0" => AnalogSettings.ShiftReg <= (others => '0');
+          when O"1" => AnalogSettings.ShiftReg <= (others => '0');
+          when O"2" => AnalogSettings.ShiftReg <= (others => '0');
+          when O"3" => AnalogSettings.ShiftReg <= (others => '0');
+          when O"4" => AnalogSettings.ShiftReg <= (others => '0');
+          when O"5" =>
+            AnalogSettings.ShiftReg <= (
+              0  => iCPUtoAnalog.CH1_K1_ON,
+              1  => iCPUtoAnalog.CH1_K1_OFF,
+              2  => iCPUtoAnalog.CH1_K2_ON,
+              3  => iCPUtoAnalog.CH1_K2_OFF,
+              4  => iCPUtoAnalog.CH1_OPA656,
+              5  => iCPUtoAnalog.CH1_BW_Limit,
+              6  => iCPUtoAnalog.CH1_U14,
+              7  => iCPUtoAnalog.CH1_U13,
+              8  => iCPUtoAnalog.CH0_src2_addr(0),
+              9  => iCPUtoAnalog.CH0_src2_addr(1),
+              10 => iCPUtoAnalog.CH1_src2_addr(0),
+              11 => iCPUtoAnalog.CH1_src2_addr(1),
+              12 => iCPUtoAnalog.CH2_src2_addr(0),
+              13 => iCPUtoAnalog.CH2_src2_addr(1),
+              14 => iCPUtoAnalog.CH3_src2_addr(0),
+              15 => iCPUtoAnalog.CH3_src2_addr(1));
+          when O"6" =>
+              for i in 0 to 7 loop
+               AnalogSettings.ShiftReg(i) <= iCPUtoAnalog.CH0_Offset(i);
+               AnalogSettings.ShiftReg(i+8) <= iCPUtoAnalog.CH1_Offset(i);
+          end loop;
+          when O"7" =>
+            AnalogSettings.ShiftReg <= (
+              0      => iCPUtoAnalog.CH0_K1_ON,
+              1      => iCPUtoAnalog.CH0_K1_OFF,
+              2      => iCPUtoAnalog.CH0_K2_ON,
+              3      => iCPUtoAnalog.CH0_K2_OFF,
+              4      => iCPUtoAnalog.CH0_OPA656,
+              5      => iCPUtoAnalog.CH0_BW_Limit,
+              6      => iCPUtoAnalog.CH0_U14,
+              7      => iCPUtoAnalog.CH0_U13,
+              8      => iCPUtoAnalog.CH0_DC,
+              9      => iCPUtoAnalog.CH1_DC,
+              10     => iCPUtoAnalog.CH2_DC,
+              11     => iCPUtoAnalog.CH3_DC,
+              others => '0');
+          when others => AnalogSettings.ShiftReg <= (others => 'X');
+        end case;
+      end if;
+
+      AnalogSettings.Enable <= '0';
+      -- after all data was shifted into the regs, the strobe must be active
+      -- only for one cycle!
+      if Strobe = '1' and SerialClk = '1' then
+        if AnalogSettings.Counter = 0 then
+          AnalogSettings.Enable <= '0';
+        elsif AnalogSettings.Counter = 1 then
+          AnalogSettings.Enable  <= '1';
+          AnalogSettings.Counter <= AnalogSettings.Counter -1;
+        else
+          AnalogSettings.Counter           <= AnalogSettings.Counter -1;
+          AnalogSettings.ShiftReg(14 downto 0) <= AnalogSettings.ShiftReg(15 downto 1);
+        end if;
+      end if;
+      
+    end if;
+  end process;
+
+  oAnalogSettings.Addr <= AnalogSettings.Addr;
+ oAnalogSettings.Enable <= AnalogSettings.Enable;
+ oAnalogSettings.Data <= AnalogSettings.ShiftReg(0);
+
+  pPWM : entity DSO.PWM
+    generic map (
+      gBitWidth => iCPUtoAnalog.PWM_Offset'length)
+    port map (
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iRefON      => iCPUtoAnalog.PWM_Offset,
+      iRefOff     => (others => '0'),
+      oPWM        => oAnalogSettings.PWM);
 
 
 end architecture;

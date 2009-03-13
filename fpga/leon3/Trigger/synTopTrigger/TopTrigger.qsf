@@ -41,4 +41,3 @@ set_global_assignment -name VHDL_FILE "../Trigger-p.vhd"
 set_global_assignment -name VHDL_FILE "../ExternalTrigger-ea.vhd"
 set_global_assignment -name VHDL_FILE "../NormalTrigger-ea.vhd"
 set_global_assignment -name VHDL_FILE "../TopTrigger-ea.vhd"
-set_global_assignment -name QIP_FILE ../../Altera/TriggerMemory.qip
