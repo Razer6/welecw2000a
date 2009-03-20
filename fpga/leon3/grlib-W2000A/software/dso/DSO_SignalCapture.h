@@ -41,7 +41,7 @@ bool SetTriggerInput (	const unsigned int noChannels,
 
 
 
-// reference time in samples
+/* reference time in samples*/
 bool SetTrigger(const unsigned int Trigger, 
 		const unsigned int TriggerChannel,
 		const unsigned int TriggerPrefetchSamples,
@@ -54,12 +54,12 @@ bool SetTrigger(const unsigned int Trigger,
 bool SetAnalogInputRange(const unsigned int NoCh, 
 			 const SetAnalog * Settings);
 
-// returns read DWORDS
-unsigned int CaptureData(const unsigned int WaitTime, // just a integer 
-			const unsigned int Start,
-			unsigned int CaptureSize,    // size in DWORDs
+/* returns read DWORDS*/
+unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
+			const bool Start,
+			unsigned int CaptureSize,    /* size in DWORDs*/
 			unsigned int * RawData,
-			unsigned int FrameSize, // set it to something from 100 to 1000
+			unsigned int FrameSize, /* set it to something from 100 to 1000*/
 			const unsigned int SamplingFrequncy,
 			const unsigned int CPUFrequency); 
 

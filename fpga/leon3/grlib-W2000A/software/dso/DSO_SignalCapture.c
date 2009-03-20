@@ -43,7 +43,7 @@ bool SetTriggerInput (	const unsigned int noChannels,
 	int M = 0;
 
 	if ((Ch0 > 3) || (Ch1 > 3) || (Ch2 > 3) || (Ch3 > 3)) {
-//		Print.ChannelsNotSupported();
+/*		Print.ChannelsNotSupported();*/
 		return false;
 	}
 
@@ -105,7 +105,7 @@ bool SetTriggerInput (	const unsigned int noChannels,
 					CaptureR->InputCh3Addr = Ch3;
 					break;
 				default : 
-				//	Print.NotAvialbe();
+				/*	Print.NotAvialbe();*/
 					return false;
 			       break;
 			}
@@ -128,20 +128,20 @@ bool SetTriggerInput (	const unsigned int noChannels,
 					CaptureR->InputCh3Addr = Ch1+4;
 					break;
 				default : 
-				//	Print.NotAvialbe();
+				/*	Print.NotAvialbe();*/
 					return false;
 			       break;
 			}
 			break;
 		default : 
-		//	Print.NotAvialbe();
+		/*	Print.NotAvialbe();*/
 			return false;
 			break;
 	}
 	return true;
 }
 
-// reference time in samples
+/* reference time in samples*/
 bool SetTrigger(const unsigned int Trigger, 
 		const unsigned int TriggerChannel,
 		const unsigned int TriggerPrefetchSamples,
@@ -151,11 +151,11 @@ bool SetTrigger(const unsigned int Trigger,
 		const unsigned int HighReferenceTime) 
 {
 	if (TriggerChannel > 3) {
-	//	Print.ChannelsNotSupported();
+	/*	Print.ChannelsNotSupported();*/
 		return false;
 	}
 	if (TriggerPrefetchSamples >= (TRIGGER_MEM_SIZE-16)){
-	//	Print.ToMuchPrefetchSamples();
+	/*	Print.ToMuchPrefetchSamples();*/
 		return false;
 	}
 	TriggerR->TriggerLowValueAddr  = LowReference;
@@ -168,7 +168,7 @@ bool SetTrigger(const unsigned int Trigger,
 	(loadmem((int)&TriggerR->TriggerHighValueAddr) != HighReference)    ||
 	(loadmem((int)&TriggerR->TriggerHighTimeAddr)  != HighReferenceTime))
 	{
-	//	Print.TriggerSettingsOutofRange();
+	/*	Print.TriggerSettingsOutofRange();*/
 		return false;
 	}
     return true;
@@ -178,13 +178,13 @@ bool SetTrigger(const unsigned int Trigger,
 bool SetAnalogInputRange(const unsigned int NoCh, 
 			 const SetAnalog * Settings) 
 {
-// TODO must be implemented for each target in HW before this can be used!
-//	CaptureR->InputCh0Gain = 0;       
-//	CaptureR->InputCh1Gain = 0;      
-//	CaptureR->InputCh2Gain = 0;        
-//	CaptureR->InputCh3Gain = 0;
-//	Print.AnalogInputGainNotSupported();
-//	
+/* TODO must be implemented for each target in HW before this can be used!*/
+/*	CaptureR->InputCh0Gain = 0;       */
+/*	CaptureR->InputCh1Gain = 0;      */
+/*	CaptureR->InputCh2Gain = 0;        */
+/*	CaptureR->InputCh3Gain = 0;*/
+/*	Print.AnalogInputGainNotSupported();*/
+/*	*/
 	unsigned int i = 0;
 	unsigned int temp = 0;
 	unsigned int j = 0;
@@ -216,11 +216,11 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 							temp |= (1 << (CH0_DC+j));
 						}
 					}
-					// send the configuration to the hardware
+					/* send the configuration to the hardware*/
 					AnalogR->Bank7 = temp;
-					// wait until the coils have switched
+					/* wait until the coils have switched*/
 					WaitMs(COIL_SWITCH_TIME);
-					temp &= ~(0xf); // turn of the coils
+					temp &= ~(0xf); /* turn of the coils*/
 					AnalogR->Bank7 = temp;
 				}
 				if (i == 1) {
@@ -243,11 +243,11 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 								break;
 						}
 					}
-					// send the configuration to the hardware
+					/* send the configuration to the hardware*/
 					AnalogR->Bank5 = temp;
-					// wait until the coils have switched
+					/* wait until the coils have switched*/
 					WaitMs(COIL_SWITCH_TIME);
-					temp &= ~(0xf); // turn of the coils
+					temp &= ~(0xf); /* turn of the coils*/
 					AnalogR->Bank5 = temp;
 				}
 				break;
@@ -259,8 +259,8 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 	return true;
 }
 
-int FastCapture(const unsigned int WaitTime, // just a integer 
-		unsigned int CaptureSize,    // size in DWORDs
+int FastCapture(const unsigned int WaitTime, /* just a integer */
+		unsigned int CaptureSize,    /* size in DWORDs*/
 		unsigned int * RawData) 
 {
 	unsigned int i = 0;
@@ -268,13 +268,13 @@ int FastCapture(const unsigned int WaitTime, // just a integer
 	volatile int * Addr = 0;
 	TriggerR->TriggerOnceAddr = 0;
 	TriggerR->TriggerOnceAddr = 1;
-	//while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){
-	//	i = i + 1;
-	//	if (WaitTime > i) {
-	//		return 0;
-	//	}
-	//	
-	//}// busy wait
+	/*while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){*/
+	/*	i = i + 1;*/
+	/*	if (WaitTime > i) {*/
+	/*		return 0;*/
+	/*	}*/
+	/*	*/
+	/*} busy wait*/
 	while(1){
 		i++;
 		if (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) != 0){
@@ -286,9 +286,9 @@ int FastCapture(const unsigned int WaitTime, // just a integer
 	}
 	StartAddr = (int *)(TRIGGER_MEM_BASE_ADDR + loadmem((int)&TriggerR->TriggerReadOffSetAddr));
 
-	// The folowing 5 lines solve a feature (bug) in the hardware trigger, 
-	// which is overwriting the first 16 samples at the end!
-	//while(((int)StartAddr + 8*3) < TriggerR->TriggerCurrentAddr);
+	/* The folowing 5 lines solve a feature (bug) in the hardware trigger, */
+	/* which is overwriting the first 16 samples at the end!*/
+	/*while(((int)StartAddr + 8*3) < TriggerR->TriggerCurrentAddr);*/
 	while(1){
 		if (((int)StartAddr + 8*3) < loadmem((int)&TriggerR->TriggerCurrentAddr)){
 			break;
@@ -296,10 +296,10 @@ int FastCapture(const unsigned int WaitTime, // just a integer
 	}
 /*	StartAddr--;
 	StartAddr--;
-	TriggerR->TriggerReadOffSetAddr = (int)StartAddr; // masking is done by the SFR itself!
+	TriggerR->TriggerReadOffSetAddr = (int)StartAddr;  masking is done by the SFR itself!
 	StartAddr++;
 */
-	//while(((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) != 0);
+	/*while(((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) != 0);*/
 	while(1){
 		if (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) == 0){
 			break;
@@ -319,16 +319,16 @@ int FastCapture(const unsigned int WaitTime, // just a integer
 	return i;
 }
 
-// returns read DWORDS
-unsigned int CaptureData(const unsigned int WaitTime, // just a integer 
+/* returns read DWORDS*/
+unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
 			 const bool Start,
-			 unsigned int CaptureSize,    // size in DWORDs
+			 unsigned int CaptureSize,    /* size in DWORDs*/
 			 unsigned int * RawData,
 			 unsigned int FrameSize,
 		         const unsigned int SamplingFrequency,
 			 const unsigned int CPUFrequency) 
 {
-	// TODO Idle wait
+	/* TODO Idle wait*/
 	const int FMode = FastMode(SamplingFrequency,CPUFrequency);
 	unsigned int i = 0;
 	unsigned int StartAddr = 0;
@@ -351,27 +351,27 @@ unsigned int CaptureData(const unsigned int WaitTime, // just a integer
 			if (WaitTime > i) {
 				return 0;
 			}
-		}// busy wait
+		}/* busy wait*/
 	}
 	i = 0;
 	StartAddr = (TriggerR->TriggerReadOffSetAddr);
 	Addr = (int *)TRIGGER_MEM_BASE_ADDR + StartAddr;
-	// abort if the trigger 
+	/* abort if the trigger */
 	while (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) != 0){
-//	while(i < CaptureSize) {
+/*	while(i < CaptureSize) {*/
 		if (i == CaptureSize) {
 			return i;
 		}
 		ForwardStartAddr = (int)TriggerR->TriggerCurrentAddr;
 		ForwardStartAddr = ForwardStartAddr - (int)Addr - FrameSize;
         	ForwardStartAddr &= (TRIGGER_MEM_SIZE-1);
-	//	if (ForwardStartAddr > (TRIGGER_MEM_SIZE/2)) {
+	/*	if (ForwardStartAddr > (TRIGGER_MEM_SIZE/2)) {*/
 		if (ForwardStartAddr > 0) {
 			StartAddr = StartAddr + FrameSize;
 			TriggerR->TriggerReadOffSetAddr = StartAddr;
 		} else {
-			// here the race condition gets active if the ratio of 
-			// FastMode is wrong!
+			/* here the race condition gets active if the ratio of */
+			/* FastMode is wrong!*/
 			continue;
 		}
 		Frame = Frame + FrameSize; 

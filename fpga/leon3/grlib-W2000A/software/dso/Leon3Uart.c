@@ -24,22 +24,13 @@
 #define OVERRUN      0x10 
 #define TX_FULL      0x200
 
-typedef struct  
-{
-   volatile int data;
-   volatile int status;
-   volatile int control;
-   volatile int scaler;
-} uart_regs;
-
-
 bool UartInit(	const unsigned int CPUFreq,
 		const unsigned int BaudRate,
 		const unsigned int Control,
 		uart_regs * uart) {
 
-//	if you do this outside, more uarts can be used with this file
-//	uart = (uart_regs *)GENERIC_UART_BASE_ADDR;
+/*	if you do this outside, more uarts can be used with this file*/
+/*	uart = (uart_regs *)GENERIC_UART_BASE_ADDR;*/
 	if ((BaudRate < 10) || (CPUFreq < 1000000) || (BaudRate > CPUFreq*8)) {
 		return false;
 	}
@@ -58,7 +49,7 @@ void SendCharBlock(uart_regs * uart, char c) {
 	uart->data = c;
 }
 
-// interrupts if the rx buffer is empty!
+/* interrupts if the rx buffer is empty!*/
 void ReceiveString (uart_regs * uart, char * c, unsigned int * size) {
 	unsigned int rsize = 0;
 	while ((loadmem((int)&uart->status) & RX_DATAREADY) != 0 && (rsize < (*size))){
@@ -71,7 +62,7 @@ void ReceiveString (uart_regs * uart, char * c, unsigned int * size) {
 void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size) {
 	unsigned int rsize = 0;
 	while  (rsize < (*size)){
-		c[rsize] = ReceiveCharBlock();
+		c[rsize] = ReceiveCharBlock(uart);
 		rsize++;
 	}
 }
@@ -80,12 +71,12 @@ void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size) {
 void SendStringBlock (uart_regs * uart, char * c, unsigned int * size) {
 	unsigned int i = 0;
 	while (i < (*size)){
-		SendCharBlock(c[i]);
+		SendCharBlock(uart,c[i]);
 		i++;
 	}
 }
 
-// interrupts if the tx buffer is full!
+/* interrupts if the tx buffer is full!*/
 void SendString (uart_regs * uart, char * c, unsigned int * size) {
 	unsigned int i = 0;
 	while (((loadmem((int)&uart->status) & TX_FULL) != 0) && (i < (*size))){

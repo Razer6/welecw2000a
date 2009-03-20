@@ -1,178 +1,96 @@
 
-
-#include "DSO_Main.h"
-#include "DSO_Misc.h"
-#include "DSO_SignalCapture.h"
-#include "Leon3Uart.h"
 #include "DSO_Remote.h"
 
-int * buffer;
-unsigned int buffer_size;
-uart_regs * uart;
 
-bool GetTask();
-void SendNAK();
-void SendACK();
-void SendHeader();
-bool SendData(int datasize);
-bool GetHeader();
-int  GetInt();
-void SendInt();
-
-
-void RemoteSlave(	uart_regs * comm_uart,
-			const unsigned int DataSize,
-			int *Data) {
-	buffer = Data;
-	buffer_size = DataSize;
-	uart = comm_uart;
-	while(GetHeader()){
-		GetTask();		
-	}
-}
-
-bool GetTask() {
-	unsigned int i = 0;
-	SetAnalog Analog[4];
-	unsigned int s = GetInt();
-	static unsigned int SamplingFrequency = 10000;
-	int * addr;
-	int data;
-	unsigned int size;
-
-	switch (s) {
-		case SET_TRIGGER_INPUT:
-			{
-				unsigned int noCh = GetInt();
-				unsigned int SamplingSize = GetInt();
-				SamplingFrequency = GetInt();			
-				if(SetTriggerInput(	noCh, SamplingSize, SamplingFrequency,
-							GetInt(),GetInt(),GetInt(),
-							GetInt(),GetInt(),GetInt(),
-							GetInt())){
-					SendACK();
-				} else {
-					SendNAK();
-					return false;
-				}
-			}
-			break;
-
-		case  SET_ANALOG_INPUT:
-			s = GetInt();
-			if (s > 3) {
-				SendNAK();
-				return false;
-			}
-			for (i = 0; i < s; ++i){
-				Analog[i].myVperDiv  = GetInt();
-				Analog[i].AC         = GetInt();
-				Analog[i].DA_Offset  = GetInt();
-				Analog[i].PWM_Offset = GetInt();
-			}
-			if(SetAnalogInputRange(s, Analog)){
-				SendACK();
-			} else {
-				SendNAK();
-				return false;
-			}
-			break;
-
-		case SET_TRIGGER:
-			if (SetTrigger(	GetInt(), GetInt(), GetInt(), GetInt(), GetInt(),
-					GetInt(), GetInt())) {
-				SendACK();
-			} else {
-				SendNAK();
-				return false;
-			}
-			break;
-		case CAPTURE_DATA:
-			{
-				unsigned int WaitTime = GetInt();
-				unsigned int Start = GetInt();
-				unsigned int Csize = GetInt();
-				if (Csize > buffer_size){
-					Csize = buffer_size;
-				}
-				if(s = CaptureData(WaitTime,Start,Csize,buffer,
-						512,FIXED_CPU_FREQUENCY, SamplingFrequency)){
-					return SendData(s, buffer);
-				} else {
-					SendNAK();
-					return false;
-				}
-			}
-			break;
-
-		case STORE_DWORDS:
-			addr = (int *)GetInt();
-			size = GetInt();
-			if (size > buffer_size){
-				SendNAK();
-				return false;
-			}
-			for  (i = 0; i < size; ++i){
-				addr[i] = GetInt();
-			}
-			SendACK();
-			break;
-
-		case LOAD_DWORDS:
-			addr = (int *)GetInt();
-			size = (int *)GetInt();
-			if (size > buffer_size){
-				SendNAK();
-				return false;
-			}
-			for (i = 0; i < size; ++i){
-				buffer[i] = addr[i];
-			}
-			SendData(size, buffer);
-			break;
-				
-		default:
-			SendNAK();
-			return false;
-			break;
-	}
-	return true;
-}
-
-void SendNAK() {
+void SendNAK(uart_regs * uart) {
 	char Res[] = DSO_NAK_RESP;
-	SendHeader();
 	int size = strlen(Res);
+	SendHeader(uart);
 	SendStringBlock(uart, Res, &size);
 }
 
-void SendACK() {
+void SendACK(uart_regs * uart) {
 	char Res[] = DSO_ACK_RESP;
-	SendHeader();
 	int size = strlen(Res);
+	SendHeader(uart);
 	SendStringBlock(uart, Res, &size);
 }
 
-void SendHeader() {
+void SendHeader(uart_regs * uart) {
 	int size = 0;
-	char Header[] = DSO_SLAVE_HEADER;
+	char Header[] = DSO_SEND_HEADER;
 	size = strlen(Header);
 	SendStringBlock(uart,Header,&size);
 }
 
-bool SendData(int datasize, int * data) {
-	int size = 0;
-	char DataH[] = "Data ";
+bool ReceiveHeader(uart_regs * uart){
+	char Header[] = DSO_REC_HEADER;
+	int size = strlen(Header);
 	int i = 0;
-	size = strlen(DataH);
-	SendStringBlock(uart,DataH,&size);
-	SendInt(datasize);
-	for (i = 0; i < datasize; ++i) {
-		SendInt(data[i]);
+	for (i = 0; i < size; ++i){
+		if (Header[i] != ReceiveCharBlock(uart)){
+		       return false;
+		}
 	}
+	return true;
 }
 
-bool GetHeader() {
+bool SendData(uart_regs * uart, int datasize, int * data) {
+	int size = 0;
+	char DataH[] = DSO_DATA_RESP;
+	int i = 0;
+	size = strlen(DataH);
+	SendHeader(uart);
+	SendStringBlock(uart,DataH,&size);
+	SendInt(uart, 0); /* FastMode */
+	SendInt(uart, datasize);
+	for (i = 0; i < datasize; ++i) {
+		SendInt(uart, data[i]);
+	}
+	return true;
+}
+
+int ReceiveData(uart_regs * uart, int buffersize, int * FastMode, int * data) {
+	int size = 0;
+	int i = 0;
+	char DataH[] = DSO_DATA_RESP;
+	size = strlen(DataH);
+	if (!ReceiveHeader(uart)){
+		return 0;
+	}
+	for (i = 0; i < size; ++i){
+		if (DataH[i] /= ReceiveCharBlock(uart)){
+		       return 0;
+		}
+	}
+	*FastMode = GetInt(uart);
+	size = GetInt(uart);
+	if (size > buffersize) {
+		size = buffersize;
+	}
+	for (i = 0; i < size; ++i){
+		data[i] = GetInt(uart);
+	}
+	return size;
+}
+
+bool ReceiveACK(uart_regs * uart){
+	int size = 0;
+	int i = 0;
+	char DataH[] = DSO_ACK_RESP;
+	size = strlen(DataH);
+	if (!ReceiveHeader(uart)){
+		return false;
+	}
+	for (i = 0; i < size; ++i){
+		if (DataH[i] /= ReceiveCharBlock(uart)){
+		       return false;
+		}
+	}
+	return true;
+}
+
+bool GetHeader(uart_regs * uart) {
 	const char RefHeader[] = DSO_MASTER_HEADER;
 	int size = strlen(RefHeader);
 	int i = 0;
@@ -192,9 +110,8 @@ bool GetHeader() {
 	return true;
 }
 
-int GetInt() {
+int GetInt(uart_regs * uart) {
  	int data = 0;
-	char byte = 0;
 	int i = 0;
 	for (i = 0; i < 4; ++i){
 		data |= (ReceiveCharBlock(uart) << (i*8));
@@ -202,7 +119,7 @@ int GetInt() {
 	return data;
 }
 
-void SendInt(int data) {
+void SendInt(uart_regs * uart, int data) {
 	int i = 0;
 	for (i = 0; i < 4; ++i){
 		SendCharBlock(uart,(char)data);

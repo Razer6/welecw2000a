@@ -71,7 +71,7 @@ begin
     end if;
   end process;
 
-  process (Sources, Toggle)
+  process (iExtTrigger, Toggle)
   begin
     Sources(0) <= Toggle;
     for i in 1 to cExtTriggers loop

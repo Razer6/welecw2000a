@@ -1,7 +1,7 @@
 #ifndef DSO_SFR_H
 #define DSO_SFR_H
 #include "DSO_Main.h"
-// TODO make this doxygen conform
+/* TODO make this doxygen conform*/
 
 #define DEVICEADDR               (DSO_SFR_BASE_ADDR+ 4*0)
 #define INTERRUPTADDR            (DSO_SFR_BASE_ADDR+ 4*1)
@@ -12,10 +12,10 @@
 #define INPUTCH1ADDR             (DSO_SFR_BASE_ADDR+ 4*9)
 #define INPUTCH2ADDR             (DSO_SFR_BASE_ADDR+ 4*10)
 #define INPUTCH3ADDR             (DSO_SFR_BASE_ADDR+ 4*11)
-//#define INPUTCH0GAINADDR         (DSO_SFR_BASE_ADDR+ 4*12)
-//#define INPUTCH0GAINADDR         (DSO_SFR_BASE_ADDR+ 4*13)
-//#define INPUTCH1GAINADDR         (DSO_SFR_BASE_ADDR+ 4*14)
-//#define INPUTCH2GAINADDR         (DSO_SFR_BASE_ADDR+ 4*15)
+/*#define INPUTCH0GAINADDR         (DSO_SFR_BASE_ADDR+ 4*12)*/
+/*#define INPUTCH0GAINADDR         (DSO_SFR_BASE_ADDR+ 4*13)*/
+/*#define INPUTCH1GAINADDR         (DSO_SFR_BASE_ADDR+ 4*14)*/
+/*#define INPUTCH2GAINADDR         (DSO_SFR_BASE_ADDR+ 4*15)*/
 #define TRIGGERONCHADDR          (DSO_SFR_BASE_ADDR+ 4*24)
 #define TRIGGERONCEADDR          (DSO_SFR_BASE_ADDR+ 4*25)
 #define TRIGGERPREFETCHADDR      (DSO_SFR_BASE_ADDR+ 4*26)
@@ -36,16 +36,16 @@
 #define KEYADDR0                 (DSO_SFR_BASE_ADDR+ 4*49)
 #define KEYADDR1                 (DSO_SFR_BASE_ADDR+ 4*50)
 #define ANALOGSETTINGSPWMADDR    (DSO_SFR_BASE_ADDR+ 4*51)
-// If you wish, the following 3 Addresses can be merged to one addr
-// look for this to the analog_inputs.png and 
-// registers_for_control_inputs.png
+/* If you wish, the following 3 Addresses can be merged to one addr*/
+/* look for this to the analog_inputs.png and */
+/* registers_for_control_inputs.png*/
 #define ANALOGSETTINGSBANK7      (DSO_SFR_BASE_ADDR+ 4*52) 
 #define ANALOGSETTINGSBANK6      (DSO_SFR_BASE_ADDR+ 4*53) 
 #define ANALOGSETTINGSBANK5      (DSO_SFR_BASE_ADDR+ 4*54) 
 #define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*55)
 
 
-// DEVICEADDR
+/* DEVICEADDR*/
 #define WELEC2012   (2012)
 #define WELEC2014   (2014)
 #define WELEC2022   (2022)
@@ -54,28 +54,28 @@
 #define CURRENTDEVICE   (WELEC2022)
 
 #define WELECMAXFS	1000000000
-// The first decimator is for the parallel input data (eg. 1Gs @ 125 MHz)
-// If this is not used the max fs must be set 10 times higher! 
+/* The first decimator is for the parallel input data (eg. 1Gs @ 125 MHz)*/
+/* If this is not used the max fs must be set 10 times higher! */
 #define SANDBOXXFS   (100000000*10)
-//int ERRUPTADDR
-// TODO
+/*int ERRUPTADDR*/
+/* TODO*/
 
 
-// SAMPLINGFREQADDR
-// write the sampling frequence as decimal number in Hz
-// unsupported sampling frequencys are set to 1 GS!
+/* SAMPLINGFREQADDR*/
+/* write the sampling frequence as decimal number in Hz*/
+/* unsupported sampling frequencys are set to 1 GS!*/
 
-// FILTERENABLEADDR
-// Digital Anti Aliasing Filter Enable
-// For now on the W2000A
+/* FILTERENABLEADDR*/
+/* Digital Anti Aliasing Filter Enable*/
+/* For now on the W2000A*/
 #define D1GHZTO100MHZ  0
 #define D100MHZTO10MHZ 1
 #define D10MHZTO1MHZ   2
 #define D1MHZTO100KHZ  3
 
-// INPUTCH0ADDR INPUTCH0ADDR INPUTCH1ADDR INPUTCH2ADDR
-// Signal Selector: The trigger does always have on each device 4 channels with each 8 bits
-// For the lower 8 bits from a 16 bit signal use CHxLOWER 
+/* INPUTCH0ADDR INPUTCH0ADDR INPUTCH1ADDR INPUTCH2ADDR*/
+/* Signal Selector: The trigger does always have on each device 4 channels with each 8 bits*/
+/* For the lower 8 bits from a 16 bit signal use CHxLOWER */
 #define CH0UPPER 0
 #define CH1UPPER 1
 #define CH2UPPER 2
@@ -85,89 +85,89 @@
 #define CH2LOWER 6
 #define CH3LOWER 7
 
-// TRIGGERONCHADDR
-// Trigger on Channel out of the SignalSelector
+/* TRIGGERONCHADDR*/
+/* Trigger on Channel out of the SignalSelector*/
 #define INCH0ADDR 0
 #define INCH1ADDR 1
 #define INCH2ADDR 2
 #define INCH3ADDR 3
 
-// TRIGGERONCEADDR
-// start trigger one time, no continious triggering on the hardware (because it's stupid)
-// write 1 to start and 0 to stop the trigger
+/* TRIGGERONCEADDR*/
+/* start trigger one time, no continious triggering on the hardware (because it's stupid)*/
+/* write 1 to start and 0 to stop the trigger*/
 
-// TRIGGERPREFETCHADDR
-// Here you can set the frame start address for the triggered buffer.
-// When the trigger is started, it first writes  TRIGGERPREFETCHADDR 
-// samplesint o the trigger data RAM before the trigger starts triggering.
-// It is simply the data offset of the triggered sample, so post triggering is possible!
+/* TRIGGERPREFETCHADDR*/
+/* Here you can set the frame start address for the triggered buffer.*/
+/* When the trigger is started, it first writes  TRIGGERPREFETCHADDR */
+/* samplesint o the trigger data RAM before the trigger starts triggering.*/
+/* It is simply the data offset of the triggered sample, so post triggering is possible!*/
 
-// TRIGGERSTORAGEMODEADDR
-// Data of the TRIGGER_MEM address range 
-// Data(i)(j) data bits from ((i+1)*8)+j-1 (i*8)+j
-// chx(k) is the sample offset 
-// TODO: Correct it + 4*This may change, too!
+/* TRIGGERSTORAGEMODEADDR*/
+/* Data of the TRIGGER_MEM address range */
+/* Data(i)(j) data bits from ((i+1)*8)+j-1 (i*8)+j*/
+/* chx(k) is the sample offset */
+/* TODO: Correct it + 4*This may change, too!*/
 #define TRIGGERSTORAGEMODE4CH 0
-// "00" :     4 CH each  8 KB
-// Data(0)(0) = ch0(0), Data(1)(0) = ch1(0), Data(2)(0) = ch2(0), Data(3)(0) = ch3(0)
+/* "00" :     4 CH each  8 KB*/
+/* Data(0)(0) = ch0(0), Data(1)(0) = ch1(0), Data(2)(0) = ch2(0), Data(3)(0) = ch3(0)*/
 #define TRIGGERSTORAGEMODE2CH 1
-// "01" :     2 CH each 16 KB
-//#define 0)(0) = ch0(0), Data(1)(0) = ch1(0), Data(2)(0) = ch0(8192), Data(3)(0) = ch1(8192)
+/* "01" :     2 CH each 16 KB*/
+/*#define 0)(0) = ch0(0), Data(1)(0) = ch1(0), Data(2)(0) = ch0(8192), Data(3)(0) = ch1(8192)*/
 #define TRIGGERSTORAGEMODE1CH 3
-// "11" :     1 CH with 32 KB
-// Data(0)(0) = ch0(0),#define (1)(0) = ch0(8192),#define (2)(0) = ch0(16384),#define (3)(0) = ch0(24576)
+/* "11" :     1 CH with 32 KB*/
+/* Data(0)(0) = ch0(0),#define (1)(0) = ch0(8192),#define (2)(0) = ch0(16384),#define (3)(0) = ch0(24576)*/
 
-// TRIGGERREADOFFSETADDR
-// start and stop address for the trigger 
-// write on it and the trigger sample capture size can be extended easily by software
-// but take care about the TRIGGERCURRENTADDR and the sampling speed to avoid race conditions
-// TRIGGERTYPEADDR
-// Choose the trigger type here 
+/* TRIGGERREADOFFSETADDR*/
+/* start and stop address for the trigger */
+/* write on it and the trigger sample capture size can be extended easily by software*/
+/* but take care about the TRIGGERCURRENTADDR and the sampling speed to avoid race conditions*/
+/* TRIGGERTYPEADDR*/
+/* Choose the trigger type here */
 #define EXTTRIGGER_LH    0
 #define EXTTRIGGER_HL    1
 #define NORMALTRIGGER_LH 2 
 #define NORMALTRIGGER_HL 3 
-// TODO add more trigger types
+/* TODO add more trigger types*/
 
 
-// NORMALTRIGGER is an 8 bit trigger
-// The NORMALTRIGGER is a schmitt trigger with an stable counter.
-// TRIGGERLOWVALUEADDR  is the low reference level.
-// TRIGGERLOWTIMEADDR   is the minimum stable time for the low level in samples.
-// TRIGGERHIGHVALUEADDR is the high reference level.
-// TRIGGERHIGHTIMEADDR  is the minimum stable time for the high level in samples.
+/* NORMALTRIGGER is an 8 bit trigger*/
+/* The NORMALTRIGGER is a schmitt trigger with an stable counter.*/
+/* TRIGGERLOWVALUEADDR  is the low reference level.*/
+/* TRIGGERLOWTIMEADDR   is the minimum stable time for the low level in samples.*/
+/* TRIGGERHIGHVALUEADDR is the high reference level.*/
+/* TRIGGERHIGHTIMEADDR  is the minimum stable time for the high level in samples.*/
 
-// TRIGGERSTATUSREGISTER   
+/* TRIGGERSTATUSREGISTER   */
 #define TRIGGERBUSYBIT      0
 #define TRIGGERRECORDINGBIT 1
 
-// TRIGGERCURRENTADDR  
-// read only 
-//
-// EXTTRIGGERSRCADDR
+/* TRIGGERCURRENTADDR  */
+/* read only */
+/**/
+/* EXTTRIGGERSRCADDR*/
 #define FORCETOGGE  0
 #define EXTTRIGGER1 1
-// Note that most devices have none only one Exttrigger input!
-// Welec W20xx devices have 1
-// SandboxX has also only 1
+/* Note that most devices have none only one Exttrigger input!*/
+/* Welec W20xx devices have 1*/
+/* SandboxX has also only 1*/
 #define EXTTRIGGER2 2
 #define EXTTRIGGER3 3
 #define EXTTRIGGER4 4
-// ...
+/* ...*/
 
-// EXTTRIGGERPWMADDR
+/* EXTTRIGGERPWMADDR*/
 #define EXTTRIGGERPWM0_STARTBIT 0 
 #define EXTTRIGGERPWM1_STARTBIT 8
 #define EXTTRIGGERPWM2_STARTBIT 16
 #define EXTTRIGGERPWM3_STARTBIT 24
 
-// These Memory mapped addresses are for simple processors and unused when using the LEON3
-// UART16550ADDR            
-// UART16550DATA           
+/* These Memory mapped addresses are for simple processors and unused when using the LEON3*/
+/* UART16550ADDR            */
+/* UART16550DATA           */
 
-// LEDADDR
-// switch on the led by setting the corresponding bit to 1
-// TODO solve many bugs and make a good read and write algorithm (hw+sw)
+/* LEDADDR*/
+/* switch on the led by setting the corresponding bit to 1*/
+/* TODO solve many bugs and make a good read and write algorithm (hw+sw)*/
 #define LED_BTN_CH3         0
 #define LED_Beam1On         1
 #define LED_BTN_MATH        2
@@ -183,8 +183,8 @@
 #define LED_BTN_F3          12
 #define LED_SINGLE          13
 
-// KEYADDR0 
-// (read only)
+/* KEYADDR0 */
+/* (read only)*/
 #define BTN_F1           0
 #define BTN_F2           1
 #define BTN_F3           2
@@ -217,8 +217,8 @@
 #define ENX_F           29
 #define ENY_F           30
 
-// KEYADDR1 
-// (read only)
+/* KEYADDR1 */
+/* (read only)*/
 #define ENX_LEFT_RIGHT  0
 #define ENY_LEFT_RIGHT  1
 #define ENX_LEVEL       2
@@ -240,7 +240,7 @@
 #define ENX_CH3_VDIV   18
 #define ENY_CH3_VDIV   19
 
-// ANALOGSETTINGSBANK7 
+/* ANALOGSETTINGSBANK7 */
 #define CH0_K1_ON     0
 #define CH0_K1_OFF    1
 #define CH0_K2_ON     2
@@ -254,11 +254,11 @@
 #define CH2_DC       10
 #define CH3_DC       11
 
-// ANALOGSETTINGSBANK6
+/* ANALOGSETTINGSBANK6*/
 #define CH0DA_OFFSET 0
 #define CH1DA_OFFSET 8
 	
-// ANALOGSETTINGSBANK5 
+/* ANALOGSETTINGSBANK5 */
 #define CH1_K1_ON      0
 #define CH1_K1_OFF     1
 #define CH1_K2_ON      2
@@ -272,7 +272,7 @@
 #define CH2_SRC2_ADDR 12
 #define CH3_SRC2_ADDR 14
 
-// CHX_SRC2_ADDR
+/* CHX_SRC2_ADDR*/
 #define SRC2_NONE    0
 #define SRC2_PWM     1
 #define SRC2_GND     2
@@ -292,8 +292,8 @@ typedef struct {
 	volatile int InputCh1Addr;
 	volatile int InputCh2Addr;
 	volatile int InputCh3Addr;
-	// The following 4 confort regs are not implemented!
-	// use ANALOGSETTINGSBANK istead
+	/* The following 4 confort regs are not implemented!*/
+	/* use ANALOGSETTINGSBANK istead*/
 	volatile int InputCh0Gain;
 	volatile int InputCh1Gain;
 	volatile int InputCh2Gain;
@@ -329,7 +329,7 @@ typedef struct {
 	volatile int Bank5;
 } volatile AnalogSettings;
 
-//int Uart16550Addr          40;
-//int Uart16550Data          41;
+/*int Uart16550Addr          40;*/
+/*int Uart16550Data          41;*/
 
 #endif

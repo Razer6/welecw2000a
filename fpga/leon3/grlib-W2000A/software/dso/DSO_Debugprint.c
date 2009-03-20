@@ -46,7 +46,7 @@ void En_PrintfTriggerSettingsOutofRange(){
 }
 
 bool InitDebugprint (Debugprint * Init, Target T, Language L){
-	//TODO: switch(T), switch(L) ...
+	/*TODO: switch(T), switch(L) ...*/
 	(*Init).Target                      = &En_PrintfTarget;
 	(*Init).ChannelsNotSupported        = &En_PrintfChannelsNotSupported;
 	(*Init).NotAvialbe                  = &En_PrintfNotAvialbe;

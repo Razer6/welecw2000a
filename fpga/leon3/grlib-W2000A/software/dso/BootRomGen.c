@@ -1,5 +1,5 @@
-// Author: Alexander Lindert <alexander_lindert at gmx.at>
-// File Generator License: GPL
+/* Author: Alexander Lindert <alexander_lindert at gmx.at>*/
+/* File Generator License: GPL*/
 
 #include <stdlib.h>
 #include <stdio.h>
