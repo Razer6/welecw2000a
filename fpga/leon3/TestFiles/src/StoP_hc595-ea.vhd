@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : DSOConfig-p.vhd
+-- File       : StoP_hc595-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
--- Created    : 2009-03-04
--- Last update: 2009-03-25
+-- Created    : 2009-03-23
+-- Last update: 2009-03-23
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -31,39 +31,49 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-03-04  1.0      
+-- 2009-03-23  1.0      
 -------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 
-package pDSOConfig is
+entity StoP_hc595 is
+  port (
+    iSD    : in  std_ulogic;
+    iSCK   : in  std_ulogic;
+    inSCLR : in  std_ulogic;
+    iRCK   : in  std_ulogic;
+    iG     : in  std_ulogic;
+    oSD    : out std_ulogic;
+    oQ     : out std_ulogic_vector (0 to 7));
+end entity;
 
-  -- DeviceAddr:
-  constant cWelec2012 : natural := 2012;
-  constant cWelec2014 : natural := 2014;
-  constant cWelec2022 : natural := 2022;
-  constant cWelec2024 : natural := 2024;
-  -- common for all minimal solutions with 1 Ch 14 Bit
-  -- and no VGA
-  constant cSandboxX  : natural := 1011;
-
-  constant cCurrentDevice : natural := cWelec2022;  -- can be read in the SFR(0)
-
-  -- downsampler settings
-  constant cDecimationStages : natural    := 5;
-  constant cChannels         : natural    := 2;
-  constant cADCsperChannel   : natural    := 4;
-  constant cADCClkRate       : natural    := 250E6;
-  constant cDesignClkRate    : natural    := 125E6;
-  constant cCPUClkRate       : natural    := 31250E3;
-  constant cAnSettStrobeRate : natural    := 2E3;  -- 1 kHz calibrator freq.
-  constant cResetActive      : std_ulogic := '0';
-  constant cADCBitWidth      : natural    := 8;
-  constant cBitWidth         : natural    := 9;
-  constant cExtTriggers      : natural    := 1;
-  constant cSRAMAddrWidth    : natural    := 19;   -- DwordAddr
-  constant cFLASHAddrWidth   : natural    := 23;   -- byte address
+architecture RTL of StoP_hc595 is
+  signal Reg   : std_ulogic_vector (0 to 7);
+  signal Shift : std_ulogic_vector (0 to 7);
+begin
   
-end;
+  process (iSCK)
+  begin
+    if rising_edge(iSCK) then
+      if inSCLR = '0' then
+        Shift <= (others => '0');
+      else
+        Shift(0)               <= iSD;
+        Shift(1 to Shift'high) <= Shift(0 to Shift'high-1);
+      end if;
+    end if;
+  end process;
+
+  process (iRCK)
+  begin
+    if rising_edge(iRCK) then
+      Reg <= Shift;
+    end if;
+  end process;
+
+  oSD <= Shift(Shift'high);
+  oQ  <= Reg when iG = '1' else (others => 'Z');
+  
+  
+end architecture;

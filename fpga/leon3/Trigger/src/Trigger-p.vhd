@@ -4,7 +4,7 @@
 -- File       : Trigger-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-03-11
+-- Last update: 2009-03-21
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -62,19 +62,6 @@ package pTrigger is
 
   -- the trigger always has 4 channels with each 8 bit width, generated in the SignalSelector  
   type aTriggerData is array (0 to 3) of aBytes(0 to cCoefficients-1);
-  type aTopTriggerState is (Idle, Preamble, Triggering, PreRecording, Recording);
-  type aTopTriggerFSM is record
-                           State       : aTopTriggerState;
-                           PrevTrigger : std_ulogic;
-                           Counter     : unsigned(cStorageModeLength+cTriggerAddrLength-cTriggerAlign-1 downto 0);
-                           Busy        : std_ulogic;
-                           WrEn        : std_ulogic_vector(0 to 3);
-                           --          TriggerData : aWords(0 to cCoefficients-1);
-                           Addr        : unsigned(cStorageModeLength+cTriggerAddrLength-cTriggerAlign-1 downto 0);
-                           StartAddr   : aTriggerAddr;
-                           ReadAlign   : std_ulogic_vector(cTriggerAlign-1 downto 0);
-                           DataValid   : std_ulogic_vector(1 to 2);
-                         end record;
   
   type aTriggerInput is record
                           TriggerOnce     : std_ulogic;

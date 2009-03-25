@@ -253,11 +253,13 @@
 #define CH1_DC        9
 #define CH2_DC       10
 #define CH3_DC       11
+#define	ANALOGSETTINGSBUSY 31
 
 /* ANALOGSETTINGSBANK6*/
-#define CH0DA_OFFSET 0
-#define CH1DA_OFFSET 8
-	
+#define DAC_OFFSET 0
+#define DAC_CH_OFFSET 16
+#define	ANALOGSETTINGSBUSY 31
+
 /* ANALOGSETTINGSBANK5 */
 #define CH1_K1_ON      0
 #define CH1_K1_OFF     1
@@ -271,6 +273,7 @@
 #define CH1_SRC2_ADDR 10
 #define CH2_SRC2_ADDR 12
 #define CH3_SRC2_ADDR 14
+#define	ANALOGSETTINGSBUSY 31
 
 /* CHX_SRC2_ADDR*/
 #define SRC2_NONE    0

@@ -166,8 +166,8 @@ CONFIG_AHB_MONWAR=y
 #
 # Debug Link           
 #
-# CONFIG_DSU_UART is not set
-CONFIG_DSU_JTAG=y
+CONFIG_DSU_UART=y
+# CONFIG_DSU_JTAG is not set
 
 #
 # Peripherals             

@@ -4,7 +4,7 @@
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-11
+-- Last update: 2009-03-23
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -44,13 +44,12 @@ use DSO.Global.all;
 
 package pLedsKeysAnalogSettings is
   
-  constant cKeyShiftLength       : natural := 54;
-  constant cLedShiftLength       : natural := 16;
-  constant cAnalogSetAddrLength  : natural := 3;
-  constant cAnalogSetShiftLength : natural := 16;
+  constant cKeyShiftLength    : natural := 54;
+  constant cLedShiftLength    : natural := 16;
+  constant cAnalogAddrLength  : natural := 3;
+  constant cAnalogShiftLength : natural := 24;
 
   type aShiftOut is record
-                      SerialClk     : std_ulogic;
                       nResetSync    : std_ulogic;
                       Data          : std_ulogic;
                       ValidStrobe   : std_ulogic;
@@ -135,7 +134,7 @@ package pLedsKeysAnalogSettings is
   
   type aAnalogSettings is record
                             Set           : std_ulogic;
-                            Addr          : std_ulogic_vector(cAnalogSetAddrLength-1 downto 0);
+                            Addr          : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
                             CH0_K1_ON     : std_ulogic;
                             CH0_K1_OFF    : std_ulogic;
                             CH0_K2_ON     : std_ulogic;
@@ -160,27 +159,16 @@ package pLedsKeysAnalogSettings is
                             CH1_src2_addr : std_ulogic_vector(1 downto 0);
                             CH2_src2_addr : std_ulogic_vector(1 downto 0);
                             CH3_src2_addr : std_ulogic_vector(1 downto 0);
-                            CH0_Offset    : aByte;
-                            CH1_Offset    : aByte;
+                            DAC_Offset    : aWord;
+                            DAC_Ch        : std_ulogic;
                             PWM_Offset    : aByte;
                           end record;
   
   type aAnalogSettingsOut is record
-                               Addr   : std_ulogic_vector(cAnalogSetAddrLength-1 downto 0);
+                               Addr   : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
                                Enable : std_ulogic;
                                Data   : std_ulogic;
                                PWM    : std_ulogic;
                              end record;
-  
-  component PWM is
-    generic (
-      gBitWidth : natural := 7);
-    port (
-      iClk        : in  std_ulogic;
-      iResetAsync : in  std_ulogic;
-      iRefON      : in  std_ulogic_vector(gBitWidth-1 downto 0);
-      iRefOff     : in  std_ulogic_vector(gBitWidth-1 downto 0);
-      oPWM        : out std_ulogic);
-  end component;
   
 end;

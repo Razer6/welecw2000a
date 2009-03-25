@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-11
+-- Last update: 2009-03-21
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -131,90 +131,27 @@ begin
         Stages       => (others => '0'),
         EnableFilter => (others => '0'));
       case cCurrentDevice is
-        when cWelec2012 =>
+        when cWelec2012 | cWelec2022 =>
           SignalSelector <= (
-            0                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            1                => (
-              TriggerCh      => O"1",
-              Gain10Exponent => 4),
-            2                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            3                => (
-              TriggerCh      => O"1",
-              Gain10Exponent => 4));
-        when cWelec2014 =>
+            0                => O"0",
+            1                => O"1",
+            2                => O"0",
+            3                => O"1");
+        when cWelec2014 | cWelec2024 =>
           SignalSelector <= (
-            0                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            1                => (
-              TriggerCh      => O"1",
-              Gain10Exponent => 4),
-            2                => (
-              TriggerCh      => O"2",
-              Gain10Exponent => 4),
-            3                => (
-              TriggerCh      => O"3",
-              Gain10Exponent => 4));
-        when cWelec2022 =>
-          SignalSelector <= (
-            0                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            1                => (
-              TriggerCh      => O"1",
-              Gain10Exponent => 4),
-            2                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            3                => (
-              TriggerCh      => O"1",
-              Gain10Exponent => 4));
-        when cWelec2024 =>
-          SignalSelector <= (
-            0                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            1                => (
-              TriggerCh      => O"1",
-              Gain10Exponent => 4),
-            2                => (
-              TriggerCh      => O"2",
-              Gain10Exponent => 4),
-            3                => (
-              TriggerCh      => O"3",
-              Gain10Exponent => 4));
-        when cSandboxX =>
-          SignalSelector <= (
-            0                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            1                => (
-              TriggerCh      => O"4",
-              Gain10Exponent => 4),
-            2                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            3                => (
-              TriggerCh      => O"4",
-              Gain10Exponent => 4));
+            0                => O"0",
+            1                => O"1",
+            2                => O"2",
+            3                => O"3");
+--        when cSandboxX =>
+--          SignalSelector <= (
+--            0                => O"0",
+--            1                => O"4",
+--            2                => O"0",
+--            3                => O"4");
         when others =>
           SignalSelector <= (
-            0                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            1                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            2                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4),
-            3                => (
-              TriggerCh      => O"0",
-              Gain10Exponent => 4));
+            others => O"0");
       end case;
       
       ExtTriggerSrc <= (
@@ -260,8 +197,7 @@ begin
         CH1_src2_addr => (others => '0'),
         CH2_src2_addr => (others => '0'),
         CH3_src2_addr => (others => '0'),
-        CH0_Offset    => (others => '0'),
-        CH1_Offset    => (others => '0'),
+        DAC_Offset    => (others => '0'),
         PWM_Offset    => (others => '0'),
         others        => '0');
 
@@ -286,24 +222,17 @@ begin
             --  vData                := iData(31 downto 12)& X"000";
             Decimator.Stages <= iData;
           when cFilterEnableAddr =>
-            Decimator.EnableFilter <= iData(Decimator.EnableFilter'length-1 downto 0);
+            for i in Decimator.EnableFilter'range loop
+              Decimator.EnableFilter(i) <= iData(i);
+            end loop;
           when cInputCh0Addr =>
-            SignalSelector(0).TriggerCh <= iData(SignalSelector(0).TriggerCh'range);
+            SignalSelector(0)<= iData(SignalSelector(0)'range);
           when cInputCh1Addr =>
-            SignalSelector(1).TriggerCh <= iData(SignalSelector(1).TriggerCh'range);
+            SignalSelector(1) <= iData(SignalSelector(1)'range);
           when cInputCh2Addr =>
-            SignalSelector(2).TriggerCh <= iData(SignalSelector(2).TriggerCh'range);
+            SignalSelector(2) <= iData(SignalSelector(2)'range);
           when cInputCh3Addr =>
-            SignalSelector(3).TriggerCh <= iData(SignalSelector(3).TriggerCh'range);
-          when cInputCh0GainAddr =>
-            SignalSelector(0).Gain10Exponent <= to_integer(unsigned(iData));
-          when cInputCh1GainAddr =>
-            SignalSelector(1).Gain10Exponent <= to_integer(unsigned(iData));
-          when cInputCh2GainAddr =>
-            SignalSelector(2).Gain10Exponent <= to_integer(unsigned(iData));
-          when cInputCh3GainAddr =>
-            SignalSelector(3).Gain10Exponent <= to_integer(unsigned(iData));
-            
+            SignalSelector(3) <= iData(SignalSelector(3)'range);           
           when cTriggerOnChAddr =>
             Trigger.TriggerChannel <= to_integer(unsigned(iData(1 downto 0)));
           when cTriggerOnceAddr =>
@@ -358,8 +287,8 @@ begin
               BTN_F3         => iData(12),
               SINGLE         => iData(13));
 
-	  when cAnalogSettingsPWMAddr =>
-	       AnalogSettings.PWM_Offset <= iData(AnalogSettings.PWM_Offset'range);
+          when cAnalogSettingsPWMAddr =>
+            AnalogSettings.PWM_Offset <= iData(AnalogSettings.PWM_Offset'range);
 
             -----------------------------------------------------------------
             -- You must not change any bits between the AnalogSettingsBanks!
@@ -399,8 +328,8 @@ begin
           when cAnalogSettingsBank6 =>
             AnalogSettings.Addr       <= O"6";
             AnalogSettings.Set        <= '1';
-            AnalogSettings.CH0_Offset <= iData(7 downto 0);
-            AnalogSettings.CH1_Offset <= iData(15 downto 8);
+            AnalogSettings.DAC_Offset <= iData(15 downto 0);
+            AnalogSettings.DAC_Ch     <= iData(16);
             
           when cUart16550Addr =>
             --     UartOut.Addr <= iData(cUART_ADDR_WIDTH-1 downto 0);
@@ -430,24 +359,17 @@ begin
         -- oData <= std_ulogic_vector(to_unsigned(Decimator.SampleTime, oData'length));
         oData <= Decimator.Stages;
       when cFilterEnableAddr =>
-        oData(Decimator.EnableFilter'length-1 downto 0) <= Decimator.EnableFilter;
+        for i in Decimator.EnableFilter'range loop
+          oData(i) <= Decimator.EnableFilter(i);
+        end loop;
       when cInputCh0Addr =>
-        oData(SignalSelector(0).TriggerCh'range) <= SignalSelector(0).TriggerCh;
+        oData(SignalSelector(0)'range) <= SignalSelector(0);
       when cInputCh1Addr =>
-        oData(SignalSelector(1).TriggerCh'range) <= SignalSelector(0).TriggerCh;
+        oData(SignalSelector(1)'range) <= SignalSelector(0);
       when cInputCh2Addr =>
-        oData(SignalSelector(2).TriggerCh'range) <= SignalSelector(0).TriggerCh;
+        oData(SignalSelector(2)'range) <= SignalSelector(0);
       when cInputCh3Addr =>
-        oData(SignalSelector(3).TriggerCh'range) <= SignalSelector(0).TriggerCh;
-      when cInputCh0GainAddr =>
-        oData <= std_ulogic_vector(to_unsigned(SignalSelector(0).Gain10Exponent, oData'length));
-      when cInputCh1GainAddr =>
-        oData <= std_ulogic_vector(to_unsigned(SignalSelector(1).Gain10Exponent, oData'length));
-      when cInputCh2GainAddr =>
-        oData <= std_ulogic_vector(to_unsigned(SignalSelector(2).Gain10Exponent, oData'length));
-      when cInputCh3GainAddr =>
-        oData <= std_ulogic_vector(to_unsigned(SignalSelector(3).Gain10Exponent, oData'length));
-        
+        oData(SignalSelector(3)'range) <= SignalSelector(0);
       when cTriggerOnChAddr =>
         oData <= std_ulogic_vector(to_unsigned(Trigger.TriggerChannel, oData'length));
       when cTriggerPrefetchAddr =>
@@ -558,8 +480,8 @@ begin
         oData(18) <= iSFRControl.Keys.ENX_CH3_VDIV;
         oData(19) <= iSFRControl.Keys.ENY_CH3_VDIV;
 
-	when cAnalogSettingsPWMAddr =>
-	       oData(AnalogSettings.PWM_Offset'range) <= AnalogSettings.PWM_Offset;
+      when cAnalogSettingsPWMAddr =>
+        oData(AnalogSettings.PWM_Offset'range) <= AnalogSettings.PWM_Offset;
         
       when cAnalogSettingsBank7 =>
         oData(0)  <= AnalogSettings.CH0_K1_ON;
@@ -574,7 +496,7 @@ begin
         oData(9)  <= AnalogSettings.CH1_DC;
         oData(10) <= AnalogSettings.CH2_DC;
         oData(11) <= AnalogSettings.CH3_DC;
-        
+        oData(31) <= iSFRControl.AnalogBusy;
       when cAnalogSettingsBank5 =>
         oData(0)            <= AnalogSettings.CH1_K1_ON;
         oData(1)            <= AnalogSettings.CH1_K1_OFF;
@@ -588,11 +510,11 @@ begin
         oData(11 downto 10) <= AnalogSettings.CH1_src2_addr;
         oData(13 downto 12) <= AnalogSettings.CH2_src2_addr;
         oData(15 downto 14) <= AnalogSettings.CH3_src2_addr;
-        
+        oData(31)           <= iSFRControl.AnalogBusy;
       when cAnalogSettingsBank6 =>
-        oData(7 downto 0)  <= AnalogSettings.CH0_Offset;
-        oData(15 downto 8) <= AnalogSettings.CH1_Offset;
-        
+        oData(15 downto 0) <= AnalogSettings.DAC_Offset;
+        oData(16)          <= AnalogSettings.DAC_Ch;
+        oData(31)          <= iSFRControl.AnalogBusy;
       when others =>
         if Addr >= cLastAddr then
           oData <= (others => '-');

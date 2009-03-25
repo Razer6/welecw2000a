@@ -4,7 +4,7 @@
 -- File       : Global-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-14
--- Last update: 2009-03-05
+-- Last update: 2009-03-22
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -57,10 +57,10 @@ package Global is
 
   -- typedefs for the ADC inputs
   subtype aADCX is std_ulogic_vector(cADCBitWidth-1 downto 0);
-  type aADCData is array (natural range <>) of aADCX;
-  type aADCInPhase is array (natural range <>) of aADCData(0 to cChannels-1);
-  type aADCIn is array (0 to cADCsperChannel-1) of aADCData(0 to cChannels-1);
-  type aADCOut is array (0 to cChannels-1) of aADCData(0 to cCoefficients-1);
+  type    aADCData is array (natural range <>) of aADCX;
+  type    aADCInPhase is array (natural range <>) of aADCData(0 to cChannels-1);
+  type    aADCIn is array (0 to cADCsperChannel-1) of aADCData(0 to cChannels-1);
+  type    aADCOut is array (0 to cChannels-1) of aADCData(0 to cCoefficients-1);
 
   -- typedefs for the DownSampler 
   subtype aValue is signed (cBitWidth-1 downto 0);
@@ -76,24 +76,20 @@ package Global is
   subtype aTriggerCH is std_ulogic_vector(2 downto 0);
   -- the trigger has for every plattform 4 channels
   -- 0 to 3 are the ch0 to ch3 MSB, 4 to 7 are ch0 to ch3 LSB (only supported in filtering mode)
-  subtype aGain10Exponent is integer range 0 to 6;
-  -- 1 micro volt
-  -- Resolution 4 to 6 is fully supported
-  -- Resolution 0 to 3 results from filters
-  -- It is supported only when filtering is on!
-  -- 2 for < 10 Ms with 8 bit
-
-  type aSS is record
-                TriggerCH      : aTriggerCh;
-                Gain10Exponent : aGain10Exponent;
-              end record;
-  type aSignalSelector is array (0 to 3) of aSS;
-  type aAnalogAmplification is array (0 to 3) of aTriggerCH;  -- same bit width
-
-
+  type    aSignalSelector is array (0 to 3) of aTriggerCH;
 
   function LogXY (x, y : natural) return natural;
   
+  component PWM is
+    generic (
+      gBitWidth : natural := 7);
+    port (
+      iClk        : in  std_ulogic;
+      iResetAsync : in  std_ulogic;
+      iRefON      : in  std_ulogic_vector(gBitWidth-1 downto 0);
+      iRefOff     : in  std_ulogic_vector(gBitWidth-1 downto 0);
+      oPWM        : out std_ulogic);
+  end component;
 end;
 
 package body Global is

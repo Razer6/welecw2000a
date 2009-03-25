@@ -17,7 +17,7 @@ vcom -quiet -93 -work DSO {../../DownSampler/src/TopDownSampler-ea.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/Trigger-p.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/LedsKeys-p.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/PWM-ea.vhd}
-vcom -quiet -93 -work DSO {../../Trigger/src/TriggerMemory-ea.vhd}
+#vcom -quiet -93 -work DSO {../../Trigger/src/TriggerMemory-ea.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/NormalTrigger-ea.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/ExternalTrigger-ea.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/TopTrigger-ea.vhd}
@@ -33,10 +33,14 @@ vcom -quiet -93 -work DSO {../../uart16550/src/Uart-p.vhd}
 #vcom -quiet -93 -work DSO {../../uart16550/src/UartWrapper-e.vhd}
 #vcom -quiet -93 -work DSO {../../uart16550/src/UartWrapper-Empty-a.vhd}
 #vcom -quiet -93 -work DSO {../../uart16550/src/UartWrapper-RTL-a.vhd}
-vcom -quiet -93 -work DSO {../../Altera/src/PLL0.vhd}
-vcom -quiet -93 -work DSO {../../Altera/src/PLL1.vhd}
-vcom -quiet -93 -work DSO {../../Altera/src/PLL2.vhd}
-vcom -quiet -93 -work DSO {../../Altera/src/PLL3.vhd}
+#vcom -quiet -93 -work DSO {../../Altera/src/PLL0.vhd}
+#vcom -quiet -93 -work DSO {../../Altera/src/PLL1.vhd}
+#vcom -quiet -93 -work DSO {../../Altera/src/PLL2.vhd}
+#vcom -quiet -93 -work DSO {../../Altera/src/PLL3.vhd}
+vcom -quiet -93 -work DSO {../../SignalCapture/src/PLL0.vhd}
+vcom -quiet -93 -work DSO {../../SignalCapture/src/PLL1.vhd}
+vcom -quiet -93 -work DSO {../../SignalCapture/src/PLL2.vhd}
+vcom -quiet -93 -work DSO {../../SignalCapture/src/PLL3.vhd}
 vcom -quiet -93 -work DSO {../../SignalCapture/src/ADC-ea.vhd}
 vcom -quiet -93 -work DSO {../../SignalCapture/src/SignalSelector-ea.vhd}
 vcom -quiet -93 -work DSO {../../SignalCapture/src/SignalCapture-ea.vhd}
@@ -74,9 +78,13 @@ vcom -quiet -93 -work work {../../TestFiles/src/Wavefiles-p.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/BhvADC-ea.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/AsyncSRAM-ea.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/BhvDisplay-ea.vhd}
+vcom -quiet -93 -work work {../../TestFiles/src/StoP_hc595-ea.vhd}
+vcom -quiet -93 -work work {../../TestFiles/src/PtoS_HCT165-ea.vhd}
+vcom -quiet -93 -work work {../../TestFiles/src/DeMux_HCT238-ea.vhd}
+vcom -quiet -93 -work work {../../TestFiles/src/DAC_LTC2612-ea.vhd}
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/Testbench.vhd
 #vcom -quiet -93 -work work {../../Scope/src/TestbenchTopScope-ea.vhd} # out of date
 
 vsim -t ps -suppress 3473 -gdisas=1 Testbench
 do wave.do
-run 100 us
+run 500 us

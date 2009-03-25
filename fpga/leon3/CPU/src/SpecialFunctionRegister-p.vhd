@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-11
+-- Last update: 2009-03-21
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -52,6 +52,7 @@ package pSpecialFunctionRegister is
                     Trigger        : aTriggerOutput;
                     --                  Uart           : aUarttoCPU;
                     Keys           : aKeys;
+                    AnalogBusy     : std_ulogic;
                   end record;
   type aSFR_out is record
                      Decimator      : aDownSampler;

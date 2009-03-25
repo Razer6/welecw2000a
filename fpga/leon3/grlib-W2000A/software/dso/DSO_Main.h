@@ -32,6 +32,8 @@
 #define FIXED_CPU_FREQUENCY  31250000
 /*int return SamplingFrequency/(CPUFrequency*FASTMODEFACTOR);*/
 #define FASTMODEFACTOR       10
+/* time in ms */
+/*#define COIL_SWITCH_TIME     100*/
 #define COIL_SWITCH_TIME     100
 
 /* base addresses of the grip components*/

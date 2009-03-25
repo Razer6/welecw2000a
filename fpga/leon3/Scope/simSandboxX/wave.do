@@ -152,12 +152,14 @@ add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/dataout
 add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/hready
 add wave -noupdate -divider {DSO SFR}
 add wave -noupdate -format Literal -radix hexadecimal -expand /testbench/d3/gensfrdso/sfr0/apb_i
-add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/addr
 add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/apb_o
 add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/isfrcontrol
 add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/osfrcontrol
+add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/addr
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rd
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/idata
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/wr
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/odata
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
 add wave -noupdate -divider CaptureSignals
 add wave -noupdate -format Logic -radix hexadecimal /testbench/d3/capturesignals/oclkcpu
@@ -195,20 +197,8 @@ add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggers
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggerdata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/triggerinvalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/aclr
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/datainch0
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/dataoutch0
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/datainch1
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/dataoutch1
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/datainch2
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/dataoutch2
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/datainch3
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/dataoutch3
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/aligndatach0
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/aligndatach1
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/aligndatach2
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/aligndatach3
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {120833912 ps} 0}
+WaveRestoreCursors {{Cursor 1} {371278518 ps} 0}
 configure wave -namecolwidth 341
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -222,4 +212,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ps} {420 us}
+WaveRestoreZoom {364337500 ps} {377462500 ps}

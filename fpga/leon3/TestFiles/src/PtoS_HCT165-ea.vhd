@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : DSOConfig-p.vhd
+-- File       : PtoS_HCT165-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
--- Created    : 2009-03-04
--- Last update: 2009-03-25
+-- Created    : 2009-03-23
+-- Last update: 2009-03-23
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -31,39 +31,41 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-03-04  1.0      
+-- 2009-03-23  1.0      
 -------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 
-package pDSOConfig is
+entity PtoS_hct165 is
+  port (
+    iSD  : in  std_ulogic;
+    iCK  : in  std_ulogic;
+    inCE : in  std_ulogic;
+    inPL : in  std_ulogic;
+    iPD  : in  std_ulogic_vector(0 to 7);
+    oQ   : out std_ulogic;
+    onQ  : out std_ulogic);
+end entity;
 
-  -- DeviceAddr:
-  constant cWelec2012 : natural := 2012;
-  constant cWelec2014 : natural := 2014;
-  constant cWelec2022 : natural := 2022;
-  constant cWelec2024 : natural := 2024;
-  -- common for all minimal solutions with 1 Ch 14 Bit
-  -- and no VGA
-  constant cSandboxX  : natural := 1011;
-
-  constant cCurrentDevice : natural := cWelec2022;  -- can be read in the SFR(0)
-
-  -- downsampler settings
-  constant cDecimationStages : natural    := 5;
-  constant cChannels         : natural    := 2;
-  constant cADCsperChannel   : natural    := 4;
-  constant cADCClkRate       : natural    := 250E6;
-  constant cDesignClkRate    : natural    := 125E6;
-  constant cCPUClkRate       : natural    := 31250E3;
-  constant cAnSettStrobeRate : natural    := 2E3;  -- 1 kHz calibrator freq.
-  constant cResetActive      : std_ulogic := '0';
-  constant cADCBitWidth      : natural    := 8;
-  constant cBitWidth         : natural    := 9;
-  constant cExtTriggers      : natural    := 1;
-  constant cSRAMAddrWidth    : natural    := 19;   -- DwordAddr
-  constant cFLASHAddrWidth   : natural    := 23;   -- byte address
+architecture RTL of PtoS_hct165 is
+  signal Shift : std_ulogic_vector (0 to 7);
   
-end;
+begin
+  
+  process (iCK, inPL)
+  begin
+    if inPL = '0' then
+      Shift <= iPD;
+    elsif rising_edge(iCK) then
+      if inCE = '0' then
+        Shift(0)               <= iSD;
+        Shift(1 to Shift'high) <= Shift(0 to Shift'high-1);
+      end if;
+    end if;
+  end process;
+
+  oQ  <= Shift(Shift'high);
+  onQ <= not Shift(Shift'high);
+  
+end architecture;

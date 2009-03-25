@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-03-08
+-- Last update: 2009-03-24
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -46,6 +46,7 @@ use DSO.pTrigger.all;
 entity TopTrigger is
   port (
     iClk        : in  std_ulogic;
+    iClkCPU     : in  std_ulogic;
     iResetAsync : in  std_ulogic;
     iData       : in  aTriggerData;
     iValid      : in  std_ulogic;
@@ -57,7 +58,17 @@ entity TopTrigger is
 end entity;
 
 architecture RTL of TopTrigger is
-  
+  type aTopTriggerState is (Idle, Preamble, Triggering, PreRecording, Recording);
+  type aTopTriggerFSM is record
+                           State       : aTopTriggerState;
+                           PrevTrigger : std_ulogic;
+                           Counter     : unsigned(cStorageModeLength+cTriggerAddrLength-cTriggerAlign-1 downto 0);
+                           Busy        : std_ulogic;
+                           WrEn        : std_ulogic_vector(0 to 3);
+                           --          TriggerData : aWords(0 to cCoefficients-1);
+                           Addr        : unsigned(cStorageModeLength+cTriggerAddrLength-cTriggerAlign-1 downto 0);
+                           StartAddr   : aTriggerAddr;
+                         end record;
   signal R              : aTopTriggerFSM;
   signal TriggerStrobes : aTrigger2D(0 to cDiffTriggers-1);
   signal TriggerData    : aBytes(0 to cCoefficients-1);
@@ -65,34 +76,40 @@ architecture RTL of TopTrigger is
 --  signal WrEn           : std_ulogic;
   signal aclr           : std_ulogic;
 
-  signal DataInCh0    : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal DataOutCh0   : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal DataInCh1    : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal DataOutCh1   : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal DataInCh2    : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal DataOutCh2   : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal DataInCh3    : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal DataOutCh3   : std_ulogic_vector(8*cCoefficients-1 downto 0);
-  signal AlignDataCh0 : aBytes(0 to cCoefficients-1);
-  signal AlignDataCh1 : aBytes(0 to cCoefficients-1);
-  signal AlignDataCh2 : aBytes(0 to cCoefficients-1);
-  signal AlignDataCh3 : aBytes(0 to cCoefficients-1);
-  
+  type   aDataIn is array (0 to 3) of std_ulogic_vector(8*cCoefficients-1 downto 0);
+  type   aAlignData is array (0 to 3) of aBytes(0 to cCoefficients-1);
+  type   aTriggerAlign is array (0 to 1) of std_ulogic_vector(cTriggerAlign-1 downto 0);
+  signal DataIn, DataOut : aDataIn;
+  signal AlignData       : aAlignData;
+  signal ReadValid       : std_ulogic_vector(0 to 2);  -- (1) bug, if you dont use it as ahb
+                                                       -- slave
+  signal ReadAlign       : aTriggerAlign;
+
+  component TriggerMemory is
+    port
+      (
+        data      : in  std_logic_vector (63 downto 0);
+        rd_aclr   : in  std_logic := '0';
+        rdaddress : in  std_logic_vector (9 downto 0);
+        rdclock   : in  std_logic;
+        wraddress : in  std_logic_vector (9 downto 0);
+        wrclock   : in  std_logic;
+        wren      : in  std_logic := '1';
+        q         : out std_logic_vector (63 downto 0)
+        );
+  end component;
 begin
   
-  Convert : process (iData, iCPUPort.TriggerChannel, DataOutCh0, DataOutCh1, DataOutCh2, DataOutCh3)
+  Convert : process (iData, iCPUPort.TriggerChannel, DataOut)
   begin
-    for i in 0 to cCoefficients-1 loop
-      DataInCh0(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(0)(i));
-      DataInCh1(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(1)(i));
-      DataInCh2(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(2)(i));
-      DataInCh3(8*(i+1)-1 downto 8*i) <= std_ulogic_vector(iData(3)(i));
 
-      AlignDataCh0(i) <= DataOutCh0(8*(i+1)-1 downto 8*i);
-      AlignDataCh1(i) <= DataOutCh1(8*(i+1)-1 downto 8*i);
-      AlignDataCh2(i) <= DataOutCh2(8*(i+1)-1 downto 8*i);
-      AlignDataCh3(i) <= DataOutCh3(8*(i+1)-1 downto 8*i);
+    for i in 0 to 3 loop
+      for j in 0 to cCoefficients-1 loop
+        DataIn(i)(8*(j+1)-1 downto 8*j) <= std_ulogic_vector(iData(i)(j));
+        AlignData(i)(j)                 <= DataOut(i)(8*(j+1)-1 downto 8*j);
+      end loop;
     end loop;
+    
   end process;
 
   TriggerOnCh : process (iClk, iResetAsync)
@@ -109,7 +126,6 @@ begin
 
 
   Top : process (iClk, iResetAsync)
-    variable i    : natural;
     constant cInit : aTopTriggerFSM := (
       State       => Idle,
       PrevTrigger => '0',
@@ -117,29 +133,17 @@ begin
       Busy        => '0',
       WrEn        => (others => '0'),
       Addr        => (others => '0'),
-      StartAddr   => (others => '0'),
-      ReadAlign   => (others => '0'),
-      DataValid   => "00");
+      StartAddr   => (others => '0'));
   begin
     
     if iResetAsync = cResetActive then
-      R                       <= cInit;
-      oTriggerMem.Data        <= (others => '0');
+      R                  <= cInit;
       oCPUPort.Recording <= '0';
     elsif rising_edge(iClk) then
       
-      R.ReadAlign                    <= iTriggerMem.Addr(cTriggerAlign-1 downto 0);
-      i                              := to_integer(unsigned(R.ReadAlign));
-      oTriggerMem.Data(7 downto 0)   <= std_ulogic_vector(AlignDataCh0(i));
-      oTriggerMem.Data(15 downto 8)  <= std_ulogic_vector(AlignDataCh1(i));
-      oTriggerMem.Data(23 downto 16) <= std_ulogic_vector(AlignDataCh2(i));
-      oTriggerMem.Data(31 downto 24) <= std_ulogic_vector(AlignDataCh3(i));
-      oCPUPort.Recording        <= '0';
-      R.PrevTrigger                  <= iCPUPort.TriggerOnce;
-      --    R.WrEn         <= '1';
-      R.Busy                         <= '1';
-      R.DataValid(1)                 <= iTriggerMem.Rd;
-      R.DataValid(2)                 <= R.DataValid(1);
+      oCPUPort.Recording <= '0';
+      R.PrevTrigger      <= iCPUPort.TriggerOnce;
+      R.Busy             <= '1';
 
       if iValid = '1' then
         R.Addr <= R.Addr + to_unsigned(1, R.Addr'length);
@@ -225,7 +229,7 @@ begin
 
         when PreRecording =>
           if iValid = '1' then
-            R.State                 <= Recording;
+            R.State            <= Recording;
             oCPUPort.Recording <= '1';
           end if;
           --     R.StartAddr(R.StartAddr'high downto cTriggerAlign) <=
@@ -271,50 +275,42 @@ begin
   oCPUPort.ReadOffset         <= R.StartAddr;
   oCPUPort.CurrentTriggerAddr <= R.Addr(oCPUPort.CurrentTriggerAddr'range);
   oCPUPort.Busy               <= R.Busy;
-  oTriggerMem.ACK             <= R.DataValid(2);
+  oTriggerMem.ACK             <= ReadValid(ReadValid'high);
 
-  -- WrEn <= R.WrEn and iValid;
   aclr <= iResetAsync when cResetActive = '1' else
           not iResetAsync;
-  MemoryCH0 : entity work.TriggerMemory
-    port map(
-      aclr                 => aclr,
-      clock                => iClk,
-      data                 => std_logic_vector(DataInCh0),
-      rdaddress            => std_logic_vector(iTriggerMem.Addr(iTriggerMem.Addr'high downto cTriggerAlign)),
-      wraddress            => std_logic_vector(R.Addr(R.Addr'high-cStorageModeLength downto 0)),
-      wren                 => R.WrEn(0),
-      std_ulogic_vector(q) => DataOutCh0);
+  
+  Memory : for i in 0 to 3 generate
+    Ch : TriggerMemory
+      port map (
+        data                 => std_logic_vector(DataIn(i)),
+        rd_aclr              => aclr,
+        rdaddress            => std_logic_vector(iTriggerMem.Addr(iTriggerMem.Addr'high downto cTriggerAlign)),
+        rdclock              => iClkCPU,
+        wraddress            => std_logic_vector(R.Addr(R.Addr'high-cStorageModeLength downto 0)),
+        wrclock              => iClk,
+        wren                 => R.WrEn(i),
+        std_ulogic_vector(q) => DataOut(i));
+  end generate;
 
-  MemoryCH1 : entity work.TriggerMemory
-    port map(
-      aclr                 => aclr,
-      clock                => iClk,
-      data                 => std_logic_vector(DataInCh1),
-      rdaddress            => std_logic_vector(iTriggerMem.Addr(iTriggerMem.Addr'high downto cTriggerAlign)),
-      wraddress            => std_logic_vector(R.Addr(R.Addr'high-cStorageModeLength downto 0)),
-      wren                 => R.WrEn(1),
-      std_ulogic_vector(q) => DataOutCh1);
-
-  MemoryCH2 : entity work.TriggerMemory
-    port map(
-      aclr                 => aclr,
-      clock                => iClk,
-      data                 => std_logic_vector(DataInCh2),
-      rdaddress            => std_logic_vector(iTriggerMem.Addr(iTriggerMem.Addr'high downto cTriggerAlign)),
-      wraddress            => std_logic_vector(R.Addr(R.Addr'high-cStorageModeLength downto 0)),
-      wren                 => R.WrEn(2),
-      std_ulogic_vector(q) => DataOutCh2);
-
-  MemoryCH3 : entity work.TriggerMemory
-    port map(
-      aclr                 => aclr,
-      clock                => iClk,
-      data                 => std_logic_vector(DataInCh3),
-      rdaddress            => std_logic_vector(iTriggerMem.Addr(iTriggerMem.Addr'high downto cTriggerAlign)),
-      wraddress            => std_logic_vector(R.Addr(R.Addr'high-cStorageModeLength downto 0)),
-      wren                 => R.WrEn(3),
-      std_ulogic_vector(q) => DataOutCh3);
+  process (iClkCPU, iResetAsync)
+    variable i : natural range 0 to cCoefficients-1;
+  begin
+    if iResetAsync = cResetActive then
+      oTriggerMem.Data <= (others => '0');
+      ReadValid        <= (others => '0');
+      ReadAlign        <= (others => (others => '0'));
+    elsif rising_edge(iClkCPU) then
+      ReadValid(ReadValid'low)                     <= iTriggerMem.Rd;
+      ReadValid(ReadValid'low+1 to ReadValid'high) <= ReadValid(ReadValid'low to ReadValid'high-1);
+      ReadAlign(ReadAlign'low)                     <= iTriggerMem.Addr(cTriggerAlign-1 downto 0);
+      ReadAlign(ReadAlign'low+1 to ReadAlign'high) <= ReadAlign(ReadAlign'low to ReadAlign'high-1);
+      i                                            := to_integer(unsigned(ReadAlign(ReadAlign'high)));
+      for j in 0 to 3 loop
+        oTriggerMem.Data((8*(j+1))-1 downto 8*j) <= std_ulogic_vector(AlignData(j)(i));
+      end loop;
+    end if;
+  end process;
 
 
   -----------------------------------------------------------------------------

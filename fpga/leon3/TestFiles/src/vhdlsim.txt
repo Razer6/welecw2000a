@@ -2,3 +2,7 @@ Wavefiles-p.vhd
 AsyncSRAM-ea.vhd
 BhvADC-ea.vhd
 BhvDisplay-ea.vhd
+StoP_hc595-ea.vhd
+PtoS_HCT165-ea.vhd
+DeMux_HCT238-ea.vhd
+DAC_LTC2612-ea.vhd

@@ -68,7 +68,7 @@ entity leon3mini is
     disas   : integer := CFG_DISAS;     -- Enable disassembly to console
     dbguart : integer := CFG_DUART;     -- Print UART on console
     pclow   : integer := CFG_PCLOW;
-    freq    : integer := 25000       -- frequency of main clock (used for PLLs)
+    freq    : integer := 25000          -- frequency of main clock (used for PLLs)
     );
   port (
     --RS232
@@ -132,14 +132,14 @@ entity leon3mini is
     iFPGA2_T7   : in std_ulogic;
 
     --CONTROL of inputs
-    iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
+    iUx6        : in  std_ulogic;       -- not soldering register channels 1,2 è 3,4
     iUx11       : in  std_ulogic;       -- not soldering register channels 1,2
     oAAQpin5    : out std_ulogic;
     oCalibrator : out std_ulogic;
 
     -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-    oPWMout  : out std_ulogic;          --Level Of External Syncro
-    iSinhcro : in  std_ulogic;          --Comparator external syncro.
+    oPWMout  : out std_ulogic;                     --Level Of External Syncro
+    iSinhcro : in  std_ulogic;                     --Comparator external syncro.
     oDesh    : out std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
     oDeshENA : out std_ulogic;
     oRegCLK  : out std_ulogic;
@@ -159,6 +159,11 @@ entity leon3mini is
     iCh2ADC3 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
     iCh2ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
 
+-- pragma translate_off
+    errorn : out std_ulogic;
+    resoutn : out std_ulogic;
+-- pragma translate_on
+
     --CLK
 --    iResetAsync : in  std_ulogic;       -- Where is the async reset input pin ?
     iclk25_2  : in  std_ulogic;
@@ -168,103 +173,6 @@ entity leon3mini is
     iclk13inp : in  std_ulogic;         --wire W12-U15
     oclk13out : out std_ulogic;         --W12-U15
     iclk12_5  : in  std_ulogic
-
-    -- original ports from leon3mini board
-    --   resetn  : in  std_ulogic;
-    -- resoutn : out std_logic;
-    --   clk     : in  std_ulogic;
-
---    errorn : out std_ulogic;
---    address : out   std_logic_vector(15 downto 2);
---    data    : inout std_logic_vector(31 downto 0);
-
--- pragma translate_off
---    ramsn  : out std_logic_vector (4 downto 0);
---    ramoen : out std_logic_vector (4 downto 0);
---    rben   : out std_logic_vector(3 downto 0);
---    rwen   : out std_logic_vector(3 downto 0);
-
---    romsn  : out std_logic_vector (1 downto 0);
---    iosn   : out std_ulogic;
---    oen    : out std_ulogic;
---    read   : out std_ulogic;
---    writen : out std_ulogic;
--- pragma translate_on
-
---    sdcke  : out std_logic_vector (1 downto 0);  -- sdram clock enable
---    sdcsn  : out std_logic_vector (1 downto 0);  -- sdram chip select
---    sdwen  : out std_ulogic;                     -- sdram write enable
---    sdrasn : out std_ulogic;                     -- sdram ras
---    sdcasn : out std_ulogic;                     -- sdram cas
---    sddqm  : out std_logic_vector (3 downto 0);  -- sdram dqm
---    sdclk  : out std_ulogic;
---    sdba   : out std_logic_vector(1 downto 0);   -- sdram bank address
-
-    -- debug support unit
---    dsuen   : in  std_ulogic;
---    dsubre : in std_ulogic
---    dsuactn : out std_ulogic;
-
-    -- UART for serial DCL/console I/O
---    serrx     : in  std_ulogic;
---    sertx     : out std_ulogic;
---    sersrcsel : in  std_ulogic
-
---    dsutx   : out std_ulogic;           -- DSU tx data
---    dsurx   : in  std_ulogic;           -- DSU rx data
---    rxd1 : in  std_ulogic;
---    txd1 : out std_ulogic;
---    gpio   : inout std_logic_vector(7 downto 0);  -- I/O port, unused at the moment
-
---    -- ethernet signals
---    emdio   : inout std_logic;          -- ethernet PHY interface
---    etx_clk : in    std_ulogic;
---    erx_clk : in    std_ulogic;
---    erxd    : in    std_logic_vector(3 downto 0);
---    erx_dv  : in    std_ulogic;
---    erx_er  : in    std_ulogic;
---    erx_col : in    std_ulogic;
---    erx_crs : in    std_ulogic;
---    etxd    : out   std_logic_vector(3 downto 0);
---    etx_en  : out   std_ulogic;
---    etx_er  : out   std_ulogic;
---    emdc    : out   std_ulogic;
-
---    ata_rst   : out   std_logic;
---    ata_data  : inout std_logic_vector(15 downto 0);
---    ata_da    : out   std_logic_vector(2 downto 0);
---    ata_cs0   : out   std_logic;
---    ata_cs1   : out   std_logic;
---    ata_dior  : out   std_logic;
---    ata_diow  : out   std_logic;
---    ata_iordy : in    std_logic;
---    ata_intrq : in    std_logic;
---    ata_dmack : out   std_logic;
-
---    sample_clock : out std_ulogic;
-
----------------------------------------------------------------------------------
----- HPI PORT
----------------------------------------------------------------------------------
---    hpiaddr : out   std_logic_vector(1 downto 0);
---    hpidata : inout std_logic_vector(15 downto 0);
---    hpicsn  : out   std_ulogic;
---    hpiwrn  : out   std_ulogic;
---    hpirdn  : out   std_ulogic;
---    hpiint  : in    std_ulogic;
-
---    -- equality flag for R/W data
---    dbg_equal : out std_ulogic;
----------------------------------------------------------------------------------
-
-
---    dac       : out std_ulogic;
---    vga_vsync : out std_ulogic;
---    vga_hsync : out std_ulogic;
---    vga_rd    : out std_logic_vector(1 downto 0);
---    vga_gr    : out std_logic_vector(1 downto 0);
---    vga_bl    : out std_logic_vector(1 downto 0)
-
     );
 end;
 
@@ -288,6 +196,8 @@ architecture rtl of leon3mini is
   -- signal KeystoCPU      : aKeys;
   signal KeysFromPanel  : aShiftIn;
   signal AnalogSettings : aAnalogSettingsOut;
+  signal SerialClk : std_ulogic;
+  -- internal ROM
   signal BootRomRd      : std_ulogic;
   signal BootACK        : std_ulogic;
 --  signal RamtoVGA       : aSharedRamReturn;
@@ -349,7 +259,7 @@ architecture rtl of leon3mini is
 
   signal tck, tms, tdi, tdo : std_ulogic;
 
-  signal errorn         : std_ulogic;
+--  signal errorn         : std_ulogic;
   signal dsuact         : std_logic;
   signal dsuen          : std_ulogic;
   signal oen_ctrl       : std_logic;
@@ -364,19 +274,10 @@ architecture rtl of leon3mini is
   signal dsutx  : std_ulogic;           -- DSU tx data
   signal dsurx  : std_ulogic;           -- DSU rx data
   signal dsubre : std_ulogic;
-  ---------------------------------------------------------------------------------------
-  -- HPI SIGNALS
-  ---------------------------------------------------------------------------------------
---  signal hpiaddr      : std_logic_vector(1 downto 0);
---  signal hpidata      : std_logic_vector(15 downto 0);
---  signal hpicsn       : std_ulogic;
---  signal hpiwrn       : std_ulogic;
---  signal hpirdn       : std_ulogic;
---  signal hpiint       : std_ulogic;
 
-  signal hpiwriten : std_ulogic;        -- intermediate signal
-  signal hpirdata  : std_logic_vector(15 downto 0);
-  signal hpiwdata  : std_logic_vector(15 downto 0);
+--  signal hpiwriten : std_ulogic;        -- intermediate signal
+--  signal hpirdata  : std_logic_vector(15 downto 0);
+--  signal hpiwdata  : std_logic_vector(15 downto 0);
   signal drive_bus : std_ulogic;
 
   signal dbg_rdata : std_logic_vector(15 downto 0);
@@ -390,7 +291,6 @@ architecture rtl of leon3mini is
   constant BOARD_FREQ : integer := freq;  -- input frequency in KHz
   constant CPU_FREQ   : integer := BOARD_FREQ * CFG_CLKMUL / CFG_CLKDIV;  -- cpu frequency in KHz
   
-                                   signal resoutn : std_ulogic;
 begin
 
 ---------------------------------------------------------------------------------------
@@ -406,12 +306,13 @@ begin
   oTXD    <= txd1;
   rxd1    <= iRXD;
   dsurx   <= iUSBRX;                    -- Receive from USB
-  oUSBTX  <= dsutx;                     -- Tratsmit to USB
+  oUSBTX  <= dsutx;                     -- Transmit to USB
   dsubre  <= '1';
   -- dsuactn <= not dsuact;
-  dsuen   <= '1';
+  dsuen   <= '0';
+  -- pragma translate_off
   resoutn <= rstn;
-
+  -- pragma translate_on
   ClkADC25(0) <= iclk25_2;
   ClkADC25(1) <= iclk25_7;
   ClkADC25(2) <= iclk25_10;
@@ -464,21 +365,23 @@ begin
       onFetchKeys     => KeysfromPanel,
       oKeys           => SFRControltoCPU.Keys,
       iCPUtoAnalog    => SFRControlfromCPU.AnalogSettings,
-      oAnalogSettings => AnalogSettings);
+      oAnalogBusy     => SFRControltoCPU.AnalogBusy,
+      oAnalogSettings => AnalogSettings,
+      oSerialClk      => SerialClk);
 
   oFPSW_PE    <= KeysFromPanel.nFetchStrobe;
-  oFPSW_CLK   <= LedstoPanel.SerialClk;
+  oFPSW_CLK   <= SerialClk;
   --  iFPSW_F2   : in  std_ulogic;
   --  iFPSW_F1   : in  std_ulogic;
   oFPLED_OE   <= LedstoPanel.nOutputEnable;
   oFPLED_WR   <= LedstoPanel.ValidStrobe;
   oFPLED_DIN  <= LedstoPanel.Data;
-  oFPLED_CLK  <= LedstoPanel.SerialClk;
-  oCalibrator <= LedstoPanel.SerialClk;  -- 1 KHz Clk
+  oFPLED_CLK  <= SerialClk;
+  oCalibrator <= SerialClk;             -- 1 KHz Clk
 
   oDesh    <= AnalogSettings.Addr;      --demux. write strob for 4094
   oDeshENA <= AnalogSettings.Enable;
-  oRegCLK  <= LedstoPanel.SerialClk;
+  oRegCLK  <= SerialClk;
   oRegData <= AnalogSettings.Data;
 
   BootRomRd <= memo.romsn(0) or memo.oen;
@@ -604,7 +507,9 @@ begin
         port map (clkm, rstn, ahbmi, ahbmo(i), ahbsi, ahbso,
                   irqi(i), irqo(i), dbgi(i), dbgo(i));
     end generate;
+    -- pragma translate_off
     errorn_pad : odpad generic map (tech => padtech) port map (errorn, dbgo(0).error);
+    -- pragma translate_on
 
     dsugen : if CFG_DSU = 1 generate
       dsu0 : dsu3                       -- LEON3 Debug Support Unit
@@ -754,7 +659,7 @@ begin
   genDSO : if CFG_DSO_ENABLE /= 0 generate
     TriggerMem : SignalAccess
       generic map (
-        hindex => 4,
+        hindex => 3,
         haddr  => 16#A00#,
         hmask  => 16#FFF#,
         kbytes => 16
@@ -763,7 +668,7 @@ begin
         rst_in      => rstn,
         clk_i       => clkm,
         ahbsi       => ahbsi,
-        ahbso       => ahbso(4),
+        ahbso       => ahbso(3),
         iClkDesign  => ClkDesign,
         iResetAsync => ResetAsync,
         iTriggerMem => TriggerMemtoCPU,
@@ -851,6 +756,7 @@ begin
   oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
   oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
   oDCLK  <= iclk25_2;
+  oDENA  <= '1';
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,
@@ -868,192 +774,28 @@ begin
   end generate;
 
 -----------------------------------------------------------------------
----  ETHERNET ---------------------------------------------------------
------------------------------------------------------------------------
-
-  eth0 : if CFG_GRETH = 1 generate      -- Gaisler ethernet MAC
-    e1 : greth generic map(hindex    => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_SVGA_ENABLE,
-                           pindex    => 15, paddr => 15, pirq => 12, memtech => memtech,
-                           mdcscaler => CPU_FREQ/1000, enable_mdio => 1, fifosize => CFG_ETH_FIFO,
-                           nsync     => 1, edcl => CFG_DSU_ETH, edclbufsz => CFG_ETH_BUF,
-                           macaddrh  => CFG_ETH_ENM, macaddrl => CFG_ETH_ENL,
-                           ipaddrh   => CFG_ETH_IPM, ipaddrl => CFG_ETH_IPL)
-      port map(rst   => rstn, clk => clkm, ahbmi => ahbmi,
-               ahbmo => ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_SVGA_ENABLE), apbi => apbi,
-               apbo  => apbo(15), ethi => ethi, etho => etho); 
-
---    emdio_pad : iopad generic map (tech => padtech)
---      port map (emdio, etho.mdio_o, etho.mdio_oe, ethi.mdio_i);
---    etxc_pad : inpad generic map (tech => padtech)
---      port map (etx_clk, ethi.tx_clk);
---    erxc_pad : inpad generic map (tech => padtech)
---      port map (erx_clk, ethi.rx_clk);
---    erxd_pad : inpadv generic map (tech => padtech, width => 4)
---      port map (erxd, ethi.rxd(3 downto 0));
---    erxdv_pad : inpad generic map (tech => padtech)
---      port map (erx_dv, ethi.rx_dv);
---    erxer_pad : inpad generic map (tech => padtech)
---      port map (erx_er, ethi.rx_er);
---    erxco_pad : inpad generic map (tech => padtech)
---      port map (erx_col, ethi.rx_col);
---    erxcr_pad : inpad generic map (tech => padtech)
---      port map (erx_crs, ethi.rx_crs);
-
---    etxd_pad : outpadv generic map (tech => padtech, width => 4)
---      port map (etxd, etho.txd(3 downto 0));
---    etxen_pad : outpad generic map (tech => padtech)
---      port map (etx_en, etho.tx_en);
---    etxer_pad : outpad generic map (tech => padtech)
---      port map (etx_er, etho.tx_er);
---    emdc_pad : outpad generic map (tech => padtech)
---      port map (emdc, etho.mdc);
-
---    emdis_pad : outpad generic map (tech => padtech)
---      port map (emddis, vcc(0));
---    eepwrdwn_pad : outpad generic map (tech => padtech)
---      port map (epwrdwn, gnd(0));
---    esleep_pad : outpad generic map (tech => padtech)
---      port map (esleep, gnd(0));
---    epause_pad : outpad generic map (tech => padtech)
---      port map (epause, gnd(0));
---    ereset_pad : outpad generic map (tech => padtech)
---      port map (ereset, gnd(0));
-
-  end generate;
-
------------------------------------------------------------------------
----  ATA Controller ---------------------------------------------------
------------------------------------------------------------------------
-  atac : if CFG_ATA = 1 generate
-    atac0 : atactrl
-      generic map(
-        shindex => 5,
-        haddr   => CFG_ATAIO,
-        hmask   => 16#fff#,
-        pirq    => CFG_ATAIRQ,
-
-        TWIDTH => 8,                    -- counter width
-
-        -- PIO mode 0 settings (@100MHz clock)
-        PIO_mode0_T1   => 6,            -- 70ns
-        PIO_mode0_T2   => 28,           -- 290ns
-        PIO_mode0_T4   => 2,            -- 30ns
-        PIO_mode0_Teoc => 23   -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
-        )
-      port map(
-        rst   => rstn,
-        arst  => '1',
-        clk   => clkm,
-        ahbsi => ahbsi,
-        ahbso => ahbso(5),
-        ahbmo => open,
-        ahbmi => ahbmi,
-
-        -- ATA signals
-        atai => atai,
-        atao => atao
-        );
-
---    ata_rst_pad : outpad generic map (tech => padtech)
---      port map (ata_rst, atao.rstn);
---    ata_data_pad : iopadv generic map (tech => padtech, width => 16, oepol => 1)
---      port map (ata_data, atao.ddo, atao.oen, atai.ddi);
---    ata_da_pad : outpadv generic map (tech => padtech, width => 3)
---      port map (ata_da, atao.da);
---    ata_cs0_pad : outpad generic map (tech => padtech)
---      port map (ata_cs0, atao.cs0);
---    ata_cs1_pad : outpad generic map (tech => padtech)
---      port map (ata_cs1, atao.cs1);
---    ata_dior_pad : outpad generic map (tech => padtech)
---      port map (ata_dior, atao.dior);
---    ata_diow_pad : outpad generic map (tech => padtech)
---      port map (ata_diow, atao.diow);
---    iordy_pad : inpad generic map (tech => padtech)
---      port map (ata_iordy, atai.iordy);
---    intrq_pad : inpad generic map (tech => padtech)
---      port map (ata_intrq, atai.intrq);
---    dmack_pad : outpad generic map (tech => padtech)
---      port map (ata_dmack, atao.dmack);
-  end generate;
-
------------------------------------------------------------------------
 ---  AHB ROM ----------------------------------------------------------
 -----------------------------------------------------------------------
 
-  bpromgen : if CFG_AHBROMEN /= 0 generate
-    brom : entity work.ahbrom
-      generic map (hindex => 6, haddr => CFG_AHBRODDR, pipe => CFG_AHBROPIP)
-      port map (rstn, clkm, ahbsi, ahbso(6));
-  end generate;
-  nobpromgen : if CFG_AHBROMEN = 0 generate
-    ahbso(6) <= ahbs_none;
-  end generate;
+--  bpromgen : if CFG_AHBROMEN /= 0 generate
+--    brom : entity work.ahbrom
+--      generic map (hindex => 6, haddr => CFG_AHBRODDR, pipe => CFG_AHBROPIP)
+--      port map (rstn, clkm, ahbsi, ahbso(6));
+--  end generate;
+--  nobpromgen : if CFG_AHBROMEN = 0 generate
+--    ahbso(6) <= ahbs_none;
+--  end generate;
 
 -----------------------------------------------------------------------
 ---  AHB RAM ----------------------------------------------------------
 -----------------------------------------------------------------------
 
-  ahbramgen : if CFG_AHBRAMEN = 1 generate
-    ahbram0 : ahbram generic map (hindex => 3, haddr => CFG_AHBRADDR,
-                                  tech   => CFG_MEMTECH, kbytes => CFG_AHBRSZ)
-      port map (rstn, clkm, ahbsi, ahbso(3));
-  end generate;
-  nram : if CFG_AHBRAMEN = 0 generate ahbso(3) <= ahbs_none; end generate;
-
------------------------------------------------------------------------
----  AHB DAC IF -------------------------------------------------------
------------------------------------------------------------------------
-
---  dac_ahb_inst : if CFG_DAC_AHB /= 0 generate
---    dac_ahb_1 : dac_ahb
---      generic map(length => 16, hindex => 4, haddr => 16#010#, hmask => 16#FFF#, tech => fabtech, kbytes => 1)
---      port map(rst       => rstn, clk => clkm, ahbsi => ahbsi, ahbso => ahbso(4), dac_out => dac);
+--  ahbramgen : if CFG_AHBRAMEN = 1 generate
+--    ahbram0 : ahbram generic map (hindex => 3, haddr => CFG_AHBRADDR,
+--                                  tech   => CFG_MEMTECH, kbytes => CFG_AHBRSZ)
+--      port map (rstn, clkm, ahbsi, ahbso(3));
 --  end generate;
---  ndac_ahb_inst : if CFG_DAC_AHB = 0 generate
---    ahbso(4) <= ahbs_none;
---  end generate;
-
-  -----------------------------------------------------------------------------
-  -- HPI SECTION
-  -----------------------------------------------------------------------------
-
---  ahb2hpi_inst : if CFG_AHB2HPI /= 0 generate
---    ahb2hpi2_1 : ahb2hpi2
---      generic map (
---        counter_width => 4,
---        data_width    => 16,
---        address_width => 2,
---        hindex        => 7,
---        haddr         => 16#240#,
---        hmask         => 16#fff#)
---      port map (
---        HCLK      => clkm,
---        HRESETn   => rstn,
---        ahbso     => ahbso(7),
---        ahbsi     => ahbsi,
---        ADDR      => hpiaddr,
---        WDATA     => hpiwdata,
---        RDATA     => hpirdata,
---        nCS       => hpicsn,
---        nWR       => hpiwriten,
---        nRD       => hpirdn,
---        INT       => hpiint,
---        drive_bus => drive_bus,
---        dbg_equal => dbg_equal
---        );
-
---    hpidata <= hpiwdata when drive_bus = '1' else
---               (others => 'Z');
-
---    hpirdata <= hpidata;
-
---    hpiwrn <= hpiwriten;
-
---  end generate;
---  nahb2hpi_inst : if CFG_AHB2HPI = 0 generate
---    ahbso(7) <= ahbs_none;
---  end generate;
-
+--  nram : if CFG_AHBRAMEN = 0 generate ahbso(3) <= ahbs_none; end generate;
 
 -----------------------------------------------------------------------
 ---  Drive unused bus elements  ---------------------------------------
@@ -1079,7 +821,5 @@ begin
       mdel => 1
       );
 -- pragma translate_on
-
-
 
 end rtl;

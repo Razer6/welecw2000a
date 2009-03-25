@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : DSOConfig-p.vhd
+-- File       : PLL1.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
--- Created    : 2009-03-04
--- Last update: 2009-03-25
+-- Created    : 2009-03-24
+-- Last update: 2009-03-24
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -31,39 +31,39 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-03-04  1.0      
+-- 2009-03-24  1.0      
 -------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 
-package pDSOConfig is
+entity PLL1 is
+  port
+    (
+      inclk0 : in  std_logic := '0';
+      pllena : in  std_logic := '1';
+      c0     : out std_logic;
+      locked : out std_logic
+      );
+end PLL1;
 
-  -- DeviceAddr:
-  constant cWelec2012 : natural := 2012;
-  constant cWelec2014 : natural := 2014;
-  constant cWelec2022 : natural := 2022;
-  constant cWelec2024 : natural := 2024;
-  -- common for all minimal solutions with 1 Ch 14 Bit
-  -- and no VGA
-  constant cSandboxX  : natural := 1011;
-
-  constant cCurrentDevice : natural := cWelec2022;  -- can be read in the SFR(0)
-
-  -- downsampler settings
-  constant cDecimationStages : natural    := 5;
-  constant cChannels         : natural    := 2;
-  constant cADCsperChannel   : natural    := 4;
-  constant cADCClkRate       : natural    := 250E6;
-  constant cDesignClkRate    : natural    := 125E6;
-  constant cCPUClkRate       : natural    := 31250E3;
-  constant cAnSettStrobeRate : natural    := 2E3;  -- 1 kHz calibrator freq.
-  constant cResetActive      : std_ulogic := '0';
-  constant cADCBitWidth      : natural    := 8;
-  constant cBitWidth         : natural    := 9;
-  constant cExtTriggers      : natural    := 1;
-  constant cSRAMAddrWidth    : natural    := 19;   -- DwordAddr
-  constant cFLASHAddrWidth   : natural    := 23;   -- byte address
+architecture bhv of PLL1 is
+  signal   Clk      : std_ulogic := '1';
+  constant cClkTime : time       := 1 sec /(2*250E6);
+begin
   
-end;
+  process
+  begin
+    locked <= '0';
+--    wait until pllena = '1';
+    wait until inclk0 = '0';
+    wait until inclk0 = '1';
+    locked <= '1';
+    wait for 1 sec /(4*250E6);
+    loop
+      Clk <= not Clk;
+      wait for cClkTime;
+    end loop;
+  end process;
+  c0 <= Clk;
+  
+end architecture;

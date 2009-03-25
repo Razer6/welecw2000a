@@ -23,7 +23,7 @@ bool InitSignalCapture(Debugprint * Init, Target T, Language L){
 	TriggerR = (TriggerRegs *)   TRIGGERONCHADDR;
 	AnalogR  = (AnalogSettings *)ANALOGSETTINGSBANK7;
 	Init = &Print;
-	return InitDebugprint(&Print,T,L);
+	return InitDebugprint(Init,T,L);
 }
 
 bool SetTriggerInput (	const unsigned int noChannels, 
@@ -188,6 +188,7 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 	unsigned int i = 0;
 	unsigned int temp = 0;
 	unsigned int j = 0;
+	short dac = 0;
 	for(i = 0; i < NoCh; ++i){
 		switch (CaptureR->DeviceAddr) {
 			case WELEC2012:
@@ -218,10 +219,20 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 					}
 					/* send the configuration to the hardware*/
 					AnalogR->Bank7 = temp;
+					/*while ((loadmem((int)&AnalogR->Bank7) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
+					WaitUntilMaskedAndZero(&AnalogR->Bank7, (1 << ANALOGSETTINGSBUSY));
 					/* wait until the coils have switched*/
 					WaitMs(COIL_SWITCH_TIME);
 					temp &= ~(0xf); /* turn of the coils*/
 					AnalogR->Bank7 = temp;
+					/*while ((loadmem((int)&AnalogR->Bank7) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
+					WaitUntilMaskedAndZero(&AnalogR->Bank7, (1 << ANALOGSETTINGSBUSY));
+					/* Used DAC types are limited to 16 bits per protocol! */
+					dac = (short)Settings[i].DA_Offset;
+					temp = dac;
+					AnalogR->Bank6 = temp| (i << DAC_CH_OFFSET);
+					/*while ((loadmem((int)&AnalogR->Bank6) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
+					WaitUntilMaskedAndZero(&AnalogR->Bank6, (1 << ANALOGSETTINGSBUSY));
 				}
 				if (i == 1) {
 					for (j = 0; j < NoCh; ++j) {
@@ -245,10 +256,20 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 					}
 					/* send the configuration to the hardware*/
 					AnalogR->Bank5 = temp;
+					/*while ((loadmem((int)&AnalogR->Bank5) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
+					WaitUntilMaskedAndZero(&AnalogR->Bank5, (1 << ANALOGSETTINGSBUSY));
 					/* wait until the coils have switched*/
 					WaitMs(COIL_SWITCH_TIME);
 					temp &= ~(0xf); /* turn of the coils*/
 					AnalogR->Bank5 = temp;
+					/*while ((loadmem((int)&AnalogR->Bank5) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
+					WaitUntilMaskedAndZero(&AnalogR->Bank5, (1 << ANALOGSETTINGSBUSY));
+					/* Used DAC types are limited to 16 bits per protocol! */
+					dac = (short)Settings[i].DA_Offset;
+					temp = dac;
+					AnalogR->Bank6 = temp | (i << DAC_CH_OFFSET);
+					/*while ((loadmem((int)&AnalogR->Bank6) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
+					WaitUntilMaskedAndZero(&AnalogR->Bank6, (1 << ANALOGSETTINGSBUSY));
 				}
 				break;
 			default: 
@@ -264,51 +285,54 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 		unsigned int * RawData) 
 {
 	unsigned int i = 0;
-	int * StartAddr = 0;
+	int * StopAddr = 0;
 	volatile int * Addr = 0;
+	/* The compiler has bugs in the loop optimisation with the keyword volatile 
+	 * even with function call to get the data from an hw address + masking in a condition */
+	volatile int temp = 0; 
+
 	TriggerR->TriggerOnceAddr = 0;
 	TriggerR->TriggerOnceAddr = 1;
-	/*while (((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) == 0){*/
-	/*	i = i + 1;*/
-	/*	if (WaitTime > i) {*/
-	/*		return 0;*/
-	/*	}*/
-	/*	*/
-	/*} busy wait*/
-	while(1){
-		i++;
-		if (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) != 0){
-			break;
-		}
-		if (WaitTime > i) {
-			return 0;
-		}
-	}
-	StartAddr = (int *)(TRIGGER_MEM_BASE_ADDR + loadmem((int)&TriggerR->TriggerReadOffSetAddr));
 
-	/* The folowing 5 lines solve a feature (bug) in the hardware trigger, */
-	/* which is overwriting the first 16 samples at the end!*/
-	/*while(((int)StartAddr + 8*3) < TriggerR->TriggerCurrentAddr);*/
+	if (WaitTimeoutAndNotZero(&TriggerR->TriggerStatusRegister, 
+			(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
+		return 0;
+	}
+	temp = loadmem((int)&TriggerR->TriggerReadOffSetAddr);
+	StopAddr = (int *)(TRIGGER_MEM_BASE_ADDR + temp);
+
+	StopAddr++; /* matching 0 to end-1 */
+	Addr = StopAddr;
+
+	/* The folowing lines solve a feature in the hardware trigger, 
+	 * which is overwriting up the first 7 samples at the end!       
+	 * It is caused, because the trigger always writes 8 Samples per Channel at once */
 	while(1){
-		if (((int)StartAddr + 8*3) < loadmem((int)&TriggerR->TriggerCurrentAddr)){
+		temp = loadmem((int)&TriggerR->TriggerCurrentAddr); 
+		if (((int)StopAddr + 8) < temp){
 			break;
 		}
 	}
-/*	StartAddr--;
-	StartAddr--;
-	TriggerR->TriggerReadOffSetAddr = (int)StartAddr;  masking is done by the SFR itself!
-	StartAddr++;
-*/
-	/*while(((1 << TRIGGERRECORDINGBIT) & TriggerR->TriggerStatusRegister) != 0);*/
-	while(1){
-		if (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) == 0){
-			break;
+	if (8 > CaptureSize){
+		i = CaptureSize;
+	} else {
+		i = 8;
+	}
+	for (; i < 8; ++i){
+		RawData[0] = *Addr;
+		Addr++;
+		if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
 		}
 	}
 	
-	Addr = StartAddr+1;
-	i = 0;
-	while ((i < CaptureSize) && (Addr != StartAddr)){
+	/* Wait until the trigger buffer is full */
+	WaitUntilMaskedAndZero(&TriggerR->TriggerStatusRegister, (1 << TRIGGERRECORDINGBIT));
+	i = 8;
+	while ((i < CaptureSize)){
+		if  (Addr == StopAddr) {
+			return i;
+		}
 		RawData[i] = *Addr;
 		i++;
 		Addr++;
@@ -321,7 +345,7 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 
 /* returns read DWORDS*/
 unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
-			 const bool Start,
+			 bool Start,
 			 unsigned int CaptureSize,    /* size in DWORDs*/
 			 unsigned int * RawData,
 			 unsigned int FrameSize,
@@ -331,44 +355,44 @@ unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
 	/* TODO Idle wait*/
 	const int FMode = FastMode(SamplingFrequency,CPUFrequency);
 	unsigned int i = 0;
-	unsigned int StartAddr = 0;
+	unsigned int StopAddr = 0;
 	volatile unsigned int * Addr = 0;
 	unsigned int Frame = 0;
-	unsigned int ForwardStartAddr = 0;
+	unsigned int ForwardStopAddr = 0;
+	/* The compiler has bugs in the loop optimisation with the keyword volatile 
+	 * even with function call to get the data from an hw address + masking in a condition */
+	volatile int temp = 0; 
 	
 	if (FMode != 0) {
 		return FastCapture(WaitTime,CaptureSize, RawData);
 	} 
-	if (Start == false){
-		if (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) == 0){
-			return 0;
-		}
-	} else {
+	if (Start != false) {
 		TriggerR->TriggerOnceAddr = 0;
 		TriggerR->TriggerOnceAddr = 1;
-		while (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) == 0){
-			i = i + 1;
-			if (WaitTime > i) {
-				return 0;
-			}
-		}/* busy wait*/
+		if (WaitTimeoutAndNotZero(&TriggerR->TriggerStatusRegister, 
+					(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
+			return 0;
+		}
 	}
 	i = 0;
-	StartAddr = (TriggerR->TriggerReadOffSetAddr);
-	Addr = (int *)TRIGGER_MEM_BASE_ADDR + StartAddr;
+	StopAddr = (TriggerR->TriggerReadOffSetAddr) +1;
+	Addr = (int *)TRIGGER_MEM_BASE_ADDR + StopAddr;
 	/* abort if the trigger */
-	while (((1 << TRIGGERRECORDINGBIT) & loadmem((int)&TriggerR->TriggerStatusRegister)) != 0){
-/*	while(i < CaptureSize) {*/
-		if (i == CaptureSize) {
+	while (1) {
+		temp = loadmem((int)&TriggerR->TriggerStatusRegister);
+		if (((1 << TRIGGERRECORDINGBIT) & temp) == 0) {
 			return i;
 		}
-		ForwardStartAddr = (int)TriggerR->TriggerCurrentAddr;
-		ForwardStartAddr = ForwardStartAddr - (int)Addr - FrameSize;
-        	ForwardStartAddr &= (TRIGGER_MEM_SIZE-1);
-	/*	if (ForwardStartAddr > (TRIGGER_MEM_SIZE/2)) {*/
-		if (ForwardStartAddr > 0) {
-			StartAddr = StartAddr + FrameSize;
-			TriggerR->TriggerReadOffSetAddr = StartAddr;
+		if ((i == CaptureSize)){
+			return i;
+		}
+		ForwardStopAddr = (int)TriggerR->TriggerCurrentAddr;
+		ForwardStopAddr = ForwardStopAddr - (int)Addr - FrameSize;
+        	ForwardStopAddr &= (TRIGGER_MEM_SIZE-1);
+	/*	if (ForwardStopAddr > (TRIGGER_MEM_SIZE/2)) {*/
+		if (ForwardStopAddr > 0) {
+			StopAddr = StopAddr + FrameSize;
+			TriggerR->TriggerReadOffSetAddr = StopAddr;
 		} else {
 			/* here the race condition gets active if the ratio of */
 			/* FastMode is wrong!*/

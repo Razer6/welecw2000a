@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-11
+-- Last update: 2009-03-21
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -79,6 +79,7 @@ end entity;
 architecture RTL of SignalCapture is
   signal ResetAsync        : std_ulogic;
   signal ClkDesign         : std_ulogic;
+  signal ClkCPU            : std_ulogic;
   signal ADCout            : aADCout;
   signal DecimatorIn       : aAllData;
   signal DecimatorOut      : aDownSampled;
@@ -89,7 +90,8 @@ architecture RTL of SignalCapture is
   signal SlowInputValid    : std_ulogic;
   signal ExtTrigger        : std_ulogic;
 begin
-
+  
+  oClkCPU     <= ClkCPU;
   oClkDesign  <= ClkDesign;
   oResetAsync <= ResetAsync;
 
@@ -102,7 +104,7 @@ begin
       iADC    => iADC,
       oLocked => ResetAsync,
       oClk125 => ClkDesign,
-      oClk625 => oClkCPU,
+      oClk625 => ClkCPU,
       oClkADC => oClkADC,
       oData   => ADCout);
 
@@ -155,6 +157,7 @@ begin
   Trigger : entity DSO.TopTrigger
     port map (
       iClk        => ClkDesign,
+      iClkCPU     => ClkCPU,
       iResetAsync => ResetAsync,
       iCPUPort    => iTriggerCPUPort,
       oCPUPort    => oTriggerCPUPort,

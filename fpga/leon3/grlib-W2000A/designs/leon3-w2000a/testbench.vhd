@@ -36,11 +36,12 @@ use DSO.pDSOConfig.all;
 use DSO.Global.all;
 --use DSO.pshram.all;
 use DSO.pVGA.all;
-use DSO.pSFR.all;
-use DSO.pSpecialFunctionRegister.all;
-use DSO.pTrigger.all;
-use DSO.pSignalAccess.all;
-use DSO.pSRamPriorityAccess.all;
+--use DSO.pSFR.all;
+--use DSO.pSpecialFunctionRegister.all;
+--use DSO.pTrigger.all;
+--use DSO.pSignalAccess.all;
+--use DSO.pSRamPriorityAccess.all;
+use DSO.pLedsKeysAnalogSettings.all;
 
 use work.config.all;                    -- configuration
 use work.debug.all;
@@ -85,10 +86,7 @@ entity testbench is
 end;
 
 architecture behav of testbench is
-   signal    tck  :   std_ulogic;
-  signal  tms  :   std_ulogic;
-  signal  tdi  :   std_ulogic;
- signal   tdo  :  std_ulogic;
+
   signal iRXD : std_ulogic;             --RS232 
   signal oTXD : std_ulogic;
 
@@ -107,11 +105,9 @@ architecture behav of testbench is
   signal oOE_FLASH : std_ulogic;
   signal oCE_FLASH : std_ulogic;
   signal oWE_FLASH : std_ulogic;
-  --RESET_FLASH :out std_ulogic; connected to SW2
-  --ACC_FLASH :out std_ulogic;
 
   --SRAM
-  signal A_SRAM   : std_ulogic_vector (cSRAMAddrWidth+1 downto 0);
+  signal A_SRAM    : std_ulogic_vector (cSRAMAddrWidth+1 downto 0);
   signal bD_SRAM   : std_logic_vector (31 downto 0);  --inout
   signal oCE_SRAM  : std_ulogic;
   signal oWE_SRAM  : std_ulogic;
@@ -150,14 +146,14 @@ architecture behav of testbench is
   signal iFPGA2_T7   : std_ulogic;
 
   --CONTROL of inputs
-  signal iUx6        : std_ulogic;  -- not soldering register channels 1,2 è 3,4
+  signal iUx6        : std_ulogic;      -- not soldering register channels 1,2 è 3,4
   signal iUx11       : std_ulogic;      -- not soldering register channels 1,2
-  signal iAAQpin5    : std_ulogic;
+  signal AAQpin5     : std_ulogic;
   signal oCalibrator : std_ulogic;
 
 -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-  signal oPWMout  : std_ulogic;         --Level Of External Syncro
-  signal iSinhcro : std_ulogic;         --Comparator external syncro.
+  signal oPWMout  : std_ulogic;                     --Level Of External Syncro
+  signal iSinhcro : std_ulogic;                     --Comparator external syncro.
   signal oDesh    : std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
   signal oDeshENA : std_ulogic;
   signal oRegCLK  : std_ulogic;
@@ -173,149 +169,38 @@ architecture behav of testbench is
   signal oclk13out : std_ulogic;        --W12-U15
   signal iclk12_5  : std_ulogic := '0';
 
-  constant promfile  : string := "prom.srec";   -- rom contents
-  constant sramfile  : string := "sram.srec";   -- ram contents
-  constant sdramfile : string := "sdram.srec";  -- sdram contents
-
+  constant promfile : string := "prom.srec";  -- rom contents
+  constant sramfile : string := "sram.srec";  -- ram contents
 
   signal   clk : std_logic := '0';
   signal   Rst : std_logic := '0';      -- Reset
   constant ct  : integer   := clkperiod/2;
 
-  signal address : std_logic_vector(27 downto 0);
-  signal data    : std_logic_vector(31 downto 0);
-
-  signal ramsn  : std_logic_vector(4 downto 0);
-  signal ramoen : std_logic_vector(4 downto 0);
   signal romsn  : std_logic_vector(1 downto 0);
-  signal iosn   : std_ulogic;
   signal oen    : std_ulogic;
   signal read   : std_ulogic;
   signal writen : std_ulogic;
   signal rben   : std_logic_vector(3 downto 0);
   signal rwen   : std_logic_vector(3 downto 0);
 
-
-  signal brdyn                               : std_ulogic;
-  signal bexcn                               : std_ulogic;
-  signal wdog                                : std_ulogic;
-  signal dsuen, dsutx, dsurx, dsubre, dsuact : std_ulogic;
-  signal dsurst                              : std_ulogic;
-  signal test                                : std_ulogic;
+  signal test : std_ulogic;
 
   signal error : std_logic;
 
-  signal pio  : std_logic_vector(15 downto 0);
   signal GND  : std_ulogic := '0';
   signal VCC  : std_ulogic := '1';
   signal NC   : std_ulogic := 'Z';
   signal clk2 : std_ulogic := '1';
 
-  signal sdcke  : std_logic_vector (1 downto 0);  -- clk en
-  signal sdcsn  : std_logic_vector (1 downto 0);  -- chip sel
-  signal sdwen  : std_ulogic;                     -- write en
-  signal sdrasn : std_ulogic;                     -- row addr stb
-  signal sdcasn : std_ulogic;                     -- col addr stb
-  signal sddqm  : std_logic_vector (3 downto 0);  -- data i/o mask
-  signal sd_clk : std_logic_vector(1 downto 0);
-
-  signal sdclk   : std_ulogic;
---  alias sdclk   : std_logic is sd_clk(0);
-  signal plllock : std_ulogic;
 
 -- pulled up high, therefore std_logic
   signal txd1, rxd1 : std_logic;
 
-  signal etx_clk, erx_clk, erx_dv, erx_er, erx_col, erx_crs, etx_en, etx_er : std_logic                    := '0';
-  signal erxd, etxd                                                         : std_logic_vector(3 downto 0) := (others => '0');
-  signal emdc, emdio                                                        : std_logic;  --dummy signal for the mdc,mdio in the phy which is not used
-
-  signal emddis  : std_logic;
-  signal epwrdwn : std_logic;
-  signal ereset  : std_logic;
-  signal esleep  : std_logic;
-  signal epause  : std_logic;
-  signal tp_out  : std_logic_vector(7 downto 0);
-  signal led_cfg : std_logic_vector(2 downto 0);
-
-  constant lresp : boolean := false;
-
-  signal sa : std_logic_vector(14 downto 0);
-  signal sd : std_logic_vector(63 downto 0);
-
-  -- ATA signals
-  signal ata_rst   : std_logic;
-  signal ata_data  : std_logic_vector(15 downto 0);
-  signal ata_da    : std_logic_vector(2 downto 0);
-  signal ata_cs0   : std_logic;
-  signal ata_cs1   : std_logic;
-  signal ata_dior  : std_logic;
-  signal ata_diow  : std_logic;
-  signal ata_iordy : std_logic;
-  signal ata_intrq : std_logic;
-  signal ata_dmack : std_logic;
-
+  signal   dstrst, dsutx, dsurx, dsurst : std_ulogic;
+  constant lresp                        : boolean := false;
 -- Added for Hpe
 
   signal resoutn : std_logic;
-  signal disrams : std_logic;
-  signal sdclk0  : std_ulogic;
-  signal sdclk1  : std_ulogic;
-  signal sdba0   : std_logic;           -- bank address zero
-  signal sdba1   : std_logic;           -- bank address one
-  signal dsubren : std_ulogic;
-  signal dsuactn : std_ulogic;
-  signal bufdir  : std_logic;
-  signal bufoen  : std_logic;
-  signal s_sddqm : std_logic_vector (3 downto 0);
-
-  signal HRESETn   : std_ulogic;
-  signal HSEL      : std_ulogic;
-  signal HREADY_ba : std_ulogic;        -- hready input signal
-  signal HADDR     : std_logic_vector(31 downto 0);
-  signal HWRITE    : std_ulogic;
-  signal HTRANS    : std_logic_vector(1 downto 0);
-  signal HSIZE     : std_logic_vector(2 downto 0);
-  signal HBURST    : std_logic_vector(2 downto 0);
-  signal HWDATA    : std_logic_vector(31 downto 0);
-  signal HMASTER   : std_logic_vector(3 downto 0);
-  signal HMASTLOCK : std_ulogic;
-  signal HREADY    : std_ulogic;
-  signal HRESP     : std_logic_vector(1 downto 0);
-  signal HRDATA    : std_logic_vector(31 downto 0);
-  signal HSPLIT    : std_logic_vector(15 downto 0);
-
-  signal clk_ctrl        : std_logic_vector(1 downto 0);  -- cpld      
-  signal CAN_RXD         : std_logic;
-  signal CAN_TXD         : std_logic;
-  signal CAN_STB         : std_logic;
-  signal CAN_TXD_delayed : std_logic := '1';
-  signal gpio            : std_logic_vector(7 downto 0);
-
-  signal dac : std_ulogic;              -- ouput of sigma delta DAC
-
-  subtype sd_address_range is natural range 14 downto 2;
-  subtype sd_ba_range is natural range 16 downto 15;
-
-  signal vga_vsync : std_ulogic;
-  signal vga_hsync : std_ulogic;
-  signal vga_rd    : std_logic_vector(1 downto 0);
-  signal vga_gr    : std_logic_vector(1 downto 0);
-  signal vga_bl    : std_logic_vector(1 downto 0);
-
-  ---------------------------------------------------------------------------------------
-  -- HPI SIGNALS
-  ---------------------------------------------------------------------------------------
-  signal hpiaddr           : std_logic_vector(1 downto 0);
-  signal hpidata, hpirdata : std_logic_vector(15 downto 0);
-  signal hpicsn            : std_ulogic;
-  signal hpiwrn            : std_ulogic;
-  signal hpirdn            : std_ulogic;
-  signal hpiint            : std_ulogic;
-  signal dbg_equal         : std_ulogic;
-  signal drive_bus         : std_ulogic;
-  ---------------------------------------------------------------------------------------
-
 
 -----------------------------------------------------------------------------------------
 -- Scope input data generation
@@ -333,6 +218,7 @@ architecture behav of testbench is
     end loop;
     return vRet;
   end function;
+
   constant cWaveFileNames : aWaveFileNames := WaveFileNames(cChannels, cADCsperChannel);
   signal   ADCData        : aADCIn;
   signal   ADCClk         : std_ulogic_vector(0 to 3);
@@ -347,8 +233,82 @@ architecture behav of testbench is
       oData       : out std_ulogic_vector(gBitWidth-1 downto 0));
   end component;
   
+  component StoP_hc595 is
+  port (
+    iSD    : in  std_ulogic;
+    iSCK   : in  std_ulogic;
+    inSCLR : in  std_ulogic;
+    iRCK   : in  std_ulogic;
+    iG     : in  std_ulogic;
+    oSD    : out std_ulogic;
+    oQ     : out std_ulogic_vector (0 to 7));
+  end component;
+  
+  component PtoS_hct165 is
+    port (
+      iSD  : in  std_ulogic;
+      iCK  : in  std_ulogic;
+      inCE : in  std_ulogic;
+      inPL : in  std_ulogic;
+      iPD  : in  std_ulogic_vector(0 to 7);
+      oQ   : out std_ulogic;
+      onQ  : out std_ulogic);
+  end component;
+
+
+ -- signal Keys : aKeys;
+ -- signal Leds : aLeds;
+
+  type aAnalogSettingsBank5 is record
+                                 CH1_K1_ON     : std_ulogic;
+                                 CH1_K1_OFF    : std_ulogic;
+                                 CH1_K2_ON     : std_ulogic;
+                                 CH1_K2_OFF    : std_ulogic;
+                                 CH1_OPA656    : std_ulogic;
+                                 CH1_BW_Limit  : std_ulogic;
+                                 CH1_U14       : std_ulogic;
+                                 CH1_U13       : std_ulogic;
+                                 CH0_src2_addr : std_ulogic_vector(1 downto 0);
+                                 CH1_src2_addr : std_ulogic_vector(1 downto 0);
+                                 CH2_src2_addr : std_ulogic_vector(1 downto 0);
+                                 CH3_src2_addr : std_ulogic_vector(1 downto 0);
+                               end record;
+  
+  type aAnalogSettingsBank7 is record
+                                 CH0_K1_ON    : std_ulogic;
+                                 CH0_K1_OFF   : std_ulogic;
+                                 CH0_K2_ON    : std_ulogic;
+                                 CH0_K2_OFF   : std_ulogic;
+                                 CH0_OPA656   : std_ulogic;
+                                 CH0_BW_Limit : std_ulogic;
+                                 CH0_U14      : std_ulogic;
+                                 CH0_U13      : std_ulogic;
+                                 CH0_DC       : std_ulogic;
+                                 CH1_DC       : std_ulogic;
+                                 CH2_DC       : std_ulogic;
+                                 CH3_DC       : std_ulogic;
+                               end record;
+  
+  -- leds, leys, analog settings
+  signal DAC_A, DAC_B   : real;
+  signal ASEnable       : std_ulogic_vector(0 to 7);
+  signal DACEn          : std_ulogic;
+  signal ASDCh0, ASDCh1 : std_ulogic;
+  
+  constant cLedBanks : natural := 2;
+  constant cKeyBanks : natural := 7;
+  signal LedSD : std_ulogic_vector(0 to cLedBanks);
+  signal KeySD : std_ulogic_vector(0 to cKeyBanks);
+  type aKeyData is array (0 to cKeyBanks-1) of std_ulogic_vector(0 to 7);
+  signal KeyData : aKeyData := (
+    0 => X"F0",
+    1 => X"FF",
+    2 to cKeyBanks-2 => X"A5",
+    cKeyBanks-1 => X"0F");
+  
   
 begin
+  
   
   ADC : for i in 0 to cChannels-1 generate
     CH : for j in 0 to cADCsperChannel-1 generate
@@ -375,28 +335,107 @@ begin
       iGreen => Green(5 downto 4),
       iBlue  => Blue(5 downto 4));
 
+  iclk25_2  <= clk;
+  iclk25_7  <= clk;
+  iclk25_10 <= clk;
+  iclk25_15 <= clk;
+  iclk13inp <= oclk13out;
+  iclk12_5  <= not iclk12_5 after ct * 2 ns;
 
-  -- iClkDesign  <= clk;
-  -- iResetAsync <= rst;
+  MUX : entity work.DeMux_HCT238
+    port map (
+      iA   => oDesh,
+      inE1 => '0',
+      inE2 => '0',
+      iE3  => oDeshENA,
+      oQ   => ASEnable);
 
+  DACEn <= not ASEnable(6);
+  DAC : entity work.DAC_LTC2612
+    generic map (gUnusedDataBits => 2)
+    port map (
+      inCE => DACEn,
+      iSCK => oRegCLK,
+      iSD  => oRegData,
+      iRef => 2.5,
+      oA   => DAC_A,
+      oB   => DAC_B,
+      iGND => -2.5);
 
-  iclk25_2              <= clk;
-  iclk25_7              <= clk;
-  iclk25_10             <= clk;
-  iclk25_15             <= clk;
-  iclk13inp             <= oclk13out;
-  iclk12_5              <= not iclk12_5 after ct * 2 ns;
-  -- original hpe mini testbench
-  dsubren               <= not dsubre;
-  disrams               <= '0';
-  address(27 downto 16) <= (others => '0');
-  address(1 downto 0)   <= (others => '0');
+  CH0_RegL : entity work.StoP_hc595
+    port map (
+      iSD    => oRegData,
+      iSCK   => oRegCLK,
+      inSCLR => '1',
+      iRCK   => ASEnable(7),
+      iG     => '1',
+      oSD    => ASDCh0,
+      oQ     => open);
+
+  CH0_RegH : entity work.StoP_hc595
+    port map (
+      iSD    => ASDCh0,
+      iSCK   => oRegCLK,
+      inSCLR => '1',
+      iRCK   => ASEnable(7),
+      iG     => '1',
+      oSD    => open,
+      oQ     => open);
+
+  CH1_RegL : entity work.StoP_hc595
+    port map (
+      iSD    => oRegData,
+      iSCK   => oRegCLK,
+      inSCLR => '1',
+      iRCK   => ASEnable(5),
+      iG     => '1',
+      oSD    => ASDCh1,
+      oQ     => open);
+
+  CH1_RegH : entity work.StoP_hc595
+    port map (
+      iSD    => ASDCh1,
+      iSCK   => oRegCLK,
+      inSCLR => '1',
+      iRCK   => ASEnable(5),
+      iG     => '1',
+      oSD    => open,
+      oQ     => open);
+
+  
+  iFPSW_DOUT <= KeySD(cKeyBanks);
+  KeySD(0) <= '-';
+  pKeys : for i in 0 to cKeyBanks-1 generate
+    Bank : PtoS_hct165
+      port map (
+        iSD  => KeySD(i),
+        iCK  => oFPSW_CLK,
+        inCE => '0',
+        inPL => oFPSW_PE,
+        iPD  => KeyData(i),
+        oQ   => KeySD(i+1),
+        onQ  => open);
+  end generate;
+  
+  LedSD(0) <= oFPLED_DIN;
+  pLeds : for i in 0 to cLedBanks-1 generate
+    Bank : StoP_hc595
+      port map (
+        iSD    => LedSD(i),
+        iSCK   => oFPLED_CLK,
+        inSCLR => '1',
+        iRCK   => oFPLED_WR,
+        iG     => oFPLED_OE,
+        oSD    => LedSD(i+1),
+        oQ     => open);
+  end generate;
+
+-- original hpe mini testbench
 -- clock and reset
 
-  clk     <= not clk after ct * 1 ns;
-  rst     <= '1'     after 10 ns;
-  dsuen   <= '0'; dsubre <= '0'; rxd1 <= 'H';
-  led_cfg <= "000";                     --put the phy in base10h mode
+  clk  <= not clk after ct * 1 ns;
+  rst  <= '1'     after 10 ns;
+  rxd1 <= 'H';
 
   d3 : entity work.leon3mini
     generic map (
@@ -404,10 +443,6 @@ begin
       clktech => clktech, disas => disas, dbguart => dbguart,
       pclow   => pclow)
     port map (
-      tck  => tck,
-    tms   => tms,
-    tdi   => tdi,
-    tdo   => tdo,
       --RS232
       iRXD => iRXD,                     --RS232 
       oTXD => oTXD,
@@ -470,9 +505,9 @@ begin
       iFPGA2_T7   => iFPGA2_T7,
 
       --CONTROL of inputs
-      iUx6        => iUx6,   -- not soldering register channels 1,2 è 3,4
+      iUx6        => iUx6,              -- not soldering register channels 1,2 è 3,4
       iUx11       => iUx11,             -- not soldering register channels 1,2
-      iAAQpin5    => iAAQpin5,
+      oAAQpin5    => AAQpin5,
       oCalibrator => oCalibrator,
 
       -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
@@ -506,133 +541,9 @@ begin
       oclk13out => oclk13out,           --W12-U15
       iclk12_5  => iclk12_5,
 
-
-      --   resetn  => rst,
       resoutn => resoutn,
-      --   clk     => clk,
-      errorn  => error,
---      address => address(15 downto 2),
---      data    => data,
---      sdclk   => sdclk,
---      sdcke   => sdcke,
---      sdcsn   => sdcsn,
---      sdwen   => sdwen,
---      sdrasn  => sdrasn,
---      sdcasn  => sdcasn,
---      sddqm   => sddqm(3 downto 0),     -- topmost bits are undriven
---      sdba    => sa(14 downto 13),
-
---      sertx     => dsutx,
---      serrx     => dsurx,
---      sersrcsel => gnd,                 -- select serial DCL
-
---      dsuen   => dsuen,
-      dsubre  => dsubre
---      dsuactn => dsuactn
-
---      txd1    => txd1,
---      rxd1    => rxd1,
-
---      gpio => gpio,
-
---      ramsn  => ramsn,
---      ramoen => ramoen,
---      oen    => oen,
---      rben   => rben,
---      rwen   => rwen,
---      writen => writen,
---      read   => read,
---      iosn   => iosn,
---      romsn  => romsn,
-
---      emdio   => emdio,
---      etx_clk => etx_clk,
---      erx_clk => erx_clk,
---      erxd    => erxd,
---      erx_dv  => erx_dv,
---      erx_er  => erx_er,
---      erx_col => erx_col,
---      erx_crs => erx_crs,
---      etxd    => etxd,
---      etx_en  => etx_en,
---      etx_er  => etx_er,
---      emdc    => emdc,
-
---      ata_rst   => ata_rst,
---      ata_data  => ata_data,
---      ata_da    => ata_da,
---      ata_cs0   => ata_cs0,
---      ata_cs1   => ata_cs1,
---      ata_dior  => ata_dior,
---      ata_diow  => ata_diow,
---      ata_iordy => ata_iordy,
---      ata_intrq => ata_intrq,
---      ata_dmack => ata_dmack,
-
---      hpiaddr   => hpiaddr,
---      hpidata   => hpidata,
---      hpicsn    => hpicsn,
---      hpiwrn    => hpiwrn,
---      hpirdn    => hpirdn,
---      hpiint    => hpiint,
---      dbg_equal => dbg_equal,
-----      drive_bus => drive_bus,
-
-
---      dac       => dac,
---      vga_vsync => vga_vsync,
---      vga_hsync => vga_hsync,
---      vga_rd    => vga_rd,
---      vga_gr    => vga_gr,
---      vga_bl    => vga_bl
+      errorn  => error
       );
-
-  hpidata <= hpirdata when hpirdn = '0' else (others => 'Z');
-
-  hpiint <= '0';
-
-  hpi_ram_1 : hpi_ram
-    generic map (
-      abits => 10,
-      dbits => 16)
-    port map (
-      clk     => clk,
-      address => hpiaddr,
-      datain  => hpidata,
-      dataout => hpirdata,
-      writen  => hpiwrn,
-      readn   => hpirdn,
-      csn     => hpicsn
-      );
-
--- optional sdram
-
---  sd0 : if (CFG_MCTRL_SDEN = 1) generate
---    u0 : mt48lc16m16a2 generic map (index => 0, fname => sdramfile)
---      port map(
---        Dq   => data(31 downto 16), Addr => address(sd_address_range),
---        Ba   => address(sd_ba_range), Clk => sdclk, Cke => sdcke(0),
---        Cs_n => sdcsn(0), Ras_n => sdrasn, Cas_n => sdcasn, We_n => sdwen,
---        Dqm  => sddqm(3 downto 2));
---    u1 : mt48lc16m16a2 generic map (index => 16, fname => sdramfile)
---      port map(
---        Dq   => data(15 downto 0), Addr => address(sd_address_range),
---        Ba   => address(sd_ba_range), Clk => sdclk, Cke => sdcke(0),
---        Cs_n => sdcsn(0), Ras_n => sdrasn, Cas_n => sdcasn, We_n => sdwen,
---        Dqm  => sddqm(1 downto 0));
---    u2 : mt48lc16m16a2 generic map (index => 0, fname => sdramfile)
---      port map(
---        Dq   => data(31 downto 16), Addr => address(sd_address_range),
---        Ba   => address(sd_ba_range), Clk => sdclk, Cke => sdcke(0),
---        Cs_n => sdcsn(1), Ras_n => sdrasn, Cas_n => sdcasn, We_n => sdwen,
---        Dqm  => sddqm(3 downto 2));
---    u3 : mt48lc16m16a2 generic map (index => 16, fname => sdramfile)
---      port map(
---        Dq   => data(15 downto 0), Addr => address(sd_address_range),
---        Ba   => address(sd_ba_range), Clk => sdclk, Cke => sdcke(0),
---        Cs_n => sdcsn(1), Ras_n => sdrasn, Cas_n => sdcasn, We_n => sdwen,
---        Dqm  => sddqm(1 downto 0));
---  end generate;
 
 --  extbprom : if CFG_BOOTOPT = 0 generate
 --    prom0 : for i in 0 to (romwidth/8)-1 generate
@@ -649,7 +560,7 @@ begin
 --                --         rben(0), ramoen(0));    -- **** tame: changed rwen to rben
 --                 rwen(0), ramoen(0));
 --  end generate;
-  
+
 --  sram0 : entity work.AsyncSRAM
 --    generic map (
 --      gFileName  => "sram.bin",
@@ -673,38 +584,7 @@ begin
         oe  => oOE_SRAM);
   end generate;
 
-  -- phy0 : if CFG_GRETH > 0 generate
-  --   p0 : phy
-  --     port map(rst, 
-  --     led_cfg(0), 
-  --     open, 
-  --     etx_clk, 
-  --     erx_clk, 
-  --     std_ulogic_vector(erxd), 
-  --     erx_dv,
-  --     erx_er, 
-  --     erx_col, 
-  --     erx_crs, 
-  --     std_ulogic_vector(etxd), 
-  --     etx_en, 
-  --     etx_er, 
-  --     emdc
-  --     );
-  -- end generate;
   error <= 'H';                         -- ERROR pull-up
-
-  --ata_dev0 : ata_device
-  --  port map(
-  --    ata_rst_n  => ata_rst,
-  --    ata_data   => ata_data,
-  --    ata_da     => ata_da,
-  --    ata_cs0    => ata_cs0,
-  --    ata_cs1    => ata_cs1,
-  --    ata_dior_n => ata_dior,
-  --    ata_diow_n => ata_diow,
-  --    ata_iordy  => ata_iordy,
-  --    ata_intrq  => ata_intrq
-  --    );
 
   iuerr : process(error)
   begin
@@ -712,9 +592,6 @@ begin
       report "*** IU in error mode, simulation halted ***"
       severity failure;
   end process;
-
-  data <= buskeep(data), (others => 'H') after 250 ns;
-  sd   <= buskeep(sd), (others   => 'H') after 250 ns;
 
   -- test0 : grtestmod
   --   port map (rst, clk, error, address(21 downto 2), data,

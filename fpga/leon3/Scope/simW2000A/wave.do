@@ -45,7 +45,6 @@ add wave -noupdate -format Logic /testbench/d3/ifpga2_w9
 add wave -noupdate -format Logic /testbench/d3/ifpga2_t7
 add wave -noupdate -format Logic /testbench/d3/iux6
 add wave -noupdate -format Logic /testbench/d3/iux11
-add wave -noupdate -format Logic /testbench/d3/iaaqpin5
 add wave -noupdate -format Logic /testbench/d3/ocalibrator
 add wave -noupdate -format Logic /testbench/d3/opwmout
 add wave -noupdate -format Logic /testbench/d3/isinhcro
@@ -76,10 +75,6 @@ add wave -noupdate -format Logic /testbench/d3/resoutn
 add wave -noupdate -format Logic /testbench/d3/errorn
 add wave -noupdate -format Logic /testbench/d3/dsuen
 add wave -noupdate -format Logic /testbench/d3/dsubre
-add wave -noupdate -format Logic /testbench/d3/dsuactn
-add wave -noupdate -format Logic /testbench/d3/serrx
-add wave -noupdate -format Logic /testbench/d3/sertx
-add wave -noupdate -format Logic /testbench/d3/sersrcsel
 add wave -noupdate -format Logic /testbench/d3/resetasync
 add wave -noupdate -format Logic /testbench/d3/clkdesign
 add wave -noupdate -format Logic /testbench/d3/clkcpu
@@ -87,16 +82,12 @@ add wave -noupdate -format Literal /testbench/d3/clkadc25
 add wave -noupdate -format Literal /testbench/d3/clkadc250
 add wave -noupdate -format Logic /testbench/d3/clklocked
 add wave -noupdate -format Literal /testbench/d3/adcin
-add wave -noupdate -format Literal /testbench/d3/analogamplification
-add wave -noupdate -format Logic /testbench/d3/exttrigger
 add wave -noupdate -format Literal /testbench/d3/triggermemtocpu
 add wave -noupdate -format Literal /testbench/d3/cputotriggermem
 add wave -noupdate -format Literal /testbench/d3/sfrcontroltocpu
 add wave -noupdate -format Literal /testbench/d3/sfrcontrolfromcpu
 add wave -noupdate -format Literal /testbench/d3/ledstopanel
 add wave -noupdate -format Literal /testbench/d3/keysfrompanel
-add wave -noupdate -format Logic /testbench/d3/keyinterruptlh
-add wave -noupdate -format Logic /testbench/d3/keyinterrupthl
 add wave -noupdate -format Literal /testbench/d3/vcc
 add wave -noupdate -format Literal /testbench/d3/gnd
 add wave -noupdate -format Literal /testbench/d3/memi
@@ -157,9 +148,6 @@ add wave -noupdate -format Logic /testbench/d3/rxd1
 add wave -noupdate -format Logic /testbench/d3/txd1
 add wave -noupdate -format Logic /testbench/d3/dsutx
 add wave -noupdate -format Logic /testbench/d3/dsurx
-add wave -noupdate -format Logic /testbench/d3/hpiwriten
-add wave -noupdate -format Literal /testbench/d3/hpirdata
-add wave -noupdate -format Literal /testbench/d3/hpiwdata
 add wave -noupdate -format Logic /testbench/d3/drive_bus
 add wave -noupdate -format Literal /testbench/d3/dbg_rdata
 add wave -noupdate -format Literal /testbench/d3/dbg_wdata
@@ -186,7 +174,7 @@ add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/osfrcontrol
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rd
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/wr
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
-add wave -noupdate -divider {6 Bit VGA}
+add wave -noupdate -divider {Memory Controller}
 add wave -noupdate -format Logic /testbench/d3/mg2/sr1/rst
 add wave -noupdate -format Logic /testbench/d3/mg2/sr1/clk
 add wave -noupdate -format Literal -expand /testbench/d3/mg2/sr1/memi
@@ -208,10 +196,123 @@ add wave -noupdate -format Literal /testbench/d3/mg2/sr1/rrsbdrive
 add wave -noupdate -format Literal /testbench/d3/mg2/sr1/rsbdrive
 add wave -noupdate -format Literal /testbench/d3/mg2/sr1/risbdrive
 add wave -noupdate -format Logic /testbench/d3/mg2/sr1/arst
+add wave -noupdate -divider {Trigger Memory}
+add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/rst_in
+add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/clk_i
+add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbsi
+add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbso
+add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/iclkdesign
+add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/iresetasync
+add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/itriggermem
+add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/otriggermem
+add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbout
+add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/memin
+add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/dataout
+add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/hready
+add wave -noupdate -divider {DSO SFR}
+add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rst_in
+add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/iresetasync
+add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/clk_i
+add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/apb_i
+add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/apb_o
+add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/isfrcontrol
+add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/osfrcontrol
+add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/addr
+add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rd
+add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/wr
+add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/idata
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/odata
+add wave -noupdate -divider Trigger
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclkcpu
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iresetasync
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/idata
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/ivalid
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iexttrigger
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/itriggermem
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/otriggermem
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/icpuport
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/ocpuport
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/r
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggerstrobes
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggerdata
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/triggerinvalid
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/aclr
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/datain
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/dataout
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/aligndata
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/readvalid
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/readalign
+add wave -noupdate -divider LedsKeysAnalogSettings
+add wave -noupdate -format Logic /testbench/d3/frontpanel/iclk
+add wave -noupdate -format Logic /testbench/d3/frontpanel/iresetasync
+add wave -noupdate -format Literal /testbench/d3/frontpanel/ileds
+add wave -noupdate -format Literal /testbench/d3/frontpanel/oleds
+add wave -noupdate -format Logic /testbench/d3/frontpanel/ikeysdata
+add wave -noupdate -format Literal /testbench/d3/frontpanel/onfetchkeys
+add wave -noupdate -format Literal /testbench/d3/frontpanel/okeys
+add wave -noupdate -format Literal /testbench/d3/frontpanel/icputoanalog
+add wave -noupdate -format Logic /testbench/d3/frontpanel/oanalogbusy
+add wave -noupdate -format Literal /testbench/d3/frontpanel/oanalogsettings
+add wave -noupdate -format Logic /testbench/d3/frontpanel/strobe
+add wave -noupdate -format Logic /testbench/d3/frontpanel/serialclk
+add wave -noupdate -format Literal /testbench/d3/frontpanel/ledshiftreg
+add wave -noupdate -format Literal /testbench/d3/frontpanel/ledcounter
+add wave -noupdate -format Literal /testbench/d3/frontpanel/keyshiftreg
+add wave -noupdate -format Literal /testbench/d3/frontpanel/keycounter
+add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/analogsettings
+add wave -noupdate -divider {Analog Input Perivials}
+add wave -noupdate -format Logic /testbench/dac/ince
+add wave -noupdate -format Logic /testbench/dac/isck
+add wave -noupdate -format Logic /testbench/dac/isd
+add wave -noupdate -format Literal /testbench/dac/iref
+add wave -noupdate -format Literal /testbench/dac/oa
+add wave -noupdate -format Literal /testbench/dac/ob
+add wave -noupdate -format Literal /testbench/dac/ignd
+add wave -noupdate -format Literal /testbench/dac/shift
+add wave -noupdate -format Literal /testbench/dac/a
+add wave -noupdate -format Literal /testbench/dac/b
+add wave -noupdate -format Logic /testbench/dac/aen
+add wave -noupdate -format Logic /testbench/dac/ben
+add wave -noupdate -format Logic /testbench/dac/au
+add wave -noupdate -format Logic /testbench/dac/bu
+add wave -noupdate -format Literal /testbench/dac/ao
+add wave -noupdate -format Literal /testbench/dac/bo
+add wave -noupdate -format Logic /testbench/ch0_regh/isd
+add wave -noupdate -format Logic /testbench/ch0_regh/isck
+add wave -noupdate -format Logic /testbench/ch0_regh/insclr
+add wave -noupdate -format Logic /testbench/ch0_regh/irck
+add wave -noupdate -format Logic /testbench/ch0_regh/ig
+add wave -noupdate -format Logic /testbench/ch0_regh/osd
+add wave -noupdate -format Literal /testbench/ch0_regh/oq
+add wave -noupdate -format Literal -expand /testbench/ch0_regh/reg
+add wave -noupdate -format Literal /testbench/ch0_regh/shift
+add wave -noupdate -format Literal /testbench/mux/ia
+add wave -noupdate -format Logic /testbench/mux/ie3
+add wave -noupdate -format Literal /testbench/mux/oq
+add wave -noupdate -format Logic /testbench/ch1_regl/isd
+add wave -noupdate -format Logic /testbench/ch1_regl/isck
+add wave -noupdate -format Logic /testbench/ch1_regl/insclr
+add wave -noupdate -format Logic /testbench/ch1_regl/irck
+add wave -noupdate -format Logic /testbench/ch1_regl/ig
+add wave -noupdate -format Logic /testbench/ch1_regl/osd
+add wave -noupdate -format Literal /testbench/ch1_regl/oq
+add wave -noupdate -format Literal -expand /testbench/ch1_regl/reg
+add wave -noupdate -format Literal /testbench/ch1_regl/shift
+add wave -noupdate -format Logic /testbench/ch1_regh/isd
+add wave -noupdate -format Logic /testbench/ch1_regh/isck
+add wave -noupdate -format Logic /testbench/ch1_regh/insclr
+add wave -noupdate -format Logic /testbench/ch1_regh/irck
+add wave -noupdate -format Logic /testbench/ch1_regh/ig
+add wave -noupdate -format Logic /testbench/ch1_regh/osd
+add wave -noupdate -format Literal /testbench/ch1_regh/oq
+add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
+add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {57445000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {157381132 ps} 0} {{Cursor 2} {121599000 ps} 0} {{Cursor 3} {198113 ps} 0}
 configure wave -namecolwidth 375
-configure wave -valuecolwidth 100
+configure wave -valuecolwidth 180
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
 configure wave -snapdistance 10
@@ -223,4 +324,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {59978590 ps} {60974812 ps}
+WaveRestoreZoom {0 ps} {59433962 ps}

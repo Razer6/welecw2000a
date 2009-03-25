@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : DSOConfig-p.vhd
+-- File       : DeMux_HCT238-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
--- Created    : 2009-03-04
--- Last update: 2009-03-25
+-- Created    : 2009-03-23
+-- Last update: 2009-03-23
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -31,39 +31,30 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-03-04  1.0      
+-- 2009-03-23  1.0      
 -------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package pDSOConfig is
+entity DeMux_HCT238 is
+  port (
+    iA   : in  std_ulogic_vector(2 downto 0);
+    inE1 : in  std_ulogic;
+    inE2 : in  std_ulogic;
+    iE3  : in  std_ulogic;
+    oQ   : out std_ulogic_vector(0 to 7));
+end entity;
 
-  -- DeviceAddr:
-  constant cWelec2012 : natural := 2012;
-  constant cWelec2014 : natural := 2014;
-  constant cWelec2022 : natural := 2022;
-  constant cWelec2024 : natural := 2024;
-  -- common for all minimal solutions with 1 Ch 14 Bit
-  -- and no VGA
-  constant cSandboxX  : natural := 1011;
-
-  constant cCurrentDevice : natural := cWelec2022;  -- can be read in the SFR(0)
-
-  -- downsampler settings
-  constant cDecimationStages : natural    := 5;
-  constant cChannels         : natural    := 2;
-  constant cADCsperChannel   : natural    := 4;
-  constant cADCClkRate       : natural    := 250E6;
-  constant cDesignClkRate    : natural    := 125E6;
-  constant cCPUClkRate       : natural    := 31250E3;
-  constant cAnSettStrobeRate : natural    := 2E3;  -- 1 kHz calibrator freq.
-  constant cResetActive      : std_ulogic := '0';
-  constant cADCBitWidth      : natural    := 8;
-  constant cBitWidth         : natural    := 9;
-  constant cExtTriggers      : natural    := 1;
-  constant cSRAMAddrWidth    : natural    := 19;   -- DwordAddr
-  constant cFLASHAddrWidth   : natural    := 23;   -- byte address
+architecture RTL of DeMux_HCT238 is
+begin
   
-end;
+  process (iA , inE1, inE2, iE3)
+  begin
+    oQ <= (others => '0');
+    if inE1 = '0' and inE2 = '0' and iE3 = '1' then
+      oQ(to_integer(unsigned(iA))) <= '1';
+    end if;
+  end process;
+end architecture;

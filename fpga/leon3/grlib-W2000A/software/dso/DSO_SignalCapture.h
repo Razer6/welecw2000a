@@ -17,7 +17,7 @@ typedef enum eSrc2 Src2;
 typedef struct {
 	unsigned int myVperDiv;
 	unsigned int AC;
-	unsigned int DA_Offset;
+	int DA_Offset;
 	unsigned int PWM_Offset;
 	Src2 Mode;
 } SetAnalog;

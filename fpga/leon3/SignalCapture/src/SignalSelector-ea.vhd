@@ -76,11 +76,11 @@ begin
 
       for i in 0 to cChannels-1 loop
         for j in 0 to cCoefficients-1 loop
-          vTriggerCh := to_integer(unsigned(iSignalSelector(i).TriggerCh(1 downto 0)));
+          vTriggerCh := to_integer(unsigned(iSignalSelector(i)(1 downto 0)));
           if is_x(std_ulogic_vector(iData(vTriggerCh)(j))) = true then
             Data(i)(j) <= (others => '0');
           else
-            if iSignalSelector(i).TriggerCh(2) = '0' then
+            if iSignalSelector(i)(2) = '0' then
               Data(i)(j) <= std_ulogic_vector(iData(vTriggerCh)(j)(cBitwidth*2-1 downto cBitwidth*2-aByte'length));
             else
               --         if is_x(std_ulogic_vector(iDataL(vTriggerCh)(j))) = true then

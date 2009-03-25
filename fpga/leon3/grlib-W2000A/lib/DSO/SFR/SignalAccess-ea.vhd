@@ -4,7 +4,7 @@
 -- File       : SignalAccess-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-06
+-- Last update: 2009-03-24
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -81,19 +81,40 @@ architecture rtl of SignalAccess is
     0      => ahb_device_reg (VENDOR_FHH, FHH_DSO_SIGNALACCESS, 0, abits+2, 0),
     4      => ahb_membar(haddr, '1', '1', hmask),
     others => zero32);
+  signal hsel   : std_ulogic;
+  signal htrans : std_ulogic_vector(1 downto 0);
+  signal hsize  : std_ulogic_vector(2 downto 0);
+  signal align  : std_ulogic_vector(1 downto 0);
 begin  -- rtl
+  
+  process (clk_i, rst_in)
+  begin
+    if rst_in = '0' then
+      hsel   <= '0';
+      htrans <= "00";
+      hsize  <= "010";
+      align  <= "00";
+    elsif rising_edge(clk_i) then
+      if ahbsi.hready = '1' then
+        hsel   <= ahbsi.hsel(hindex);
+        htrans <= std_ulogic_vector(ahbsi.htrans);
+        hsize  <= std_ulogic_vector(ahbsi.hsize);
+        align  <= std_ulogic_vector(ahbsi.haddr(1 downto 0));
+      end if;
+    end if;
+  end process;
 
-  process (ahbsi, hready, iTriggerMem, DataOut)
+
+  process (ahbsi, iTriggerMem, hsel, htrans, hsize, align)
   begin
     DataOut <= (others => '-');
-    -- if hindex = to_integer(unsigned(ahbsi.hsel)) then
-    if ahbsi.hsel(hindex) = '1' then
-      case ahbsi.htrans is
+    if hsel = '1' then
+      case htrans is
         when "01" | "10" | "11" =>
           DataOut <= (others => '0');
-          case ahbsi.hsize is
+          case hsize is
             when "000" =>
-              case to_integer(unsigned(ahbsi.haddr(1 downto 0))) is
+              case to_integer(unsigned(align(1 downto 0))) is
                 when 0 =>
                   DataOut(7 downto 0) <= iTriggerMem.Data(31 downto 24);
                 when 1 =>
@@ -106,7 +127,7 @@ begin  -- rtl
                   null;
               end case;
             when "001" =>
-              case ahbsi.haddr(1) is
+              case align(1) is
                 when '0' =>
                   DataOut(15 downto 0) <= iTriggerMem.Data(31 downto 16);
                 when '1' =>
@@ -117,7 +138,7 @@ begin  -- rtl
             when "010" =>
               DataOut <= iTriggerMem.data;
             when others =>
-              assert is_x(ahbsi.hsize) report "Wrong transfer size" severity error;
+              assert is_x(hsize) report "Wrong transfer size" severity error;
           end case;
         when others =>
           null;
@@ -127,7 +148,6 @@ begin  -- rtl
 
     MemIn.Addr <= aTriggerReadAddr(ahbsi.haddr(aTriggerReadAddr'range));
     MemIn.Rd   <= '0';
-    --  if hindex = to_integer(unsigned(ahbsi.hsel)) then
     if ahbsi.hsel(hindex) = '1' then
       case ahbsi.htrans is
         when "10" | "11" =>
@@ -149,32 +169,30 @@ begin  -- rtl
     hconfig => hconfig,
     hindex  => hindex);
 
---  hready <= iTriggerMem.ACK or (not ahbsi.hsel(hindex));
---  ahbso       <= AHBout;
---  oTriggerMem <= MemIn;
+  hready      <= iTriggerMem.ACK or (not hsel);
+  ahbso       <= AHBout;
+  oTriggerMem <= MemIn;
 
-  Pipelining : process (clk_i, rst_in)
-  begin
-    if rst_in = '0' then
-      ahbso <= (
-        hready  => '1',
-        hresp   => "00",                -- response type
-        hrdata  => (others => '0'),     -- read data bus
-        hsplit  => (others => '0'),     -- split completion
-        hcache  => '0',                 -- cacheable  
-        hirq    => (others => '0'),
-        hconfig => hconfig,
-        hindex  => hindex);
-      oTriggerMem <= (
-        Addr => (others => '0'),
-        Rd   => '0');
-      hready <= '1';
-    elsif rising_edge(clk_i) then
-      hready      <= iTriggerMem.ACK or (not ahbsi.hsel(hindex));
-      ahbso       <= AHBout;
-      oTriggerMem <= MemIn;
-    end if;
-  end process;
+--  Pipelining : process (clk_i, rst_in)
+--  begin
+--    if rst_in = '0' then
+--      ahbso <= (
+--        hready  => '1',
+--        hresp   => "00",              -- response type
+--        hrdata  => (others => '0'),     -- read data bus
+--        hsplit  => (others => '0'),     -- split completion
+--        hcache  => '0',                 -- cacheable  
+--        hirq    => (others => '0'),
+--        hconfig => hconfig,
+--        hindex  => hindex);
+--      oTriggerMem <= (
+--        Addr => (others => '0'),
+--        Rd   => '0');     
+--    elsif rising_edge(clk_i) then
+--      ahbso       <= AHBout;
+--      oTriggerMem <= MemIn;
+--    end if;
+--  end process;
 
 
 

@@ -28,16 +28,17 @@ set_global_assignment -name DEVICE EP2C70F896C7
 set_global_assignment -name TOP_LEVEL_ENTITY TopTrigger
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:12:27  AUGUST 28, 2008"
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 9.0
 set_global_assignment -name USE_CONFIGURATION_DEVICE ON
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_global_assignment -name VHDL_FILE ../../Altera/TriggerMemory4CH.vhd
-set_global_assignment -name VHDL_FILE "../../DownSampler/Global-p.vhd"
-set_global_assignment -name VHDL_FILE "../Trigger-p.vhd"
-set_global_assignment -name VHDL_FILE "../ExternalTrigger-ea.vhd"
-set_global_assignment -name VHDL_FILE "../NormalTrigger-ea.vhd"
-set_global_assignment -name VHDL_FILE "../TopTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd"
+set_global_assignment -name VHDL_FILE "../../Scope/src/Global-p.vhd"
+set_global_assignment -name VHDL_FILE ../../Altera/src/TriggerMemory.vhd
+set_global_assignment -name VHDL_FILE "../../Trigger/src/Trigger-p.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/NormalTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/ExternalTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/TopTrigger-ea.vhd"

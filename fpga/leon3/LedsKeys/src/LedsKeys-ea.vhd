@@ -4,7 +4,7 @@
 -- File       : LedsKeysAnalogSettings-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-11
+-- Last update: 2009-03-25
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -53,7 +53,9 @@ entity LedsKeysAnalogSettings is
     onFetchKeys     : out aShiftIn;
     oKeys           : out aKeys;
     iCPUtoAnalog    : in  aAnalogSettings;
-    oAnalogSettings : out aAnalogSettingsOut);
+    oAnalogBusy     : out std_ulogic;
+    oAnalogSettings : out aAnalogSettingsOut;
+    oSerialClk      : out std_ulogic);
 end entity;
 
 architecture RTL of LedsKeysAnalogSettings is
@@ -62,13 +64,13 @@ architecture RTL of LedsKeysAnalogSettings is
   signal LedCounter        : natural range 0 to cLedShiftLength-1;
   signal KeyShiftReg       : std_ulogic_vector(cKeyShiftLength downto 1);
   signal KeyCounter        : natural range 0 to cKeyShiftLength-1;
-  signal Keys, PrevKeys    : aKeys;
 
   type aAnalogState is record
-                         Counter   : natural range 0 to 17;
-                         Addr      : std_ulogic_vector(cAnalogSetAddrLength-1 downto 0);
-                         ShiftReg  : std_ulogic_vector(cAnalogSetShiftLength-1 downto 0);
-                         Enable    : std_ulogic;
+                         SetCounter : std_ulogic;
+                         Counter    : natural range 0 to cAnalogShiftLength+1;
+                         Addr       : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
+                         ShiftReg   : std_ulogic_vector(cAnalogShiftLength-1 downto 0);
+                         Enable     : std_ulogic;
                        end record;
   
   signal AnalogSettings : aAnalogState;
@@ -77,15 +79,18 @@ begin
 
   Strobe2KHz : entity work.StrobeGen
     generic map (
-      gClkFrequency    => cDesignClkRate,
-      gStrobeFrequency => 2000)         -- 54 ms for one key reading
-                                        -- avoids unstable key values
-                                        -- 1 KHz probe output
+      gClkFrequency    => cCPUClkRate,
+      gStrobeFrequency => cAnSettStrobeRate)
+    --    gStrobeFrequency => 2000)        -- 54 ms for one key reading
+    -- avoids unstable key values
+    -- 1 KHz probe output
     port map (
       iClk        => iClk,
       iResetAsync => iResetAsync,
       iResetSync  => '0',
       oStrobe     => Strobe);
+
+  oSerialClk <= SerialClk;
 
   pLeds : process (iClk, iResetAsync)
   begin
@@ -99,7 +104,6 @@ begin
         others        => '0');
     elsif rising_edge(iClk) then
       oLeds.nOutputEnable <= cLowActive;
-
       if Strobe = '1' then
         SerialClk <= not SerialClk;
         if SerialClk = '0' then
@@ -150,7 +154,7 @@ begin
     end if;
   end process;
 
-  oKeys <= Keys;
+--  oKeys <= Keys;
   pKeys : process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
@@ -159,8 +163,7 @@ begin
       onFetchKeys <= (
         nFetchStrobe => cHighInactive,
         nChipEnable  => cHighInactive);
-      Keys     <= (others => '0');
-      PrevKeys <= (others => '0');
+      oKeys <= (others => '0');
       
     elsif rising_edge(iClk) then
       onFetchKeys.nChipEnable  <= cLowActive;
@@ -179,9 +182,7 @@ begin
         
         if KeyCounter = 0 then
           onFetchKeys.nFetchStrobe <= cLowActive;
-          PrevKeys                 <= Keys;
-          
-          Keys <= (
+          oKeys <= (
             BTN_F1           => KeyShiftReg(19),
             BTN_F2           => KeyShiftReg(20),
             BTN_F3           => KeyShiftReg(21),
@@ -242,43 +243,51 @@ begin
   begin
     if iResetAsync = cResetActive then
       AnalogSettings <= (
-        Counter  => 0,
-        ShiftReg => (others => '0'),
-        Addr     => (others => '0'),
-        Enable   => '0');
+        SetCounter => '0',
+        Counter    => 0,
+        ShiftReg   => (others => '-'),
+        Addr       => (others => '0'),
+        Enable     => '0');
+      oAnalogBusy <= '0';
     elsif rising_edge(iClk) then
       if iCPUtoAnalog.Set = '1' then
-        AnalogSettings.Counter <= cAnalogSetShiftLength+1;
-        AnalogSettings.Addr    <= iCPUtoAnalog.Addr;
+        oAnalogBusy               <= '1';
+        AnalogSettings.SetCounter <= '1';
+--        AnalogSettings.Counter <= cAnalogShiftLength;
+        AnalogSettings.Addr       <= iCPUtoAnalog.Addr;
         case iCPUtoAnalog.Addr is
-          when O"0" => AnalogSettings.ShiftReg <= (others => '0');
-          when O"1" => AnalogSettings.ShiftReg <= (others => '0');
-          when O"2" => AnalogSettings.ShiftReg <= (others => '0');
-          when O"3" => AnalogSettings.ShiftReg <= (others => '0');
-          when O"4" => AnalogSettings.ShiftReg <= (others => '0');
+          when O"0" => AnalogSettings.ShiftReg <= (others => '-');
+          when O"1" => AnalogSettings.ShiftReg <= (others => '-');
+          when O"2" => AnalogSettings.ShiftReg <= (others => '-');
+          when O"3" => AnalogSettings.ShiftReg <= (others => '-');
+          when O"4" => AnalogSettings.ShiftReg <= (others => '-');
           when O"5" =>
             AnalogSettings.ShiftReg <= (
-              0  => iCPUtoAnalog.CH1_K1_ON,
-              1  => iCPUtoAnalog.CH1_K1_OFF,
-              2  => iCPUtoAnalog.CH1_K2_ON,
-              3  => iCPUtoAnalog.CH1_K2_OFF,
-              4  => iCPUtoAnalog.CH1_OPA656,
-              5  => iCPUtoAnalog.CH1_BW_Limit,
-              6  => iCPUtoAnalog.CH1_U14,
-              7  => iCPUtoAnalog.CH1_U13,
-              8  => iCPUtoAnalog.CH0_src2_addr(0),
-              9  => iCPUtoAnalog.CH0_src2_addr(1),
-              10 => iCPUtoAnalog.CH1_src2_addr(0),
-              11 => iCPUtoAnalog.CH1_src2_addr(1),
-              12 => iCPUtoAnalog.CH2_src2_addr(0),
-              13 => iCPUtoAnalog.CH2_src2_addr(1),
-              14 => iCPUtoAnalog.CH3_src2_addr(0),
-              15 => iCPUtoAnalog.CH3_src2_addr(1));
+              0      => iCPUtoAnalog.CH1_K1_ON,
+              1      => iCPUtoAnalog.CH1_K1_OFF,
+              2      => iCPUtoAnalog.CH1_K2_ON,
+              3      => iCPUtoAnalog.CH1_K2_OFF,
+              4      => iCPUtoAnalog.CH1_OPA656,
+              5      => iCPUtoAnalog.CH1_BW_Limit,
+              6      => iCPUtoAnalog.CH1_U14,
+              7      => iCPUtoAnalog.CH1_U13,
+              8      => iCPUtoAnalog.CH0_src2_addr(0),
+              9      => iCPUtoAnalog.CH0_src2_addr(1),
+              10     => iCPUtoAnalog.CH1_src2_addr(0),
+              11     => iCPUtoAnalog.CH1_src2_addr(1),
+              12     => iCPUtoAnalog.CH2_src2_addr(0),
+              13     => iCPUtoAnalog.CH2_src2_addr(1),
+              14     => iCPUtoAnalog.CH3_src2_addr(0),
+              15     => iCPUtoAnalog.CH3_src2_addr(1),
+              others => '-');
           when O"6" =>
-              for i in 0 to 7 loop
-               AnalogSettings.ShiftReg(i) <= iCPUtoAnalog.CH0_Offset(i);
-               AnalogSettings.ShiftReg(i+8) <= iCPUtoAnalog.CH1_Offset(i);
-          end loop;
+            -- DAC LTC2612MS8
+            for i in 0 to 15 loop
+              AnalogSettings.ShiftReg(i) <= iCPUtoAnalog.DAC_Offset(i);
+            end loop;
+            -- MODE X2, Addr = Channel1 or Channel2
+            AnalogSettings.ShiftReg(16)           <= iCPUtoAnalog.DAC_Ch;
+            AnalogSettings.ShiftReg(23 downto 17) <= X"2" & O"0";
           when O"7" =>
             AnalogSettings.ShiftReg <= (
               0      => iCPUtoAnalog.CH0_K1_ON,
@@ -293,32 +302,60 @@ begin
               9      => iCPUtoAnalog.CH1_DC,
               10     => iCPUtoAnalog.CH2_DC,
               11     => iCPUtoAnalog.CH3_DC,
-              others => '0');
+              others => '-');
           when others => AnalogSettings.ShiftReg <= (others => 'X');
         end case;
       end if;
 
-      AnalogSettings.Enable <= '0';
-      -- after all data was shifted into the regs, the strobe must be active
-      -- only for one cycle!
       if Strobe = '1' and SerialClk = '1' then
-        if AnalogSettings.Counter = 0 then
-          AnalogSettings.Enable <= '0';
-        elsif AnalogSettings.Counter = 1 then
-          AnalogSettings.Enable  <= '1';
-          AnalogSettings.Counter <= AnalogSettings.Counter -1;
+        if iCPUtoAnalog.Addr = O"6" then
+          if AnalogSettings.Counter = 0 then
+            oAnalogBusy <= '0';
+            --      AnalogSettings.Enable <= '0';
+          else
+            AnalogSettings.Enable <= '1';
+            if AnalogSettings.Counter = 1 then
+              AnalogSettings.Enable <= '0';
+            end if;
+            -- The DAC needs an enable signal! 
+            AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high downto 1) <=
+              AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high-1 downto 0);
+            AnalogSettings.ShiftReg(0) <= '-';
+            AnalogSettings.Counter     <= AnalogSettings.Counter -1;
+          end if;
+          
         else
-          AnalogSettings.Counter           <= AnalogSettings.Counter -1;
-          AnalogSettings.ShiftReg(14 downto 0) <= AnalogSettings.ShiftReg(15 downto 1);
+          -- after all data was shifted into the regs, the strobe must be active
+          -- only for one cycle!
+          AnalogSettings.Enable <= '0';
+          if AnalogSettings.Counter = 0 then
+            AnalogSettings.Enable <= '0';
+            oAnalogBusy           <= '0';
+          elsif AnalogSettings.Counter = 1 then
+            AnalogSettings.Enable  <= '1';
+            AnalogSettings.Counter <= AnalogSettings.Counter -1;
+          else
+            AnalogSettings.Counter                                         <= AnalogSettings.Counter -1;
+            AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high downto 1) <=
+              AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high-1 downto 0);
+            AnalogSettings.ShiftReg(0) <= '-';
+          end if;
+        end if;
+        if AnalogSettings.SetCounter = '1' then  -- important to garantee the
+          AnalogSettings.Counter    <= cAnalogShiftLength;  -- the fist bit time
+          AnalogSettings.SetCounter <= '0';
+          oAnalogBusy               <= '1';
+          if iCPUtoAnalog.Addr = O"6" then
+            AnalogSettings.Enable <= '1';
+          end if;
         end if;
       end if;
-      
     end if;
   end process;
 
-  oAnalogSettings.Addr <= AnalogSettings.Addr;
- oAnalogSettings.Enable <= AnalogSettings.Enable;
- oAnalogSettings.Data <= AnalogSettings.ShiftReg(0);
+  oAnalogSettings.Addr   <= AnalogSettings.Addr;
+  oAnalogSettings.Enable <= AnalogSettings.Enable;
+  oAnalogSettings.Data   <= AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high);
 
   pPWM : entity DSO.PWM
     generic map (

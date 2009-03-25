@@ -4,7 +4,7 @@
 -- File       : SBxXSignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-03-08
+-- Last update: 2009-03-21
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -60,7 +60,10 @@ entity SbxXSignalCapture is
     oTriggerCPUPort : out aTriggerOutput;
     iTriggerMem     : in  aTriggerMemIn;
     oTriggerMem     : out aTriggerMemOut;
-    iExtTrigger     : in  std_ulogic
+
+    iExtTriggerSrc : in  aExtTriggerInput;
+    iExtTrigger    : in  std_ulogic;
+    oExtTriggerPWM : out std_ulogic_vector(1 to cExtTriggers)
     );
 
 end entity;
@@ -69,6 +72,7 @@ end entity;
 architecture RTL of SbxXSignalCapture is
   signal ResetAsync        : std_ulogic;
   signal ClkDesign         : std_ulogic;
+  signal ClkCPU            : std_ulogic;
   signal DecimatorIn       : aAllData;
   signal DecimatorOut      : aDownSampled;
   signal DecimatorOutValid : std_ulogic;
@@ -76,18 +80,20 @@ architecture RTL of SbxXSignalCapture is
   signal SelectorOutValid  : std_ulogic;
   signal SlowInputData     : aLongValues(0 to cChannels-1);
   signal SlowInputValid    : std_ulogic;
-  signal DownSampler    :     aDownSampler;
+  signal DownSampler       : aDownSampler;
+  signal ExtTrigger : std_ulogic;
 begin
 
   -- oResetAsync <= ResetAsync;
   ResetAsync <= not iResetAsync;
   ClkDesign  <= iCLKADC(0);
+  oClkCPU    <= ClkCPU;
 
   DesignClk : entity DSO.SbXPLL
     port map (
       areset => ResetAsync,
       inclk0 => iCLKADC(0),
-      c0     => oClkCPU,
+      c0     => ClkCPU,
       locked => oResetAsync);
 
 
@@ -103,14 +109,14 @@ begin
 
   DecimatorIn    <= (others => (others => (others => '0')));
   SlowInputValid <= '1';
-  
+
   process (iDownSampler)
   begin
-    DownSampler <= iDownSampler;
-    DownSampler.EnableFilter(0) <= '1';
+    DownSampler                    <= iDownSampler;
+    DownSampler.EnableFilter(0)    <= '1';
     DownSampler.Stages(3 downto 0) <= X"A";
   end process;
-  
+
   Decimator : entity work.TopDownSampler
     generic map (gUseStage0 => false)
     port map (
@@ -135,11 +141,20 @@ begin
   end process;
 
   SelectorOutValid <= DecimatorOutValid;
-
+  
+  ExtTriggerInput : entity DSO.ExtTriggerInput
+    port map(
+      iClk           => ClkDesign,
+      iResetAsync    => ResetAsync,
+      iExtTrigger(1) => iExtTrigger,
+      iExtTriggerSrc => iExtTriggerSrc,
+      oTrigger       => ExtTrigger,
+      oPWM           => oExtTriggerPWM);
 
   Trigger : entity work.TopTrigger
     port map (
       iClk        => ClkDesign,
+      iClkCPU     => ClkCPU,
       iResetAsync => iResetAsync,
       iCPUPort    => iTriggerCPUPort,
       oCPUPort    => oTriggerCPUPort,
@@ -147,7 +162,7 @@ begin
       oTriggerMem => oTriggerMem,
       iData       => SelectorOut,
       iValid      => SelectorOutValid,
-      iExtTrigger => iExtTrigger);
+      iExtTrigger => ExtTrigger);
 
 end architecture;
 
