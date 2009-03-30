@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-21
+-- Last update: 2009-03-30
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -365,11 +365,11 @@ begin
       when cInputCh0Addr =>
         oData(SignalSelector(0)'range) <= SignalSelector(0);
       when cInputCh1Addr =>
-        oData(SignalSelector(1)'range) <= SignalSelector(0);
+        oData(SignalSelector(1)'range) <= SignalSelector(1);
       when cInputCh2Addr =>
-        oData(SignalSelector(2)'range) <= SignalSelector(0);
+        oData(SignalSelector(2)'range) <= SignalSelector(2);
       when cInputCh3Addr =>
-        oData(SignalSelector(3)'range) <= SignalSelector(0);
+        oData(SignalSelector(3)'range) <= SignalSelector(3);
       when cTriggerOnChAddr =>
         oData <= std_ulogic_vector(to_unsigned(Trigger.TriggerChannel, oData'length));
       when cTriggerPrefetchAddr =>

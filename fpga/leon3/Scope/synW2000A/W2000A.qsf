@@ -22,16 +22,15 @@
 # file is updated automatically by the Quartus II software
 # and any changes you make may be lost or overwritten.
 
-
 set_global_assignment -name FAMILY "Cyclone II"
 set_global_assignment -name DEVICE EP2C35F484C8
 set_global_assignment -name TOP_LEVEL_ENTITY leon3mini
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "7.1 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:07:45  MAY 15, 2008"
 set_global_assignment -name LAST_QUARTUS_VERSION 9.0
-set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
 set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id "3.3-V LVTTL"
 set_global_assignment -name OUTPUT_PIN_LOAD 3 -section_id "1.8 V"
 set_global_assignment -name FMAX_REQUIREMENT "250 MHz"
@@ -112,7 +111,7 @@ set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id LVDS
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name END_TIME "400 us"
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE v2.vwf
-set_global_assignment -name OPTIMIZE_FAST_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name FMAX_REQUIREMENT "250 MHz" -section_id 250
 
@@ -148,8 +147,8 @@ set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_2
 set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_7
 set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_10
 set_instance_assignment -name CLOCK_SETTINGS 25 -to iclk25_15
-set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_2
-set_instance_assignment -name TOGGLE_RATE "0 MHz" -to iclk25_7
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to iclk25_2
+set_instance_assignment -name IO_MAXIMUM_TOGGLE_RATE "0 MHz" -to iclk25_7
 
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
@@ -162,8 +161,6 @@ set_location_assignment PIN_M1 -to iclk25_2
 set_location_assignment PIN_M21 -to iclk25_7
 set_location_assignment PIN_D12 -to iclk25_10
 set_location_assignment PIN_U11 -to iclk25_15
-set_location_assignment PIN_D5 -to oCLKADC3
-set_location_assignment PIN_D6 -to "oCLKADC3(n)"
 set_location_assignment PIN_D3 -to iCh2ADC1[0]
 set_location_assignment PIN_D4 -to "iCh2ADC1[0](n)"
 set_location_assignment PIN_E3 -to iCh2ADC1[1]
@@ -386,7 +383,6 @@ set_location_assignment PIN_E7 -to iUx11
 set_location_assignment PIN_U15 -to oclk13out
 set_location_assignment PIN_W12 -to iclk13inp
 set_location_assignment PIN_V14 -to iSW2
-set_location_assignment PIN_D8 -to oAAQpin5
 set_location_assignment PIN_R15 -to oA_FLASH[13]
 set_location_assignment PIN_R14 -to oA_FLASH[9]
 set_location_assignment PIN_W15 -to oA_FLASH[8]
@@ -444,6 +440,10 @@ set_location_assignment PIN_U8 -to oDesh[0]
 set_location_assignment PIN_T8 -to oDesh[1]
 set_location_assignment PIN_AA13 -to oDesh[2]
 
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+
+set_global_assignment -name VHDL_FILE jtag_uart_0.vhd
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/version.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/stdlib.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/sparc/sparc.vhd"
@@ -672,7 +672,11 @@ set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAcce
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAccess-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/W2000ROM.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/leon3mini.vhd"
-set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
-set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name FLOW_ENABLE_IO_ASSIGNMENT_ANALYSIS ON
 
-set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
+
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name FITTER_AUTO_EFFORT_DESIRED_SLACK_MARGIN "100 ps"

@@ -255,8 +255,10 @@ architecture behav of testbench is
 
   component BhvADC is
     generic (
-      gFilename : string;
-      gBitWidth : natural);
+      gFilename    : string;
+      gBitWidth    : natural;
+      -- This generic is for netlist simulations with timing information! 
+      gOutputDelay : time);
     port (
       iClk        : in  std_ulogic;
       iResetAsync : in  std_ulogic;
@@ -266,13 +268,14 @@ architecture behav of testbench is
   
 begin
   ADCClk <= (others => clk);
-  
+
   ADC : for i in 0 to cChannels-1 generate
     CH : for j in 0 to cADCsperChannel-1 generate
       BHV : BhvADC
         generic map (
-          gFileName => cWaveFileNames(i)(j),
-          gBitWidth => cADCBitWidth)
+          gFileName    => cWaveFileNames(i)(j),
+          gBitWidth    => cADCBitWidth,
+          gOutputDelay => 1800 ps)
         port map (
           iClk        => ADCClk(j),
           iResetAsync => resoutn,
@@ -297,10 +300,10 @@ begin
 
 
   -- original hpe mini testbench
-  dsubren               <= not dsubre;
-  disrams               <= '0';
+  dsubren             <= not dsubre;
+  disrams             <= '0';
 --  address(27 downto 16) <= (others => '0');
-  address(1 downto 0)   <= (others => '0');
+  address(1 downto 0) <= (others => '0');
 -- clock and reset
 
   clk     <= not clk after ct * 1 ns;
@@ -316,32 +319,32 @@ begin
     port map (
       iCh1ADC1 => ADCData(0)(0),
 
-      resetn => rst,
-      resoutn     => resoutn,
-      clk         => clk,
-      errorn      => error,
-      address     => address(address'high downto 2),
-      data        => data,
-      sdclk       => sdclk,
-      sdcke       => sdcke(0),
-      sdcsn       => sdcsn(0),
-      sdwen       => sdwen,
-      sdrasn      => sdrasn,
-      sdcasn      => sdcasn,
-      sddqm       => sddqm(3 downto 0),  -- topmost bits are undriven
-      sdba        => sa(14 downto 13),
+      resetn  => rst,
+      resoutn => resoutn,
+      clk     => clk,
+      errorn  => error,
+      address => address(address'high downto 2),
+      data    => data,
+      sdclk   => sdclk,
+      sdcke   => sdcke(0),
+      sdcsn   => sdcsn(0),
+      sdwen   => sdwen,
+      sdrasn  => sdrasn,
+      sdcasn  => sdcasn,
+      sddqm   => sddqm(3 downto 0),     -- topmost bits are undriven
+      sdba    => sa(14 downto 13),
 
 --      sertx     => dsutx,
 --      serrx     => dsurx,
 --      sersrcsel => gnd,                 -- select serial DCL
 
 --      dsuen   => dsuen,
-      dsubre  => dsubre,
+      dsubre => dsubre,
 --      dsuactn => dsuactn,
-      dsutx => dsutx,
-      dsurx => dsurx,
-      txd1 => txd1,
-      rxd1 => rxd1,
+      dsutx  => dsutx,
+      dsurx  => dsurx,
+      txd1   => txd1,
+      rxd1   => rxd1,
 
       --    gpio => gpio,
 
@@ -524,7 +527,7 @@ begin
   end process;
 
   -- data <= buskeep(data), (others => 'H') after 250 ns;
-     sd   <= buskeep(sd), (others   => 'H') after 250 ns;
+  sd <= buskeep(sd), (others => 'H') after 250 ns;
 
   -- test0 : grtestmod
   --   port map (rst, clk, error, address(21 downto 2), data,

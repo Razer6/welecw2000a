@@ -22,37 +22,54 @@
 
 #define RX_DATAREADY 0x1
 #define OVERRUN      0x10 
-#define TX_FULL      0x200
+#define TX_FULL      (1 << 9)
 
 bool UartInit(	const unsigned int CPUFreq,
 		const unsigned int BaudRate,
 		const unsigned int Control,
 		uart_regs * uart) {
-
+	int scaler = CPUFreq/(8*BaudRate);
 /*	if you do this outside, more uarts can be used with this file*/
 /*	uart = (uart_regs *)GENERIC_UART_BASE_ADDR;*/
-	if ((BaudRate < 10) || (CPUFreq < 1000000) || (BaudRate > CPUFreq*8)) {
+	if ((BaudRate < 10) || (CPUFreq < 1000000) || (BaudRate > CPUFreq/8)) {
 		return false;
 	}
-	uart->scaler = (CPUFreq*8/BaudRate);
+	uart->scaler = scaler;
 	uart->control = Control;
 	return true;
 }
 
 char ReceiveCharBlock(uart_regs * uart) {
-	while ((loadmem((int)&uart->status) & RX_DATAREADY) == 0);
+	volatile int temp = 0;
+	while (1){
+		temp = loadmem((int)&uart->status);
+		if ((temp & RX_DATAREADY) == 1){
+			break;
+     		}
+	}
 	return loadmem((int)&uart->data);
 }
 
 void SendCharBlock(uart_regs * uart, char c) {
-	while ((loadmem((int)&uart->status) & TX_FULL) != 0);
+	volatile int temp = 0;
+	while (1) {
+		temp = loadmem((int)&uart->status);
+		if ((temp & TX_FULL) == 0){
+			break;
+		}
+	}
 	uart->data = c;
 }
 
 /* interrupts if the rx buffer is empty!*/
 void ReceiveString (uart_regs * uart, char * c, unsigned int * size) {
 	unsigned int rsize = 0;
-	while ((loadmem((int)&uart->status) & RX_DATAREADY) != 0 && (rsize < (*size))){
+	volatile int temp = 0;
+	while (rsize < (*size)) {
+		temp = loadmem((int)&uart->status);
+	        if ((temp & RX_DATAREADY) != 0){
+		       break;
+		}
 		c[rsize] = loadmem((int)&uart->data);
 		rsize++;
 	}
@@ -79,7 +96,12 @@ void SendStringBlock (uart_regs * uart, char * c, unsigned int * size) {
 /* interrupts if the tx buffer is full!*/
 void SendString (uart_regs * uart, char * c, unsigned int * size) {
 	unsigned int i = 0;
-	while (((loadmem((int)&uart->status) & TX_FULL) != 0) && (i < (*size))){
+	volatile int temp = 0;
+	while (i < (*size)){
+		temp = loadmem((int)&uart->status);
+		if ((temp & TX_FULL) != 0){
+			break;
+		}
 		uart->data = c[i];
 		i++;
 	}

@@ -85,6 +85,7 @@ vcom -quiet -93 -work work {../../TestFiles/src/DAC_LTC2612-ea.vhd}
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/Testbench.vhd
 #vcom -quiet -93 -work work {../../Scope/src/TestbenchTopScope-ea.vhd} # out of date
 
-vsim -t ps -suppress 3473 -gdisas=1 Testbench
+#vsim -t ps -suppress 3473 -gdisas=1 Testbench
+vsim -t ps -suppress 3473 Testbench
 do wave.do
 run 500 us

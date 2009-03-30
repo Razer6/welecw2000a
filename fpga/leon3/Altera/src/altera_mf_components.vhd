@@ -1,4 +1,4 @@
--- Copyright (C) 1991-2008 Altera Corporation
+-- Copyright (C) 1991-2009 Altera Corporation
 -- Your use of Altera Corporation's design tools, logic functions 
 -- and other software and tools, and its AMPP partner logic 
 -- functions, and any output files from any of the foregoing 
@@ -11,7 +11,7 @@
 -- programming logic devices manufactured by Altera and sold by 
 -- Altera or its authorized distributors.  Please refer to the 
 -- applicable agreement for further details.
--- Quartus II 8.0 Build 231 05/29/2008
+-- Quartus II 9.0 Build 132 02/25/2009
 ----------------------------------------------------------------------------
 -- ALtera Megafunction Component Declaration File
 ----------------------------------------------------------------------------
@@ -124,6 +124,7 @@ component altlvds_rx
         registered_data_align_input : string :="ON";
         common_rx_tx_pll            : string :="ON";
         enable_dpa_mode             : string := "OFF";
+        enable_dpa_pll_calibration  : string  := "OFF";
         enable_dpa_fifo             : string := "ON";
         use_dpll_rawperror          : string := "OFF";
         use_coreclock_input         : string := "OFF";
@@ -173,12 +174,20 @@ component altlvds_rx
         rx_cda_reset          : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
         rx_coreclk            : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
         pll_areset            : in std_logic := '0';
+        dpa_pll_recal         : in std_logic := '0';
+        pll_phasedone         : in std_logic := '1';
+        rx_dpa_lock_reset     : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
         rx_out                : out std_logic_vector(deserialization_factor*number_of_channels -1 downto 0);
         rx_outclock           : out std_logic;
         rx_locked             : out std_logic;
         rx_dpa_locked         : out std_logic_vector(number_of_channels-1 downto 0);
         rx_cda_max            : out std_logic_vector(number_of_channels-1 downto 0);
-        rx_divfwdclk          : out std_logic_vector(number_of_channels-1 downto 0) );
+        rx_divfwdclk          : out std_logic_vector(number_of_channels-1 downto 0);
+        dpa_pll_cal_busy      : out std_logic;
+        pll_phasestep         : out std_logic;
+        pll_phaseupdown       : out std_logic;
+        pll_phasecounterselect: out std_logic_Vector(3 downto 0);
+        pll_scanclk           : out std_logic);
 end component;
 
 component altlvds_tx
@@ -257,13 +266,13 @@ component altdpram
         data            : in std_logic_vector(width-1 downto 0);
         wraddress       : in std_logic_vector(widthad-1 downto 0);
         wraddressstall  : in std_logic := '0';
-        inclock         : in std_logic := '0';
+        inclock         : in std_logic := '1';
         inclocken       : in std_logic := '1';
         rden            : in std_logic := '1';
         rdaddress       : in std_logic_vector(widthad-1 downto 0);
         rdaddressstall  : in std_logic := '0';
         byteena         : in std_logic_vector(width_byteena-1 downto 0) := (others => '1');
-        outclock        : in std_logic := '0';
+        outclock        : in std_logic := '1';
         outclocken      : in std_logic := '1';
         aclr            : in std_logic := '0';
         q               : out std_logic_vector(width-1 downto 0) );
@@ -426,8 +435,8 @@ component dcfifo_mixed_widths
         underflow_checking      : string := "ON";
         delay_rdusedw           : natural := 1;
         delay_wrusedw           : natural := 1;
-        rdsync_delaypipe        : natural := 3;
-        wrsync_delaypipe        : natural := 3;
+        rdsync_delaypipe        : natural := 0;
+        wrsync_delaypipe        : natural := 0;
         use_eab                 : string := "ON";
         add_ram_output_register : string := "OFF";
         add_width               : natural := 1;
@@ -464,8 +473,8 @@ component dcfifo
         underflow_checking      : string := "ON";
         delay_rdusedw           : natural := 1;
         delay_wrusedw           : natural := 1;
-        rdsync_delaypipe        : natural := 3;
-        wrsync_delaypipe        : natural := 3;
+        rdsync_delaypipe        : natural := 0;
+        wrsync_delaypipe        : natural := 0;
         use_eab                 : string := "ON";
         add_ram_output_register : string := "OFF";
         add_width               : natural := 1;
@@ -1052,6 +1061,8 @@ component altsyncram
         implement_in_les               : string := "OFF";
         -- determine whether RAM would be power up to uninitialized or not
         power_up_uninitialized         : string := "FALSE";
+
+        sim_show_memory_data_in_port_b_layout :  string  := "OFF";
 
         -- general operation parameters
         init_file                      : string := "UNUSED";
@@ -1686,6 +1697,252 @@ component sld_virtual_jtag_basic
         tms                : out std_logic);
 end component;
 
+component altdq_dqs
+    generic (
+        delay_buffer_mode                       :  string  := "LOW";
+        delay_dqs_enable_by_half_cycle          :  string  := "FALSE";
+        intended_device_family                  :  string  := "UNUSED";
+        dq_half_rate_use_dataoutbypass          :  string  := "FALSE";
+        dq_input_reg_async_mode                 :  string  := "NONE";
+        dq_input_reg_clk_source                 :  string  := "DQS_BUS";
+        dq_input_reg_mode                       :  string  := "NONE";
+        dq_input_reg_power_up                   :  string  := "LOW";
+        dq_input_reg_sync_mode                  :  string  := "NONE";
+        dq_input_reg_use_clkn                   :  string  := "FALSE";
+        dq_ipa_add_input_cycle_delay            :  string  := "FALSE";
+        dq_ipa_add_phase_transfer_reg           :  string  := "FALSE";
+        dq_ipa_bypass_output_register           :  string  := "FALSE";
+        dq_ipa_invert_phase                     :  string  := "FALSE";
+        dq_ipa_phase_setting                    :  integer := 0;
+        dq_oe_reg_async_mode                    :  string  := "NONE";
+        dq_oe_reg_mode                          :  string  := "NONE";
+        dq_oe_reg_power_up                      :  string  := "LOW";
+        dq_oe_reg_sync_mode                     :  string  := "NONE";
+        dq_output_reg_async_mode                :  string  := "NONE";
+        dq_output_reg_mode                      :  string  := "NONE";
+        dq_output_reg_power_up                  :  string  := "LOW";
+        dq_output_reg_sync_mode                 :  string  := "NONE";
+        dqs_ctrl_latches_enable                 :  string  := "FALSE";
+        dqs_delay_chain_delayctrlin_source      :  string  := "CORE";
+        dqs_delay_chain_phase_setting           :  integer := 0;
+        dqs_dqsn_mode                           :  string  := "NONE";
+        dqs_enable_ctrl_add_phase_transfer_reg  :  string  := "FALSE";
+        dqs_enable_ctrl_invert_phase            :  string  := "FALSE";
+        dqs_enable_ctrl_phase_setting           :  integer := 0;
+        dqs_input_frequency                     :  string  := "UNUSED";
+        dqs_oe_reg_async_mode                   :  string  := "NONE";
+        dqs_oe_reg_mode                         :  string  := "NONE";
+        dqs_oe_reg_power_up                     :  string  := "LOW";
+        dqs_oe_reg_sync_mode                    :  string  := "NONE";
+        dqs_offsetctrl_enable                   :  string  := "FALSE";
+        dqs_output_reg_async_mode               :  string  := "NONE";
+        dqs_output_reg_mode                     :  string  := "NONE";
+        dqs_output_reg_power_up                 :  string  := "LOW";
+        dqs_output_reg_sync_mode                :  string  := "NONE";
+        dqs_phase_shift                         :  integer := 0;
+        io_clock_divider_clk_source             :  string  := "CORE";
+        io_clock_divider_invert_phase           :  string  := "FALSE";
+        io_clock_divider_phase_setting          :  integer := 0;
+        level_dqs_enable                        :  string  := "FALSE";
+        number_of_bidir_dq                      :  integer := 1;
+        number_of_clk_divider                   :  integer := 1;
+        number_of_input_dq                      :  integer := 1;
+        number_of_output_dq                     :  integer := 1;
+        oct_reg_mode                            :  string  := "NONE";
+        use_dq_input_delay_chain                :  string  := "FALSE";
+        use_dq_ipa                              :  string  := "FALSE";
+        use_dq_ipa_phasectrlin                  :  string  := "TRUE";
+        use_dq_oe_delay_chain1                  :  string  := "FALSE";
+        use_dq_oe_delay_chain2                  :  string  := "FALSE";
+        use_dq_oe_path                          :  string  := "FALSE";
+        use_dq_output_delay_chain1              :  string  := "FALSE";
+        use_dq_output_delay_chain2              :  string  := "FALSE";
+        use_dqs                                 :  string  := "FALSE";
+        use_dqs_delay_chain                     :  string  := "FALSE";
+        use_dqs_delay_chain_phasectrlin         :  string  := "FALSE";
+        use_dqs_enable                          :  string  := "FALSE";
+        use_dqs_enable_ctrl                     :  string  := "FALSE";
+        use_dqs_enable_ctrl_phasectrlin         :  string  := "TRUE";
+        use_dqs_input_delay_chain               :  string  := "FALSE";
+        use_dqs_input_path                      :  string  := "FALSE";
+        use_dqs_oe_delay_chain1                 :  string  := "FALSE";
+        use_dqs_oe_delay_chain2                 :  string  := "FALSE";
+        use_dqs_oe_path                         :  string  := "FALSE";
+        use_dqs_output_delay_chain1             :  string  := "FALSE";
+        use_dqs_output_delay_chain2             :  string  := "FALSE";
+        use_dqs_output_path                     :  string  := "FALSE";
+        use_dqsbusout_delay_chain               :  string  := "FALSE";
+        use_dqsenable_delay_chain               :  string  := "FALSE";
+        use_dynamic_oct                         :  string  := "FALSE";
+        use_half_rate                           :  string  := "FALSE";
+        use_io_clock_divider_masterin           :  string  := "FALSE";
+        use_io_clock_divider_phasectrlin        :  string  := "TRUE";
+        use_oct_delay_chain1                    :  string  := "FALSE";
+        use_oct_delay_chain2                    :  string  := "FALSE";
+        lpm_hint                                :  string  := "UNUSED";
+        lpm_type                                :  string  := "altdq_dqs");
+    port (
+        bidir_dq_areset                 : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_hr_oct_in              : in std_logic_vector(2 * number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_hr_oe_in               : in std_logic_vector(2 * number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_hr_output_data_in      : in std_logic_vector(4 * number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_input_data_in          : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_io_config_ena          : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '1');
+        bidir_dq_oct_in                 : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_oe_in                  : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_output_data_in         : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_output_data_in_high    : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_output_data_in_low     : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        bidir_dq_sreset                 : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+        config_clk                      : in std_logic := '0';
+        config_datain                   : in std_logic := '0';
+        config_update                   : in std_logic := '0';
+        core_delayctrlin                : in std_logic_vector(5 downto 0) := (others => '0');
+        dll_delayctrlin                 : in std_logic_vector(5 downto 0) := (others => '0');
+        dq_hr_output_reg_clk            : in std_logic := '0';
+        dq_input_reg_clk                : in std_logic := '0';
+        dq_input_reg_clkena             : in std_logic := '1';
+        dq_ipa_clk                      : in std_logic := '0';
+        dq_output_reg_clk               : in std_logic := '0';
+        dq_output_reg_clkena            : in std_logic := '1';
+        dqs_areset                      : in std_logic := '0';
+        dqs_config_ena                  : in std_logic := '1';
+        dqs_enable_ctrl_clk             : in std_logic := '1';
+        dqs_enable_ctrl_hr_datainhi     : in std_logic := '0';
+        dqs_enable_ctrl_hr_datainlo     : in std_logic := '0';
+        dqs_enable_ctrl_in              : in std_logic := '1';
+        dqs_enable_in                   : in std_logic := '1';
+        dqs_hr_oct_in                   : in std_logic_vector(1 downto 0) := (others => '0');
+        dqs_hr_oe_in                    : in std_logic_vector(1 downto 0) := (others => '0');
+        dqs_hr_output_data_in           : in std_logic_vector(3 downto 0) := (others => '0');
+        dqs_hr_output_reg_clk           : in std_logic := '0';
+        dqs_input_data_in               : in std_logic := '0';
+        dqs_io_config_ena               : in std_logic := '1';
+        dqs_oct_in                      : in std_logic := '0';
+        dqs_oe_in                       : in std_logic := '0';
+        dqs_output_data_in              : in std_logic := '0';
+        dqs_output_data_in_high         : in std_logic := '0';
+        dqs_output_data_in_low          : in std_logic := '0';
+        dqs_output_reg_clk              : in std_logic := '0';
+        dqs_output_reg_clkena           : in std_logic := '1';
+        dqs_sreset                      : in std_logic := '0';
+        dqsn_areset                     : in std_logic := '0';
+        dqsn_hr_oct_in                  : in std_logic_vector(1 downto 0) := (others => '0');
+        dqsn_hr_oe_in                   : in std_logic_vector(1 downto 0) := (others => '0');
+        dqsn_hr_output_data_in          : in std_logic_vector(3 downto 0) := (others => '0');
+        dqsn_input_data_in              : in std_logic := '0';
+        dqsn_io_config_ena              : in std_logic := '1';
+        dqsn_oct_in                     : in std_logic := '0';
+        dqsn_oe_in                      : in std_logic := '0';
+        dqsn_output_data_in             : in std_logic := '0';
+        dqsn_output_data_in_high        : in std_logic := '0';
+        dqsn_output_data_in_low         : in std_logic := '0';
+        dqsn_sreset                     : in std_logic := '0';
+        dqsupdateen                     : in std_logic := '0';
+        hr_oct_reg_clk                  : in std_logic := '0';
+        input_dq_areset                 : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+        input_dq_hr_oct_in              : in std_logic_vector(2 * number_of_input_dq - 1 downto 0) := (others => '0');
+        input_dq_input_data_in          : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+        input_dq_io_config_ena          : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '1');
+        input_dq_oct_in                 : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+        input_dq_sreset                 : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+        io_clock_divider_clk            : in std_logic := '0';
+        io_clock_divider_masterin       : in std_logic := '0';
+        oct_reg_clk                     : in std_logic := '0';
+        offsetctrlin                    : in std_logic_vector(5 downto 0) := (others => '0');
+        output_dq_areset                : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_hr_oct_in             : in std_logic_vector(2 * number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_hr_oe_in              : in std_logic_vector(2 * number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_hr_output_data_in     : in std_logic_vector(4 * number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_io_config_ena         : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '1');
+        output_dq_oct_in                : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_oe_in                 : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_output_data_in        : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_output_data_in_high   : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_output_data_in_low    : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+        output_dq_sreset                : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+        bidir_dq_hr_input_data_out      : out std_logic_vector(4 * number_of_bidir_dq - 1 downto 0);
+        bidir_dq_input_data_out         : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+        bidir_dq_input_data_out_high    : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+        bidir_dq_input_data_out_low     : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+        bidir_dq_oct_out                : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+        bidir_dq_oe_out                 : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+        bidir_dq_output_data_out        : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+        dqs_bus_out                     : out std_logic;
+        dqs_input_data_out              : out std_logic;
+        dqs_oct_out                     : out std_logic;
+        dqs_oe_out                      : out std_logic;
+        dqs_output_data_out             : out std_logic;
+        dqsn_bus_out                    : out std_logic;
+        dqsn_input_data_out             : out std_logic;
+        dqsn_oct_out                    : out std_logic;
+        dqsn_oe_out                     : out std_logic;
+        dqsn_output_data_out            : out std_logic;
+        input_dq_hr_input_data_out      : out std_logic_vector(4 * number_of_input_dq - 1 downto 0);
+        input_dq_input_data_out         : out std_logic_vector(number_of_input_dq - 1 downto 0);
+        input_dq_input_data_out_high    : out std_logic_vector(number_of_input_dq - 1 downto 0);
+        input_dq_input_data_out_low     : out std_logic_vector(number_of_input_dq - 1 downto 0);
+        input_dq_oct_out                : out std_logic_vector(number_of_input_dq - 1 downto 0);
+        io_clock_divider_clkout         : out std_logic_vector(number_of_clk_divider - 1 downto 0);
+        io_clock_divider_slaveout       : out std_logic;
+        output_dq_oct_out               : out std_logic_vector(number_of_output_dq - 1 downto 0);
+        output_dq_oe_out                : out std_logic_vector(number_of_output_dq - 1 downto 0);
+        output_dq_output_data_out       : out std_logic_vector(number_of_output_dq - 1 downto 0));
+
+end component;
+
+
+component altera_std_synchronizer
+    generic (depth : integer := 3);
+
+    port (
+          clk     : in  std_logic;
+          reset_n : in  std_logic;
+          din     : in  std_logic;
+          dout    : out std_logic
+         );
+end component;
+
+component altera_std_synchronizer_bundle
+    generic (depth : integer := 3;
+             width : integer := 1);
+
+    port (
+          clk     : in  std_logic;
+          reset_n : in  std_logic;
+          din     : in  std_logic_vector(width-1 downto 0);
+          dout    : out std_logic_vector(width-1 downto 0)
+         );
+end component;
+
+component alt_cal
+	 generic (
+	    number_of_channels		:  integer := 1;
+	    channel_address_width 	:  integer := 1;
+            sim_model_mode  		:  string  := "TRUE";
+            lpm_hint        		:  string  := "UNUSED";
+            lpm_type        		:  string  := "alt_cal"
+	  );
+	 PORT 
+	 ( 
+		 busy	:	OUT  STD_LOGIC;
+		 cal_error	:	OUT  STD_LOGIC_VECTOR (0 DOWNTO 0);
+		 clock	:	IN  STD_LOGIC;
+		 dprio_addr	:	OUT  STD_LOGIC_VECTOR (15 DOWNTO 0);
+		 dprio_busy	:	IN  STD_LOGIC;
+		 dprio_datain	:	IN  STD_LOGIC_VECTOR (15 DOWNTO 0);
+		 dprio_dataout	:	OUT  STD_LOGIC_VECTOR (15 DOWNTO 0);
+		 dprio_rden	:	OUT  STD_LOGIC;
+		 dprio_wren	:	OUT  STD_LOGIC;
+		 quad_addr	:	OUT  STD_LOGIC_VECTOR (6 DOWNTO 0);
+		 remap_addr	:	IN  STD_LOGIC_VECTOR (9 DOWNTO 0) := (OTHERS => '0');
+		 reset	:	IN  STD_LOGIC := '0';
+		 retain_addr	:	OUT  STD_LOGIC_VECTOR (0 DOWNTO 0);
+		 start	:	IN  STD_LOGIC := '0';
+		 testbuses	:	IN  STD_LOGIC_VECTOR (4 * number_of_channels - 1 DOWNTO 0) := (OTHERS => '0')
+	 ); 
+end component;
+
 
 
 
@@ -1704,18 +1961,24 @@ component    sld_signaltap
         SLD_ADVANCED_TRIGGER_6    :    string    :=    "NONE";
         SLD_ADVANCED_TRIGGER_9    :    string    :=    "NONE";
         SLD_ADVANCED_TRIGGER_7    :    string    :=    "NONE";
+        SLD_STORAGE_QUALIFIER_ADVANCED_CONDITION_ENTITY    :    string    :=    "basic";
+        SLD_STORAGE_QUALIFIER_GAP_RECORD    :    natural    :=    0;
         SLD_INCREMENTAL_ROUTING    :    natural    :=    0;
+        SLD_STORAGE_QUALIFIER_PIPELINE    :    natural    :=    0;
         SLD_TRIGGER_IN_ENABLED    :    natural    :=    0;
-        SLD_STATE_BITS    :    natural    :=    5;
+        SLD_STATE_BITS    :    natural    :=    11;
         SLD_STATE_FLOW_USE_GENERATED    :    natural    :=    0;
         SLD_INVERSION_MASK_LENGTH    :    integer    :=    1;
         SLD_DATA_BITS    :    natural    :=    1;
         SLD_BUFFER_FULL_STOP    :    natural    :=    1;
+        SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH    :    natural    :=    0;
         SLD_ATTRIBUTE_MEM_MODE    :    string    :=    "OFF";
+        SLD_STORAGE_QUALIFIER_MODE    :    string    :=    "OFF";
         SLD_STATE_FLOW_MGR_ENTITY    :    string    :=    "state_flow_mgr_entity.vhd";
         SLD_NODE_CRC_LOWORD    :    natural    :=    50132;
         SLD_ADVANCED_TRIGGER_5    :    string    :=    "NONE";
         SLD_TRIGGER_BITS    :    natural    :=    1;
+        SLD_STORAGE_QUALIFIER_BITS    :    natural    :=    1;
         SLD_ADVANCED_TRIGGER_10    :    string    :=    "NONE";
         SLD_MEM_ADDRESS_BITS    :    natural    :=    7;
         SLD_ADVANCED_TRIGGER_ENTITY    :    string    :=    "basic";
@@ -1732,6 +1995,7 @@ component    sld_signaltap
         SLD_ENABLE_ADVANCED_TRIGGER    :    natural    :=    0;
         SLD_SEGMENT_SIZE    :    natural    :=    0;
         SLD_NODE_INFO    :    natural    :=    0;
+        SLD_STORAGE_QUALIFIER_ENABLE_ADVANCED_CONDITION    :    natural    :=    0;
         SLD_NODE_CRC_HIWORD    :    natural    :=    41394;
         SLD_TRIGGER_LEVEL_PIPELINE    :    natural    :=    1;
         SLD_ADVANCED_TRIGGER_3    :    string    :=    "NONE"
@@ -1746,11 +2010,12 @@ component    sld_signaltap
         jtag_state_uir    :    in    std_logic    :=    '0';
         acq_trigger_in    :    in    std_logic_vector(SLD_TRIGGER_BITS-1 downto 0)   :=   (others => '0');
         trigger_out    :    out    std_logic;
+        storage_enable    :    in    std_logic    :=    '0';
         acq_data_out    :    out    std_logic_vector(SLD_DATA_BITS-1 downto 0);
         acq_data_in    :    in    std_logic_vector(SLD_DATA_BITS-1 downto 0)   :=   (others => '0');
+        acq_storage_qualifier_in    :    in    std_logic_vector(SLD_STORAGE_QUALIFIER_BITS-1 downto 0)   :=   (others => '0');
         jtag_state_udr    :    in    std_logic    :=    '0';
         tdo    :    out    std_logic;
-        clrn    :    in    std_logic    :=    '0';
         crc    :    in    std_logic_vector(SLD_NODE_CRC_BITS-1 downto 0)   :=   (others => '0');
         jtag_state_e1dr    :    in    std_logic    :=    '0';
         raw_tck    :    in    std_logic    :=    '0';
@@ -1758,6 +2023,7 @@ component    sld_signaltap
         acq_clk    :    in    std_logic;
         shift    :    in    std_logic    :=    '0';
         ena    :    in    std_logic    :=    '0';
+        clr    :    in    std_logic    :=    '0';
         trigger_in    :    in    std_logic    :=    '0';
         update    :    in    std_logic    :=    '0';
         rti    :    in    std_logic    :=    '0'
@@ -1778,6 +2044,7 @@ component    altstratixii_oct
 end component; --altstratixii_oct
 
     constant    TOP_PFL_IR_BITS    :    natural    :=    5;
+    constant    N_FLASH_BITS    :    natural    :=    4;
 
 component    altparallel_flash_loader
     generic    (
@@ -1788,6 +2055,7 @@ component    altparallel_flash_loader
         dclk_divisor    :    natural    :=    1;
         safe_mode_retry    :    natural    :=    1;
         features_cfg    :    natural    :=    1;
+        burst_mode_numonyx    :    natural    :=    0;
         burst_mode_intel    :    natural    :=    0;
         burst_mode    :    natural    :=    0;
         clk_divisor    :    natural    :=    1;
@@ -1798,6 +2066,7 @@ component    altparallel_flash_loader
         page_mode    :    natural    :=    0;
         lpm_type    :    string    :=    "ALTPARALLEL_FLASH_LOADER";
         features_pgm    :    natural    :=    1;
+        n_flash    :    natural    :=    1;
         burst_mode_spansion    :    natural    :=    0;
         auto_restart    :    STRING    :=    "OFF";
         page_clk_divisor    :    natural    :=    1;
@@ -1831,6 +2100,8 @@ end component; --altparallel_flash_loader
 
 component    altserial_flash_loader
     generic    (
+        enhanced_mode    :    natural    :=    0;
+        intended_device_family    :    STRING    :=    "Cyclone";
         enable_shared_access    :    STRING    :=    "OFF";
         lpm_type    :    STRING    :=    "ALTSERIAL_FLASH_LOADER"
     );

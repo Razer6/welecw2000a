@@ -7,6 +7,12 @@ vmap cycloneii
 vlib DSO
 vmap DSO
 
+vlib lpm
+vlib altera
+vcom -quiet -work lpm ../../Altera/src/lpm_pack.vhd
+vcom -quiet -work altera ../../Altera/src/altera_europa_support_lib.vhd
+vcom -quiet -work work ../../Altera/src/jtag_uart_0.vhd
+
 do ../../grlib-W2000A/designs/leon3-w2000a/l3.do
 #vcom -quiet -93 {../../Altera/src/altera_mf_components.vhd}
 #vcom -quiet -93 {../../Altera/src/altera_mf.vhd}

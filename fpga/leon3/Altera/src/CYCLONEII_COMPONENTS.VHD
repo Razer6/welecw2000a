@@ -1,4 +1,4 @@
--- Copyright (C) 1991-2008 Altera Corporation
+-- Copyright (C) 1991-2009 Altera Corporation
 -- Your use of Altera Corporation's design tools, logic functions 
 -- and other software and tools, and its AMPP partner logic 
 -- functions, and any output files from any of the foregoing 
@@ -11,7 +11,7 @@
 -- programming logic devices manufactured by Altera and sold by 
 -- Altera or its authorized distributors.  Please refer to the 
 -- applicable agreement for further details.
--- Quartus II 8.0 Build 231 05/29/2008
+-- Quartus II 9.0 Build 132 02/25/2009
 LIBRARY IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.VITAL_Timing.all;

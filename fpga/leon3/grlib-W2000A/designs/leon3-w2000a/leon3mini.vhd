@@ -68,7 +68,7 @@ entity leon3mini is
     disas   : integer := CFG_DISAS;     -- Enable disassembly to console
     dbguart : integer := CFG_DUART;     -- Print UART on console
     pclow   : integer := CFG_PCLOW;
-    freq    : integer := 25000          -- frequency of main clock (used for PLLs)
+    freq    : integer := 25000       -- frequency of main clock (used for PLLs)
     );
   port (
     --RS232
@@ -77,7 +77,7 @@ entity leon3mini is
 
     --USB
     iUSBRX : in  std_ulogic;            -- Receive from USB
-    oUSBTX : out std_ulogic;            -- Tratsmit to USB
+    oUSBTX : out std_ulogic;            -- Transmit to USB
 
     --SWITCH on board
     iSW1 : in std_ulogic;               --switch 1
@@ -132,14 +132,14 @@ entity leon3mini is
     iFPGA2_T7   : in std_ulogic;
 
     --CONTROL of inputs
-    iUx6        : in  std_ulogic;       -- not soldering register channels 1,2 è 3,4
-    iUx11       : in  std_ulogic;       -- not soldering register channels 1,2
-    oAAQpin5    : out std_ulogic;
+    iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
+    iUx11       : in  std_ulogic;  -- not soldering register channels 1,2
+    iAAQpin5    : in  std_ulogic;  -- ? does not fit to analog_inputs.png
     oCalibrator : out std_ulogic;
 
     -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-    oPWMout  : out std_ulogic;                     --Level Of External Syncro
-    iSinhcro : in  std_ulogic;                     --Comparator external syncro.
+    oPWMout  : out std_ulogic;          --Level Of External Syncro
+    iSinhcro : in  std_ulogic;          --Comparator external syncro.
     oDesh    : out std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
     oDeshENA : out std_ulogic;
     oRegCLK  : out std_ulogic;
@@ -160,7 +160,7 @@ entity leon3mini is
     iCh2ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
 
 -- pragma translate_off
-    errorn : out std_ulogic;
+    errorn  : out std_ulogic;
     resoutn : out std_ulogic;
 -- pragma translate_on
 
@@ -177,7 +177,7 @@ entity leon3mini is
 end;
 
 architecture rtl of leon3mini is
-  
+  signal ux_valid   : std_ulogic;
   signal ResetAsync : std_ulogic;
   signal ClkDesign  : std_ulogic;
   signal ClkCPU     : std_ulogic;
@@ -196,7 +196,7 @@ architecture rtl of leon3mini is
   -- signal KeystoCPU      : aKeys;
   signal KeysFromPanel  : aShiftIn;
   signal AnalogSettings : aAnalogSettingsOut;
-  signal SerialClk : std_ulogic;
+  signal SerialClk      : std_ulogic;
   -- internal ROM
   signal BootRomRd      : std_ulogic;
   signal BootACK        : std_ulogic;
@@ -205,17 +205,8 @@ architecture rtl of leon3mini is
   -- signal CPUIn          : aSharedRamAccess;
   -- signal CPUOut         : aSharedRamReturn;
 
-  -- original signals from HPE mini board
-  constant blength   : integer := 12;
-  constant fifodepth : integer := 8;
-
-  signal vcc, gnd   : std_logic_vector(4 downto 0);
-  signal memi       : memory_in_type;
-  signal memo       : memory_out_type;
-  signal wpo        : wprot_out_type;
-  signal sdi        : sdctrl_in_type;
-  signal sdo        : sdram_out_type;
-  signal sdo2, sdo3 : sdctrl_out_type;
+  signal memi     : memory_in_type;
+  signal memo     : memory_out_type;
 
   signal apbi  : apb_slv_in_type;
   signal apbo  : apb_slv_out_vector := (others => apb_none);
@@ -239,33 +230,16 @@ architecture rtl of leon3mini is
   signal dsui : dsu_in_type;
   signal dsuo : dsu_out_type;
 
-  signal ethi, ethi1, ethi2 : eth_in_type;
-  signal etho, etho1, etho2 : eth_out_type;
-
-  signal atai : ata_in_type;
-  signal atao : ata_out_type;
 
   signal gpti : gptimer_in_type;
-
-  signal sa : std_logic_vector(14 downto 0);  -- ?
-  signal sd : std_logic_vector(63 downto 0);  -- ?
-
-  signal emddis : std_ulogic;
-  signal ereset : std_ulogic;
-
-  signal epwrdwn : std_ulogic;
-  signal esleep  : std_ulogic;
-  signal epause  : std_ulogic;
-
-  signal tck, tms, tdi, tdo : std_ulogic;
 
 --  signal errorn         : std_ulogic;
   signal dsuact         : std_logic;
   signal dsuen          : std_ulogic;
-  signal oen_ctrl       : std_logic;
-  signal sdram_selected : std_logic;
+--  signal oen_ctrl       : std_logic;
+--  signal sdram_selected : std_logic;
 
-  signal shortcut : std_logic;
+--  signal shortcut : std_logic;
   signal rx       : std_logic;
   signal tx       : std_logic;
 
@@ -274,15 +248,6 @@ architecture rtl of leon3mini is
   signal dsutx  : std_ulogic;           -- DSU tx data
   signal dsurx  : std_ulogic;           -- DSU rx data
   signal dsubre : std_ulogic;
-
---  signal hpiwriten : std_ulogic;        -- intermediate signal
---  signal hpirdata  : std_logic_vector(15 downto 0);
---  signal hpiwdata  : std_logic_vector(15 downto 0);
-  signal drive_bus : std_ulogic;
-
-  signal dbg_rdata : std_logic_vector(15 downto 0);
-  signal dbg_wdata : std_logic_vector(15 downto 0);
-  ---------------------------------------------------------------------------------------
 
   signal vgao      : apbvga_out_type;
   signal video_clk : std_logic;
@@ -303,15 +268,20 @@ begin
   oCE_FLASH <= '1';
   oWE_FLASH <= '1';
 
-  oTXD    <= txd1;
-  rxd1    <= iRXD;
-  dsurx   <= iUSBRX;                    -- Receive from USB
-  oUSBTX  <= dsutx;                     -- Transmit to USB
-  dsubre  <= '1';
+  -- oTXD    <= txd1;
+  -- rxd1    <= iRXD;
+  -- dsurx   <= iUSBRX;                    -- Receive from USB
+  -- oUSBTX  <= dsutx;                     -- Transmit to USB
+
+  oTXD  <= dsutx;
+  dsurx <= iRXD;
+  rxd1  <= iSinhcro;
+
+  dsubre      <= '0';
   -- dsuactn <= not dsuact;
-  dsuen   <= '0';
+  dsuen       <= '1';
   -- pragma translate_off
-  resoutn <= rstn;
+  resoutn     <= rstn;
   -- pragma translate_on
   ClkADC25(0) <= iclk25_2;
   ClkADC25(1) <= iclk25_7;
@@ -384,6 +354,7 @@ begin
   oRegCLK  <= SerialClk;
   oRegData <= AnalogSettings.Data;
 
+  -- pragma translate_off
   BootRomRd <= memo.romsn(0) or memo.oen;
   Bootloader : entity work.BootRom
     generic map (
@@ -396,6 +367,7 @@ begin
       -- odata => bD_SRAM,
       odata => memi.data,
       oACK  => BootACK);
+  -- pragma translate_on
 
   -----------------------------------------------------------------------------
   -- These few lines solve an incompability with the mctrl and the
@@ -461,7 +433,7 @@ begin
 ---  Reset and Clock generation  -------------------------------------
 ----------------------------------------------------------------------
 
-  vcc         <= (others => '1'); gnd <= (others => '0');
+--  vcc         <= (others => '1'); gnd <= (others => '0');
 --  cgi.pllctrl <= "00"; cgi.pllrst <= not resetn; cgi.pllref <= clk;  --'0'; --pllref;
   cgi.pllctrl <= "00"; cgi.pllrst <= not ResetAsync; cgi.pllref <= ClkCPU;  --'0'; --pllref;
 --  clkgen0 : clkgen                      -- clock generator using toplevel generic 'freq'
@@ -533,68 +505,71 @@ begin
   end generate;
   nouah : if CFG_AHB_UART = 0 generate apbo(4) <= apb_none; end generate;
 
-  ahbjtaggen0 : if CFG_AHB_JTAG = 1 generate
-    ahbjtag0 : ahbjtag generic map(tech => fabtech, hindex => CFG_NCPU+CFG_AHB_UART)
-      port map(rstn, clkm, tck, tms, tdi, tdo, ahbmi, ahbmo(CFG_NCPU+CFG_AHB_UART),
-               open, open, open, open, open, open, open, gnd(0));
-  end generate;
+--  ahbjtaggen0 : if CFG_AHB_JTAG = 1 generate
+--    ahbjtag0 : ahbjtag generic map(tech => fabtech, hindex => CFG_NCPU+CFG_AHB_UART)
+--      port map(rstn, clkm, tck, tms, tdi, tdo, ahbmi, ahbmo(CFG_NCPU+CFG_AHB_UART),
+--               open, open, open, open, open, open, open, gnd(0));
+--  end generate;
 
 ----------------------------------------------------------------------
 ---  Memory controllers ----------------------------------------------
 ----------------------------------------------------------------------
 
   mg2 : if CFG_MCTRL_LEON2 = 1 generate  -- LEON2 memory controller
---     sr1 : mctrl generic map (hindex => 0, pindex => 0,
---                              paddr  => 0, fast => 0, srbanks => 1, sden => CFG_MCTRL_SDEN)
-    --   port map (rstn, clkm, memi, memo, ahbsi, ahbso(0), apbi, apbo(0), wpo, sdo);
-    sr1 : mctrl
-      generic map (
-        hindex    => 0,
-        pindex    => 0,
-        romaddr   => 16#000#,
-        -- rommask   => 16#E00#,
-        rommask   => 16#FF7#,
-        ioaddr    => 16#200#,
-        -- iomask    => 16#E00#,
-        iomask    => 16#FFE#,
-        ramaddr   => 16#400#,
-        -- rammask   => 16#C00#,
-        rammask   => 16#FFE#,
-        paddr     => 0,
-        pmask     => 16#fff#,
-        wprot     => 0,
-        invclk    => 0,
-        fast      => 0,
-        romasel   => 28,
-        sdrasel   => 29,
-        -- srbanks   => 4,
-        srbanks   => CFG_SRCTRL_SRBANKS,
-        ram8      => 0,
-        ram16     => 0,
-        sden      => CFG_MCTRL_SDEN,
-        sepbus    => 0,
-        sdbits    => 32,
-        sdlsb     => 2,                  -- set to 12 for the GE-HPE board
-        oepol     => 0,
-        syncrst   => 1,
-        pageburst => 0)
-      port map (rstn, clkm, memi, memo, ahbsi, ahbso(0), apbi, apbo(0), wpo, sdo);
+--    sr1 : mctrl
+--      generic map (
+--        hindex    => 0,
+--        pindex    => 0,
+--        romaddr   => 16#000#,
+--        -- rommask   => 16#E00#,
+--        rommask   => 16#FF7#,
+--        ioaddr    => 16#200#,
+--        -- iomask    => 16#E00#,
+--        iomask    => 16#FFE#,
+--        ramaddr   => 16#400#,
+--        -- rammask   => 16#C00#,
+--        rammask   => 16#FFE#,
+--        paddr     => 0,
+--        pmask     => 16#fff#,
+--        wprot     => 0,
+--        invclk    => 0,
+--        fast      => 0,
+--        romasel   => 28,
+--        sdrasel   => 29,
+--        -- srbanks   => 4,
+--        srbanks   => CFG_SRCTRL_SRBANKS,
+--        ram8      => 0,
+--        ram16     => 0,
+--        sden      => CFG_MCTRL_SDEN,
+--        sepbus    => 0,
+--        sdbits    => 32,
+--        sdlsb     => 2,                  -- set to 12 for the GE-HPE board
+--        oepol     => 0,
+--        syncrst   => 1,
+--        pageburst => 0)
+--      port map (rstn, clkm, memi, memo, ahbsi, ahbso(0), apbi, apbo(0), wpo, sdo);
+    
+    
+    srctrl0 : srctrl
+      generic map -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
+      (hindex  => 0,
+       romaddr => 0,
+       rommask => 16#ff8#,
+       ramaddr => 16#400#,
+       rammask => 16#ffe#,
+       ioaddr  => 16#200#,
+       iomask  => 16#ffe#,
+       ramws   => 0,
+       romws   => 2,
+       iows    => 2,
+       rmw     => 0,                    -- read-modify-write enable
+       prom8en => 0,
+       oepol   => 0,
+       srbanks => 1,
+       banksz  => 13,
+       romasel => 19)
+      port map (rstn, clkm, ahbsi, ahbso(0), memi, memo, open);
 
---    sdpads : if CFG_MCTRL_SDEN = 1 generate  -- SDRAM pads
---      sdwen_pad : outpad generic map (tech => padtech)
---        port map (sdwen, sdo.sdwen);
---      sdras_pad : outpad generic map (tech => padtech)
---        port map (sdrasn, sdo.rasn);
---      sdcas_pad : outpad generic map (tech => padtech)
---        port map (sdcasn, sdo.casn);
---      sddqm_pad : outpadv generic map (width => 4, tech => padtech)
---        port map (sddqm, sdo.dqm(3 downto 0));
---      sdclk_pad : outpad generic map (tech   => padtech, slew => 1) port map (sdclk, sdclkl);
---      sdcke_pad : outpadv generic map (width => 2, tech => padtech)
---        port map (sdcke, sdo.sdcke);
---      sdcsn_pad : outpadv generic map (width => 2, tech => padtech)
---        port map (sdcsn, sdo.sdcsn);
---    end generate;
 --    addr_pad : outpadv generic map (width => 14, tech => padtech)
 --      port map (address, memo.address(15 downto 2));
 --    bdr : for i in 0 to 3 generate
@@ -618,14 +593,6 @@ begin
     oLB2_SRAM <= memo.wrn(2);
     oUB2_SRAM <= memo.wrn(3);
   end generate;
-
---  nosd0 : if (CFG_MCTRL_SDEN = 0) generate  -- no SDRAM controller
---    sdclk_pad : outpad generic map (tech   => padtech, slew => 1) port map (sdclk, sdclkl);
---    sdcke_pad : outpadv generic map (width => 2, tech => padtech)
---      port map (sdcke, sdo3.sdcke);
---    sdcsn_pad : outpadv generic map (width => 2, tech => padtech)
---      port map (sdcsn, sdo3.sdcsn);
---  end generate;
 
   memi.brdyn  <= '1'; memi.bexcn <= '1';
   memi.writen <= '1'; memi.wrn <= "1111"; memi.bwidth <= "10";
@@ -690,6 +657,24 @@ begin
                    fifosize => CFG_UART1_FIFO)
       port map (rstn, clkm, apbi, apbo(1), u1i, u1o);
     u1i.rxd <= rxd1; u1i.ctsn <= '0'; u1i.extclk <= '0'; txd1 <= u1o.txd;
+
+    process (apbi)
+    begin
+      if apbi.psel(1) = '1' and apbi.penable = '1' and apbi.pwrite = '1'
+        and apbi.paddr(3 downto 2) = "00" then
+        ux_valid <= '1';
+      else
+        ux_valid <= '0';
+      end if;
+    end process;
+
+    ux : entity work.jtag_uart_0_log_module
+      port map (
+        -- inputs:
+        clk    => clkm,
+        data   => apbi.pwdata(7 downto 0),
+        strobe => ux_valid,
+        valid  => ux_valid);
   end generate;
   noua0 : if CFG_UART1_ENABLE = 0 generate apbo(1) <= apb_none; end generate;
 
@@ -750,13 +735,13 @@ begin
 --    port map (vga_bl, vgao.video_out_b(7 downto 6));
 
 
-  oVD    <= vgao.vsync;
-  oHD    <= vgao.hsync;
-  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
-  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
-  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
-  oDCLK  <= iclk25_2;
-  oDENA  <= '1';
+--  oVD    <= vgao.vsync;
+--  oHD    <= vgao.hsync;
+--  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
+--  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
+--  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
+--  oDCLK  <= iclk25_2;
+  oDENA  <= '0';
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,
@@ -772,30 +757,6 @@ begin
   novga : if CFG_VGA_ENABLE+CFG_SVGA_ENABLE = 0 generate
     apbo(6) <= apb_none; vgao <= vgao_none;
   end generate;
-
------------------------------------------------------------------------
----  AHB ROM ----------------------------------------------------------
------------------------------------------------------------------------
-
---  bpromgen : if CFG_AHBROMEN /= 0 generate
---    brom : entity work.ahbrom
---      generic map (hindex => 6, haddr => CFG_AHBRODDR, pipe => CFG_AHBROPIP)
---      port map (rstn, clkm, ahbsi, ahbso(6));
---  end generate;
---  nobpromgen : if CFG_AHBROMEN = 0 generate
---    ahbso(6) <= ahbs_none;
---  end generate;
-
------------------------------------------------------------------------
----  AHB RAM ----------------------------------------------------------
------------------------------------------------------------------------
-
---  ahbramgen : if CFG_AHBRAMEN = 1 generate
---    ahbram0 : ahbram generic map (hindex => 3, haddr => CFG_AHBRADDR,
---                                  tech   => CFG_MEMTECH, kbytes => CFG_AHBRSZ)
---      port map (rstn, clkm, ahbsi, ahbso(3));
---  end generate;
---  nram : if CFG_AHBRAMEN = 0 generate ahbso(3) <= ahbs_none; end generate;
 
 -----------------------------------------------------------------------
 ---  Drive unused bus elements  ---------------------------------------

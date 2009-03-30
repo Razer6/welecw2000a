@@ -1,4 +1,4 @@
--- Copyright (C) 1991-2008 Altera Corporation
+-- Copyright (C) 1991-2009 Altera Corporation
 -- Your use of Altera Corporation's design tools, logic functions 
 -- and other software and tools, and its AMPP partner logic 
 -- functions, and any output files from any of the foregoing 
@@ -11,7 +11,7 @@
 -- programming logic devices manufactured by Altera and sold by 
 -- Altera or its authorized distributors.  Please refer to the 
 -- applicable agreement for further details.
--- Quartus II 8.0 Build 231 05/29/2008
+-- Quartus II 9.0 Build 132 02/25/2009
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -65,6 +65,14 @@ function int2str( value : integer ) return string;
 function map_x_to_0 (value : std_logic) return std_logic;
 
 function SelectDelay (CONSTANT Paths: IN  VitalPathArray01Type) return TIME;
+
+function int2bit (arg : boolean) return std_logic;
+function int2bit (arg : integer) return std_logic;
+function bin2int (s : std_logic_vector) return integer;
+function bin2int (s : std_logic) return integer;
+function int2bin (arg : integer; size : integer) return std_logic_vector;
+function int2bin (arg : boolean; size : integer) return std_logic_vector;
+function calc_sum_len( widtha : integer; widthb : integer) return integer;
 
 end cycloneii_atom_pack;
 
@@ -218,6 +226,96 @@ begin
     return PathDelay;
 
 end;
+
+function int2bit (arg : integer) return std_logic is
+    variable int_val : integer := arg;
+    variable result : std_logic;
+    begin
+        
+            if (int_val  = 0) then
+                result := '0';
+            else
+                result := '1';
+            end if;
+            
+        return result;
+end int2bit;
+
+function int2bit (arg : boolean) return std_logic is
+    variable int_val : boolean := arg;
+    variable result : std_logic;
+    begin
+        
+            if (int_val ) then
+                result := '1';
+            else
+                result := '0';
+            end if;
+            
+        return result;
+end int2bit;
+
+function bin2int (s : std_logic_vector) return integer is
+
+      constant temp      : std_logic_vector(s'high-s'low DOWNTO 0) := s;      
+      variable result      : integer := 0;
+   begin
+      for i in temp'range loop
+         if (temp(i) = '1') then
+            result := result + (2**i);
+         end if;
+      end loop;
+      return(result);
+   end bin2int;
+                  
+function bin2int (s : std_logic) return integer is
+      constant temp      : std_logic := s;      
+      variable result      : integer := 0;
+   begin
+         if (temp = '1') then
+            result := 1;
+         else
+         	result := 0;
+     	 end if;
+      return(result);
+	end bin2int;
+
+	function int2bin (arg : integer; size : integer) return std_logic_vector is
+    variable int_val : integer := arg;
+    variable result : std_logic_vector(size-1 downto 0);
+    begin
+        for i in 0 to result'left loop
+            if ((int_val mod 2) = 0) then
+                result(i) := '0';
+            else
+                result(i) := '1';
+            end if;
+            int_val := int_val/2;
+        end loop;
+        return result;
+    end int2bin;
+    
+function int2bin (arg : boolean; size : integer) return std_logic_vector is
+    variable result : std_logic_vector(size-1 downto 0);
+    begin
+		if(arg)then
+			result := (OTHERS => '1');
+		else
+			result := (OTHERS => '0');
+		end if;
+        return result;
+    end int2bin;
+
+function calc_sum_len( widtha : integer; widthb : integer) return integer is
+variable result: integer;
+begin
+	if(widtha >= widthb) then
+		result := widtha + 1;
+	else
+		result := widthb + 1;
+	end if;
+	return result;
+end calc_sum_len;
 
 end cycloneii_atom_pack;
 
@@ -424,6 +522,7 @@ procedure find_m_and_n_4_manual_phase ( inclock_period : in integer;
         constant MIN_PFD : integer := 5;
         constant MAX_VCO : integer := 1300;
         constant MIN_VCO : integer := 300;
+        constant MAX_OFFSET : real := 0.004;
 
         variable vco_period : integer;
         variable pfd_freq : integer;
@@ -440,6 +539,27 @@ procedure find_m_and_n_4_manual_phase ( inclock_period : in integer;
 
         variable i_max_iter : integer;
         variable loop_iter : integer;
+        
+        variable clk0_div_factor_real : real;
+        variable clk1_div_factor_real : real;
+        variable clk2_div_factor_real : real;
+        variable clk3_div_factor_real : real;
+        variable clk4_div_factor_real : real;
+        variable clk5_div_factor_real : real;
+        variable clk6_div_factor_real : real;
+        variable clk7_div_factor_real : real;
+        variable clk8_div_factor_real : real;
+        variable clk9_div_factor_real : real;
+        variable clk0_div_factor_int : integer;
+        variable clk1_div_factor_int : integer;
+        variable clk2_div_factor_int : integer;
+        variable clk3_div_factor_int : integer;
+        variable clk4_div_factor_int : integer;
+        variable clk5_div_factor_int : integer;
+        variable clk6_div_factor_int : integer;
+        variable clk7_div_factor_int : integer;
+        variable clk8_div_factor_int : integer;
+        variable clk9_div_factor_int : integer;
 begin
     vco_period := vco_phase_shift_step * 8;
     i_pre_m := 0;
@@ -448,16 +568,39 @@ begin
 
     LOOP_1 :   for i_n_out in 1 to MAX_N loop
         for i_m_out in 1 to MAX_M loop
-            if ((((clk0_div * i_m_out) rem (clk0_mult * i_n_out) = 0) or (clk0_used = "unused")) and
-                (((clk1_div * i_m_out) rem (clk1_mult * i_n_out) = 0) or (clk1_used = "unused")) and
-                (((clk2_div * i_m_out) rem (clk2_mult * i_n_out) = 0) or (clk2_used = "unused")) and
-                (((clk3_div * i_m_out) rem (clk3_mult * i_n_out) = 0) or (clk3_used = "unused")) and
-                (((clk4_div * i_m_out) rem (clk4_mult * i_n_out) = 0) or (clk4_used = "unused")) and
-                (((clk5_div * i_m_out) rem (clk5_mult * i_n_out) = 0) or (clk5_used = "unused")) and
-                (((clk6_div * i_m_out) rem (clk6_mult * i_n_out) = 0) or (clk6_used = "unused")) and
-                (((clk7_div * i_m_out) rem (clk7_mult * i_n_out) = 0) or (clk7_used = "unused")) and
-                (((clk8_div * i_m_out) rem (clk8_mult * i_n_out) = 0) or (clk8_used = "unused")) and
-                (((clk9_div * i_m_out) rem (clk9_mult * i_n_out) = 0) or (clk9_used = "unused")) )
+        
+	    clk0_div_factor_real := real(clk0_div * i_m_out) / real(clk0_mult * i_n_out);
+            clk1_div_factor_real := real(clk1_div * i_m_out) / real(clk1_mult * i_n_out);
+            clk2_div_factor_real := real(clk2_div * i_m_out) / real(clk2_mult * i_n_out);
+            clk3_div_factor_real := real(clk3_div * i_m_out) / real(clk3_mult * i_n_out);
+            clk4_div_factor_real := real(clk4_div * i_m_out) / real(clk4_mult * i_n_out);
+            clk5_div_factor_real := real(clk5_div * i_m_out) / real(clk5_mult * i_n_out);
+            clk6_div_factor_real := real(clk6_div * i_m_out) / real(clk6_mult * i_n_out);
+            clk7_div_factor_real := real(clk7_div * i_m_out) / real(clk7_mult * i_n_out);
+            clk8_div_factor_real := real(clk8_div * i_m_out) / real(clk8_mult * i_n_out);
+            clk9_div_factor_real := real(clk9_div * i_m_out) / real(clk9_mult * i_n_out);
+
+            clk0_div_factor_int := integer(clk0_div_factor_real);
+            clk1_div_factor_int := integer(clk1_div_factor_real);
+            clk2_div_factor_int := integer(clk2_div_factor_real);
+            clk3_div_factor_int := integer(clk3_div_factor_real);
+            clk4_div_factor_int := integer(clk4_div_factor_real);
+            clk5_div_factor_int := integer(clk5_div_factor_real);
+            clk6_div_factor_int := integer(clk6_div_factor_real);
+            clk7_div_factor_int := integer(clk7_div_factor_real);
+            clk8_div_factor_int := integer(clk8_div_factor_real);
+            clk9_div_factor_int := integer(clk9_div_factor_real);
+	                
+            if (((abs(clk0_div_factor_real - real(clk0_div_factor_int)) < MAX_OFFSET) or (clk0_used = "unused")) and
+                ((abs(clk1_div_factor_real - real(clk1_div_factor_int)) < MAX_OFFSET) or (clk1_used = "unused")) and
+                ((abs(clk2_div_factor_real - real(clk2_div_factor_int)) < MAX_OFFSET) or (clk2_used = "unused")) and
+                ((abs(clk3_div_factor_real - real(clk3_div_factor_int)) < MAX_OFFSET) or (clk3_used = "unused")) and
+                ((abs(clk4_div_factor_real - real(clk4_div_factor_int)) < MAX_OFFSET) or (clk4_used = "unused")) and
+                ((abs(clk5_div_factor_real - real(clk5_div_factor_int)) < MAX_OFFSET) or (clk5_used = "unused")) and
+                ((abs(clk6_div_factor_real - real(clk6_div_factor_int)) < MAX_OFFSET) or (clk6_used = "unused")) and
+                ((abs(clk7_div_factor_real - real(clk7_div_factor_int)) < MAX_OFFSET) or (clk7_used = "unused")) and
+                ((abs(clk8_div_factor_real - real(clk8_div_factor_int)) < MAX_OFFSET) or (clk8_used = "unused")) and
+                ((abs(clk9_div_factor_real - real(clk9_div_factor_int)) < MAX_OFFSET) or (clk9_used = "unused")) )
             then
                 if ((i_m_out /= 0) and (i_n_out /= 0))
                 then
@@ -592,9 +735,11 @@ end lcm;
 -- find the factor of division of the output clock frequency compared to the VCO
 function output_counter_value (clk_divide: integer; clk_mult: integer ;
                                 M: integer; N: integer ) return integer is
-variable R: integer := 1;
+variable r_real : real := 1.0;
+variable r: integer := 1;
 begin
-    R := (clk_divide * M)/(clk_mult * N);
+    r_real := real(clk_divide * M)/ real(clk_mult * N);
+    r := integer(r_real);
 
     return R;
 end output_counter_value;
@@ -649,7 +794,7 @@ begin
     R := output_counter_value - R1;
 
     if (R = 0) then
-       R := 1;
+        R := 1;
     end if;
 
     return R;
@@ -733,7 +878,7 @@ function counter_initial (tap_phase: integer; m: integer; n: integer)
 variable R: integer;
 variable R1: real;
 begin
-    R1 := (real(abs(tap_phase)) * real(m))/(360.0 * real(n)) + 0.5;
+    R1 := (real(abs(tap_phase)) * real(m))/(360.0 * real(n)) + 0.6;
     -- Note NCSim VHDL had problem in rounding up for 0.5 - 0.99. 
     -- This checking will ensure that the rounding up is done.
     if (R1 >= 0.5) and (R1 <= 1.0) then
@@ -750,7 +895,7 @@ function counter_ph (tap_phase: integer; m: integer; n: integer) return integer 
 variable R: integer := 0;
 begin
     -- 0.5 is added for proper rounding of the tap_phase.
-    R := (integer(real(tap_phase * m / n)+ 0.5) REM 360)/45;
+    R := integer(real(integer(real(tap_phase * m / n)+ 0.5) REM 360)/45.0) rem 8;
 
     return R;
 end;
@@ -2492,6 +2637,7 @@ use work.cycloneii_atom_pack.all;
 entity  cycloneii_crcblock is
     generic  (
         oscillator_divider : integer := 1;
+
         lpm_type : string := "cycloneii_crcblock"
         );	
     port (
@@ -3039,6 +3185,7 @@ signal   c_mode_val_hold : str_array(0 to 5);
 -- temp registers
 signal   sig_c_ph_val_tmp   : int_array(0 to 5) := (OTHERS => 0);
 signal   sig_c_low_val_tmp  : int_array(0 to 5) := (OTHERS => 1);
+signal   sig_c_hi_val_tmp  : int_array(0 to 5) := (OTHERS => 1);
 signal   c_ph_val_orig  : int_array(0 to 5) := (OTHERS => 0);
 
 --signal   i_clk5_counter         : string(1 to 2) := "c5";
@@ -3212,6 +3359,10 @@ signal inclk_sclkout0_from_vco : std_logic;
 signal inclk_sclkout1_from_vco : std_logic;
 
 --signal tap0_is_active : boolean := true;
+    signal sig_quiet_time : time := 0 ps;
+    signal sig_slowest_clk_old : time := 0 ps;
+    signal sig_slowest_clk_new : time := 0 ps;
+    signal sig_m_val_tmp : int_array(0 to 1) := (OTHERS => 1);
 
 COMPONENT cycloneii_m_cntr
     PORT (
@@ -4547,6 +4698,7 @@ begin
                 end loop;
                 sig_c_ph_val_tmp <= c_ph_val_tmp;
                 sig_c_low_val_tmp <= c_low_val_tmp;
+                sig_c_hi_val_tmp <= c_high_val_tmp;
                 -- M
                 -- some temporary storage
                 if (tmp_scan_data(65 downto 62) = "0000") then
@@ -4677,6 +4829,7 @@ begin
                 end loop;
                 sig_c_ph_val_tmp <= c_ph_val_tmp;
                 sig_c_low_val_tmp <= c_low_val_tmp;
+                sig_c_hi_val_tmp <= c_high_val_tmp;
 
                 -- cntrs M/M2
                 for i in 0 to 1 loop
@@ -4725,7 +4878,8 @@ begin
                         ASSERT false REPORT "Incompatible modes for M/M2 counters. Either both should be BYPASSED or both NON-BYPASSED. Reconfiguration may not work." severity warning;
                     end if;
                 end if;
-          
+                sig_m_val_tmp <= m_val_tmp;
+
                 -- cntrs N/N2
                 for i in 0 to 1 loop
                     start_bit := 154 + i*10;
@@ -4794,7 +4948,9 @@ begin
             else
                 quiet_time := slowest_clk_old;
             end if;
-                                    
+            sig_quiet_time <= quiet_time;
+            sig_slowest_clk_old <= slowest_clk_old;
+            sig_slowest_clk_new <= slowest_clk_new;
             tmp_rem := (quiet_time/1 ps) rem (scanclk_period/ 1 ps);
             scanclk_cycles := (quiet_time/1 ps) / (scanclk_period/1 ps);
             if (tmp_rem /= 0) then
@@ -4809,72 +4965,54 @@ begin
             end if;
 
             if (c_clk(0)'event and c_clk(0) = '1') then
-                c_high_val_hold(0) <= c_high_val_tmp(0);
-                c_mode_val_hold(0) <= c_mode_val_tmp(0);
+                c_high_val(0) <= c_high_val_tmp(0);
+                c_mode_val(0) <= c_mode_val_tmp(0);
                 c0_rising_edge_transfer_done := true;
-                c_high_val(0) <= c_high_val_hold(0);
-                c_mode_val(0) <= c_mode_val_hold(0);
             end if;
             if (c_clk(1)'event and c_clk(1) = '1') then
-                c_high_val_hold(1) <= c_high_val_tmp(1);
-                c_mode_val_hold(1) <= c_mode_val_tmp(1);
+                c_high_val(1) <= c_high_val_tmp(1);
+                c_mode_val(1) <= c_mode_val_tmp(1);
                 c1_rising_edge_transfer_done := true;
-                c_high_val(1) <= c_high_val_hold(1);
-                c_mode_val(1) <= c_mode_val_hold(1);
             end if;
             if (c_clk(2)'event and c_clk(2) = '1') then
-                c_high_val_hold(2) <= c_high_val_tmp(2);
-                c_mode_val_hold(2) <= c_mode_val_tmp(2);
+                c_high_val(2) <= c_high_val_tmp(2);
+                c_mode_val(2) <= c_mode_val_tmp(2);
                 c2_rising_edge_transfer_done := true;
-                c_high_val(2) <= c_high_val_hold(2);
-                c_mode_val(2) <= c_mode_val_hold(2);
             end if;
             if (c_clk(3)'event and c_clk(3) = '1') then
-                c_high_val_hold(3) <= c_high_val_tmp(3);
-                c_mode_val_hold(3) <= c_mode_val_tmp(3);
-                c_high_val(3) <= c_high_val_hold(3);
-                c_mode_val(3) <= c_mode_val_hold(3);
+                c_high_val(3) <= c_high_val_tmp(3);
+                c_mode_val(3) <= c_mode_val_tmp(3);
                 c3_rising_edge_transfer_done := true;
             end if;
             if (c_clk(4)'event and c_clk(4) = '1') then
-                c_high_val_hold(4) <= c_high_val_tmp(4);
-                c_mode_val_hold(4) <= c_mode_val_tmp(4);
-                c_high_val(4) <= c_high_val_hold(4);
-                c_mode_val(4) <= c_mode_val_hold(4);
+                c_high_val(4) <= c_high_val_tmp(4);
+                c_mode_val(4) <= c_mode_val_tmp(4);
                 c4_rising_edge_transfer_done := true;
             end if;
             if (c_clk(5)'event and c_clk(5) = '1') then
-                c_high_val_hold(5) <= c_high_val_tmp(5);
-                c_mode_val_hold(5) <= c_mode_val_tmp(5);
-                c_high_val(5) <= c_high_val_hold(5);
-                c_mode_val(5) <= c_mode_val_hold(5);
+                c_high_val(5) <= c_high_val_tmp(5);
+                c_mode_val(5) <= c_mode_val_tmp(5);
                 c5_rising_edge_transfer_done := true;
             end if;
         end if;
 
         if (c_clk(0)'event and c_clk(0) = '0' and c0_rising_edge_transfer_done) then
-            c_low_val_hold(0) <= c_low_val_tmp(0);
-            c_low_val(0) <= c_low_val_hold(0);
+            c_low_val(0) <= c_low_val_tmp(0);
         end if;
         if (c_clk(1)'event and c_clk(1) = '0' and c1_rising_edge_transfer_done) then
-            c_low_val_hold(1) <= c_low_val_tmp(1);
-            c_low_val(1) <= c_low_val_hold(1);
+            c_low_val(1) <= c_low_val_tmp(1);
         end if;
         if (c_clk(2)'event and c_clk(2) = '0' and c2_rising_edge_transfer_done) then
-            c_low_val_hold(2) <= c_low_val_tmp(2);
-            c_low_val(2) <= c_low_val_hold(2);
+            c_low_val(2) <= c_low_val_tmp(2);
         end if;
         if (c_clk(3)'event and c_clk(3) = '0' and c3_rising_edge_transfer_done) then
-            c_low_val_hold(3) <= c_low_val_tmp(3);
-            c_low_val(3) <= c_low_val_hold(3);
+            c_low_val(3) <= c_low_val_tmp(3);
         end if;
         if (c_clk(4)'event and c_clk(4) = '0' and c4_rising_edge_transfer_done) then
-            c_low_val_hold(4) <= c_low_val_tmp(4);
-            c_low_val(4) <= c_low_val_hold(4);
+            c_low_val(4) <= c_low_val_tmp(4);
         end if;
         if (c_clk(5)'event and c_clk(5) = '0' and c5_rising_edge_transfer_done) then
-            c_low_val_hold(5) <= c_low_val_tmp(5);
-            c_low_val(5) <= c_low_val_hold(5);
+            c_low_val(5) <= c_low_val_tmp(5);
         end if;
 
         if (scanwrite_enabled = '1') then
@@ -5253,15 +5391,8 @@ begin
                         sched_time := sched_time + low_time;
                     end if;
 
-                    -- schedule the phase taps
-                    for k in 0 to 7 loop
-                        phase_shift(k) := (k * vco_per)/8;
-                        if (first_schedule) then
-                            vco_out(k) <= transport vco_val after (sched_time + phase_shift(k));
-                        else
-                            vco_out(k) <= transport vco_val after (sched_time + last_phase_shift(k));
-                        end if;
-                    end loop;
+                    -- schedule tap0
+                    vco_out(0) <= transport vco_val after sched_time;
                 end loop;
             end loop;
 
@@ -5273,11 +5404,8 @@ begin
                 elsif (vco_val = '1') then
                     sched_time := sched_time + low_time;
                 end if;
-                -- schedule the phase taps
-                for k in 0 to 7 loop
-                    phase_shift(k) := (k * vco_per)/8;
-                    vco_out(k) <= transport vco_val after (sched_time + phase_shift(k));
-                end loop;
+                -- schedule tap 0
+                vco_out(0) <= transport vco_val after sched_time;
                 first_schedule := false;
             end if;
 
@@ -5295,6 +5423,13 @@ begin
                     phase_shift(k) := (k * vco_per)/8;
                 end loop;
             end if;
+        end if;
+        -- now schedule the other taps with the appropriate phase-shift
+        if (vco_out(0)'event) then
+            for k in 1 to 7 loop
+                phase_shift(k) := (k * vco_per)/8;
+                vco_out(k) <= transport vco_out(0) after phase_shift(k);
+            end loop;
         end if;
 
         if (refclk'event and refclk = '1' and areset_ipd = '0') then

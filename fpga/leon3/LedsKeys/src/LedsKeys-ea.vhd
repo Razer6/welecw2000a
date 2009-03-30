@@ -4,7 +4,7 @@
 -- File       : LedsKeysAnalogSettings-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-25
+-- Last update: 2009-03-29
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -116,21 +116,21 @@ begin
 
           if LedCounter = 0 then
             LedShiftReg <= (
-              0      => iLeds.BTN_CH3,
-              1      => iLeds.Beam1On,
-              2      => iLeds.BTN_MATH,
-              3      => iLeds.Beam2On,
-              4      => iLeds.BTN_QUICKMEAS,
-              5      => iLeds.CURSORS,
-              6      => iLeds.BTN_F1,
-              7      => iLeds.BTN_CH2,
-              8      => iLeds.BTN_PULSEWIDTH,
-              9      => iLeds.EDGE,
-              10     => iLeds.RUNSTOP,
-              11     => iLeds.BTN_F2,
-              12     => iLeds.BTN_F3,
-              13     => iLeds.SINGLE,
-              others => '0');
+              0      => not iLeds.BTN_CH3,
+              1      => not iLeds.Beam1On,
+              2      => not iLeds.BTN_MATH,
+              3      => not iLeds.Beam2On,
+              4      => not iLeds.BTN_QUICKMEAS,
+              5      => not iLeds.CURSORS,
+              6      => not iLeds.BTN_F1,
+              7      => not iLeds.BTN_CH2,
+              8      => not iLeds.BTN_PULSEWIDTH,
+              9      => not iLeds.EDGE,
+              10     => not iLeds.RUNSTOP,
+              11     => not iLeds.BTN_F2,
+              12     => not iLeds.BTN_F3,
+              13     => not iLeds.SINGLE,
+              others => '1');
 --           LedShiftReg <= (
 --            0      => iLeds.BTN_CH3,
 --            1      => iLeds.BTN_CH0,
@@ -146,7 +146,7 @@ begin
 --            11     => iLeds.BTN_F2,
 --            12     => iLeds.BTN_F3,
 --            13     => iLeds.SINGLE,
---            others => '0');
+--            others => '1');
             oLeds.ValidStrobe <= '1';
           end if;
         end if;
@@ -263,10 +263,10 @@ begin
           when O"4" => AnalogSettings.ShiftReg <= (others => '-');
           when O"5" =>
             AnalogSettings.ShiftReg <= (
-              0      => iCPUtoAnalog.CH1_K1_ON,
-              1      => iCPUtoAnalog.CH1_K1_OFF,
-              2      => iCPUtoAnalog.CH1_K2_ON,
-              3      => iCPUtoAnalog.CH1_K2_OFF,
+              0      => not iCPUtoAnalog.CH1_K1_ON,
+              1      => not iCPUtoAnalog.CH1_K1_OFF,
+              2      => not iCPUtoAnalog.CH1_K2_ON,
+              3      => not iCPUtoAnalog.CH1_K2_OFF,
               4      => iCPUtoAnalog.CH1_OPA656,
               5      => iCPUtoAnalog.CH1_BW_Limit,
               6      => iCPUtoAnalog.CH1_U14,
@@ -290,10 +290,10 @@ begin
             AnalogSettings.ShiftReg(23 downto 17) <= X"2" & O"0";
           when O"7" =>
             AnalogSettings.ShiftReg <= (
-              0      => iCPUtoAnalog.CH0_K1_ON,
-              1      => iCPUtoAnalog.CH0_K1_OFF,
-              2      => iCPUtoAnalog.CH0_K2_ON,
-              3      => iCPUtoAnalog.CH0_K2_OFF,
+              0      => not iCPUtoAnalog.CH0_K1_ON,
+              1      => not iCPUtoAnalog.CH0_K1_OFF,
+              2      => not iCPUtoAnalog.CH0_K2_ON,
+              3      => not iCPUtoAnalog.CH0_K2_OFF,
               4      => iCPUtoAnalog.CH0_OPA656,
               5      => iCPUtoAnalog.CH0_BW_Limit,
               6      => iCPUtoAnalog.CH0_U14,

@@ -4,7 +4,7 @@
 -- File       : ADC-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-04
+-- Last update: 2009-03-30
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -69,18 +69,19 @@ architecture RTL of ADC is
   signal   Locked        : std_ulogic_vector(0 to 4);
   -- signal   areset        : std_ulogic;
   signal   ADC           : aADCIn;
-  signal   InvPhase2     : aADCInPhase(0 to 0);
+  signal   InvPhase      : aADCInPhase(0 to 0);
   signal   Phase0        : aADCInPhase(1 downto 0);
   signal   Phase1        : aADCInPhase(1 downto 0);
   signal   Phase2        : aADCInPhase(0 downto 0);
-  signal   Phase3        : aADCInPhase(2 downto 0);
+--  signal   Phase3        : aADCInPhase(2 downto 0);
+  signal   Phase3        : aADCInPhase(0 downto 0);
 begin
-  
- -- Locked(Locked'high) <= Locked(0) and Locked(1) and Locked(2) and Locked(3);
-  oClk125             <= Clk125;
-  oClkADC             <= ClkADC250;
+
+  -- Locked(Locked'high) <= Locked(0) and Locked(1) and Locked(2) and Locked(3);
+  oClk125 <= Clk125;
+  oClkADC <= ClkADC250;
   -- oLocked             <= Locked125(Locked125'high);
-  oLocked             <= Locked(3);
+  oLocked <= Locked(3);
 
   -- areset <= iResetAsync when cResetActive = '1' else
   --           not iResetAsync;
@@ -108,7 +109,7 @@ begin
       pllena => '1',
       c0     => ClkADC250(2),
       locked => Locked(2));
-  
+
   -- The pll clk signals are stable for 10000 cycles before Locked(3) is asserted!
   PLL3 : entity work.PLL3
     port map (
@@ -131,12 +132,12 @@ begin
     end process;
   end generate;
 
-  pInvPhase2 : process (ClkADC250(2), Locked(3))
+  pInvPhase2 : process (ClkADC250(0), Locked(3))
   begin
     if Locked(3) = '0' then
-       InvPhase2(0) <= (others => (others => '0'));
-    elsif falling_edge(ClkADC250(2)) then
-      InvPhase2(0) <= ADC(2);
+      InvPhase(0) <= (others => (others => '0'));
+    elsif falling_edge(ClkADC250(0)) then
+      InvPhase(0) <= ADC(0);
     end if;
   end process;
 
@@ -147,14 +148,15 @@ begin
       Phase1 <= (others => (others => (others => '0')));
       Phase2 <= (others => (others => (others => '0')));
       Phase3 <= (others => (others => (others => '0')));
-    elsif rising_edge(ClkADC250(3)) then
-      Phase0(1)          <= ADC(0);
-      Phase1(1)          <= ADC(1);
-      Phase2(0)          <= InvPhase2(0);
-      Phase3(2)          <= ADC(3);
-      Phase0(0)          <= Phase0(1);
-      Phase1(0)          <= Phase1(1);
-      Phase3(1 downto 0) <= Phase3(2 downto 1);
+    elsif falling_edge(ClkADC250(3)) then
+      Phase0(0) <= Phase0(1);
+      Phase1(0) <= Phase1(1);
+      for i in 0 to cChannels-1 loop
+        Phase0(1)(i) <= not InvPhase(0)(i); -- not's solve hold time violations
+        Phase1(1)(i) <= not ADC(1)(i);
+        Phase2(0)(i) <= not ADC(2)(i); 
+        Phase3(0)(i) <= not ADC(3)(i); -- not's are only workarounds to avoid a slow block ram!
+      end loop;
     end if;
   end process;
 
@@ -164,17 +166,17 @@ begin
       oData <= (others => (others => (others => '0')));
     elsif rising_edge(Clk125) then
       for i in 0 to cChannels-1 loop
-        oData(i)(0) <= Phase0(0)(i);
-        oData(i)(2) <= Phase1(0)(i);
-        oData(i)(4) <= Phase2(0)(i);
-        oData(i)(6) <= Phase3(0)(i);
+        oData(i)(0) <= not Phase0(0)(i);
+        oData(i)(2) <= not Phase1(0)(i);
+        oData(i)(4) <= not Phase2(0)(i);
+        oData(i)(6) <= not Phase3(0)(i);
       end loop;
     elsif falling_edge(Clk125) then
       for i in 0 to cChannels-1 loop
-        oData(i)(1) <= Phase0(0)(i);
-        oData(i)(3) <= Phase1(0)(i);
-        oData(i)(5) <= Phase2(0)(i);
-        oData(i)(7) <= Phase3(0)(i);
+        oData(i)(1) <= not Phase0(0)(i);
+        oData(i)(3) <= not Phase1(0)(i);
+        oData(i)(5) <= not Phase2(0)(i);
+        oData(i)(7) <= not Phase3(0)(i);
       end loop;
     end if;
   end process;

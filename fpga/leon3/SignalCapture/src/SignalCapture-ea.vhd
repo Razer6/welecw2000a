@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-21
+-- Last update: 2009-03-29
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -115,7 +115,7 @@ begin
     elsif rising_edge(ClkDesign) then
       for i in 0 to cChannels-1 loop
         for j in 0 to cCoefficients-1 loop
-          DecimatorIn(i)(j) <= signed('0' & ADCout(i)(j));
+          DecimatorIn(i)(j) <= signed(ADCout(i)(j)(7) & ADCout(i)(j));
         end loop;
       end loop;
     end if;

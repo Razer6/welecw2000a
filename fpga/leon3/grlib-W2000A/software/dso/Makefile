@@ -8,7 +8,7 @@ MKPROMOPT= -v -freq=63  -stack 0x401C7C00 -ramsize 2048 -ramcs 1 -rmw -romws 1 -
 TINYFLAGS= -msoft-float -nostdlib  -nostartfiles
 TX= -Tlinkprom -N -L./ -Ttext=0
 
-DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart $(DSOPATH)/DSO_Debugprint  $(DSOPATH)/DSO_SignalCapture 
+DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart $(DSOPATH)/DSO_Debugprint  $(DSOPATH)/DSO_SignalCapture $(DSOPATH)/DSO_FrontPanel
 W2000SRC=$(DSOPATH)/DSO_SignalCTest  $(DSOPATH)/DSO_Screen $(DSOSRC)
 SBXSRC=$(DSOPATH)/SandboxXBootloader $(DSOSRC)
 

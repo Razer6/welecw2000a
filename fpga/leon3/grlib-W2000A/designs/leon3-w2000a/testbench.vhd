@@ -146,14 +146,14 @@ architecture behav of testbench is
   signal iFPGA2_T7   : std_ulogic;
 
   --CONTROL of inputs
-  signal iUx6        : std_ulogic;      -- not soldering register channels 1,2 è 3,4
+  signal iUx6        : std_ulogic;  -- not soldering register channels 1,2 è 3,4
   signal iUx11       : std_ulogic;      -- not soldering register channels 1,2
   signal AAQpin5     : std_ulogic;
   signal oCalibrator : std_ulogic;
 
 -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-  signal oPWMout  : std_ulogic;                     --Level Of External Syncro
-  signal iSinhcro : std_ulogic;                     --Comparator external syncro.
+  signal oPWMout  : std_ulogic;         --Level Of External Syncro
+  signal iSinhcro : std_ulogic;         --Comparator external syncro.
   signal oDesh    : std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
   signal oDeshENA : std_ulogic;
   signal oRegCLK  : std_ulogic;
@@ -198,7 +198,7 @@ architecture behav of testbench is
 
   signal   dstrst, dsutx, dsurx, dsurst : std_ulogic;
   constant lresp                        : boolean := false;
--- Added for Hpe
+
 
   signal resoutn : std_logic;
 
@@ -225,25 +225,27 @@ architecture behav of testbench is
 
   component BhvADC is
     generic (
-      gFilename : string;
-      gBitWidth : natural);
+      gFilename : string := "";
+      gBitWidth : natural;
+    -- This generic is for netlist simulations with timing information! 
+    gOutputDelay : time);
     port (
       iClk        : in  std_ulogic;
       iResetAsync : in  std_ulogic;
       oData       : out std_ulogic_vector(gBitWidth-1 downto 0));
   end component;
-  
+
   component StoP_hc595 is
-  port (
-    iSD    : in  std_ulogic;
-    iSCK   : in  std_ulogic;
-    inSCLR : in  std_ulogic;
-    iRCK   : in  std_ulogic;
-    iG     : in  std_ulogic;
-    oSD    : out std_ulogic;
-    oQ     : out std_ulogic_vector (0 to 7));
+    port (
+      iSD    : in  std_ulogic;
+      iSCK   : in  std_ulogic;
+      inSCLR : in  std_ulogic;
+      iRCK   : in  std_ulogic;
+      iG     : in  std_ulogic;
+      oSD    : out std_ulogic;
+      oQ     : out std_ulogic_vector (0 to 7));
   end component;
-  
+
   component PtoS_hct165 is
     port (
       iSD  : in  std_ulogic;
@@ -256,8 +258,8 @@ architecture behav of testbench is
   end component;
 
 
- -- signal Keys : aKeys;
- -- signal Leds : aLeds;
+  -- signal Keys : aKeys;
+  -- signal Leds : aLeds;
 
   type aAnalogSettingsBank5 is record
                                  CH1_K1_ON     : std_ulogic;
@@ -288,34 +290,154 @@ architecture behav of testbench is
                                  CH2_DC       : std_ulogic;
                                  CH3_DC       : std_ulogic;
                                end record;
-  
+
   -- leds, leys, analog settings
   signal DAC_A, DAC_B   : real;
   signal ASEnable       : std_ulogic_vector(0 to 7);
   signal DACEn          : std_ulogic;
   signal ASDCh0, ASDCh1 : std_ulogic;
-  
+
   constant cLedBanks : natural := 2;
   constant cKeyBanks : natural := 7;
-  signal LedSD : std_ulogic_vector(0 to cLedBanks);
-  signal KeySD : std_ulogic_vector(0 to cKeyBanks);
-  type aKeyData is array (0 to cKeyBanks-1) of std_ulogic_vector(0 to 7);
+  signal   LedSD     : std_ulogic_vector(0 to cLedBanks);
+  signal   KeySD     : std_ulogic_vector(0 to cKeyBanks);
+  type     aKeyData is array (0 to cKeyBanks-1) of std_ulogic_vector(0 to 7);
   signal KeyData : aKeyData := (
-    0 => X"F0",
-    1 => X"FF",
+    0                => X"F0",
+    1                => X"FF",
     2 to cKeyBanks-2 => X"A5",
-    cKeyBanks-1 => X"0F");
-  
-  
+    cKeyBanks-1      => X"0F");
+
+  component leon3mini is
+    generic (
+      fabtech : integer := CFG_FABTECH;
+      memtech : integer := CFG_MEMTECH;
+      padtech : integer := CFG_PADTECH;
+      clktech : integer := CFG_CLKTECH;
+      disas   : integer := CFG_DISAS;   -- Enable disassembly to console
+      dbguart : integer := CFG_DUART;   -- Print UART on console
+      pclow   : integer := CFG_PCLOW;
+      freq    : integer := 25000  -- frequency of main clock (used for PLLs)
+      );
+    port (
+      --RS232
+      iRXD : in  std_ulogic;            --RS232 
+      oTXD : out std_ulogic;
+
+      --USB
+      iUSBRX : in  std_ulogic;          -- Receive from USB
+      oUSBTX : out std_ulogic;          -- Tratsmit to USB
+
+      --SWITCH on board
+      iSW1 : in std_ulogic;             --switch 1
+      iSW2 : in std_ulogic;             --switch 2 (reset)
+
+      --FLASH
+      oA_FLASH  : out   std_ulogic_vector (cFLASHAddrWidth-1 downto 0);
+      bD_FLASH  : inout std_logic_vector (7 downto 0);
+      iRB_FLASH : in    std_ulogic;
+      oOE_FLASH : out   std_ulogic;
+      oCE_FLASH : out   std_ulogic;
+      oWE_FLASH : out   std_ulogic;
+      --RESET_FLASH :out std_ulogic; connected to SW2
+      --ACC_FLASH :out std_ulogic;
+
+      --SRAM
+      oA_SRAM   : out   std_ulogic_vector (cSRAMAddrWidth-1 downto 0);
+      bD_SRAM   : inout std_logic_vector (31 downto 0);  --inout
+      oCE_SRAM  : out   std_ulogic;
+      oWE_SRAM  : out   std_ulogic;
+      oOE_SRAM  : out   std_ulogic;
+      oUB1_SRAM : out   std_ulogic;
+      oUB2_SRAM : out   std_ulogic;
+      oLB1_SRAM : out   std_ulogic;
+      oLB2_SRAM : out   std_ulogic;
+
+      -- framebuffer VGA
+      oDCLK      : out std_ulogic;
+      oHD        : out std_ulogic;
+      oVD        : out std_ulogic;
+      oDENA      : out std_ulogic;
+      oRed       : out std_ulogic_vector(5 downto 3);
+      oGreen     : out std_ulogic_vector(5 downto 3);
+      oBlue      : out std_ulogic_vector(5 downto 3);
+      --FRONT PANEL
+      oFPSW_PE   : out std_ulogic;
+      iFPSW_DOUT : in  std_ulogic;
+      oFPSW_CLK  : out std_ulogic;
+      iFPSW_F2   : in  std_ulogic;
+      iFPSW_F1   : in  std_ulogic;
+      oFPLED_OE  : out std_ulogic;
+      oFPLED_WR  : out std_ulogic;
+      oFPLED_DIN : out std_ulogic;
+      oFPLED_CLK : out std_ulogic;
+
+      --FPGA2
+      iFPGA2_C7   : in std_ulogic;
+      iFPGA2_H11  : in std_ulogic;
+      iFPGA2_AB10 : in std_ulogic;
+      iFPGA2_U10  : in std_ulogic;
+      iFPGA2_W9   : in std_ulogic;
+      iFPGA2_T7   : in std_ulogic;
+
+      --CONTROL of inputs
+      iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
+      iUx11       : in  std_ulogic;     -- not soldering register channels 1,2
+      iAAQpin5    : in std_ulogic;
+      oCalibrator : out std_ulogic;
+
+      -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
+      oPWMout  : out std_ulogic;        --Level Of External Syncro
+      iSinhcro : in  std_ulogic;        --Comparator external syncro.
+      oDesh    : out std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
+      oDeshENA : out std_ulogic;
+      oRegCLK  : out std_ulogic;
+      oRegData : out std_ulogic;
+
+      --ADC
+      oADC1CLK : out std_ulogic;
+      oADC2CLK : out std_ulogic;
+      oADC3CLK : out std_ulogic;
+      oADC4CLK : out std_ulogic;
+      iCh1ADC1 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+      iCh1ADC2 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+      iCh1ADC3 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+      iCh1ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+      iCh2ADC1 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+      iCh2ADC2 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+      iCh2ADC3 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+      iCh2ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
+
+-- pragma translate_off
+      errorn  : out std_ulogic;
+      resoutn : out std_ulogic;
+-- pragma translate_on
+
+      --CLK
+--    iResetAsync : in  std_ulogic;       -- Where is the async reset input pin ?
+      iclk25_2  : in  std_ulogic;
+      iclk25_7  : in  std_ulogic;
+      iclk25_10 : in  std_ulogic;
+      iclk25_15 : in  std_ulogic;
+      iclk13inp : in  std_ulogic;       --wire W12-U15
+      oclk13out : out std_ulogic;       --W12-U15
+      iclk12_5  : in  std_ulogic
+      );
+  end component;
+
+--  for all : leon3mini
+--    use entity work.NetlistWrapper;
+
 begin
   
   
-  ADC : for i in 0 to cChannels-1 generate
-    CH : for j in 0 to cADCsperChannel-1 generate
+  CH : for i in 0 to cChannels-1 generate
+    ADC : for j in 0 to cADCsperChannel-1 generate
       BHV : BhvADC
         generic map (
-          gFileName => cWaveFileNames(i)(j),
-          gBitWidth => cADCBitWidth)
+  --        gFileName    => cWaveFileNames(i)(j),
+          gBitWidth    => cADCBitWidth,
+          gOutputDelay => 1800 ps)
         port map (
           iClk        => ADCClk(j),
           iResetAsync => resoutn,
@@ -404,7 +526,7 @@ begin
 
   
   iFPSW_DOUT <= KeySD(cKeyBanks);
-  KeySD(0) <= '-';
+  KeySD(0)   <= '-';
   pKeys : for i in 0 to cKeyBanks-1 generate
     Bank : PtoS_hct165
       port map (
@@ -416,7 +538,7 @@ begin
         oQ   => KeySD(i+1),
         onQ  => open);
   end generate;
-  
+
   LedSD(0) <= oFPLED_DIN;
   pLeds : for i in 0 to cLedBanks-1 generate
     Bank : StoP_hc595
@@ -437,7 +559,7 @@ begin
   rst  <= '1'     after 10 ns;
   rxd1 <= 'H';
 
-  d3 : entity work.leon3mini
+  d3 : leon3mini
     generic map (
       fabtech => fabtech, memtech => memtech, padtech => padtech,
       clktech => clktech, disas => disas, dbguart => dbguart,
@@ -505,9 +627,9 @@ begin
       iFPGA2_T7   => iFPGA2_T7,
 
       --CONTROL of inputs
-      iUx6        => iUx6,              -- not soldering register channels 1,2 è 3,4
+      iUx6        => iUx6,   -- not soldering register channels 1,2 è 3,4
       iUx11       => iUx11,             -- not soldering register channels 1,2
-      oAAQpin5    => AAQpin5,
+      iAAQpin5    => AAQpin5,
       oCalibrator => oCalibrator,
 
       -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!

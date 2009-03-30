@@ -1,4 +1,4 @@
--- Copyright (C) 1991-2008 Altera Corporation
+-- Copyright (C) 1991-2009 Altera Corporation
 -- Your use of Altera Corporation's design tools, logic functions 
 -- and other software and tools, and its AMPP partner logic 
 -- functions, and any output files from any of the foregoing 
@@ -11,7 +11,7 @@
 -- programming logic devices manufactured by Altera and sold by 
 -- Altera or its authorized distributors.  Please refer to the 
 -- applicable agreement for further details.
--- Quartus II 8.0 Build 231 05/29/2008
+-- Quartus II 9.0 Build 132 02/25/2009
 ---START_PACKAGE_HEADER-----------------------------------------------------
 --
 -- Package Name    :  ALTERA_COMMON_CONVERSION
@@ -437,7 +437,10 @@ package ALTERA_DEVICE_FAMILIES is
     function IS_FAMILY_STRATIXIII (device : in string) return boolean;
     function IS_FAMILY_CYCLONEIII (device : in string) return boolean;
     function IS_FAMILY_STRATIXIV (device : in string) return boolean;
+    function IS_FAMILY_ARRIAIIGXGX (device : in string) return boolean;
     function IS_FAMILY_HARDCOPYIII (device : in string) return boolean;
+    function IS_FAMILY_HARDCOPYIV (device : in string) return boolean;
+    function IS_FAMILY_CYCLONEIIILS (device : in string) return boolean;
     function FEATURE_FAMILY_FLEX10KE (device : in string) return boolean;
     function FEATURE_FAMILY_APEX20K (device : in string) return boolean;
     function FEATURE_FAMILY_APEX20KE (device : in string) return boolean;
@@ -453,6 +456,8 @@ package ALTERA_DEVICE_FAMILIES is
     function FEATURE_FAMILY_STRATIX (device : in string) return boolean;
     function FEATURE_FAMILY_MAXII (device : in string) return boolean;
     function FEATURE_FAMILY_CYCLONEII (device : in string) return boolean;
+    function FEATURE_FAMILY_STRATIXIV (device : in string) return boolean;
+    function FEATURE_FAMILY_ARRIAIIGX (device : in string) return boolean;
     function FEATURE_FAMILY_BASE_STRATIXII (device : in string) return boolean;
     function FEATURE_FAMILY_BASE_STRATIX (device : in string) return boolean;
     function FEATURE_FAMILY_BASE_CYCLONEII (device : in string) return boolean;
@@ -468,9 +473,9 @@ package ALTERA_DEVICE_FAMILIES is
     function FEATURE_FAMILY_HAS_STRATIXIII_STYLE_RAM (device : in string) return boolean;
     function FEATURE_FAMILY_HAS_STRATIX_STYLE_PLL (device : in string) return boolean;
     function FEATURE_FAMILY_HAS_STRATIXII_STYLE_PLL (device : in string) return boolean;
+    function FEATURE_FAMILY_USES_STRATIXIII_PLL (device : in string) return boolean;
     function FEATURE_FAMILY_HAS_FLEXIBLE_LVDS (device : in string) return boolean;
     function FEATURE_FAMILY_HAS_INVERTED_OUTPUT_DDIO (device : in string) return boolean;
-    function FEATURE_FAMILY_USES_STRATIXIII_PLL (device : in string) return boolean;
     function IS_VALID_FAMILY (device: in string) return boolean;
 end ALTERA_DEVICE_FAMILIES;
 
@@ -670,12 +675,22 @@ end IS_FAMILY_CYCLONEIII;
 function IS_FAMILY_STRATIXIV (device : in string) return boolean is
 variable is_stratixiv : boolean := false;
 begin
-    if ((device = "Stratix IV") or (device = "STRATIX IV") or (device = "stratix iv") or (device = "TGX") or (device = "tgx") or (device = "StratixIV") or (device = "STRATIXIV") or (device = "stratixiv") or (device = "StratixIIIGX") or (device = "STRATIXIIIGX") or (device = "stratixiiigx") or (device = "Stratix IV (GX/E)") or (device = "STRATIX IV (GX/E)") or (device = "stratix iv (gx/e)") or (device = "StratixIV(GX/E)") or (device = "STRATIXIV(GX/E)") or (device = "stratixiv(gx/e)"))
+    if ((device = "Stratix IV") or (device = "STRATIX IV") or (device = "stratix iv") or (device = "TGX") or (device = "tgx") or (device = "StratixIV") or (device = "STRATIXIV") or (device = "stratixiv") or (device = "StratixIIIGX") or (device = "STRATIXIIIGX") or (device = "stratixiiigx") or (device = "Stratix IV (GT/GX/E)") or (device = "STRATIX IV (GT/GX/E)") or (device = "stratix iv (gt/gx/e)") or (device = "StratixIV(GT/GX/E)") or (device = "STRATIXIV(GT/GX/E)") or (device = "stratixiv(gt/gx/e)") or (device = "Stratix IV (GX/E)") or (device = "STRATIX IV (GX/E)") or (device = "stratix iv (gx/e)") or (device = "StratixIV(GX/E)") or (device = "STRATIXIV(GX/E)") or (device = "stratixiv(gx/e)"))
     then
         is_stratixiv := true;
     end if;
     return is_stratixiv;
 end IS_FAMILY_STRATIXIV;
+
+function IS_FAMILY_ARRIAIIGXGX (device : in string) return boolean is
+variable is_arriaiigx : boolean := false;
+begin
+    if ((device = "Arria II GX") or (device = "ARRIA II GX") or (device = "arria ii gx") or (device = "ArriaIIGX") or (device = "ARRIAIIGX") or (device = "arriaiigx") or (device = "Arria IIGX") or (device = "ARRIA IIGX") or (device = "arria iigx") or (device = "ArriaII GX") or (device = "ARRIAII GX") or (device = "arriaii gx") or (device = "Arria II") or (device = "ARRIA II") or (device = "arria ii") or (device = "ArriaII") or (device = "ARRIAII") or (device = "arriaii") or (device = "Arria II (GX/E)") or (device = "ARRIA II (GX/E)") or (device = "arria ii (gx/e)") or (device = "ArriaII(GX/E)") or (device = "ARRIAII(GX/E)") or (device = "arriaii(gx/e)") or (device = "PIRANHA") or (device = "piranha"))
+    then
+        is_arriaiigx := true;
+    end if;
+    return is_arriaiigx;
+end IS_FAMILY_ARRIAIIGXGX;
 
 function IS_FAMILY_HARDCOPYIII (device : in string) return boolean is
 variable is_hardcopyiii : boolean := false;
@@ -686,6 +701,26 @@ begin
     end if;
     return is_hardcopyiii;
 end IS_FAMILY_HARDCOPYIII;
+
+function IS_FAMILY_HARDCOPYIV (device : in string) return boolean is
+variable is_hardcopyiv : boolean := false;
+begin
+    if ((device = "HardCopy IV") or (device = "HARDCOPY IV") or (device = "hardcopy iv") or (device = "HardCopyIV") or (device = "HARDCOPYIV") or (device = "hardcopyiv") or (device = "HCXIV") or (device = "hcxiv") or (device = "HardCopy IV (GX/E)") or (device = "HARDCOPY IV (GX/E)") or (device = "hardcopy iv (gx/e)") or (device = "HardCopyIV(GX/E)") or (device = "HARDCOPYIV(GX/E)") or (device = "hardcopyiv(gx/e)"))
+    then
+        is_hardcopyiv := true;
+    end if;
+    return is_hardcopyiv;
+end IS_FAMILY_HARDCOPYIV;
+
+function IS_FAMILY_CYCLONEIIILS (device : in string) return boolean is
+variable is_cycloneiiils : boolean := false;
+begin
+    if ((device = "Cyclone III LS") or (device = "CYCLONE III LS") or (device = "cyclone iii ls") or (device = "CycloneIIILS") or (device = "CYCLONEIIILS") or (device = "cycloneiiils") or (device = "Cyclone III LPS") or (device = "CYCLONE III LPS") or (device = "cyclone iii lps") or (device = "Cyclone LPS") or (device = "CYCLONE LPS") or (device = "cyclone lps") or (device = "CycloneLPS") or (device = "CYCLONELPS") or (device = "cyclonelps") or (device = "Tarpon") or (device = "TARPON") or (device = "tarpon") or (device = "Cyclone IIIE") or (device = "CYCLONE IIIE") or (device = "cyclone iiie"))
+    then
+        is_cycloneiiils := true;
+    end if;
+    return is_cycloneiiils;
+end IS_FAMILY_CYCLONEIIILS;
 
 function FEATURE_FAMILY_FLEX10KE (device : in string) return boolean is
 variable var_family_flex10ke : boolean := false;
@@ -767,7 +802,7 @@ end FEATURE_FAMILY_STRATIXIIGX;
 function FEATURE_FAMILY_STRATIXIII (device : in string) return boolean is
 variable var_family_stratixiii : boolean := false;
 begin
-    if (IS_FAMILY_STRATIXIII(device) or IS_FAMILY_STRATIXIV(device) or IS_FAMILY_HARDCOPYIII(device) )
+    if (IS_FAMILY_STRATIXIII(device) or FEATURE_FAMILY_STRATIXIV(device) or IS_FAMILY_HARDCOPYIII(device) )
     then
         var_family_stratixiii := true;
     end if;
@@ -789,7 +824,7 @@ end FEATURE_FAMILY_STRATIXII;
 function FEATURE_FAMILY_CYCLONEIII (device : in string) return boolean is
 variable var_family_cycloneiii : boolean := false;
 begin
-    if (IS_FAMILY_CYCLONEIII(device) )
+    if (IS_FAMILY_CYCLONEIII(device) or IS_FAMILY_CYCLONEIIILS(device) )
     then
         var_family_cycloneiii := true;
     end if;
@@ -844,12 +879,34 @@ end FEATURE_FAMILY_MAXII;
 function FEATURE_FAMILY_CYCLONEII (device : in string) return boolean is
 variable var_family_cycloneii : boolean := false;
 begin
-    if (IS_FAMILY_CYCLONEII(device) or IS_FAMILY_CYCLONEIII(device) )
+    if (IS_FAMILY_CYCLONEII(device) or FEATURE_FAMILY_CYCLONEIII(device) )
     then
         var_family_cycloneii := true;
     end if;
     return var_family_cycloneii;
 end FEATURE_FAMILY_CYCLONEII;
+
+
+function FEATURE_FAMILY_STRATIXIV (device : in string) return boolean is
+variable var_family_stratixiv : boolean := false;
+begin
+    if (IS_FAMILY_STRATIXIV(device) or IS_FAMILY_ARRIAIIGXGX(device) or IS_FAMILY_HARDCOPYIV(device) )
+    then
+        var_family_stratixiv := true;
+    end if;
+    return var_family_stratixiv;
+end FEATURE_FAMILY_STRATIXIV;
+
+
+function FEATURE_FAMILY_ARRIAIIGX (device : in string) return boolean is
+variable var_family_arriaiigx : boolean := false;
+begin
+    if (IS_FAMILY_ARRIAIIGXGX(device) )
+    then
+        var_family_arriaiigx := true;
+    end if;
+    return var_family_arriaiigx;
+end FEATURE_FAMILY_ARRIAIIGX;
 
 
 function FEATURE_FAMILY_BASE_STRATIXII (device : in string) return boolean is
@@ -899,7 +956,7 @@ end FEATURE_FAMILY_BASE_CYCLONE;
 function FEATURE_FAMILY_BASE_CYCLONEIII (device : in string) return boolean is
 variable var_family_base_cycloneiii : boolean := false;
 begin
-    if (IS_FAMILY_CYCLONEIII(device) )
+    if (IS_FAMILY_CYCLONEIII(device) or IS_FAMILY_CYCLONEIIILS(device) )
     then
         var_family_base_cycloneiii := true;
     end if;
@@ -910,7 +967,7 @@ end FEATURE_FAMILY_BASE_CYCLONEIII;
 function FEATURE_FAMILY_BASE_STRATIXIII (device : in string) return boolean is
 variable var_family_base_stratixiii : boolean := false;
 begin
-    if (IS_FAMILY_STRATIXIII(device) or IS_FAMILY_STRATIXIV(device) )
+    if (IS_FAMILY_STRATIXIII(device) or FEATURE_FAMILY_STRATIXIV(device) or IS_FAMILY_HARDCOPYIII(device) )
     then
         var_family_base_stratixiii := true;
     end if;
@@ -932,7 +989,7 @@ end FEATURE_FAMILY_STRATIX_NONGX;
 function FEATURE_FAMILY_HAS_MEGARAM (device : in string) return boolean is
 variable var_family_has_megaram : boolean := false;
 begin
-    if (IS_FAMILY_STRATIX(device) or FEATURE_FAMILY_STRATIX_HC(device) or IS_FAMILY_STRATIXGX(device) or FEATURE_FAMILY_STRATIXII(device) )
+    if (( IS_FAMILY_STRATIX(device) or FEATURE_FAMILY_STRATIX_HC(device) or IS_FAMILY_STRATIXGX(device) or FEATURE_FAMILY_STRATIXII(device)  ) and NOT FEATURE_FAMILY_ARRIAIIGX(device) )
     then
         var_family_has_megaram := true;
     end if;
@@ -1017,6 +1074,17 @@ begin
 end FEATURE_FAMILY_HAS_STRATIXII_STYLE_PLL;
 
 
+function FEATURE_FAMILY_USES_STRATIXIII_PLL (device : in string) return boolean is
+variable var_family_uses_stratixiii_pll : boolean := false;
+begin
+    if (FEATURE_FAMILY_STRATIXIII(device) or FEATURE_FAMILY_CYCLONEIII(device) )
+    then
+        var_family_uses_stratixiii_pll := true;
+    end if;
+    return var_family_uses_stratixiii_pll;
+end FEATURE_FAMILY_USES_STRATIXIII_PLL;
+
+
 function FEATURE_FAMILY_HAS_FLEXIBLE_LVDS (device : in string) return boolean is
 variable var_family_has_flexible_lvds : boolean := false;
 begin
@@ -1037,17 +1105,6 @@ begin
     end if;
     return var_family_has_inverted_output_ddio;
 end FEATURE_FAMILY_HAS_INVERTED_OUTPUT_DDIO;
-
-
-function FEATURE_FAMILY_USES_STRATIXIII_PLL (device : in string) return boolean is
-variable var_family_uses_stratixiii_pll : boolean := false;
-begin
-    if (FEATURE_FAMILY_STRATIXIII(device) or FEATURE_FAMILY_CYCLONEIII(device) )
-    then
-        var_family_uses_stratixiii_pll := true;
-    end if;
-    return var_family_uses_stratixiii_pll;
-end FEATURE_FAMILY_USES_STRATIXIII_PLL;
 
 
 function IS_VALID_FAMILY (device : in string) return boolean is
@@ -1081,8 +1138,11 @@ begin
     or ((device = "HardCopy II") or (device = "HARDCOPY II") or (device = "hardcopy ii") or (device = "HardCopyII") or (device = "HARDCOPYII") or (device = "hardcopyii") or (device = "Fusion") or (device = "FUSION") or (device = "fusion"))
     or ((device = "Stratix III") or (device = "STRATIX III") or (device = "stratix iii") or (device = "StratixIII") or (device = "STRATIXIII") or (device = "stratixiii") or (device = "Titan") or (device = "TITAN") or (device = "titan") or (device = "SIII") or (device = "siii"))
     or ((device = "Cyclone III") or (device = "CYCLONE III") or (device = "cyclone iii") or (device = "CycloneIII") or (device = "CYCLONEIII") or (device = "cycloneiii") or (device = "Barracuda") or (device = "BARRACUDA") or (device = "barracuda") or (device = "Cuda") or (device = "CUDA") or (device = "cuda") or (device = "CIII") or (device = "ciii"))
-    or ((device = "Stratix IV") or (device = "STRATIX IV") or (device = "stratix iv") or (device = "TGX") or (device = "tgx") or (device = "StratixIV") or (device = "STRATIXIV") or (device = "stratixiv") or (device = "StratixIIIGX") or (device = "STRATIXIIIGX") or (device = "stratixiiigx") or (device = "Stratix IV (GX/E)") or (device = "STRATIX IV (GX/E)") or (device = "stratix iv (gx/e)") or (device = "StratixIV(GX/E)") or (device = "STRATIXIV(GX/E)") or (device = "stratixiv(gx/e)"))
-    or ((device = "HardCopy III") or (device = "HARDCOPY III") or (device = "hardcopy iii") or (device = "HardCopyIII") or (device = "HARDCOPYIII") or (device = "hardcopyiii") or (device = "HCX") or (device = "hcx")))
+    or ((device = "Stratix IV") or (device = "STRATIX IV") or (device = "stratix iv") or (device = "TGX") or (device = "tgx") or (device = "StratixIV") or (device = "STRATIXIV") or (device = "stratixiv") or (device = "StratixIIIGX") or (device = "STRATIXIIIGX") or (device = "stratixiiigx") or (device = "Stratix IV (GT/GX/E)") or (device = "STRATIX IV (GT/GX/E)") or (device = "stratix iv (gt/gx/e)") or (device = "StratixIV(GT/GX/E)") or (device = "STRATIXIV(GT/GX/E)") or (device = "stratixiv(gt/gx/e)") or (device = "Stratix IV (GX/E)") or (device = "STRATIX IV (GX/E)") or (device = "stratix iv (gx/e)") or (device = "StratixIV(GX/E)") or (device = "STRATIXIV(GX/E)") or (device = "stratixiv(gx/e)"))
+    or ((device = "Arria II GX") or (device = "ARRIA II GX") or (device = "arria ii gx") or (device = "ArriaIIGX") or (device = "ARRIAIIGX") or (device = "arriaiigx") or (device = "Arria IIGX") or (device = "ARRIA IIGX") or (device = "arria iigx") or (device = "ArriaII GX") or (device = "ARRIAII GX") or (device = "arriaii gx") or (device = "Arria II") or (device = "ARRIA II") or (device = "arria ii") or (device = "ArriaII") or (device = "ARRIAII") or (device = "arriaii") or (device = "Arria II (GX/E)") or (device = "ARRIA II (GX/E)") or (device = "arria ii (gx/e)") or (device = "ArriaII(GX/E)") or (device = "ARRIAII(GX/E)") or (device = "arriaii(gx/e)") or (device = "PIRANHA") or (device = "piranha"))
+    or ((device = "HardCopy III") or (device = "HARDCOPY III") or (device = "hardcopy iii") or (device = "HardCopyIII") or (device = "HARDCOPYIII") or (device = "hardcopyiii") or (device = "HCX") or (device = "hcx"))
+    or ((device = "HardCopy IV") or (device = "HARDCOPY IV") or (device = "hardcopy iv") or (device = "HardCopyIV") or (device = "HARDCOPYIV") or (device = "hardcopyiv") or (device = "HCXIV") or (device = "hcxiv") or (device = "HardCopy IV (GX/E)") or (device = "HARDCOPY IV (GX/E)") or (device = "hardcopy iv (gx/e)") or (device = "HardCopyIV(GX/E)") or (device = "HARDCOPYIV(GX/E)") or (device = "hardcopyiv(gx/e)"))
+    or ((device = "Cyclone III LS") or (device = "CYCLONE III LS") or (device = "cyclone iii ls") or (device = "CycloneIIILS") or (device = "CYCLONEIIILS") or (device = "cycloneiiils") or (device = "Cyclone III LPS") or (device = "CYCLONE III LPS") or (device = "cyclone iii lps") or (device = "Cyclone LPS") or (device = "CYCLONE LPS") or (device = "cyclone lps") or (device = "CycloneLPS") or (device = "CYCLONELPS") or (device = "cyclonelps") or (device = "Tarpon") or (device = "TARPON") or (device = "tarpon") or (device = "Cyclone IIIE") or (device = "CYCLONE IIIE") or (device = "cyclone iiie")))
     then
         is_valid := true;
     end if;
@@ -1364,6 +1424,7 @@ procedure find_m_and_n_4_manual_phase ( inclock_period : in integer;
         constant MIN_PFD : integer := 5;
         constant MAX_VCO : integer := 1300;
         constant MIN_VCO : integer := 300;
+        constant MAX_OFFSET : real := 0.004;
 
         variable vco_period : integer;
         variable pfd_freq : integer;
@@ -1380,6 +1441,27 @@ procedure find_m_and_n_4_manual_phase ( inclock_period : in integer;
 
         variable i_max_iter : integer;
         variable loop_iter : integer;
+        
+        variable clk0_div_factor_real : real;
+        variable clk1_div_factor_real : real;
+        variable clk2_div_factor_real : real;
+        variable clk3_div_factor_real : real;
+        variable clk4_div_factor_real : real;
+        variable clk5_div_factor_real : real;
+        variable clk6_div_factor_real : real;
+        variable clk7_div_factor_real : real;
+        variable clk8_div_factor_real : real;
+        variable clk9_div_factor_real : real;
+        variable clk0_div_factor_int : integer;
+        variable clk1_div_factor_int : integer;
+        variable clk2_div_factor_int : integer;
+        variable clk3_div_factor_int : integer;
+        variable clk4_div_factor_int : integer;
+        variable clk5_div_factor_int : integer;
+        variable clk6_div_factor_int : integer;
+        variable clk7_div_factor_int : integer;
+        variable clk8_div_factor_int : integer;
+        variable clk9_div_factor_int : integer;
 begin
     vco_period := vco_phase_shift_step * 8;
     i_pre_m := 0;
@@ -1388,16 +1470,39 @@ begin
 
     LOOP_1 :   for i_n_out in 1 to MAX_N loop
         for i_m_out in 1 to MAX_M loop
-            if ((((clk0_div * i_m_out) rem (clk0_mult * i_n_out) = 0) or (clk0_used = "unused")) and
-                (((clk1_div * i_m_out) rem (clk1_mult * i_n_out) = 0) or (clk1_used = "unused")) and
-                (((clk2_div * i_m_out) rem (clk2_mult * i_n_out) = 0) or (clk2_used = "unused")) and
-                (((clk3_div * i_m_out) rem (clk3_mult * i_n_out) = 0) or (clk3_used = "unused")) and
-                (((clk4_div * i_m_out) rem (clk4_mult * i_n_out) = 0) or (clk4_used = "unused")) and
-                (((clk5_div * i_m_out) rem (clk5_mult * i_n_out) = 0) or (clk5_used = "unused")) and
-                (((clk6_div * i_m_out) rem (clk6_mult * i_n_out) = 0) or (clk6_used = "unused")) and
-                (((clk7_div * i_m_out) rem (clk7_mult * i_n_out) = 0) or (clk7_used = "unused")) and
-                (((clk8_div * i_m_out) rem (clk8_mult * i_n_out) = 0) or (clk8_used = "unused")) and
-                (((clk9_div * i_m_out) rem (clk9_mult * i_n_out) = 0) or (clk9_used = "unused")) )
+        
+	    clk0_div_factor_real := real(clk0_div * i_m_out) / real(clk0_mult * i_n_out);
+            clk1_div_factor_real := real(clk1_div * i_m_out) / real(clk1_mult * i_n_out);
+            clk2_div_factor_real := real(clk2_div * i_m_out) / real(clk2_mult * i_n_out);
+            clk3_div_factor_real := real(clk3_div * i_m_out) / real(clk3_mult * i_n_out);
+            clk4_div_factor_real := real(clk4_div * i_m_out) / real(clk4_mult * i_n_out);
+            clk5_div_factor_real := real(clk5_div * i_m_out) / real(clk5_mult * i_n_out);
+            clk6_div_factor_real := real(clk6_div * i_m_out) / real(clk6_mult * i_n_out);
+            clk7_div_factor_real := real(clk7_div * i_m_out) / real(clk7_mult * i_n_out);
+            clk8_div_factor_real := real(clk8_div * i_m_out) / real(clk8_mult * i_n_out);
+            clk9_div_factor_real := real(clk9_div * i_m_out) / real(clk9_mult * i_n_out);
+
+            clk0_div_factor_int := integer(clk0_div_factor_real);
+            clk1_div_factor_int := integer(clk1_div_factor_real);
+            clk2_div_factor_int := integer(clk2_div_factor_real);
+            clk3_div_factor_int := integer(clk3_div_factor_real);
+            clk4_div_factor_int := integer(clk4_div_factor_real);
+            clk5_div_factor_int := integer(clk5_div_factor_real);
+            clk6_div_factor_int := integer(clk6_div_factor_real);
+            clk7_div_factor_int := integer(clk7_div_factor_real);
+            clk8_div_factor_int := integer(clk8_div_factor_real);
+            clk9_div_factor_int := integer(clk9_div_factor_real);
+	                
+            if (((abs(clk0_div_factor_real - real(clk0_div_factor_int)) < MAX_OFFSET) or (clk0_used = "unused")) and
+                ((abs(clk1_div_factor_real - real(clk1_div_factor_int)) < MAX_OFFSET) or (clk1_used = "unused")) and
+                ((abs(clk2_div_factor_real - real(clk2_div_factor_int)) < MAX_OFFSET) or (clk2_used = "unused")) and
+                ((abs(clk3_div_factor_real - real(clk3_div_factor_int)) < MAX_OFFSET) or (clk3_used = "unused")) and
+                ((abs(clk4_div_factor_real - real(clk4_div_factor_int)) < MAX_OFFSET) or (clk4_used = "unused")) and
+                ((abs(clk5_div_factor_real - real(clk5_div_factor_int)) < MAX_OFFSET) or (clk5_used = "unused")) and
+                ((abs(clk6_div_factor_real - real(clk6_div_factor_int)) < MAX_OFFSET) or (clk6_used = "unused")) and
+                ((abs(clk7_div_factor_real - real(clk7_div_factor_int)) < MAX_OFFSET) or (clk7_used = "unused")) and
+                ((abs(clk8_div_factor_real - real(clk8_div_factor_int)) < MAX_OFFSET) or (clk8_used = "unused")) and
+                ((abs(clk9_div_factor_real - real(clk9_div_factor_int)) < MAX_OFFSET) or (clk9_used = "unused")) )
             then
                 if ((i_m_out /= 0) and (i_n_out /= 0))
                 then
@@ -1532,9 +1637,11 @@ end lcm;
 -- find the factor of division of the output clock frequency compared to the VCO
 function output_counter_value (clk_divide: integer; clk_mult: integer ;
                                 M: integer; N: integer ) return integer is
-variable R: integer := 1;
+variable r_real : real := 1.0;
+variable r: integer := 1;
 begin
-    R := (clk_divide * M)/(clk_mult * N);
+    r_real := real(clk_divide * M)/ real(clk_mult * N);
+    r := integer(r_real);
 
     return R;
 end output_counter_value;
@@ -1589,7 +1696,7 @@ begin
     R := output_counter_value - R1;
 
     if (R = 0) then
-       R := 1;
+        R := 1;
     end if;
 
     return R;
@@ -1673,7 +1780,7 @@ function counter_initial (tap_phase: integer; m: integer; n: integer)
 variable R: integer;
 variable R1: real;
 begin
-    R1 := (real(abs(tap_phase)) * real(m))/(360.0 * real(n)) + 0.5;
+    R1 := (real(abs(tap_phase)) * real(m))/(360.0 * real(n)) + 0.6;
     -- Note NCSim VHDL had problem in rounding up for 0.5 - 0.99. 
     -- This checking will ensure that the rounding up is done.
     if (R1 >= 0.5) and (R1 <= 1.0) then
@@ -1690,7 +1797,7 @@ function counter_ph (tap_phase: integer; m: integer; n: integer) return integer 
 variable R: integer := 0;
 begin
     -- 0.5 is added for proper rounding of the tap_phase.
-    R := (integer(real(tap_phase * m / n)+ 0.5) REM 360)/45;
+    R := integer(real(integer(real(tap_phase * m / n)+ 0.5) REM 360)/45.0) rem 8;
 
     return R;
 end;
@@ -5727,6 +5834,7 @@ signal   c_mode_val_hold : str_array(0 to 5);
 -- temp registers
 signal   sig_c_ph_val_tmp   : int_array(0 to 5) := (OTHERS => 0);
 signal   sig_c_low_val_tmp  : int_array(0 to 5) := (OTHERS => 1);
+signal   sig_c_hi_val_tmp  : int_array(0 to 5) := (OTHERS => 1);
 signal   c_ph_val_orig  : int_array(0 to 5) := (OTHERS => 0);
 
 --signal   i_clk5_counter         : string(1 to 2) := "c5";
@@ -5900,6 +6008,10 @@ signal inclk_sclkout0_from_vco : std_logic;
 signal inclk_sclkout1_from_vco : std_logic;
 
 --signal tap0_is_active : boolean := true;
+    signal sig_quiet_time : time := 0 ps;
+    signal sig_slowest_clk_old : time := 0 ps;
+    signal sig_slowest_clk_new : time := 0 ps;
+    signal sig_m_val_tmp : int_array(0 to 1) := (OTHERS => 1);
 
 COMPONENT arm_m_cntr
     PORT (
@@ -7207,6 +7319,7 @@ begin
                 end loop;
                 sig_c_ph_val_tmp <= c_ph_val_tmp;
                 sig_c_low_val_tmp <= c_low_val_tmp;
+                sig_c_hi_val_tmp <= c_high_val_tmp;
                 -- M
                 -- some temporary storage
                 if (tmp_scan_data(65 downto 62) = "0000") then
@@ -7337,6 +7450,7 @@ begin
                 end loop;
                 sig_c_ph_val_tmp <= c_ph_val_tmp;
                 sig_c_low_val_tmp <= c_low_val_tmp;
+                sig_c_hi_val_tmp <= c_high_val_tmp;
 
                 -- cntrs M/M2
                 for i in 0 to 1 loop
@@ -7385,7 +7499,8 @@ begin
                         ASSERT false REPORT "Incompatible modes for M/M2 counters. Either both should be BYPASSED or both NON-BYPASSED. Reconfiguration may not work." severity warning;
                     end if;
                 end if;
-          
+                sig_m_val_tmp <= m_val_tmp;
+
                 -- cntrs N/N2
                 for i in 0 to 1 loop
                     start_bit := 154 + i*10;
@@ -7454,7 +7569,9 @@ begin
             else
                 quiet_time := slowest_clk_old;
             end if;
-                                    
+            sig_quiet_time <= quiet_time;
+            sig_slowest_clk_old <= slowest_clk_old;
+            sig_slowest_clk_new <= slowest_clk_new;
             tmp_rem := (quiet_time/1 ps) rem (scanclk_period/ 1 ps);
             scanclk_cycles := (quiet_time/1 ps) / (scanclk_period/1 ps);
             if (tmp_rem /= 0) then
@@ -7469,72 +7586,54 @@ begin
             end if;
 
             if (c_clk(0)'event and c_clk(0) = '1') then
-                c_high_val_hold(0) <= c_high_val_tmp(0);
-                c_mode_val_hold(0) <= c_mode_val_tmp(0);
+                c_high_val(0) <= c_high_val_tmp(0);
+                c_mode_val(0) <= c_mode_val_tmp(0);
                 c0_rising_edge_transfer_done := true;
-                c_high_val(0) <= c_high_val_hold(0);
-                c_mode_val(0) <= c_mode_val_hold(0);
             end if;
             if (c_clk(1)'event and c_clk(1) = '1') then
-                c_high_val_hold(1) <= c_high_val_tmp(1);
-                c_mode_val_hold(1) <= c_mode_val_tmp(1);
+                c_high_val(1) <= c_high_val_tmp(1);
+                c_mode_val(1) <= c_mode_val_tmp(1);
                 c1_rising_edge_transfer_done := true;
-                c_high_val(1) <= c_high_val_hold(1);
-                c_mode_val(1) <= c_mode_val_hold(1);
             end if;
             if (c_clk(2)'event and c_clk(2) = '1') then
-                c_high_val_hold(2) <= c_high_val_tmp(2);
-                c_mode_val_hold(2) <= c_mode_val_tmp(2);
+                c_high_val(2) <= c_high_val_tmp(2);
+                c_mode_val(2) <= c_mode_val_tmp(2);
                 c2_rising_edge_transfer_done := true;
-                c_high_val(2) <= c_high_val_hold(2);
-                c_mode_val(2) <= c_mode_val_hold(2);
             end if;
             if (c_clk(3)'event and c_clk(3) = '1') then
-                c_high_val_hold(3) <= c_high_val_tmp(3);
-                c_mode_val_hold(3) <= c_mode_val_tmp(3);
-                c_high_val(3) <= c_high_val_hold(3);
-                c_mode_val(3) <= c_mode_val_hold(3);
+                c_high_val(3) <= c_high_val_tmp(3);
+                c_mode_val(3) <= c_mode_val_tmp(3);
                 c3_rising_edge_transfer_done := true;
             end if;
             if (c_clk(4)'event and c_clk(4) = '1') then
-                c_high_val_hold(4) <= c_high_val_tmp(4);
-                c_mode_val_hold(4) <= c_mode_val_tmp(4);
-                c_high_val(4) <= c_high_val_hold(4);
-                c_mode_val(4) <= c_mode_val_hold(4);
+                c_high_val(4) <= c_high_val_tmp(4);
+                c_mode_val(4) <= c_mode_val_tmp(4);
                 c4_rising_edge_transfer_done := true;
             end if;
             if (c_clk(5)'event and c_clk(5) = '1') then
-                c_high_val_hold(5) <= c_high_val_tmp(5);
-                c_mode_val_hold(5) <= c_mode_val_tmp(5);
-                c_high_val(5) <= c_high_val_hold(5);
-                c_mode_val(5) <= c_mode_val_hold(5);
+                c_high_val(5) <= c_high_val_tmp(5);
+                c_mode_val(5) <= c_mode_val_tmp(5);
                 c5_rising_edge_transfer_done := true;
             end if;
         end if;
 
         if (c_clk(0)'event and c_clk(0) = '0' and c0_rising_edge_transfer_done) then
-            c_low_val_hold(0) <= c_low_val_tmp(0);
-            c_low_val(0) <= c_low_val_hold(0);
+            c_low_val(0) <= c_low_val_tmp(0);
         end if;
         if (c_clk(1)'event and c_clk(1) = '0' and c1_rising_edge_transfer_done) then
-            c_low_val_hold(1) <= c_low_val_tmp(1);
-            c_low_val(1) <= c_low_val_hold(1);
+            c_low_val(1) <= c_low_val_tmp(1);
         end if;
         if (c_clk(2)'event and c_clk(2) = '0' and c2_rising_edge_transfer_done) then
-            c_low_val_hold(2) <= c_low_val_tmp(2);
-            c_low_val(2) <= c_low_val_hold(2);
+            c_low_val(2) <= c_low_val_tmp(2);
         end if;
         if (c_clk(3)'event and c_clk(3) = '0' and c3_rising_edge_transfer_done) then
-            c_low_val_hold(3) <= c_low_val_tmp(3);
-            c_low_val(3) <= c_low_val_hold(3);
+            c_low_val(3) <= c_low_val_tmp(3);
         end if;
         if (c_clk(4)'event and c_clk(4) = '0' and c4_rising_edge_transfer_done) then
-            c_low_val_hold(4) <= c_low_val_tmp(4);
-            c_low_val(4) <= c_low_val_hold(4);
+            c_low_val(4) <= c_low_val_tmp(4);
         end if;
         if (c_clk(5)'event and c_clk(5) = '0' and c5_rising_edge_transfer_done) then
-            c_low_val_hold(5) <= c_low_val_tmp(5);
-            c_low_val(5) <= c_low_val_hold(5);
+            c_low_val(5) <= c_low_val_tmp(5);
         end if;
 
         if (scanwrite_enabled = '1') then
@@ -7913,15 +8012,8 @@ begin
                         sched_time := sched_time + low_time;
                     end if;
 
-                    -- schedule the phase taps
-                    for k in 0 to 7 loop
-                        phase_shift(k) := (k * vco_per)/8;
-                        if (first_schedule) then
-                            vco_out(k) <= transport vco_val after (sched_time + phase_shift(k));
-                        else
-                            vco_out(k) <= transport vco_val after (sched_time + last_phase_shift(k));
-                        end if;
-                    end loop;
+                    -- schedule tap0
+                    vco_out(0) <= transport vco_val after sched_time;
                 end loop;
             end loop;
 
@@ -7933,11 +8025,8 @@ begin
                 elsif (vco_val = '1') then
                     sched_time := sched_time + low_time;
                 end if;
-                -- schedule the phase taps
-                for k in 0 to 7 loop
-                    phase_shift(k) := (k * vco_per)/8;
-                    vco_out(k) <= transport vco_val after (sched_time + phase_shift(k));
-                end loop;
+                -- schedule tap 0
+                vco_out(0) <= transport vco_val after sched_time;
                 first_schedule := false;
             end if;
 
@@ -7955,6 +8044,13 @@ begin
                     phase_shift(k) := (k * vco_per)/8;
                 end loop;
             end if;
+        end if;
+        -- now schedule the other taps with the appropriate phase-shift
+        if (vco_out(0)'event) then
+            for k in 1 to 7 loop
+                phase_shift(k) := (k * vco_per)/8;
+                vco_out(k) <= transport vco_out(0) after phase_shift(k);
+            end loop;
         end if;
 
         if (refclk'event and refclk = '1' and areset_ipd = '0') then
@@ -8371,9 +8467,9 @@ ENTITY MF_stratixiii_pll is
         switch_over_counter         : integer := 1;
         enable_switch_over_counter  : string := "off";
 
-         dpa_multiply_by : integer := 0;
-         dpa_divide_by   : integer := 0;
-         dpa_divider     : integer := 0;
+        dpa_multiply_by : integer := 0;
+        dpa_divide_by   : integer := 0;
+        dpa_divider     : integer := 0;
         
         bandwidth                    : integer := 0;
         bandwidth_type               : string  := "auto";
@@ -8539,11 +8635,11 @@ ENTITY MF_stratixiii_pll is
         c2_use_casc_in              : string := "off";
         c3_use_casc_in              : string := "off";
         c4_use_casc_in              : string := "off";
-         c5_use_casc_in              : string := "off";
-         c6_use_casc_in              : string := "off";
-         c7_use_casc_in              : string := "off";
-         c8_use_casc_in              : string := "off";
-         c9_use_casc_in              : string := "off";
+        c5_use_casc_in              : string := "off";
+        c6_use_casc_in              : string := "off";
+        c7_use_casc_in              : string := "off";
+        c8_use_casc_in              : string := "off";
+        c9_use_casc_in              : string := "off";
         
         m_test_source               : integer := -1;
         c0_test_source              : integer := -1;
@@ -8551,11 +8647,11 @@ ENTITY MF_stratixiii_pll is
         c2_test_source              : integer := -1;
         c3_test_source              : integer := -1;
         c4_test_source              : integer := -1;
-         c5_test_source              : integer := -1;
-         c6_test_source              : integer := -1;
-         c7_test_source              : integer := -1;
-         c8_test_source              : integer := -1;
-         c9_test_source              : integer := -1;
+        c5_test_source              : integer := -1;
+        c6_test_source              : integer := -1;
+        c7_test_source              : integer := -1;
+        c8_test_source              : integer := -1;
+        c9_test_source              : integer := -1;
         
         vco_multiply_by             : integer := 0;
         vco_divide_by               : integer := 0;
@@ -8576,7 +8672,7 @@ ENTITY MF_stratixiii_pll is
         clk2_use_even_counter_mode  : string := "off";
         clk3_use_even_counter_mode  : string := "off";
         clk4_use_even_counter_mode  : string := "off";
-    clk5_use_even_counter_mode  : string := "off";
+        clk5_use_even_counter_mode  : string := "off";
         clk6_use_even_counter_mode  : string := "off";
         clk7_use_even_counter_mode  : string := "off";
         clk8_use_even_counter_mode  : string := "off";
@@ -8606,10 +8702,10 @@ ENTITY MF_stratixiii_pll is
         test_counter_c3_delay_chain_bits : integer := 0;
         test_counter_c4_delay_chain_bits : integer := 0;
         test_counter_c5_delay_chain_bits : integer := 0;
-         test_counter_c6_delay_chain_bits : integer := 0;
-         test_counter_c7_delay_chain_bits : integer := 0;
-         test_counter_c8_delay_chain_bits : integer := 0;
-         test_counter_c9_delay_chain_bits : integer := 0;
+        test_counter_c6_delay_chain_bits : integer := 0;
+        test_counter_c7_delay_chain_bits : integer := 0;
+        test_counter_c8_delay_chain_bits : integer := 0;
+        test_counter_c9_delay_chain_bits : integer := 0;
         test_counter_m_delay_chain_bits : integer := 0;
         test_counter_n_delay_chain_bits : integer := 0;
         test_feedback_comp_delay_chain_bits : integer := 0;
@@ -8619,13 +8715,14 @@ ENTITY MF_stratixiii_pll is
         test_volt_reg_test_mode : string := "false";
         vco_range_detector_high_bits : integer := -1;
         vco_range_detector_low_bits : integer := -1;
-	scan_chain_mif_file : string := "";
-         dpa_output_clock_phase_shift : integer := 0;
-         test_counter_c3_sclk_delay_chain_bits   : integer := -1;
-         test_counter_c4_sclk_delay_chain_bits   : integer := -1;
-         test_counter_c5_lden_delay_chain_bits   : integer := -1;
-         test_counter_c6_lden_delay_chain_bits   : integer := -1;
-     
+        scan_chain_mif_file : string := "";
+        dpa_output_clock_phase_shift : integer := 0;
+        test_counter_c3_sclk_delay_chain_bits   : integer := -1;
+        test_counter_c4_sclk_delay_chain_bits   : integer := -1;
+        test_counter_c5_lden_delay_chain_bits   : integer := -1;
+        test_counter_c6_lden_delay_chain_bits   : integer := -1;
+
+        auto_settings : string  := "true";     
 -- Simulation only generics
         family_name                 : string  := "StratixIII";
 
@@ -8713,25 +8810,25 @@ signal   i_loop_filter_r        : integer;
 -- end internal advanced parameter signals
 
 -- CONSTANTS
-CONSTANT SCAN_CHAIN : integer := 144;
-CONSTANT GPP_SCAN_CHAIN : integer := 234;
-CONSTANT FAST_SCAN_CHAIN : integer := 180;
+CONSTANT    SCAN_CHAIN : integer := 144;
+CONSTANT    GPP_SCAN_CHAIN : integer := 234;
+CONSTANT    FAST_SCAN_CHAIN : integer := 180;
  CONSTANT cntrs : str_array(9 downto 0) := ("    C9", "    C8", "    C7", "    C6", "    C5", "    C4", "    C3", "    C2", "    C1", "    C0");
-CONSTANT ss_cntrs : str_array(0 to 3) := ("     M", "    M2", "     N", "    N2");
+CONSTANT    ss_cntrs : str_array(0 to 3) := ("     M", "    M2", "     N", "    N2");
+            
+CONSTANT    loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
+CONSTANT    fpll_loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
+CONSTANT    charge_pump_curr_arr : int_array(0 to 15) := (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
-CONSTANT loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
-CONSTANT fpll_loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
-CONSTANT charge_pump_curr_arr : int_array(0 to 15) := (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-
-CONSTANT num_phase_taps : integer := 8;
+CONSTANT    num_phase_taps : integer := 8;
 -- signals
 
-signal vcc : std_logic := '1';
-
-signal fbclk       : std_logic;
-signal refclk      : std_logic;
-signal vco_over    : std_logic := '0';
-signal vco_under   : std_logic := '1';
+signal    vcc : std_logic := '1';
+          
+signal    fbclk       : std_logic;
+signal    refclk      : std_logic;
+signal    vco_over    : std_logic := '0';
+signal    vco_under   : std_logic := '1';
 
 signal pll_locked : boolean := false;
 
@@ -8740,70 +8837,70 @@ signal pll_locked : boolean := false;
 signal vco_out : std_logic_vector(7 downto 0) := (OTHERS => '0');
 
 -- signals to assign values to counter params
-signal m_val : integer := 1;
-signal n_val : integer := 1;
-signal m_ph_val : integer := 0;
-signal m_ph_initial : integer := 0;
-signal m_ph_val_tmp  : integer := 0;
-signal m_initial_val : integer := m_initial;
-
-signal m_mode_val : string(1 to 6) := "      ";
-signal n_mode_val : string(1 to 6) := "      ";
-signal lfc_val : integer := 0;
-signal vco_cur : integer := vco_post_scale;
-signal cp_curr_val : integer := 0;
-signal lfr_val : string(1 to 2) := "  ";
-
-signal cp_curr_old_bit_setting : integer := charge_pump_current_bits;
-signal cp_curr_val_bit_setting : std_logic_vector(2 downto 0) := (OTHERS => '0');
-signal lfr_old_bit_setting : integer := loop_filter_r_bits;
-signal lfr_val_bit_setting : std_logic_vector(4 downto 0) := (OTHERS => '0');
-signal lfc_old_bit_setting : integer := loop_filter_c_bits; 
-signal lfc_val_bit_setting : std_logic_vector(1 downto 0) := (OTHERS => '0');
-
-signal pll_reconfig_display_full_setting : boolean := FALSE; -- display full setting, change to true
--- old values
-signal m_val_old : integer := 1;
-signal n_val_old : integer := 1;
-signal m_mode_val_old : string(1 to 6) := "      ";
-signal n_mode_val_old : string(1 to 6) := "      ";
-signal m_ph_val_old : integer := 0;
-signal lfc_old : integer := 0;
-signal vco_old : integer := 0;
-signal cp_curr_old : integer := 0;
-signal lfr_old : string(1 to 2) := "  ";
+signal    m_val : integer := 1;
+signal    n_val : integer := 1;
+signal    m_ph_val : integer := 0;
+signal    m_ph_initial : integer := 0;
+signal    m_ph_val_tmp  : integer := 0;
+signal    m_initial_val : integer := m_initial;
+         
+signal    m_mode_val : string(1 to 6) := "      ";
+signal    n_mode_val : string(1 to 6) := "      ";
+signal    lfc_val : integer := 0;
+signal    vco_cur : integer := vco_post_scale;
+signal    cp_curr_val : integer := 0;
+signal    lfr_val : string(1 to 2) := "  ";
+         
+signal    cp_curr_old_bit_setting : integer := charge_pump_current_bits;
+signal    cp_curr_val_bit_setting : std_logic_vector(2 downto 0) := (OTHERS => '0');
+signal    lfr_old_bit_setting : integer := loop_filter_r_bits;
+signal    lfr_val_bit_setting : std_logic_vector(4 downto 0) := (OTHERS => '0');
+signal    lfc_old_bit_setting : integer := loop_filter_c_bits; 
+signal    lfc_val_bit_setting : std_logic_vector(1 downto 0) := (OTHERS => '0');
+         
+signal    pll_reconfig_display_full_setting : boolean := FALSE; -- display full setting, change to true
+-- old    values
+signal    m_val_old : integer := 1;
+signal    n_val_old : integer := 1;
+signal    m_mode_val_old : string(1 to 6) := "      ";
+signal    n_mode_val_old : string(1 to 6) := "      ";
+signal    m_ph_val_old : integer := 0;
+signal    lfc_old : integer := 0;
+signal    vco_old : integer := 0;
+signal    cp_curr_old : integer := 0;
+signal    lfr_old : string(1 to 2) := "  ";
  signal num_output_cntrs : integer := 10;
-signal scanclk_period : time := 1 ps;
+signal    scanclk_period : time := 1 ps;
  signal scan_data : std_logic_vector(0 to 233) := (OTHERS => '0');
 
 
  signal clk_pfd : std_logic_vector(0 to 9);
-signal clk0_tmp : std_logic;
-signal clk1_tmp : std_logic;
-signal clk2_tmp : std_logic;
-signal clk3_tmp : std_logic;
-signal clk4_tmp : std_logic;
+signal    clk0_tmp : std_logic;
+signal    clk1_tmp : std_logic;
+signal    clk2_tmp : std_logic;
+signal    clk3_tmp : std_logic;
+signal    clk4_tmp : std_logic;
  signal clk5_tmp : std_logic;
  signal clk6_tmp : std_logic;
  signal clk7_tmp : std_logic;
  signal clk8_tmp : std_logic;
  signal clk9_tmp : std_logic;
 
-signal update_conf_latches : std_logic := '0';
-signal update_conf_latches_reg : std_logic := '0';
+signal    update_conf_latches : std_logic := '0';
+signal    update_conf_latches_reg : std_logic := '0';
 
-signal clkin : std_logic := '0';
-signal gate_locked : std_logic := '0';
-signal pfd_locked : std_logic := '0';
-signal lock : std_logic := '0';
-signal about_to_lock : boolean := false;
-signal reconfig_err : boolean := false;
+signal    clkin : std_logic := '0';
+signal    gate_locked : std_logic := '0';
+signal    pfd_locked : std_logic := '0';
+signal    lock : std_logic := '0';
+signal    about_to_lock : boolean := false;
+signal    reconfig_err : boolean := false;
 
-signal inclk_c0 : std_logic;
-signal inclk_c1 : std_logic;
-signal inclk_c2 : std_logic;
-signal inclk_c3 : std_logic;
-signal inclk_c4 : std_logic;
+signal    inclk_c0 : std_logic;
+signal    inclk_c1 : std_logic;
+signal    inclk_c2 : std_logic;
+signal    inclk_c3 : std_logic;
+signal    inclk_c4 : std_logic;
  signal inclk_c5 : std_logic;
  signal inclk_c6 : std_logic;
  signal inclk_c7 : std_logic;
@@ -8850,7 +8947,7 @@ signal reset_low : std_logic := '0';
 
 -- Phase Reconfig
 
-    SIGNAL phasecounterselect_reg   :  std_logic_vector(3 DOWNTO 0);
+ SIGNAL phasecounterselect_reg   :  std_logic_vector(3 DOWNTO 0);
 
 SIGNAL phaseupdown_reg          :  std_logic := '0';
 SIGNAL phasestep_reg            :  std_logic := '0';
@@ -8869,6 +8966,7 @@ signal schedule_vco : std_logic := '0';
 
 signal areset_ena_sig : std_logic := '0';
 signal pll_in_test_mode : boolean := false;
+signal pll_has_just_been_reconfigured : boolean := false;
 
  signal inclk_c_from_vco : std_logic_array(0 to 9);
 
@@ -9030,6 +9128,7 @@ inclk_m <=  fbclk when m_test_source = 0 else
     variable external_switch : boolean := false;
     variable diff_percent_period : integer := 0;
     variable buf : line;
+    variable switch_clock : boolean := false;
 
     begin
         if (now = 0 ps) then
@@ -9042,17 +9141,27 @@ inclk_m <=  fbclk when m_test_source = 0 else
             external_switch := true;
         elsif (switch_over_type = "manual") then
             if (clkswitch_ipd'event and clkswitch_ipd = '1') then
-                if (current_clock = 0) then
-                current_clock := 1;
-                active_clock := '1';
-                clkin <= transport inclk1_tmp;
-                elsif (current_clock = 1) then
-                current_clock := 0;
-                active_clock := '0';
-                clkin <= transport inclk0_ipd;
+                switch_clock := true;
+            elsif (clkswitch_ipd'event and clkswitch_ipd = '0') then
+                switch_clock := false;
             end if;
         end if;
+
+        if (switch_clock = true) then
+            if (inclk0_ipd'event or inclk1_tmp'event) then
+	            if (current_clock = 0) then
+	                current_clock := 1;
+	                active_clock := '1';
+	                clkin <= transport inclk1_tmp;
+				elsif (current_clock = 1) then
+	                current_clock := 0;
+	                active_clock := '0';
+	                clkin <= transport inclk0_ipd;
+	            end if;
+	            switch_clock := false;
+	        end if;
         end if;
+
         -- save the current inclk event value
         if (inclk0_ipd'event) then
             input_value := inclk0_ipd;
@@ -9125,9 +9234,9 @@ inclk_m <=  fbclk when m_test_source = 0 else
                     got_curr_clk_falling_edge_after_clkswitch := false;
                     
                     if(inclk0_period > inclk1_period) then
-                    	diff_percent_period := (( inclk0_period - inclk1_period ) * 100) / inclk1_period;
+                        diff_percent_period := (( inclk0_period - inclk1_period ) * 100) / inclk1_period;
                     else
-                    	diff_percent_period := (( inclk1_period - inclk0_period ) * 100) / inclk0_period;
+                        diff_percent_period := (( inclk1_period - inclk0_period ) * 100) / inclk0_period;
                     end if;
                      if((diff_percent_period > 20)and ( switch_over_type = "auto")) then
                           WRITE(buf,string'("Warning : The input clock frequencies specified for the specified PLL are too far apart for auto-switch-over feature to work properly. Please make sure that the clock frequencies are 20 percent apart for correct functionality."));
@@ -9144,19 +9253,19 @@ inclk_m <=  fbclk when m_test_source = 0 else
                     external_switch := false;
                     current_clk_is_bad := false;
                 else
-     				if(switch_over_type = "auto") then
-     					if(current_clock = 0 and clk0_is_bad = '1' and clk1_is_bad = '0' ) then
-                			current_clock := 1;
-                			active_clock := not active_clock;
-                		end	if;
+                    if(switch_over_type = "auto") then
+                        if(current_clock = 0 and clk0_is_bad = '1' and clk1_is_bad = '0' ) then
+                            current_clock := 1;
+                            active_clock := not active_clock;
+                        end if;
                 
-                     	if(current_clock = 1 and clk0_is_bad = '0' and clk1_is_bad = '1' ) then
-                			current_clock := 0;
-                			active_clock := not active_clock;
-                		end	if;
-                	end if;
-                end if;  		
-       			
+                        if(current_clock = 1 and clk0_is_bad = '0' and clk1_is_bad = '1' ) then
+                            current_clock := 0;
+                            active_clock := not active_clock;
+                        end if;
+                    end if;
+                end if;         
+                
             end if;
         end if;
 
@@ -9258,85 +9367,94 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 mode           => c_mode_val(4),
                 ph_tap         => c_ph_val(4));
 
-     inclk_c5 <= refclk when c5_test_source = 1 else
-                 fbclk  when c5_test_source = 0 else
-                 c_clk(4) when c5_use_casc_in = "on" else
-                 inclk_c_from_vco(5);
-                
-     c5 : MF_ttn_scale_cntr
-         port map (
-                 clk            => inclk_c5,
-                 reset          => areset_ena_sig,
-                 cout           => c_clk(5),
-                 initial        => c_initial_val(5),
-                 high           => c_high_val(5),
-                 low            => c_low_val(5),
-                 mode           => c_mode_val(5),
-                 ph_tap         => c_ph_val(5));
+ inclk_c5 <= refclk when c5_test_source = 1 else
+             fbclk  when c5_test_source = 0 else
+             c_clk(4) when c5_use_casc_in = "on" else
+             inclk_c_from_vco(5);
+            
+ c5 : MF_ttn_scale_cntr
+     port map (
+             clk            => inclk_c5,
+             reset          => areset_ena_sig,
+             cout           => c_clk(5),
+             initial        => c_initial_val(5),
+             high           => c_high_val(5),
+             low            => c_low_val(5),
+             mode           => c_mode_val(5),
+             ph_tap         => c_ph_val(5));
 
-     inclk_c6 <= refclk when c6_test_source = 1 else
-                 fbclk  when c6_test_source = 0 else
-                 c_clk(5) when c6_use_casc_in = "on" else
-                 inclk_c_from_vco(6);
-                
-     c6 : MF_ttn_scale_cntr
-         port map (
-                 clk            => inclk_c6,
-                 reset          => areset_ena_sig,
-                 cout           => c_clk(6),
-                 initial        => c_initial_val(6),
-                 high           => c_high_val(6),
-                 low            => c_low_val(6),
-                 mode           => c_mode_val(6),
-                 ph_tap         => c_ph_val(6));
+ inclk_c6 <= refclk when c6_test_source = 1 else
+             fbclk  when c6_test_source = 0 else
+             c_clk(5) when c6_use_casc_in = "on" else
+             inclk_c_from_vco(6);
+            
+ c6 : MF_ttn_scale_cntr
+     port map (
+             clk            => inclk_c6,
+             reset          => areset_ena_sig,
+             cout           => c_clk(6),
+             initial        => c_initial_val(6),
+             high           => c_high_val(6),
+             low            => c_low_val(6),
+             mode           => c_mode_val(6),
+             ph_tap         => c_ph_val(6));
 
-     inclk_c7 <= refclk when c7_test_source = 1 else
-                 fbclk  when c7_test_source = 0 else
-                 c_clk(6) when c7_use_casc_in = "on" else
-                 inclk_c_from_vco(7);
-                
-     c7 : MF_ttn_scale_cntr
-         port map (
-                 clk            => inclk_c7,
-                 reset          => areset_ena_sig,
-                 cout           => c_clk(7),
-                 initial        => c_initial_val(7),
-                 high           => c_high_val(7),
-                 low            => c_low_val(7),
-                 mode           => c_mode_val(7),
-                 ph_tap         => c_ph_val(7));
+ inclk_c7 <= refclk when c7_test_source = 1 else
+             fbclk  when c7_test_source = 0 else
+             c_clk(6) when c7_use_casc_in = "on" else
+             inclk_c_from_vco(7);
+            
+ c7 : MF_ttn_scale_cntr
+     port map (
+             clk            => inclk_c7,
+             reset          => areset_ena_sig,
+             cout           => c_clk(7),
+             initial        => c_initial_val(7),
+             high           => c_high_val(7),
+             low            => c_low_val(7),
+             mode           => c_mode_val(7),
+             ph_tap         => c_ph_val(7));
 
-     inclk_c8 <= refclk when c8_test_source = 1 else
-                 fbclk  when c8_test_source = 0 else
-                 c_clk(7) when c8_use_casc_in = "on" else
-                 inclk_c_from_vco(8);
-                
-     c8 : MF_ttn_scale_cntr
-         port map (
-                 clk            => inclk_c8,
-                 reset          => areset_ena_sig,
-                 cout           => c_clk(8),
-                 initial        => c_initial_val(8),
-                 high           => c_high_val(8),
-                 low            => c_low_val(8),
-                 mode           => c_mode_val(8),
-                 ph_tap         => c_ph_val(8));
+ inclk_c8 <= refclk when c8_test_source = 1 else
+             fbclk  when c8_test_source = 0 else
+             c_clk(7) when c8_use_casc_in = "on" else
+             inclk_c_from_vco(8);
+            
+ c8 : MF_ttn_scale_cntr
+     port map (
+             clk            => inclk_c8,
+             reset          => areset_ena_sig,
+             cout           => c_clk(8),
+             initial        => c_initial_val(8),
+             high           => c_high_val(8),
+             low            => c_low_val(8),
+             mode           => c_mode_val(8),
+             ph_tap         => c_ph_val(8));
+
+ inclk_c9 <= refclk when c9_test_source = 1 else
+             fbclk  when c9_test_source = 0 else
+             c_clk(8) when c9_use_casc_in = "on" else
+             inclk_c_from_vco(9);
+            
+ c9 : MF_ttn_scale_cntr
+     port map (
+             clk            => inclk_c9,
+             reset          => areset_ena_sig,
+             cout           => c_clk(9),
+             initial        => c_initial_val(9),
+             high           => c_high_val(9),
+             low            => c_low_val(9),
+             mode           => c_mode_val(9),
+             ph_tap         => c_ph_val(9));
     
-     inclk_c9 <= refclk when c9_test_source = 1 else
-                 fbclk  when c9_test_source = 0 else
-                 c_clk(8) when c9_use_casc_in = "on" else
-                 inclk_c_from_vco(9);
-                
-     c9 : MF_ttn_scale_cntr
-         port map (
-                 clk            => inclk_c9,
-                 reset          => areset_ena_sig,
-                 cout           => c_clk(9),
-                 initial        => c_initial_val(9),
-                 high           => c_high_val(9),
-                 low            => c_low_val(9),
-                 mode           => c_mode_val(9),
-                 ph_tap         => c_ph_val(9));
+    process(scandone_tmp, lock)
+    begin
+        if (scandone_tmp'event and (scandone_tmp = '1')) then
+            pll_has_just_been_reconfigured <= true;
+        elsif (lock'event and (lock = '1')) then
+            pll_has_just_been_reconfigured <= false;
+        end if;
+    end process;
     
     process(inclk_c0, inclk_c1, areset_ipd, sig_stop_vco)
     variable c0_got_first_rising_edge : boolean := false;
@@ -9898,9 +10016,6 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 elsif (((pll_type = "fast") or (pll_type = "lvds") OR (pll_type = "left_right")) and ((vco_multiply_by /= 0) and (vco_divide_by /= 0))) then
                     i_n := vco_divide_by;
                     i_m := vco_multiply_by;
-                 elsif (((pll_type = "fast") or (pll_type = "lvds") OR (pll_type = "left_right")) and ((dpa_multiply_by /= 0) and (dpa_divide_by /= 0))) then
-                     i_n := dpa_divide_by;
-                     i_m := dpa_multiply_by;
                 else
                     i_n := 1;
 
@@ -10035,10 +10150,10 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 i_c_ph(3)         := c3_ph;
                 i_c_ph(4)         := c4_ph;
                 i_c_ph(5)         := c5_ph;
-                i_c_ph(6)         := c5_ph;
-                i_c_ph(7)         := c5_ph;
-                i_c_ph(8)         := c5_ph;
-                i_c_ph(9)         := c5_ph;
+                i_c_ph(6)         := c6_ph;
+                i_c_ph(7)         := c7_ph;
+                i_c_ph(8)         := c8_ph;
+                i_c_ph(9)         := c9_ph;
                 i_c_high(0)       := c0_high;
                 i_c_high(1)       := c1_high;
                 i_c_high(2)       := c2_high;
@@ -10203,14 +10318,14 @@ inclk_c2 <= refclk when c2_test_source = 1 else
              
                 -- VCO post scale assignment   
                 if (scan_data(9) = '1') then  -- vco_post_scale = 1
-               	    i_vco_max <= vco_max/2;
-               	    i_vco_min <= vco_min/2;
-               	    vco_cur <= 1;
-       	    	else
-               	    i_vco_max <= vco_max;
-               	    i_vco_min <= vco_min;  
-               	    vco_cur <= 2;
-       	    	end if;             
+                    i_vco_max <= vco_max/2;
+                    i_vco_min <= vco_min/2;
+                    vco_cur <= 1;
+                else
+                    i_vco_max <= vco_max;
+                    i_vco_min <= vco_min;  
+                    vco_cur <= 2;
+                end if;             
                 -- CP
                 -- Bit 9 : CRBYPASS
                 -- Bit 10-14 : unused
@@ -10293,7 +10408,7 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                     IF (c_hval(i) /= 0) THEN
                         c_high_val_tmp(i) := c_hval(i);
                     ELSE
-                    	c_high_val_tmp(i) := alt_conv_integer("000000001");
+                        c_high_val_tmp(i) := alt_conv_integer("000000001");
                     END IF;
                     
                     -- 4. Low 
@@ -10303,7 +10418,7 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                     IF (c_lval(i) /= 0) THEN
                         c_low_val_tmp(i) := c_lval(i);
                     ELSE
-                    	 c_low_val_tmp(i) := alt_conv_integer("000000001");
+                         c_low_val_tmp(i) := alt_conv_integer("000000001");
                     END IF;
                     i := i + 1;
                 END LOOP;
@@ -10318,10 +10433,10 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 ELSIF (m_hi /= "00000000") THEN
                     m_val_tmp := alt_conv_integer(m_hi) + alt_conv_integer(m_lo);    
                 ELSE
-                	m_val_tmp := alt_conv_integer("000000001");
+                    m_val_tmp := alt_conv_integer("000000001");
                 END IF;
                 ELSE
-                	m_val_tmp := alt_conv_integer("10000000");
+                    m_val_tmp := alt_conv_integer("10000000");
                 END IF;
                 -- N counter value
     IF(scan_data(36) /= '1') THEN
@@ -10332,10 +10447,10 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 ELSIF (n_hi /= "00000000") THEN
                     n_val <= alt_conv_integer(n_hi) + alt_conv_integer(n_lo);    
                 ELSE
-                	n_val <= alt_conv_integer("000000001");
+                    n_val <= alt_conv_integer("000000001");
                 END IF;
                 ELSE
-                	n_val <= alt_conv_integer("10000000");
+                    n_val <= alt_conv_integer("10000000");
                 END IF;
                 -- TODO : Give warnings/errors in the following cases?
                 -- 1. Illegal counter values (error)
@@ -10670,6 +10785,7 @@ BEGIN
           -- start reconfiguration
            IF (phasecounterselect_ipd < "1100") THEN -- no counters selected 
              IF (phasecounterselect_ipd = "0000") THEN
+                            i := 0;
                             WHILE (i < num_output_cntrs) LOOP
                                 c_ph := c_ph_val(i);
                                 IF (phaseupdown_ipd = '1') THEN
@@ -10827,6 +10943,8 @@ END PROCESS;
 
             if (areset_ipd = '1') then
                 pll_is_in_reset := true;
+                got_first_refclk := false;
+                got_second_refclk := false;
             end if;
 
             -- drop VCO taps to 0
@@ -10990,7 +11108,7 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
             cycles_pfd_low := 0;
             if (pfd_locked = '0') then
                 if (cycles_pfd_high = lock_high) then
-                    assert false report family_name & " PLL locked in test mode on PFD enable assertion.";
+                    assert false report family_name & " PLL locked in test mode on PFD enable assertion." severity warning;
                     pfd_locked <= '1';
                 end if;
                 cycles_pfd_high := cycles_pfd_high + 1;
@@ -11001,7 +11119,7 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
             cycles_pfd_high := 0;
             if (pfd_locked = '1') then
                 if (cycles_pfd_low = lock_low) then
-                    assert false report family_name & " PLL lost lock in test mode on PFD enable de-assertion.";
+                    assert false report family_name & " PLL lost lock in test mode on PFD enable de-assertion." severity warning;
                     pfd_locked <= '0';
                 end if;
                 cycles_pfd_low := cycles_pfd_low + 1;
@@ -11083,7 +11201,9 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
             end if;
 
             -- need refclk_period here, so initialized to proper value above
-            if ( ( (now - refclk_time > 1.5 * refclk_period) and pfdena_ipd = '1' and pll_is_locked) or ( (now - refclk_time > 5 * refclk_period) and pfdena_ipd = '1') ) then
+            if ( ( (now - refclk_time > 1.5 * refclk_period) and pfdena_ipd = '1' and pll_is_locked) or
+                ( (now - refclk_time > 5 * refclk_period) and pfdena_ipd = '1' and pll_has_just_been_reconfigured = false) or
+                ( (now - refclk_time > 50 * refclk_period) and pfdena_ipd = '1' and pll_has_just_been_reconfigured = true) ) then
                 stop_vco := true;
                 -- reset
                 got_first_refclk := false;
@@ -11092,7 +11212,10 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
                 if (pll_is_locked) then
                     pll_is_locked := false;
                     locked_tmp := '0';
-                    assert false report family_name & " PLL lost lock due to loss of input clock" severity note;
+                    assert false report family_name & " PLL lost lock due to loss of input clock or the input clock is not detected within the allowed time frame." severity note;
+                    if ((i_vco_max = 0) and (i_vco_min = 0)) then
+                        assert false report "Please run timing simulation to check whether the input clock is operating within the supported VCO range or not." severity note;
+                    end if;
                 end if;
                 cycles_to_lock := 0;
                 cycles_to_unlock := 0;
@@ -11138,6 +11261,9 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
                         vco_period_was_phase_adjusted := false;
                         phase_adjust_was_scheduled := false;
                         assert false report family_name & " PLL lost lock." severity note;
+                        got_first_refclk := false;
+                        got_first_fbclk := false;
+                        got_second_refclk := false;
                     end if;
                 end if;
                 if ( abs(refclk_period - fbclk_period) <= 2 ps ) then
@@ -11256,7 +11382,7 @@ scandone <= NOT scandone_tmp;
 phasedone <= NOT update_phase;
 vcooverrange <= 'Z' WHEN (vco_range_detector_high_bits = -1) ELSE vco_over;
 vcounderrange <= 'Z' WHEN (vco_range_detector_low_bits = -1) ELSE vco_under;
-
+fbout <= fbclk;
 end vital_pll;
 -- END ARCHITECTURE VITAL_PLL
 
@@ -11602,8 +11728,9 @@ ENTITY MF_cycloneiii_pll is
         test_volt_reg_test_mode : string := "false";
         vco_range_detector_high_bits : integer := -1;
         vco_range_detector_low_bits : integer := -1;
-	scan_chain_mif_file : string := "";
-     
+        scan_chain_mif_file : string := "";
+
+        auto_settings : string  := "true";     
 -- Simulation only generics
         family_name                 : string  := "StratixIII";
 
@@ -11686,25 +11813,25 @@ signal   i_loop_filter_r        : integer;
 -- end internal advanced parameter signals
 
 -- CONSTANTS
-CONSTANT SCAN_CHAIN : integer := 144;
-CONSTANT GPP_SCAN_CHAIN : integer := 234;
-CONSTANT FAST_SCAN_CHAIN : integer := 180;
+CONSTANT    SCAN_CHAIN : integer := 144;
+CONSTANT    GPP_SCAN_CHAIN : integer := 234;
+CONSTANT    FAST_SCAN_CHAIN : integer := 180;
  CONSTANT cntrs : str_array(4 downto 0) := ("    C4", "    C3", "    C2", "    C1", "    C0");
-CONSTANT ss_cntrs : str_array(0 to 3) := ("     M", "    M2", "     N", "    N2");
+CONSTANT    ss_cntrs : str_array(0 to 3) := ("     M", "    M2", "     N", "    N2");
+            
+CONSTANT    loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
+CONSTANT    fpll_loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
+CONSTANT    charge_pump_curr_arr : int_array(0 to 15) := (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
-CONSTANT loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
-CONSTANT fpll_loop_filter_c_arr : int_array(0 to 3) := (0,0,0,0);
-CONSTANT charge_pump_curr_arr : int_array(0 to 15) := (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-
-CONSTANT num_phase_taps : integer := 8;
+CONSTANT    num_phase_taps : integer := 8;
 -- signals
 
-signal vcc : std_logic := '1';
-
-signal fbclk       : std_logic;
-signal refclk      : std_logic;
-signal vco_over    : std_logic := '0';
-signal vco_under   : std_logic := '1';
+signal    vcc : std_logic := '1';
+          
+signal    fbclk       : std_logic;
+signal    refclk      : std_logic;
+signal    vco_over    : std_logic := '0';
+signal    vco_under   : std_logic := '1';
 
 signal pll_locked : boolean := false;
 
@@ -11713,65 +11840,65 @@ signal pll_locked : boolean := false;
 signal vco_out : std_logic_vector(7 downto 0) := (OTHERS => '0');
 
 -- signals to assign values to counter params
-signal m_val : integer := 1;
-signal n_val : integer := 1;
-signal m_ph_val : integer := 0;
-signal m_ph_initial : integer := 0;
-signal m_ph_val_tmp  : integer := 0;
-signal m_initial_val : integer := m_initial;
-
-signal m_mode_val : string(1 to 6) := "      ";
-signal n_mode_val : string(1 to 6) := "      ";
-signal lfc_val : integer := 0;
-signal vco_cur : integer := vco_post_scale;
-signal cp_curr_val : integer := 0;
-signal lfr_val : string(1 to 2) := "  ";
-
-signal cp_curr_old_bit_setting : integer := charge_pump_current_bits;
-signal cp_curr_val_bit_setting : std_logic_vector(2 downto 0) := (OTHERS => '0');
-signal lfr_old_bit_setting : integer := loop_filter_r_bits;
-signal lfr_val_bit_setting : std_logic_vector(4 downto 0) := (OTHERS => '0');
-signal lfc_old_bit_setting : integer := loop_filter_c_bits; 
-signal lfc_val_bit_setting : std_logic_vector(1 downto 0) := (OTHERS => '0');
-
-signal pll_reconfig_display_full_setting : boolean := FALSE; -- display full setting, change to true
--- old values
-signal m_val_old : integer := 1;
-signal n_val_old : integer := 1;
-signal m_mode_val_old : string(1 to 6) := "      ";
-signal n_mode_val_old : string(1 to 6) := "      ";
-signal m_ph_val_old : integer := 0;
-signal lfc_old : integer := 0;
-signal vco_old : integer := 0;
-signal cp_curr_old : integer := 0;
-signal lfr_old : string(1 to 2) := "  ";
+signal    m_val : integer := 1;
+signal    n_val : integer := 1;
+signal    m_ph_val : integer := 0;
+signal    m_ph_initial : integer := 0;
+signal    m_ph_val_tmp  : integer := 0;
+signal    m_initial_val : integer := m_initial;
+         
+signal    m_mode_val : string(1 to 6) := "      ";
+signal    n_mode_val : string(1 to 6) := "      ";
+signal    lfc_val : integer := 0;
+signal    vco_cur : integer := vco_post_scale;
+signal    cp_curr_val : integer := 0;
+signal    lfr_val : string(1 to 2) := "  ";
+         
+signal    cp_curr_old_bit_setting : integer := charge_pump_current_bits;
+signal    cp_curr_val_bit_setting : std_logic_vector(2 downto 0) := (OTHERS => '0');
+signal    lfr_old_bit_setting : integer := loop_filter_r_bits;
+signal    lfr_val_bit_setting : std_logic_vector(4 downto 0) := (OTHERS => '0');
+signal    lfc_old_bit_setting : integer := loop_filter_c_bits; 
+signal    lfc_val_bit_setting : std_logic_vector(1 downto 0) := (OTHERS => '0');
+         
+signal    pll_reconfig_display_full_setting : boolean := FALSE; -- display full setting, change to true
+-- old    values
+signal    m_val_old : integer := 1;
+signal    n_val_old : integer := 1;
+signal    m_mode_val_old : string(1 to 6) := "      ";
+signal    n_mode_val_old : string(1 to 6) := "      ";
+signal    m_ph_val_old : integer := 0;
+signal    lfc_old : integer := 0;
+signal    vco_old : integer := 0;
+signal    cp_curr_old : integer := 0;
+signal    lfr_old : string(1 to 2) := "  ";
  signal num_output_cntrs : integer := 5;
-signal scanclk_period : time := 1 ps;
+signal    scanclk_period : time := 1 ps;
  signal scan_data : std_logic_vector(0 to 143) := (OTHERS => '0');
 
 
  signal clk_pfd : std_logic_vector(0 to 4);
-signal clk0_tmp : std_logic;
-signal clk1_tmp : std_logic;
-signal clk2_tmp : std_logic;
-signal clk3_tmp : std_logic;
-signal clk4_tmp : std_logic;
+signal    clk0_tmp : std_logic;
+signal    clk1_tmp : std_logic;
+signal    clk2_tmp : std_logic;
+signal    clk3_tmp : std_logic;
+signal    clk4_tmp : std_logic;
 
-signal update_conf_latches : std_logic := '0';
-signal update_conf_latches_reg : std_logic := '0';
+signal    update_conf_latches : std_logic := '0';
+signal    update_conf_latches_reg : std_logic := '0';
 
-signal clkin : std_logic := '0';
-signal gate_locked : std_logic := '0';
-signal pfd_locked : std_logic := '0';
-signal lock : std_logic := '0';
-signal about_to_lock : boolean := false;
-signal reconfig_err : boolean := false;
+signal    clkin : std_logic := '0';
+signal    gate_locked : std_logic := '0';
+signal    pfd_locked : std_logic := '0';
+signal    lock : std_logic := '0';
+signal    about_to_lock : boolean := false;
+signal    reconfig_err : boolean := false;
 
-signal inclk_c0 : std_logic;
-signal inclk_c1 : std_logic;
-signal inclk_c2 : std_logic;
-signal inclk_c3 : std_logic;
-signal inclk_c4 : std_logic;
+signal    inclk_c0 : std_logic;
+signal    inclk_c1 : std_logic;
+signal    inclk_c2 : std_logic;
+signal    inclk_c3 : std_logic;
+signal    inclk_c4 : std_logic;
 signal inclk_m : std_logic;
 signal devpor : std_logic;
 signal devclrn : std_logic;
@@ -11813,7 +11940,7 @@ signal reset_low : std_logic := '0';
 
 -- Phase Reconfig
 
-    SIGNAL phasecounterselect_reg   :  std_logic_vector(2 DOWNTO 0);
+ SIGNAL phasecounterselect_reg   :  std_logic_vector(2 DOWNTO 0);
 
 SIGNAL phaseupdown_reg          :  std_logic := '0';
 SIGNAL phasestep_reg            :  std_logic := '0';
@@ -11832,6 +11959,7 @@ signal schedule_vco : std_logic := '0';
 
 signal areset_ena_sig : std_logic := '0';
 signal pll_in_test_mode : boolean := false;
+signal pll_has_just_been_reconfigured : boolean := false;
 
  signal inclk_c_from_vco : std_logic_array(0 to 4);
 
@@ -11987,6 +12115,7 @@ inclk_m <=  fbclk when m_test_source = 0 else
     variable external_switch : boolean := false;
     variable diff_percent_period : integer := 0;
     variable buf : line;
+    variable switch_clock : boolean := false;
 
     begin
         if (now = 0 ps) then
@@ -11999,17 +12128,27 @@ inclk_m <=  fbclk when m_test_source = 0 else
             external_switch := true;
         elsif (switch_over_type = "manual") then
             if (clkswitch_ipd'event and clkswitch_ipd = '1') then
-                if (current_clock = 0) then
-                current_clock := 1;
-                active_clock := '1';
-                clkin <= transport inclk1_tmp;
-                elsif (current_clock = 1) then
-                current_clock := 0;
-                active_clock := '0';
-                clkin <= transport inclk0_ipd;
+                switch_clock := true;
+            elsif (clkswitch_ipd'event and clkswitch_ipd = '0') then
+                switch_clock := false;
             end if;
         end if;
+
+        if (switch_clock = true) then
+            if (inclk0_ipd'event or inclk1_tmp'event) then
+	            if (current_clock = 0) then
+	                current_clock := 1;
+	                active_clock := '1';
+	                clkin <= transport inclk1_tmp;
+				elsif (current_clock = 1) then
+	                current_clock := 0;
+	                active_clock := '0';
+	                clkin <= transport inclk0_ipd;
+	            end if;
+	            switch_clock := false;
+	        end if;
         end if;
+
         -- save the current inclk event value
         if (inclk0_ipd'event) then
             input_value := inclk0_ipd;
@@ -12082,9 +12221,9 @@ inclk_m <=  fbclk when m_test_source = 0 else
                     got_curr_clk_falling_edge_after_clkswitch := false;
                     
                     if(inclk0_period > inclk1_period) then
-                    	diff_percent_period := (( inclk0_period - inclk1_period ) * 100) / inclk1_period;
+                        diff_percent_period := (( inclk0_period - inclk1_period ) * 100) / inclk1_period;
                     else
-                    	diff_percent_period := (( inclk1_period - inclk0_period ) * 100) / inclk0_period;
+                        diff_percent_period := (( inclk1_period - inclk0_period ) * 100) / inclk0_period;
                     end if;
                      if((diff_percent_period > 20)and ( switch_over_type = "auto")) then
                           WRITE(buf,string'("Warning : The input clock frequencies specified for the specified PLL are too far apart for auto-switch-over feature to work properly. Please make sure that the clock frequencies are 20 percent apart for correct functionality."));
@@ -12101,19 +12240,19 @@ inclk_m <=  fbclk when m_test_source = 0 else
                     external_switch := false;
                     current_clk_is_bad := false;
                 else
-     				if(switch_over_type = "auto") then
-     					if(current_clock = 0 and clk0_is_bad = '1' and clk1_is_bad = '0' ) then
-                			current_clock := 1;
-                			active_clock := not active_clock;
-                		end	if;
+                    if(switch_over_type = "auto") then
+                        if(current_clock = 0 and clk0_is_bad = '1' and clk1_is_bad = '0' ) then
+                            current_clock := 1;
+                            active_clock := not active_clock;
+                        end if;
                 
-                     	if(current_clock = 1 and clk0_is_bad = '0' and clk1_is_bad = '1' ) then
-                			current_clock := 0;
-                			active_clock := not active_clock;
-                		end	if;
-                	end if;
-                end if;  		
-       			
+                        if(current_clock = 1 and clk0_is_bad = '0' and clk1_is_bad = '1' ) then
+                            current_clock := 0;
+                            active_clock := not active_clock;
+                        end if;
+                    end if;
+                end if;         
+                
             end if;
         end if;
 
@@ -12215,15 +12354,24 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 mode           => c_mode_val(4),
                 ph_tap         => c_ph_val(4));
 
-                
+            
 
-                
+            
 
-                
+            
 
-                
+            
+
+            
     
-                
+    process(scandone_tmp, lock)
+    begin
+        if (scandone_tmp'event and (scandone_tmp = '1')) then
+            pll_has_just_been_reconfigured <= true;
+        elsif (lock'event and (lock = '1')) then
+            pll_has_just_been_reconfigured <= false;
+        end if;
+    end process;
     
     process(inclk_c0, inclk_c1, areset_ipd, sig_stop_vco)
     variable c0_got_first_rising_edge : boolean := false;
@@ -12960,14 +13108,14 @@ inclk_c2 <= refclk when c2_test_source = 1 else
              
                 -- VCO post scale assignment   
                 if (scan_data(9) = '1') then  -- vco_post_scale = 1
-               	    i_vco_max <= vco_max/2;
-               	    i_vco_min <= vco_min/2;
-               	    vco_cur <= 1;
-       	    	else
-               	    i_vco_max <= vco_max;
-               	    i_vco_min <= vco_min;  
-               	    vco_cur <= 2;
-       	    	end if;             
+                    i_vco_max <= vco_max/2;
+                    i_vco_min <= vco_min/2;
+                    vco_cur <= 1;
+                else
+                    i_vco_max <= vco_max;
+                    i_vco_min <= vco_min;  
+                    vco_cur <= 2;
+                end if;             
                 -- CP
                 -- Bit 9 : CRBYPASS
                 -- Bit 10-14 : unused
@@ -13050,7 +13198,7 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                     IF (c_hval(i) /= 0) THEN
                         c_high_val_tmp(i) := c_hval(i);
                     ELSE
-                    	c_high_val_tmp(i) := alt_conv_integer("000000001");
+                        c_high_val_tmp(i) := alt_conv_integer("000000001");
                     END IF;
                     
                     -- 4. Low 
@@ -13060,7 +13208,7 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                     IF (c_lval(i) /= 0) THEN
                         c_low_val_tmp(i) := c_lval(i);
                     ELSE
-                    	 c_low_val_tmp(i) := alt_conv_integer("000000001");
+                         c_low_val_tmp(i) := alt_conv_integer("000000001");
                     END IF;
                     i := i + 1;
                 END LOOP;
@@ -13075,10 +13223,10 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 ELSIF (m_hi /= "00000000") THEN
                     m_val_tmp := alt_conv_integer(m_hi) + alt_conv_integer(m_lo);    
                 ELSE
-                	m_val_tmp := alt_conv_integer("000000001");
+                    m_val_tmp := alt_conv_integer("000000001");
                 END IF;
                 ELSE
-                	m_val_tmp := alt_conv_integer("10000000");
+                    m_val_tmp := alt_conv_integer("10000000");
                 END IF;
                 -- N counter value
     IF(scan_data(18) /= '1') THEN             
@@ -13089,10 +13237,10 @@ inclk_c2 <= refclk when c2_test_source = 1 else
                 ELSIF (n_hi /= "00000000") THEN
                     n_val <= alt_conv_integer(n_hi) + alt_conv_integer(n_lo);    
                 ELSE
-                	n_val <= alt_conv_integer("000000001");
+                    n_val <= alt_conv_integer("000000001");
                 END IF;
                 ELSE
-                	n_val <= alt_conv_integer("10000000");
+                    n_val <= alt_conv_integer("10000000");
                 END IF;
                 -- TODO : Give warnings/errors in the following cases?
                 -- 1. Illegal counter values (error)
@@ -13387,6 +13535,7 @@ BEGIN
           -- start reconfiguration
            IF (phasecounterselect_ipd < "111")  THEN -- no counters selected
              IF (phasecounterselect_ipd = "000") THEN
+                            i := 0;
                             WHILE (i < num_output_cntrs) LOOP
                                 c_ph := c_ph_val(i);
                                 IF (phaseupdown_ipd = '1') THEN
@@ -13544,6 +13693,8 @@ END PROCESS;
 
             if (areset_ipd = '1') then
                 pll_is_in_reset := true;
+                got_first_refclk := false;
+                got_second_refclk := false;
             end if;
 
             -- drop VCO taps to 0
@@ -13707,7 +13858,7 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
             cycles_pfd_low := 0;
             if (pfd_locked = '0') then
                 if (cycles_pfd_high = lock_high) then
-                    assert false report family_name & " PLL locked in test mode on PFD enable assertion.";
+                    assert false report family_name & " PLL locked in test mode on PFD enable assertion." severity warning;
                     pfd_locked <= '1';
                 end if;
                 cycles_pfd_high := cycles_pfd_high + 1;
@@ -13718,7 +13869,7 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
             cycles_pfd_high := 0;
             if (pfd_locked = '1') then
                 if (cycles_pfd_low = lock_low) then
-                    assert false report family_name & " PLL lost lock in test mode on PFD enable de-assertion.";
+                    assert false report family_name & " PLL lost lock in test mode on PFD enable de-assertion." severity warning;
                     pfd_locked <= '0';
                 end if;
                 cycles_pfd_low := cycles_pfd_low + 1;
@@ -13800,7 +13951,9 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
             end if;
 
             -- need refclk_period here, so initialized to proper value above
-            if ( ( (now - refclk_time > 1.5 * refclk_period) and pfdena_ipd = '1' and pll_is_locked) or ( (now - refclk_time > 5 * refclk_period) and pfdena_ipd = '1') ) then
+            if ( ( (now - refclk_time > 1.5 * refclk_period) and pfdena_ipd = '1' and pll_is_locked) or
+                ( (now - refclk_time > 5 * refclk_period) and pfdena_ipd = '1' and pll_has_just_been_reconfigured = false) or
+                ( (now - refclk_time > 50 * refclk_period) and pfdena_ipd = '1' and pll_has_just_been_reconfigured = true) ) then
                 stop_vco := true;
                 -- reset
                 got_first_refclk := false;
@@ -13809,7 +13962,10 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
                 if (pll_is_locked) then
                     pll_is_locked := false;
                     locked_tmp := '0';
-                    assert false report family_name & " PLL lost lock due to loss of input clock" severity note;
+                    assert false report family_name & " PLL lost lock due to loss of input clock or the input clock is not detected within the allowed time frame." severity note;
+                    if ((i_vco_max = 0) and (i_vco_min = 0)) then
+                        assert false report "Please run timing simulation to check whether the input clock is operating within the supported VCO range or not." severity note;
+                    end if;
                 end if;
                 cycles_to_lock := 0;
                 cycles_to_unlock := 0;
@@ -13855,6 +14011,9 @@ if (refclk'event and refclk = '1' and areset_ipd = '0') then
                         vco_period_was_phase_adjusted := false;
                         phase_adjust_was_scheduled := false;
                         assert false report family_name & " PLL lost lock." severity note;
+                        got_first_refclk := false;
+                        got_first_fbclk := false;
+                        got_second_refclk := false;
                     end if;
                 end if;
                 if ( abs(refclk_period - fbclk_period) <= 2 ps ) then
@@ -13953,7 +14112,7 @@ scandone <= NOT scandone_tmp;
 phasedone <= NOT update_phase;
 vcooverrange <= 'Z' WHEN (vco_range_detector_high_bits = -1) ELSE vco_over;
 vcounderrange <= 'Z' WHEN (vco_range_detector_low_bits = -1) ELSE vco_under;
-
+fbout <= fbclk;
 end vital_pll;
 -- END ARCHITECTURE VITAL_PLL
 -- cycloneiii_msg
@@ -15606,6 +15765,24 @@ begin
         ASSERT FALSE
         REPORT "The primary clock is set to an illegal value"
         SEVERITY ERROR;
+    end if;    
+    
+    if ((FEATURE_FAMILY_ARRIAIIGX(intended_device_family) = true) and (alpha_tolower(operation_mode) = "external_feedback")) then
+        ASSERT FALSE
+        REPORT "The external feedback mode is not supported for the ARRIA II family."
+        SEVERITY ERROR;
+    end if;
+    
+    if((FEATURE_FAMILY_ARRIAIIGX(intended_device_family) = true) and ((alpha_tolower(pll_type) = "top_bottom") or (alpha_tolower(pll_type) = "left_right"))) then
+        ASSERT FALSE
+        REPORT "A pll_type specification is not supported for the ARRIA II family.  It will be ignored."
+        SEVERITY WARNING;
+    end if;
+    
+    if((FEATURE_FAMILY_ARRIAIIGX(intended_device_family) = true) and ((port_clk7 /= "PORT_UNUSED") or (port_clk8 /= "PORT_UNUSED") or (port_clk9 /= "PORT_UNUSED"))) then
+        ASSERT FALSE
+        REPORT "One or more clock outputs used in the design are not supported in ARRIA II family."
+        SEVERITY ERROR;
     end if;
 
     wait;
@@ -15729,6 +15906,13 @@ CLK5 :  if (width_clock = 6)  generate
             else '0';
 end generate CLK5;
 
+CLK5TO6: if (width_clock = 7)  generate
+    clk(5) <= clk_wire(5) when (port_clk5 /= "PORT_UNUSED")
+            else '0';
+    clk(6) <= clk_wire(6) when (port_clk6 /= "PORT_UNUSED")
+            else '0';
+end generate CLK5TO6;
+
 CLK5TO9: if (width_clock = 10)  generate
     clk(5) <= clk_wire(5) when (port_clk5 /= "PORT_UNUSED")
             else '0';
@@ -15787,7 +15971,8 @@ vcounderrange <= vcounderrange_wire when (port_vcounderrange /= "PORT_UNUSED")
 fbout <= fbout_wire when (port_fbout /= "PORT_UNUSED")
             else '0';
 
-stratix3_fbin <= iobuf_o when ((using_fbmimicbidir_port = "ON") and (alpha_tolower(operation_mode) = "zero_delay_buffer"))
+stratix3_fbin <= iobuf_o when ((using_fbmimicbidir_port = "ON") and (alpha_tolower(operation_mode) = "zero_delay_buffer") and (FEATURE_FAMILY_STRATIXIII(intended_device_family) = true) and (FEATURE_FAMILY_ARRIAIIGX(intended_device_family) =false))
+            else fbout_wire when ((alpha_tolower(operation_mode) = "zero_delay_buffer") and (FEATURE_FAMILY_ARRIAIIGX(intended_device_family) = true)) 
             else fbin;
 
 oe_wire <= '1';
@@ -16456,12 +16641,12 @@ if (FEATURE_FAMILY_STRATIXIII(intended_device_family) = true) generate
         clk8_counter    => get_clk_counter(clk8_counter, port_clk8),
         clk7_counter    => get_clk_counter(clk7_counter, port_clk7),
         clk6_counter    => get_clk_counter(clk6_counter, port_clk6),
-        clk5_counter    => get_clk_counter(clk5_counter, port_clk5),
-        clk4_counter    => get_clk_counter(clk4_counter, port_clk4),
-        clk3_counter    => get_clk_counter(clk3_counter, port_clk3),
-        clk2_counter    => get_clk_counter(clk2_counter, port_clk2),
-        clk1_counter    => get_clk_counter(clk1_counter, port_clk1),
-        clk0_counter    => get_clk_counter(clk0_counter, port_clk0),
+        clk5_counter    => get_clk_counter(get_clk5_counter(clk5_counter), port_clk5),
+        clk4_counter    => get_clk_counter(get_clk4_counter(clk4_counter), port_clk4),
+        clk3_counter    => get_clk_counter(get_clk3_counter(clk3_counter), port_clk3),
+        clk2_counter    => get_clk_counter(get_clk2_counter(clk2_counter), port_clk2),
+        clk1_counter    => get_clk_counter(get_clk1_counter(clk1_counter), port_clk1),
+        clk0_counter    => get_clk_counter(get_clk0_counter(clk0_counter), port_clk0),
         dpa_multiply_by => dpa_multiply_by,
         dpa_divide_by   => dpa_divide_by,
         dpa_divider     => dpa_divider,
@@ -16620,11 +16805,11 @@ if (FEATURE_FAMILY_CYCLONEIII(intended_device_family) = true) generate
         c2_test_source  => get_test_source(c2_test_source),
         c3_test_source  => get_test_source(c3_test_source),
         c4_test_source  => get_test_source(c4_test_source),
-        clk4_counter    => get_clk_counter(clk4_counter, port_clk4),
-        clk3_counter    => get_clk_counter(clk3_counter, port_clk3),
-        clk2_counter    => get_clk_counter(clk2_counter, port_clk2),
-        clk1_counter    => get_clk_counter(clk1_counter, port_clk1),
-        clk0_counter    => get_clk_counter(clk0_counter, port_clk0),
+        clk4_counter    => get_clk_counter(get_clk4_counter(clk4_counter), port_clk4),
+        clk3_counter    => get_clk_counter(get_clk3_counter(clk3_counter), port_clk3),
+        clk2_counter    => get_clk_counter(get_clk2_counter(clk2_counter), port_clk2),
+        clk1_counter    => get_clk_counter(get_clk1_counter(clk1_counter), port_clk1),
+        clk0_counter    => get_clk_counter(get_clk0_counter(clk0_counter), port_clk0),
         vco_multiply_by => vco_multiply_by,
         vco_divide_by   => vco_divide_by,
         vco_frequency_control => alpha_tolower(vco_frequency_control),
@@ -16678,7 +16863,7 @@ end generate CYCLONEIII_ALTPLL;
 
 -- Instantiate pll_iobuf
 STRATIXIIIPLL_IOBUF:
-if ((FEATURE_FAMILY_STRATIXIII(intended_device_family) = true)
+if ((FEATURE_FAMILY_STRATIXIII(intended_device_family) = true) and (FEATURE_FAMILY_ARRIAIIGX(intended_device_family) = false)
     and (alpha_tolower(operation_mode) = "zero_delay_buffer")
     and (using_fbmimicbidir_port = "ON")) generate
     iobuf1 : pll_iobuf
@@ -19691,7 +19876,6 @@ architecture behaviour of altmult_add is
             end if;
          
         end if;
-
         return changed_width;
     end resolve_internal_width;
     -- This constant int_width_a would be  used internally in this model
@@ -19718,7 +19902,6 @@ architecture behaviour of altmult_add is
                 changed_value := int_width_a - width_a + int_width_b - width_b;
             end if;
         end if;
-
         return changed_value;
     end resolve_internal_mult_diff;
     
@@ -19741,7 +19924,6 @@ architecture behaviour of altmult_add is
                 changed_width_result := int_width_a + int_width_b;
             end if;
         end if;
-
         return changed_width_result;
     end resolve_internal_width_result;
     
@@ -19751,7 +19933,6 @@ architecture behaviour of altmult_add is
         variable width_value :integer := 0;
     begin
         width_value := 44;
-  
         return width_value;
     end resolve_result_width;
     
@@ -19777,7 +19958,6 @@ architecture behaviour of altmult_add is
         else
             saturation_value:=  2;
         end if;
-
         return saturation_value;
     end resolve_saturation_position;
     
@@ -19801,7 +19981,6 @@ architecture behaviour of altmult_add is
         elsif (saturation_value > int_width_result) then
             saturation_value:= (int_width_a + int_width_b - width_saturate_sign);
         end if;
-
         return saturation_value;
     end resolve_chainout_saturation_position;
     
@@ -19831,7 +20010,6 @@ architecture behaviour of altmult_add is
                 round_value := int_width_result - width_msb;
             end if;
         end if;
-
         return round_value;
     end resolve_round_position;
     
@@ -19857,7 +20035,6 @@ architecture behaviour of altmult_add is
                 round_value := int_width_result - width_msb;
             end if;
         end if;
-
         return round_value;
     end resolve_chainout_round_position;
 
@@ -19901,7 +20078,6 @@ architecture behaviour of altmult_add is
         else
             accum_value := int_width_a + int_width_b;
         end if;
-        
         return accum_value;
     end resolve_accum_width;
 
@@ -19911,25 +20087,62 @@ architecture behaviour of altmult_add is
         variable loopback_value :integer := 0;
     begin
         loopback_value := 17;
-        
         return loopback_value;
     end resolve_loopback_width;
 
     constant loopback_width : natural := resolve_loopback_width;  
     
+    function resolve_lsb_position return integer is
+        variable lsb_position_value :integer := 0;
+    begin
+        lsb_position_value := 36 - width_a - width_b;
+        
+        if(lsb_position_value < 0) then
+            lsb_position_value := 0;
+        end if;
+        return lsb_position_value;
+    end resolve_lsb_position;
+
+    constant lsb_position : natural := resolve_lsb_position;  
     
+    function resolve_extra_sign_bit_width return integer is
+        variable extra_sign_bit_width_value :integer :=0;
+    begin
+        if(port_signa = "PORT_USED" or port_signb = "PORT_USED") then
+            extra_sign_bit_width_value := accum_width - width_result - lsb_position;
+        elsif(representation_a = "UNSIGNED" and representation_b = "UNSIGNED") then
+            extra_sign_bit_width_value  := accum_width - width_result - lsb_position;
+        else
+            extra_sign_bit_width_value  := accum_width - width_result + 1 - lsb_position;
+        end if;
+        
+        if(extra_sign_bit_width_value < 0) then
+            extra_sign_bit_width_value := 0;
+        end if;
+
+        return extra_sign_bit_width_value;
+        
+    end resolve_extra_sign_bit_width;
+    
+    constant extra_sign_bit_width : natural := resolve_extra_sign_bit_width;
+    
+    function resolve_bit_position return integer is
+        variable bit_position_value :integer := 0;
+    begin
+        bit_position_value := accum_width - lsb_position - extra_sign_bit_width - 1;
+        
+        return bit_position_value;
+    end resolve_bit_position;
+    
+    constant bit_position : natural := resolve_bit_position;  
     type pipeline_accum is array (extra_latency downto 0) of std_logic_vector (width_result - 1 downto 0); 
 
-    signal zeropad  : std_logic_vector ((int_width_result - int_width_a - int_width_b)/2  -1 downto 0) := (others => '0');
-    signal answer   : std_logic_vector (int_width_result + 1 downto 0) := (others => '0');
     signal mult_a   : std_logic_vector ((4 * int_width_a) -1 downto 0) := (others => '0');
     signal mult_b   : std_logic_vector ((4 * int_width_b) -1 downto 0) := (others => '0');
     signal mult_res : std_logic_vector ((number_of_multipliers * (int_width_a + int_width_b)) + number_of_multipliers downto 0) := (others => '0');
     signal tmp_mult_a   : std_logic_vector ((4 * int_width_a) -1 downto 0) := (others => '0');
     signal tmp_mult_b   : std_logic_vector ((4 * int_width_b) -1 downto 0) := (others => '0');
 
-    signal zero_acc_reg  : std_logic := '0';
-    signal zero_acc_pipe : std_logic := '0';
     signal sign_a_reg    : std_logic := '0';
     signal sign_a_pipe   : std_logic := '0';
     signal sign_b_reg    : std_logic := '0';
@@ -19954,7 +20167,6 @@ architecture behaviour of altmult_add is
 
     signal head_result    : natural := 0;
     signal head_result_siii : natural := 0;
-    signal signed_mult    : std_logic := '1';
 
     signal head_overflow    : natural := 0;
     
@@ -20010,6 +20222,14 @@ architecture behaviour of altmult_add is
     signal acc_feedback_temp : std_logic_vector (accum_width downto 0) := (others => '0'); 
     signal accum_res : std_logic_vector (accum_width downto 0) := (others => '0');  
     signal feedback : std_logic_vector (loopback_width downto 0) := (others => '0');
+    signal unsigned_sub1_overflow_reg : std_logic := '0';
+    signal unsigned_sub3_overflow_reg : std_logic := '0';
+    signal unsigned_sub1_overflow_mult_reg : std_logic := '0';
+    signal unsigned_sub3_overflow_mult_reg : std_logic := '0';
+    
+    constant stratixii_block : boolean := FEATURE_FAMILY_BASE_STRATIXII(intended_device_family) or (FEATURE_FAMILY_STRATIXIII(intended_device_family) and (dedicated_multiplier_circuitry = "NO"));
+    constant stratixiii_block : boolean := FEATURE_FAMILY_STRATIXIII(intended_device_family) and (dedicated_multiplier_circuitry /= "NO");
+    
     -- -------------------------------------------------------------------
     -- This function takes in a string that describes the clock name
     -- and returns the correct number that corresponds to that particular
@@ -20078,6 +20298,7 @@ architecture behaviour of altmult_add is
 
 
     begin
+      
     process(mult_b)
     begin
         if (chainout_adder = "YES" and (width_result > width_a + width_b + 8)) then
@@ -20111,7 +20332,6 @@ architecture behaviour of altmult_add is
         -- Parameter Checking
         process 
         begin
-        
             -- Checking for invalid parameters, in case Wizard is bypassed (hand-modified).
             if (number_of_multipliers > 4) then
                 assert false
@@ -20489,7 +20709,7 @@ architecture behaviour of altmult_add is
             end if;
 
             dataa_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and (width_a < 18)) then
                     if (asign = true) then -- signed number, extend MSB with sign bit
                         for dataa1_cnt in 1 to (chainout_input_a) loop
@@ -20548,7 +20768,7 @@ architecture behaviour of altmult_add is
             end if;
 
             dataa2_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and (width_a < 18)) then
                     if (asign = true) then -- signed number, extend MSB with sign bit
                         for dataa2_cnt in 1 to (chainout_input_a) loop
@@ -20608,7 +20828,7 @@ architecture behaviour of altmult_add is
             end if;
 
             dataa3_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and (width_a < 18)) then
                     if (asign = true) then -- signed number, extend MSB with sign bit
                         for dataa3_cnt in 1 to (chainout_input_a) loop
@@ -20668,7 +20888,7 @@ architecture behaviour of altmult_add is
             end if;
 
             dataa4_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and  (width_a < 18)) then
                     if (asign = true) then -- signed number, extend MSB with sign bit
                         for dataa4_cnt in 1 to (chainout_input_a) loop
@@ -20733,7 +20953,7 @@ architecture behaviour of altmult_add is
             end if;
 
             datab_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and (width_b < 18))then
                     if (bsign = true) then -- signed number, extend MSB with sign bit
                         for datab1_cnt in 1 to (chainout_input_b) loop
@@ -20793,7 +21013,7 @@ architecture behaviour of altmult_add is
             end if;
 
             datab2_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and (width_b < 18)) then
                     if (bsign = true) then -- signed number, extend MSB with sign bit
                         for datab2_cnt in 1 to (chainout_input_b) loop
@@ -20853,7 +21073,7 @@ architecture behaviour of altmult_add is
             end if;
 
             datab3_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and (width_b < 18)) then
                     if (bsign = true) then -- signed number, extend MSB with sign bit
                         for datab3_cnt in 1 to (chainout_input_b) loop
@@ -20913,7 +21133,7 @@ architecture behaviour of altmult_add is
             end if;
 
             datab4_word_temp := (others => '0');
-            if ((chainout_adder = "YES") and (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((chainout_adder = "YES") and (stratixiii_block)) then
                 if ((width_result > width_a + width_b + 8) and (width_b < 18)) then
                     if (bsign = true) then -- signed number, extend MSB with sign bit
                         for datab4_cnt in 1 to (chainout_input_b) loop
@@ -20943,7 +21163,7 @@ architecture behaviour of altmult_add is
         -- This process updates scanouta depending on which family is being used
         process (mult_a, scanouta_reg)
         begin
-            if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) then
+            if (stratixiii_block) then
                 scanouta <= scanouta_reg (width_a - 1 downto 0); 
             else
                 scanouta <=  mult_a ((number_of_multipliers * int_width_a) - 1 downto ((number_of_multipliers -1 ) * int_width_a) + int_width_a - width_a) ;                            
@@ -23467,7 +23687,7 @@ architecture behaviour of altmult_add is
             if (input_source_a0 = "DATAA") then
                 mult_a_pre0 (int_width_a-1 downto 0) := dataa_int (int_width_a-1 downto 0);
             elsif (input_source_a0 = "SCANA") then
-                if (FEATURE_FAMILY_BASE_STRATIXII(intended_device_family)) then
+                if (stratixii_block) then
                     mult_a_pre0 (int_width_a-1 downto 0) := scanina_var;
                 else
                     mult_a_pre0 (int_width_a-1 downto 0) := dataa_int (int_width_a-1 downto 0);
@@ -23708,12 +23928,12 @@ architecture behaviour of altmult_add is
             if (input_source_b0 = "DATAB") then
                 mult_b_pre0 (int_width_b-1 downto 0) := datab_int (int_width_b-1 downto 0);  
             elsif (input_source_b0 = "SCANB") then
-                if (FEATURE_FAMILY_BASE_STRATIXII(intended_device_family)) then
+                if (stratixii_block) then
                     mult_b_pre0 (int_width_b-1 downto 0) := scaninb_var;
                 else
                     mult_b_pre0 (int_width_b-1 downto 0) := datab_int (int_width_b-1 downto 0);
                 end if;
-            elsif (FEATURE_FAMILY_STRATIXIII(intended_device_family) and (input_source_b0 = "LOOPBACK")) then
+            elsif (stratixiii_block and (input_source_b0 = "LOOPBACK")) then
                 mult_b_pre0 (int_width_b - 1 downto 0) := feedback;
             else 
                 if (sourceb_wire(0) = '1') then
@@ -24619,25 +24839,25 @@ architecture behaviour of altmult_add is
                 mux_clock := mult_clock (x);
                 check_clock_out := check_clock (x);
 
-                if ((not FEATURE_FAMILY_STRATIXIII(intended_device_family)) and 
+                if ((not stratixiii_block) and 
                     ((is_reg (x) = '1') and (mult_aclr (x) = '1'))) then
                     mult_res ( ((i+1)*(int_width_a + int_width_b)) - 1 downto (i*(int_width_a + int_width_b))) <= (others => '0');
                     mult_is_saturated(x) <= '0';
-                elsif  ((not FEATURE_FAMILY_STRATIXIII(intended_device_family)) and
+                elsif  ((not stratixiii_block) and
                         (((check_clock_out = "CLOCK0") and rising_edge(clock0)) or
                         ((check_clock_out = "CLOCK1") and rising_edge(clock1)) or
                         ((check_clock_out = "CLOCK2") and rising_edge(clock2)) or
                         ((check_clock_out = "CLOCK3") and rising_edge(clock3)) or
                         (is_reg (x) = '0'))) or
-                        (FEATURE_FAMILY_STRATIXIII(intended_device_family)) then
+                        (stratixiii_block) then
 
-                    if ((not FEATURE_FAMILY_STRATIXIII(intended_device_family)) and
+                    if ((not stratixiii_block) and
                         (((check_clock_out = "CLOCK0") and (ena0 = '1')) or
                         ((check_clock_out = "CLOCK1") and (ena1 = '1')) or
                         ((check_clock_out = "CLOCK2") and (ena2 = '1')) or
                         ((check_clock_out = "CLOCK3") and (ena3 = '1')) or
                         is_reg (x) = '0')) or
-                        (FEATURE_FAMILY_STRATIXIII(intended_device_family)) then
+                        (stratixiii_block) then
                     neg_a := '0';
                     neg_b := '0';
 
@@ -24685,7 +24905,7 @@ architecture behaviour of altmult_add is
                         temp_mult_int := unsigned(temp_mult_zero) - unsigned(temp_mult_int);
                     end if;
 
-                    if (FEATURE_FAMILY_BASE_STRATIXII(intended_device_family)) then
+                    if (stratixii_block) then
                         -- -------------------------------------------------------
                         -- Stratix II Rounding support 
                         -- This block basically carries out the rounding for the 
@@ -24776,7 +24996,7 @@ architecture behaviour of altmult_add is
         -- -----------------------------------------------------------------
         -- This is the main block that performs the addition and subtraction
         -- -----------------------------------------------------------------
-        IFGFAM0: if (not FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFGFAM0: if (not stratixiii_block) generate
         process (clock0, clock1, clock2, clock3, 
                 aclr0, aclr1, aclr2, aclr3, 
                 mult_res, sign_a_reg, sign_b_reg, sign_a_pipe, sign_b_pipe, 
@@ -24791,6 +25011,8 @@ architecture behaviour of altmult_add is
             variable mult_res_ext    : std_logic_vector (int_width_result-1 downto 0);
             variable adder_round_bits: integer;
             variable adder_result    : std_logic_vector (int_width_result downto 0) := (others => '0');
+            variable adder1_result   : std_logic_vector (int_width_result downto 0) := (others => '0');
+            variable adder3_result   : std_logic_vector (int_width_result downto 0) := (others => '0');
             variable adder_final_out : std_logic_vector (2*int_width_result - 1 downto 0) := (others => '0');
             variable adder_round_out : std_logic_vector (int_width_result downto 0) := (others => '0');
             variable is_rep_a_sign      : boolean;
@@ -24871,7 +25093,7 @@ architecture behaviour of altmult_add is
                     if ((addnsub_multiplier_pipeline_register1 = "UNREGISTERED") and
                         (addnsub_multiplier_pipeline_register3 = "UNREGISTERED"))then
                         if (((i = 1) and (is_adder1_add)) or 
-                            ((i = 3) and (is_adder3_add)) or
+                            ((i = 3) and (is_adder3_add)) or 
                             (i = 0) or 
                             (i = 2) or 
                             (i > 3)) then
@@ -24882,7 +25104,7 @@ architecture behaviour of altmult_add is
                     elsif ((addnsub_multiplier_pipeline_register1 = "UNREGISTERED") and
                             (not (addnsub_multiplier_pipeline_register3 = "UNREGISTERED")))then
                         if (((i = 1) and (is_adder1_add)) or 
-                            ((i = 3) and (is_adder3_pipe_add)) or
+                            ((i = 3) and (is_adder3_pipe_add)) or 
                             (i = 0) or 
                             (i = 2) or 
                             (i > 3)) then
@@ -24893,15 +25115,17 @@ architecture behaviour of altmult_add is
                     elsif ((not (addnsub_multiplier_pipeline_register1 = "UNREGISTERED")) and
                             (addnsub_multiplier_pipeline_register3 = "UNREGISTERED")) then
                         if (((i = 1) and (is_adder1_pipe_add)) or 
-                            ((i = 3) and (is_adder3_add)) or
-                            (i = 0) or (i = 2) or (i > 3)) then
+                            ((i = 3) and (is_adder3_add)) or 
+                            (i = 0) or 
+                            (i = 2) or 
+                            (i > 3)) then
                             do_add := true;
                         else
                             do_add := false;
                         end if;
                     else
                         if (((i = 1) and (is_adder1_pipe_add)) or 
-                            ((i = 3) and (is_adder3_pipe_add)) or
+                            ((i = 3) and (is_adder3_pipe_add)) or 
                             (i = 0) or 
                             (i = 2) or 
                             (i > 3)) then
@@ -24962,7 +25186,7 @@ architecture behaviour of altmult_add is
                         end if;
                     end if;
 
-                    if (FEATURE_FAMILY_BASE_STRATIXII(intended_device_family)) then
+                    if (stratixii_block) then
                         -- -------------------------------------------------------
                         -- Stratix II Rounding support 
                         -- This block basically carries out the rounding for the 
@@ -24991,25 +25215,46 @@ architecture behaviour of altmult_add is
                                 adder_round_out(j) := '0';
                                 end loop;
 
-                            adder_result := adder_round_out;
-        
-                            for j in (int_width_result - 1) downto 0 loop
-                                temp_sum(j) := adder_round_out(j);
-                            end loop;
-        
+                            --adder_result := adder_round_out;
+                            
+                            if ((i=2) or (i=3)) then
+                                for j in (int_width_result - 1) downto 0 loop
+                                    temp_sum(j) := adder_round_out(j);
+                                end loop;
+                            end if;
+                                                               
                         else
-                            adder_result := temp_sum(int_width_result downto 0);
+                            adder_round_out := temp_sum(int_width_result downto 0);
 
+                        end if;
+                        
+                        if (i = 0) then 
+                            adder_result := adder_round_out;
+                        end if;
+                        
+                        if (i = 1) then
+                            adder1_result := adder_round_out;
+                            adder_result := adder1_result;
+                            temp_sum    := (others => '0');
+                        end if;
+                        
+                        if ((i=2) or (i=3))then
+                            adder3_result := adder_round_out;
+                            if  ((asign = true) or (bsign = true)) then 
+                                adder_result := signed (adder3_result) + signed(adder1_result);
+                            else 
+                                adder_result := unsigned (adder3_result) + unsigned(adder1_result);
+                            end if;
                         end if;
                     end if;
 
-                    if (not FEATURE_FAMILY_BASE_STRATIXII(intended_device_family)) then
+                    if (not stratixii_block) then
                         adder_final_out(int_width_result - 1 downto 0) := temp_sum(int_width_result - 1 downto 0);
-                        adder_final_out(2*int_width_result - 1 downto int_width_result) := (others => temp_sum(int_width_result - 1));
+                        adder_final_out(2*int_width_result - 1 downto int_width_result) := (others => temp_sum(int_width_result -1));
                         
                     else
                         adder_final_out(int_width_result - 1 downto 0) := adder_result(int_width_result - 1 downto 0);
-                        adder_final_out(2*int_width_result - 1 downto int_width_result) := (others => adder_result(int_width_result - 1));
+                        adder_final_out(2*int_width_result - 1 downto int_width_result) := (others => adder_result(int_width_result));
                     end if;
 
                 end loop; -- for i in 0 to (number_of_multipliers -1) loop
@@ -25144,7 +25389,7 @@ architecture behaviour of altmult_add is
         end process;
         
         -- The addition, subtraction and other functionality for Stratix III
-        IFGFAM1: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFGFAM1: if (stratixiii_block) generate
         process (clock0, clock1, clock2, clock3, aclr0, aclr1, aclr2, aclr3,
                     adder1_reg, adder3_reg, acc_feedback, acc_feedback_temp,
                     outround_pipe, outsat_pipe,
@@ -25159,11 +25404,9 @@ architecture behaviour of altmult_add is
             variable round_happen : boolean;
             
             variable adder1_sum        : std_logic_vector (int_width_a + int_width_b + int_width_result downto 0) := (others => '0');
-            variable adder1_sum_temp        : std_logic_vector (accum_width - 1 downto 0) := (others => '0');
             variable adder3_sum        : std_logic_vector (int_width_a + int_width_b + int_width_result downto 0) := (others => '0');
-            variable adder3_sum_temp        : std_logic_vector (accum_width - 1 downto 0) := (others => '0');
             variable mult_res_temp   : std_logic_vector ((int_width_a + int_width_b - 1) downto 0);
-            variable mult_res_temp_int   : std_logic_vector ((accum_width - 1) downto 0);
+            variable mult_res_temp_int   : std_logic_vector ((int_width_a + int_width_b + int_width_result) downto 0) := (others => '0');
             
             variable stckbit_cnt : integer := 0;
             variable rndbit_cnt : integer := 0;
@@ -25173,7 +25416,7 @@ architecture behaviour of altmult_add is
             variable allsat_bit_cnt : integer := 0;
             variable satbit_or_cnt : integer := 0;
             variable overflow_status_bit_pos : integer :=0;
-
+            variable i : integer := 0;
             variable stick_bits_or : std_logic := '0';
             variable overflow_status : std_logic := '0';
             variable sat_bits_or : std_logic := '0';
@@ -25188,7 +25431,13 @@ architecture behaviour of altmult_add is
             variable accum_res_temp : std_logic_vector (accum_width downto 0) := (others => '0');  
             variable accum_overflow : std_logic := '0';      
             variable acc_feedback_int : std_logic_vector (accum_width downto 0) := (others => '0'); 
-            variable accum_res_int : std_logic_vector (accum_width downto 0) := (others => '0');             
+            variable accum_res_int : std_logic_vector (accum_width downto 0) := (others => '0');
+            variable and_sign_wire : std_logic := '0';
+            variable or_sign_wire : std_logic := '0';          
+            variable accum_overflow_int : std_logic := '0';
+            variable msb : std_logic := '0';
+            variable unsigned_sub1_overflow : std_logic := '0';
+            variable unsigned_sub3_overflow : std_logic := '0';
             
         begin
             -- determine whether dataa and datab are signed or unsigned numbers
@@ -25271,8 +25520,6 @@ architecture behaviour of altmult_add is
 
                     adder1_sum := (others => '0');
                     adder3_sum := (others => '0');
-                    adder1_sum_temp := (others => '0');
-                    adder3_sum_temp := (others => '0');
                     adder1_reg <= (others => '0');
                     adder3_reg <= (others => '0');
                 
@@ -25290,56 +25537,54 @@ architecture behaviour of altmult_add is
                     
                     adder1_sum := (others => '0');
                     adder3_sum := (others => '0');
-                    adder1_sum_temp := (others => '0');
-                    adder3_sum_temp := (others => '0');
                     -- model the first level adder/subtractor        
                     for i in 0 to (number_of_multipliers - 1) loop
         
                         mult_res_temp := mult_res( ((i+1)*(int_width_a + int_width_b) - 1) downto (i*(int_width_a + int_width_b)));
                         mult_res_temp_int(int_width_a + int_width_b - 1 downto 0) := mult_res_temp;
         
-                        if(accum_width > (int_width_a + int_width_b)) then
-                            if  ((sign_b_reg = '1') or (sign_b_reg = '1')) then  
-                                mult_res_temp_int(accum_width - 1 downto int_width_a + int_width_b) := (others => mult_res_temp_int(int_width_a + int_width_b - 1));  
-                            else    
-                                mult_res_temp_int(accum_width - 1 downto int_width_a + int_width_b) := (others => '0');
-                            end if;
-                        end if;                    
+                            if ((is_rep_a_sign) or (is_rep_b_sign))then
+                                mult_res_temp_int(int_width_result + int_width_a + int_width_b downto int_width_a + int_width_b) := (others => mult_res_temp_int(int_width_a + int_width_b - 1));  
+                            else
+                                mult_res_temp_int(int_width_result + int_width_a + int_width_b downto int_width_a + int_width_b) := (others => '0');
+                            end if;                 
                         -- perform 1st level addition/subtraction
                         if ((i= 0) or (i = 1)) then
                             if ((multiplier1_direction = "ADD") or (i=0))  then
                                 if ((asign = true) or (bsign = true)) then 
-                                    adder1_sum := signed (adder1_sum) + signed(mult_res_temp);
-                                    adder1_sum_temp := signed (adder1_sum_temp) + signed(mult_res_temp_int);
+                                    adder1_sum := signed (adder1_sum) + signed(mult_res_temp_int);
                                 else
-                                    adder1_sum := unsigned (adder1_sum) + unsigned(mult_res_temp);
-                                    adder1_sum_temp := unsigned (adder1_sum_temp) + unsigned(mult_res_temp_int);
+                                    adder1_sum := unsigned (adder1_sum) + unsigned(mult_res_temp_int);
                                 end if;
                             else  -- subtract
                                 if  ((asign = true) or (bsign = true)) then 
-                                    adder1_sum := signed (adder1_sum) - signed(mult_res_temp);
-                                    adder1_sum_temp := signed (adder1_sum_temp) - signed(mult_res_temp_int);
+                                    adder1_sum := signed (adder1_sum) - signed(mult_res_temp_int);
                                 else
-                                    adder1_sum := unsigned (adder1_sum) - unsigned(mult_res_temp);
-                                    adder1_sum_temp := unsigned (adder1_sum_temp) - unsigned(mult_res_temp_int);
+                                    adder1_sum := unsigned (adder1_sum) - unsigned(mult_res_temp_int);
+                                    if(adder1_sum(int_width_a + int_width_b + int_width_result) = '1') then
+                                        unsigned_sub1_overflow := '1';
+                                    else
+                                        unsigned_sub1_overflow := '0';
+                                    end if;
                                 end if;
                             end if;
                         else -- 3rd and 4th multiplier
                             if ((multiplier3_direction = "ADD") or (i=2))  then
                                 if ((asign = true) or (bsign = true)) then 
-                                    adder3_sum := signed (adder3_sum) + signed(mult_res_temp);
-                                    adder3_sum_temp := signed (adder3_sum_temp) + signed(mult_res_temp_int);
+                                    adder3_sum := signed (adder3_sum) + signed(mult_res_temp_int);
                                 else
-                                    adder3_sum := unsigned (adder3_sum) + unsigned(mult_res_temp);
-                                    adder3_sum_temp := unsigned (adder3_sum_temp) + unsigned(mult_res_temp_int);
+                                    adder3_sum := unsigned (adder3_sum) + unsigned(mult_res_temp_int);
                                 end if;
                             else  -- subtract
                                 if  ((asign = true) or (bsign = true)) then 
-                                    adder3_sum := signed (adder3_sum) - signed(mult_res_temp);
-                                    adder3_sum_temp := signed (adder3_sum_temp) - signed(mult_res_temp_int);
+                                    adder3_sum := signed (adder3_sum) - signed(mult_res_temp_int);
                                 else
-                                    adder3_sum := unsigned (adder3_sum) - unsigned(mult_res_temp);
-                                    adder3_sum_temp := unsigned (adder3_sum_temp) - unsigned(mult_res_temp_int);
+                                    adder3_sum := unsigned (adder3_sum) - unsigned(mult_res_temp_int);
+                                    if(adder3_sum(int_width_a + int_width_b + int_width_result) = '1') then
+                                        unsigned_sub3_overflow := '1';
+                                    else
+                                        unsigned_sub3_overflow := '0';
+                                    end if;
                                 end if;
                             end if;
                         end if;
@@ -25348,20 +25593,33 @@ architecture behaviour of altmult_add is
                     -- assign the results to signals
                     adder1_reg <= adder1_sum (int_width_result + int_width_a + int_width_b downto 0);
                     adder3_reg <= adder3_sum (int_width_result + int_width_a + int_width_b downto 0);
+                    unsigned_sub1_overflow_mult_reg <= unsigned_sub1_overflow;
+                    unsigned_sub3_overflow_mult_reg <= unsigned_sub3_overflow;
                 end if;
             end if;  -- end 1st adder register stage
         
             -- extend width for adder1_reg, adder2_reg and acc_feedback to set accumulator overflow bit
-            adder1_reg_temp(accum_width - 1 downto 0) := adder1_sum_temp(accum_width - 1  downto 0);
-            adder3_reg_temp(accum_width - 1 downto 0) := adder3_sum_temp(accum_width - 1  downto 0);
+            if(accum_width < int_width_result + int_width_a + int_width_b + 1) then
+            adder1_reg_temp(accum_width - 1 downto 0) := adder1_reg(accum_width - 1  downto 0);
+            adder3_reg_temp(accum_width - 1 downto 0) := adder3_reg(accum_width - 1  downto 0);
+            else
+                adder1_reg_temp(int_width_result + int_width_a + int_width_b downto 0) := adder1_reg(int_width_result + int_width_a + int_width_b downto 0);
+                adder3_reg_temp(int_width_result + int_width_a + int_width_b downto 0) := adder3_reg(int_width_result + int_width_a + int_width_b downto 0);
+                if ((asign = true) or (bsign = true)) then 
+                    adder1_reg_temp(accum_width - 1 downto int_width_result + int_width_a + int_width_b + 1) := (others => adder1_reg(int_width_result + int_width_a + int_width_b));
+                    adder3_reg_temp(accum_width - 1 downto int_width_result + int_width_a + int_width_b + 1) := (others => adder3_reg(int_width_result + int_width_a + int_width_b));
+                else
+                    adder1_reg_temp(accum_width - 1 downto int_width_result + int_width_a + int_width_b + 1) := (others => '0');
+                    adder3_reg_temp(accum_width - 1 downto int_width_result + int_width_a + int_width_b + 1) := (others => '0');
+                end if;
+            end if;
             
             if ((asign = true) or (bsign = true)) then
                 if(acc_feedback_int(accum_width - 1) = '1') then
                     acc_feedback_int(accum_width) := '1';
                 else
                     acc_feedback_int(accum_width) := '0';
-                end if;  
-                
+                end if;    
                 if((adder1_reg_temp(accum_width - 1) = '1') and (accum_direction = "SUB")) then
                     adder1_reg_temp(accum_width) := '1';
                 else
@@ -25382,6 +25640,8 @@ architecture behaviour of altmult_add is
                 
                     output_result <= (others => '0');
                     overflow_int <= '0';
+                    unsigned_sub1_overflow_reg <= '0';
+                    unsigned_sub3_overflow_reg <= '0';
 
             elsif (((output_register = "CLOCK0") and rising_edge (clock0)) or
                 ((output_register = "CLOCK1") and rising_edge (clock1)) or
@@ -25394,6 +25654,9 @@ architecture behaviour of altmult_add is
                     ((output_register = "CLOCK2") and (ena2 = '1')) or
                     ((output_register = "CLOCK3") and (ena3 = '1')) or
                     (output_register = "UNREGISTERED")) then
+                    
+                    unsigned_sub1_overflow_reg <= unsigned_sub1_overflow_mult_reg;
+                    unsigned_sub3_overflow_reg <= unsigned_sub3_overflow_mult_reg;
                     
                     if ((asign = true) or (bsign = true)) then
                         if(accum_direction = "ADD") then
@@ -25420,11 +25683,11 @@ architecture behaviour of altmult_add is
                             adder3_reg_temp(accum_width) := '1';
                         else
                             adder3_reg_temp(accum_width) := '0';
-                        end if;
-                    else
-                        accum_res_temp(accum_width) := '0';            
+                        end if;       
+                    --else
+                        -- accum_res_temp(accum_width) := '0';
                     end if;
-                        
+                           
                     if ((asign = true) or (bsign = true)) then
                         if(accum_direction = "ADD") then
                             accum_res_int := signed (acc_feedback_int) + signed (accum_res_temp);
@@ -25439,13 +25702,109 @@ architecture behaviour of altmult_add is
                         end if;
                     end if;                     
      
-                    if ((asign = true) or (bsign = true)) then
-                        accum_overflow := accum_res_int(accum_width) xor accum_res_int(accum_width - 1);
-                    else
-                        if(accum_direction = "ADD") then
-                            accum_overflow := accum_res_int(accum_width);
+                    or_sign_wire := '0';
+                    and_sign_wire := '0';
+            
+                    if(extra_sign_bit_width >= 1) then
+                        and_sign_wire := '1';
+                        for i in (accum_width -lsb_position - extra_sign_bit_width) to (accum_width -lsb_position - 1) loop
+                            if(accum_res_int(i) = '1') then
+                                or_sign_wire := '1';
+                            end if;
+
+                            if(accum_res_int(i) = '0') then
+                                and_sign_wire := '0';
+                            end if;
+                        end loop;
+                    end if;
+        
+                    if(port_signa = "PORT_USED" or port_signb = "PORT_USED") then
+                        if ((asign = true) or (bsign = true)) then
+                        --signed data
+                            if(accum_res_int(44) /= accum_res_int(43)) then
+                                accum_overflow_int := '1';
+                            else
+                                accum_overflow_int := '0';
+                            end if;
                         else
-                            accum_overflow := not(accum_res_int(accum_width));    
+                        -- unsigned data
+                            if(accum_direction = "ADD") then    -- addition
+                                if(accum_res_int(44) = '1') then
+                                accum_overflow_int := '1';
+                                else
+                                    accum_overflow_int := '0';
+                                end if;
+                            else    -- subtraction
+                                if(accum_res_int(44) = '0') then
+                                    accum_overflow_int := '0';
+                                else
+                                    accum_overflow_int := '0';
+                                end if;
+                            end if;
+                        end if;
+
+                        -- dynamic sign input
+
+                        if(accum_res_int(bit_position) = '1') then
+                            msb := '1';
+                        else
+                            msb := '0';
+                        end if;
+
+                        if(extra_sign_bit_width >= 1) then
+                            if((and_sign_wire = '1') and ((not(asign = true or bsign = true)) or ((asign = true or  bsign = true) and (msb = '1')))) then
+                                and_sign_wire := '1';
+                            else
+                                and_sign_wire := '0';
+                            end if;
+
+                            if ((asign = true or bsign = true) and (msb = '1')) then
+                                or_sign_wire := '1';
+                            end if;
+                        end if;
+
+                        --operation XOR
+                        if ((or_sign_wire /= and_sign_wire) or accum_overflow_int = '1') then
+                            accum_overflow := '1';
+                        else
+                            accum_overflow := '0';
+                        end if;
+                    elsif(representation_a = "SIGNED" or representation_b = "SIGNED") then
+                    --signed data
+                        if (accum_res_int(44) /= accum_res_int(43)) then
+                            accum_overflow_int := '1';
+                        else
+                            accum_overflow_int := '0';
+                        end if;
+
+                        --operation XOR
+                        if ((or_sign_wire /= and_sign_wire) or accum_overflow_int = '1') then
+                            accum_overflow := '1';
+                        else
+                            accum_overflow := '0';
+                        end if;
+                    else
+                    -- unsigned data
+                        if(accum_direction = "ADD") then
+                        -- addition
+                            if ((accum_res_int(44) = '1') or ((adder1_reg_temp(43) = '1') and (adder3_reg_temp(43) = '1')))then
+                                accum_overflow_int := '1';
+                            else
+                                accum_overflow_int := '0';
+                            end if;
+                        else
+                        -- subtraction
+                            if (accum_res_int(44) = '0') then
+                                accum_overflow_int := '1';
+                            else
+                                accum_overflow_int := '0';
+                            end if;
+                        end if;
+
+                        if(or_sign_wire = '1' or accum_overflow_int = '1') then
+                            accum_overflow := '1';
+                        else
+                            accum_overflow := '0';
                         end if;
                     end if;
              
@@ -25542,13 +25901,13 @@ architecture behaviour of altmult_add is
                         overflow_status := '0';
                         if (((output_saturation = "VARIABLE") and (outsat_pipe = '1')) or (output_saturation = "YES")) then
                             if (round_block_result (int_width_result) = '0') then -- carry bit is 0, positive number                                               
-                                for sat_bit_cnt in (saturation_position) to (int_width_result -  1) loop
+                                for sat_bit_cnt in (saturation_position) to (int_width_result) loop
                                     if (sat_bit_cnt /= overflow_status_bit_pos) then
                                         overflow_status := overflow_status or round_block_result (sat_bit_cnt);
                                     end if;
                                 end loop;
                             else -- carry bit is 1, negative number
-                                for sat_bit_cnt in (saturation_position) to (int_width_result - 1) loop
+                                for sat_bit_cnt in (saturation_position) to (int_width_result) loop
                                     if (sat_bit_cnt /= overflow_status_bit_pos) then
                                         overflow_status := overflow_status or (not round_block_result (sat_bit_cnt));
                                     end if;
@@ -25653,6 +26012,9 @@ architecture behaviour of altmult_add is
                                 ((representation_a /= "UNUSED") and (representation_b /= "UNUSED")))) then
                                 sat_block_result := (others => 'X');
                             end if;
+                        elsif ((output_saturation = "VARIABLE") and (outsat_pipe = '0')) then
+                            sat_block_result := round_block_result;
+                            overflow_status := '0';
                         else
                             sat_block_result := round_block_result;
                         end if;
@@ -25675,7 +26037,7 @@ architecture behaviour of altmult_add is
         end process;
         end generate IFGFAM1;
 
-        IFGFAM10: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFGFAM10: if (stratixiii_block) generate
         process (clock0, clock1, clock2, clock3, aclr0, aclr1, aclr2, aclr3,
                     chainout_round_out_reg, chainout_sat_out,
                     zerochainout_reg, chainin, output_result)
@@ -26020,7 +26382,7 @@ architecture behaviour of altmult_add is
         end process;
         end generate IFGFAM10;
         
-        IFGFAM11: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFGFAM11: if (stratixiii_block) generate
         process (chainout_sat_block_res_wire, zerochainout_reg)
             variable cho_cnt : integer := 0;
             variable chainout_out_temp : std_logic_vector (int_width_result downto 0) := (others => '0');
@@ -26036,7 +26398,7 @@ architecture behaviour of altmult_add is
         end generate IFGFAM11;
  
         -- model the shift & rotate blocks for Stratix III
-        IFGFAM2: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFGFAM2: if (stratixiii_block) generate
         process (output_result, shiftr_out, rotate_out)
         begin
             if (not (shift_mode = "NO")) then
@@ -26052,7 +26414,7 @@ architecture behaviour of altmult_add is
         end process;
         end generate IFGFAM2;
         
-        IFGFAM3: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFGFAM3: if (stratixiii_block) generate
         process (output_result, zeroloopback_out)
             
             variable lpbk_cnt : integer := 0;
@@ -26066,7 +26428,7 @@ architecture behaviour of altmult_add is
         end process;
         end generate IFGFAM3;
         
-        IFLOOPBACK: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFLOOPBACK: if (stratixiii_block) generate
         process (loopback_wire)
         begin
             if(input_source_b0 = "LOOPBACK") then
@@ -26075,7 +26437,7 @@ architecture behaviour of altmult_add is
         end process;
         end generate IFLOOPBACK;
         
-        IFGFAM4: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFGFAM4: if (stratixiii_block) generate
         process (output_result, accumsload_pipe)
         
             variable acfdbk_cnt : integer := 0;
@@ -26089,7 +26451,7 @@ architecture behaviour of altmult_add is
         end process;
         end generate IFGFAM4;
         
-        IFACCUM: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
+        IFACCUM: if (stratixiii_block) generate
         process (accum_res, accumsload_pipe)
         
             variable acfdbk_cnt : integer := 0;
@@ -26104,8 +26466,8 @@ architecture behaviour of altmult_add is
         end generate IFACCUM;
        
         
-        IFGFAM5: if (FEATURE_FAMILY_STRATIXIII(intended_device_family)) generate
-        process (output_result, overflow_int, chainout_overflow_int, shift_rot_result, chainout_output, clock0, clock1, clock2, clock3, aclr0, aclr1, aclr2, aclr3)
+        IFGFAM5: if (stratixiii_block) generate
+        process (output_result, overflow_int, chainout_overflow_int, shift_rot_result, chainout_output, clock0, clock1, clock2, clock3, aclr0, aclr1, aclr2, aclr3, unsigned_sub1_overflow_reg, unsigned_sub3_overflow_reg)
 
             variable head_result_int : integer := 0;
             variable res_cnt : integer := 0;
@@ -26132,7 +26494,7 @@ architecture behaviour of altmult_add is
                 if ((chainout_adder = "YES") or (accumulator = "YES")) then
                     result_stxiii_ext(width_result - 1 downto 0) := result_stxiii(width_result - 1 downto 0);
                 elsif ((number_of_multipliers = 1) and (width_result > width_a + width_b)) then
-                    if ((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) then
+                    if (((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) and (unsigned_sub1_overflow_reg = '0' and unsigned_sub3_overflow_reg = '0')) then
                         for res_cnt in 1 to (width_result - width_a - width_b) loop
                             result_stxiii_ext(width_result - res_cnt) := '0';
                         end loop;
@@ -26143,7 +26505,7 @@ architecture behaviour of altmult_add is
                     end if;
                     result_stxiii_ext(width_a + width_b - 1 downto 0) := result_stxiii(width_a + width_b - 1 downto 0);
                 elsif (((number_of_multipliers = 2) or (input_source_b0 = "LOOPBACK")) and (width_result > width_a + width_b + 1)) then
-                    if ((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) then
+                    if (((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) and (unsigned_sub1_overflow_reg = '0' and unsigned_sub3_overflow_reg = '0')) then
                         for res_cnt in 1 to (width_result - width_a - width_b - 1) loop
                             result_stxiii_ext(width_result - res_cnt) := '0';
                         end loop;
@@ -26154,7 +26516,7 @@ architecture behaviour of altmult_add is
                     end if;
                     result_stxiii_ext(width_a + width_b downto 0) := result_stxiii(width_a + width_b downto 0);
                 elsif ((number_of_multipliers > 2) and (width_result > width_a + width_b + 2)) then
-                    if ((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) then
+                    if (((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) and (unsigned_sub1_overflow_reg = '0' and unsigned_sub3_overflow_reg = '0')) then
                         for res_cnt in 1 to (width_result - width_a - width_b - 2) loop
                             result_stxiii_ext(width_result - res_cnt) := '0';
                         end loop;
@@ -26185,7 +26547,7 @@ architecture behaviour of altmult_add is
                 if ((chainout_adder = "YES") or (accumulator = "YES")) then
                     result_stxiii_ext(width_result - 1 downto 0) := result_stxiii(width_result - 1 downto 0);
                 elsif ((number_of_multipliers = 1) and (width_result > int_width_a + int_width_b)) then
-                    if ((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) then
+                     if (((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) and (unsigned_sub1_overflow_reg = '0' and unsigned_sub3_overflow_reg = '0')) then
                         for res_cnt in 1 to (width_result - int_width_a - int_width_b) loop
                             result_stxiii_ext(width_result - res_cnt) := '0';
                         end loop;
@@ -26196,7 +26558,7 @@ architecture behaviour of altmult_add is
                     end if;
                     result_stxiii_ext(int_width_a + int_width_b - 1 downto 0) := result_stxiii(int_width_a + int_width_b - 1 downto 0);
                 elsif (((number_of_multipliers = 2) or (input_source_b0 = "LOOPBACK")) and (width_result > int_width_a + int_width_b + 1)) then
-                    if ((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) then
+                    if (((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) and (unsigned_sub1_overflow_reg = '0' and unsigned_sub3_overflow_reg = '0')) then
                         for res_cnt in 1 to (width_result - int_width_a - int_width_b - 1) loop
                             result_stxiii_ext(width_result - res_cnt) := '0';
                         end loop;
@@ -26207,7 +26569,7 @@ architecture behaviour of altmult_add is
                     end if;
                     result_stxiii_ext(int_width_a + int_width_b downto 0) := result_stxiii(int_width_a + int_width_b downto 0);
                 elsif ((number_of_multipliers > 2) and (width_result > int_width_a + int_width_b + 2)) then
-                    if ((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) then
+                    if (((representation_a = "UNSIGNED") and (representation_b = "UNSIGNED")) and (unsigned_sub1_overflow_reg = '0' and unsigned_sub3_overflow_reg = '0')) then
                         for res_cnt in 1 to (width_result - int_width_a - int_width_b - 2) loop
                             result_stxiii_ext(width_result - res_cnt) := '0';
                         end loop;
@@ -27393,7 +27755,8 @@ begin
     if ((FEATURE_FAMILY_FLEX10KE(intended_device_family) = false)
         and (FEATURE_FAMILY_APEX20K(intended_device_family) = false)
         and (FEATURE_FAMILY_APEX20KE(intended_device_family) = false)
-        and (FEATURE_FAMILY_APEXII(intended_device_family) = false)) then
+        and (FEATURE_FAMILY_APEXII(intended_device_family) = false)
+        and (FEATURE_FAMILY_STRATIX(intended_device_family) = false)) then
         ASSERT FALSE
         REPORT "Device family specified by the intended_device_family parameter, "& intended_device_family &", may not be supported by altclklock"
         SEVERITY WARNING;
@@ -27777,6 +28140,120 @@ begin
         -- reset schedule_clk1
         schedule_clk1 := false;
     end if; -- schedule_clk1
+
+    if (FEATURE_FAMILY_STRATIX(intended_device_family)) then
+        -- clock2 output
+        if (schedule_clk2 = true) then
+            -- initialize variables
+            sched_time := clk2_phase_delay;
+            cycle_to_adjust := 0;
+            inc := 1;
+            output_value := '1';
+            temp := clk2_synchronizing_period/1 ps;
+            my_rem := temp rem clk2_cycles_per_sync_period;
+
+            -- schedule <clk2_cycles_per_sync_period> number of output clock
+            -- cycles in this loop in order to synchronize the output clock to the
+            -- input clock - to get rid of drifting for cases where the input clock
+            -- period is not always divisible
+            for i in 1 to clk2_cycles_per_sync_period loop
+                tmp_per := temp/clk2_cycles_per_sync_period;
+                if ((my_rem /= 0) and (inc <= my_rem)) then
+                    tmp_rem := (clk2_cycles_per_sync_period * inc) rem my_rem;
+                    cycle_to_adjust := (clk2_cycles_per_sync_period * inc) / my_rem;
+                    if (tmp_rem /= 0) then
+                        cycle_to_adjust := cycle_to_adjust + 1;
+                    end if;
+                end if;
+
+                -- if this cycle is the one to adjust the output period in, then
+                -- increment the period by 1 unit
+                if (cycle_to_adjust = i) then
+                    tmp_per := tmp_per + 1;
+                    inc := inc + 1;
+                end if;
+
+                -- adjust the high and low cycle period
+                vco_per := tmp_per * 1 ps;
+                high_time := (tmp_per/2) * 1 ps;
+                if ((tmp_per rem 2) /= 0) then
+                    high_time := high_time + 1 ps;
+                end if;
+
+                low_time := vco_per - high_time;
+
+                -- schedule the high and low cycle of 1 output clock period
+                for j in 1 to 2 loop
+                    clk2_tmp <= transport output_value after sched_time;
+                    output_value := not output_value;
+                    if (output_value = '0') then
+                        sched_time := sched_time + high_time;
+                    elsif (output_value = '1') then
+                        sched_time := sched_time + low_time;
+                    end if;
+                end loop;
+            end loop;
+
+            -- reset schedule_clk2
+            schedule_clk2 := false;
+        end if; -- schedule_clk2
+
+        -- clock_ext output
+        if (schedule_extclk = true) then
+            -- initialize variables
+            sched_time := extclk_phase_delay;
+            cycle_to_adjust := 0;
+            inc := 1;
+            output_value := '1';
+            temp := extclk_synchronizing_period/1 ps;
+            my_rem := temp rem extclk_cycles_per_sync_period;
+
+            -- schedule <extclk_cycles_per_sync_period> number of output clock
+            -- cycles in this loop in order to synchronize the output clock to the
+            -- input clock - to get rid of drifting for cases where the input clock
+            -- period is not always divisible
+            for i in 1 to extclk_cycles_per_sync_period loop
+                tmp_per := temp/extclk_cycles_per_sync_period;
+                if ((my_rem /= 0) and (inc <= my_rem)) then
+                    tmp_rem := (extclk_cycles_per_sync_period * inc) rem my_rem;
+                    cycle_to_adjust := (extclk_cycles_per_sync_period * inc) / my_rem;
+                    if (tmp_rem /= 0) then
+                        cycle_to_adjust := cycle_to_adjust + 1;
+                    end if;
+                end if;
+
+                -- if this cycle is the one to adjust the output period in, then
+                -- increment the period by 1 unit
+                if (cycle_to_adjust = i) then
+                    tmp_per := tmp_per + 1;
+                    inc := inc + 1;
+                end if;
+
+                -- adjust the high and low cycle period
+                vco_per := tmp_per * 1 ps;
+                high_time := (tmp_per/2) * 1 ps;
+                if ((tmp_per rem 2) /= 0) then
+                    high_time := high_time + 1 ps;
+                end if;
+
+                low_time := vco_per - high_time;
+
+                -- schedule the high and low cycle of 1 output clock period
+                for j in 1 to 2 loop
+                    extclk_tmp <= transport output_value after sched_time;
+                    output_value := not output_value;
+                    if (output_value = '0') then
+                        sched_time := sched_time + high_time;
+                    elsif (output_value = '1') then
+                        sched_time := sched_time + low_time;
+                    end if;
+                end loop;
+            end loop;
+
+            -- reset schedule_extclk
+            schedule_extclk := false;
+        end if; -- schedule_extclk
+    end if;
 
 end process LOCK;
 
@@ -29173,6 +29650,7 @@ architecture behavior of stratixiii_lvds_rx_dpa is
     signal clk_period              : time := 0 ps;
     signal last_clk_period         : time := 0 ps;
     signal last_clkin_edge         : time := 0 ps;
+    signal j                       : integer ;
 
 begin
 
@@ -29393,7 +29871,9 @@ entity stratixiii_lvds_rx_channel is
         enable_dpa_align_to_rising_edge_only  : string  := "OFF";
         enable_dpa_initial_phase_selection    : string  := "OFF";
         dpa_initial_phase_value     : natural := 0;
-        registered_output           : string  := "ON" );
+        registered_output           : string  := "ON";
+        use_external_pll            : string := "OFF";
+        use_dpa_calibration         : boolean := false );
 
 -- PORT DECLARATION
     port(
@@ -29409,7 +29889,8 @@ entity stratixiii_lvds_rx_channel is
         rx_fifo_reset         : in std_logic;
         rx_channel_data_align : in std_logic;
         rx_cda_reset          : in std_logic;
-
+        rx_dpa_lock_reset     : in std_logic;
+        rx_locked             : in std_logic;
 -- OUTPUT PORT DECLARATION
         rx_out                : out std_logic_vector(deserialization_factor-1 downto 0);
         rx_dpa_locked         : out std_logic := '0';
@@ -29476,9 +29957,23 @@ architecture behavior of stratixiii_lvds_rx_channel is
     signal rx_reg_clk                 : std_logic := '0';
     signal rx_dpa_sync_reg_clk        : std_logic := '0';
     signal rx_divfwdclk_int           : std_logic := '0';
-    
-
-
+    signal j                          : integer ;
+    signal accum_regr                 : unsigned(8 downto 0) := (others => '0');
+    signal lock_out_regr              : std_logic := '0';
+    signal pad_regr                   : std_logic_vector(deserialization_factor-1 downto 0) := (others => '0');
+    signal extra_regr                 : std_logic := '0';
+    signal in_bus_add                 : std_logic_vector(deserialization_factor-1 downto 0) := (others => '0');
+    signal lock_out_reg_dly           : std_logic := '0';
+    signal fifo_reset_regr            : std_logic := '0';
+    signal int_pll_kick_reset         : std_logic := '0';
+    signal dpa_lock_fifo_reset        : std_logic := '0';
+    signal pll_locked                 : std_logic := '0';
+    signal wire_lock_state_mc_d	  : std_logic_vector(1 DOWNTO 0);
+    signal lock_state_mc              : std_logic_vector(1 DOWNTO 0) := (others => '0');
+    signal wire_lock_state_mc_ena	  : std_logic_vector(1 DOWNTO 0);
+    signal dpaswitch                  : std_logic := '0';
+    signal rx_in_wire                 : std_logic := '0';
+	
 -- COMPONENT DECLARATION
 
     -- stratixiii dpa block
@@ -29514,7 +30009,9 @@ begin
     fifo_write_clk <= dpa_clock;
     fifo_read_clk <= rx_fastclk;
     rx_in_reg_clk <= rx_fastclk;
-    rx_dpa_locked <= dpa_locked;
+    rx_dpa_locked <= lock_out_reg_dly when (use_external_pll = "ON")
+                    else ((lock_state_mc(0) and lock_state_mc(1)) and lock_out_reg_dly) when (use_dpa_calibration = true)
+                    else lock_out_regr;
     rx_bload <= enable0_reg;
     rx_enable_dly <= rx_enable;
     fast_clock <= dpa_clock when ((enable_dpa_mode = "ON") and (enable_soft_cdr_mode = "ON"))
@@ -29523,6 +30020,17 @@ begin
                 else rx_slowclk;
     rx_dpa_sync_reg_clk <= rx_divfwdclk_int when ((enable_dpa_mode = "ON") and (enable_soft_cdr_mode = "ON"))
                 else '0';
+    int_pll_kick_reset <= ((lock_state_mc(0) and (not lock_state_mc(1))) or ((lock_state_mc(0) and lock_state_mc(1)) and rx_dpa_lock_reset)) when (use_dpa_calibration = true)
+                else rx_dpa_lock_reset;
+    pll_locked <= rx_locked;
+    wire_lock_state_mc_ena(1 downto 0) <= (others => ((lock_state_mc(0) and lock_state_mc(1) and rx_dpa_lock_reset) or (not lock_state_mc(0) and not lock_state_mc(1) and lock_out_regr) or (lock_state_mc(0) and not lock_state_mc(1) and lock_out_reg_dly) or (not lock_state_mc(0) and lock_state_mc(1) and lock_out_regr)));
+    wire_lock_state_mc_d <= ((((lock_state_mc(0) and (not lock_state_mc(1))) and lock_out_reg_dly) or (((not lock_state_mc(0)) and lock_state_mc(1)) and lock_out_regr)) and (not (((lock_state_mc(0) and lock_state_mc(1)) and rx_dpa_lock_reset) or (((not lock_state_mc(0)) and (not lock_state_mc(1))) and lock_out_regr)))) & (((((not lock_state_mc(0)) and (not lock_state_mc(1))) and lock_out_regr) or (((not lock_state_mc(0)) and lock_state_mc(1)) and lock_out_regr)) and (not (((lock_state_mc(0) and lock_state_mc(1)) and rx_dpa_lock_reset) or ((lock_state_mc(0) and (not lock_state_mc(1))) and lock_out_reg_dly))));
+    dpaswitch <= ((not lock_state_mc(0)) and (not lock_state_mc(1))) when (use_dpa_calibration = true)
+                else '1';
+    fifo_reset_regr <= (((not lock_state_mc(0)) and lock_state_mc(1)) and (lock_out_regr xor lock_out_reg_dly)) when (use_dpa_calibration = true) 
+                else (lock_out_regr xor lock_out_reg_dly);
+    rx_in_wire <= TRANSPORT rx_in after 120 ps when ((use_dpa_calibration = true) and (dpaswitch = '1'))
+                else rx_in;
                 
 
 -- COMPONENT ASSIGNMENTS                
@@ -29539,7 +30047,7 @@ begin
                     dpa_initial_phase_value               => dpa_initial_phase_value )
             
                 port map (
-                    rx_in          => rx_in,
+                    rx_in          => rx_in_wire,
                     rx_fastclk     => rx_fastclk,
                     rx_enable      => rx_enable,
                     rx_dpa_reset   => rx_reset,
@@ -29559,9 +30067,9 @@ begin
     IN_SYNC_REGISTER : process (fast_clock)
     begin
         if (fast_clock = '1' and fast_clock'event) then
-            rx_in_reg_pos <= rx_in;
+            rx_in_reg_pos <= rx_in_wire;
         elsif (fast_clock = '0' and fast_clock'event) then
-            rx_in_reg_neg <= rx_in;
+            rx_in_reg_neg <= rx_in_wire;
         end if;
     end process IN_SYNC_REGISTER;
 
@@ -29657,7 +30165,7 @@ begin
 
             if ((enable_dpa_mode = "ON") and (enable_soft_cdr_mode = "ON"))then
                 shift_reg_chain(0) := retime_data;
-            elsif ((enable_dpa_mode = "ON") and (rx_dpll_enable = '1'))then
+            elsif ((enable_dpa_mode = "ON") and ((rx_dpll_enable = '1') or (use_dpa_calibration = true)))then
                 shift_reg_chain(0) := dpa_fifo_out;
             elsif (rx_align_data_reg = "RISING_EDGE") then
                 shift_reg_chain(0) := rx_in_reg_pos;
@@ -29700,12 +30208,12 @@ begin
     if ((enable_dpa_mode = "ON") and (enable_soft_cdr_mode = "OFF")) generate    
 
         -- STRATIXIII Phase Compensation FIFO
-        DPA_FIFO : process (fifo_write_clk, fifo_read_clk, rx_reset)
+        DPA_FIFO : process (fifo_write_clk, fifo_read_clk, rx_reset, fifo_reset_regr)
             variable wrPtr : integer := 0;
             variable rdPtr : integer := 3;
             variable fifo_in_sync_reg : std_logic := '0';
         begin
-            if (rx_reset = '1') then
+            if (rx_reset = '1' or fifo_reset_regr = '1') then
                 wrPtr := 0;
                 rdPtr := 3;
                 ram_array <= (others => '0');
@@ -29758,6 +30266,63 @@ begin
 
 
 
+    STRATIXIII_DPA_LOCKED : process (rx_slowclk, rx_reset, rx_fifo_reset, pll_locked ,int_pll_kick_reset)
+        variable accum_regr_temp            : unsigned(8 downto 0) := (others => '0');
+        variable int_accum_regr_temp        : integer;             
+    begin
+    if (rx_reset = '1' or pll_locked = '0' or int_pll_kick_reset = '1') then
+        extra_regr <= '0';        
+        lock_out_regr <= '0';
+        for j in deserialization_factor-1 downto 0 loop
+            pad_regr(j) <= '0';
+        end loop;
+        for j in 8 downto 0 loop
+            accum_regr(j) <= '0';
+            accum_regr_temp(j) := '0';
+        end loop;
+    if (rx_reset = '1' or pll_locked = '0') then
+        lock_out_reg_dly <= '0';
+    end if;
+    elsif rising_edge(rx_slowclk) then
+        for j in deserialization_factor-1 downto 0 loop
+            if  (registered_output = "ON") then
+                pad_regr <= rx_out_reg; 
+            else 
+                pad_regr <= rx_parallel_load_reg;
+            end if;
+        end loop;
+        extra_regr <= pad_regr(deserialization_factor-1);
+        in_bus_add(0) <= extra_regr xor pad_regr(0);
+        lock_out_reg_dly <= lock_out_regr;        
+        for j in deserialization_factor-1 downto 1 loop
+            in_bus_add(j) <= pad_regr(j) xor pad_regr(j-1); 
+        end loop;
+        int_accum_regr_temp := conv_integer(accum_regr_temp);
+        for j in deserialization_factor-1 downto 0 loop    
+            if (in_bus_add(j) = '1') then
+                int_accum_regr_temp := int_accum_regr_temp + 1;
+            end if;
+        end loop;
+        accum_regr <= accum_regr_temp;
+        accum_regr_temp := conv_unsigned(int_accum_regr_temp, 9);
+        if (accum_regr >= 256) then 
+            lock_out_regr <= '1';
+        end if;
+     end if;
+     
+     if (use_dpa_calibration = true) then
+         if (rx_reset = '1' or pll_locked = '0') then
+             lock_state_mc(1 downto 0) <= (others => '0');
+         elsif rising_edge(rx_slowclk) then 
+             if (wire_lock_state_mc_ena(1) = '1') then
+                 lock_state_mc(1) <= wire_lock_state_mc_d(1);
+             elsif (wire_lock_state_mc_ena(0) = '1') then
+                 lock_state_mc(0) <= wire_lock_state_mc_d(0);
+             end if;
+         end if;
+     end if;
+    end process STRATIXIII_DPA_LOCKED;
+
 end behavior;
 
 -- END OF ARCHITECTURE
@@ -29803,7 +30368,8 @@ entity stratixiii_lvds_rx is
         enable_dpa_align_to_rising_edge_only  : string  := "OFF";
         enable_dpa_initial_phase_selection    : string  := "OFF";
         dpa_initial_phase_value     : natural  := 0;
-        registered_output           : string  := "ON" );
+        registered_output           : string  := "ON";
+        use_dpa_calibration         : boolean := false );
 
 -- PORT DECLARATION
     port(
@@ -29819,6 +30385,8 @@ entity stratixiii_lvds_rx is
         rx_fifo_reset         : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
         rx_channel_data_align : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
         rx_cda_reset          : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
+        rx_dpa_lock_reset     : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
+        rx_locked             : in std_logic;
 
 -- OUTPUT PORT DECLARATION
         rx_out        : out std_logic_vector(deserialization_factor*number_of_channels -1 downto 0);
@@ -29855,7 +30423,8 @@ architecture behavior of stratixiii_lvds_rx is
             enable_dpa_align_to_rising_edge_only  : string  := "OFF";
             enable_dpa_initial_phase_selection    : string  := "OFF";
             dpa_initial_phase_value     : natural  := 0;
-            registered_output           : string := "ON" );
+            registered_output           : string := "ON";
+            use_dpa_calibration         : boolean := false );
 
         port (
             rx_in                 : in std_logic; --Required port
@@ -29869,6 +30438,8 @@ architecture behavior of stratixiii_lvds_rx is
             rx_fifo_reset         : in std_logic;
             rx_channel_data_align : in std_logic;
             rx_cda_reset          : in std_logic;
+            rx_dpa_lock_reset     : in std_logic;
+            rx_locked             : in std_logic;          
             rx_out                : out std_logic_vector(deserialization_factor-1 downto 0);
             rx_dpa_locked         : out std_logic;
             rx_cda_max            : out std_logic;
@@ -29899,7 +30470,8 @@ begin
                     enable_dpa_align_to_rising_edge_only  => enable_dpa_align_to_rising_edge_only,
                     enable_dpa_initial_phase_selection    => enable_dpa_initial_phase_selection,
                     dpa_initial_phase_value               => dpa_initial_phase_value,
-                    registered_output                     => registered_output  )
+                    registered_output                     => registered_output,
+                    use_dpa_calibration                   => use_dpa_calibration  )
 
                 port map (
                     rx_in                 => rx_in(i),
@@ -29916,7 +30488,9 @@ begin
                     rx_out                => rx_out((i+1)*deserialization_factor-1 downto i*deserialization_factor),
                     rx_dpa_locked         => rx_dpa_locked(i),
                     rx_cda_max            => rx_cda_max(i),
-                    rx_divfwdclk          => rx_divfwdclk(i)  );
+                    rx_dpa_lock_reset     => rx_dpa_lock_reset(i),
+                    rx_locked             => rx_locked,
+                    rx_divfwdclk          => rx_divfwdclk(i) );
         end generate STRATIXIII_RX_CHANNEL;
 
 end behavior;
@@ -29975,6 +30549,8 @@ entity altlvds_rx is
         registered_data_align_input : string  := "ON";
         common_rx_tx_pll            : string  := "ON";
         enable_dpa_mode             : string  := "OFF";
+        enable_dpa_pll_calibration  : string  := "OFF";
+        enable_dpa_calibration      : string  := "ON";
         enable_dpa_fifo             : string  := "ON";
         use_dpll_rawperror          : string  := "OFF";
         use_coreclock_input         : string  := "OFF";
@@ -30028,6 +30604,10 @@ entity altlvds_rx is
         rx_cda_reset          : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
         rx_coreclk            : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
         pll_areset            : in std_logic := '0';
+        dpa_pll_recal         : in std_logic := '0';
+        pll_phasedone         : in std_logic := '1';
+        rx_dpa_lock_reset     : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
+
 
 -- OUTPUT PORT DECLARATION
         rx_out        : out std_logic_vector(deserialization_factor*number_of_channels -1 downto 0);
@@ -30035,7 +30615,12 @@ entity altlvds_rx is
         rx_locked     : out std_logic;
         rx_dpa_locked : out std_logic_vector(number_of_channels-1 downto 0);
         rx_cda_max    : out std_logic_vector(number_of_channels-1 downto 0);
-        rx_divfwdclk  : out std_logic_vector(number_of_channels-1 downto 0) );
+        rx_divfwdclk  : out std_logic_vector(number_of_channels-1 downto 0);
+        dpa_pll_cal_busy      : out std_logic;
+        pll_phasestep         : out std_logic;
+        pll_phaseupdown       : out std_logic;
+        pll_phasecounterselect: out std_logic_Vector(3 downto 0);
+        pll_scanclk           : out std_logic);
 
 end altlvds_rx;
 -- END OF ENTITY
@@ -30059,6 +30644,7 @@ architecture behavior of altlvds_rx is
     constant CYCLONE_RX_STYLE   : boolean := FEATURE_FAMILY_BASE_CYCLONE(intended_device_family);
     constant CYCLONEII_RX_STYLE : boolean := FEATURE_FAMILY_BASE_CYCLONEII(intended_device_family);
     constant CYCLONEIII_RX_STYLE : boolean := FEATURE_FAMILY_BASE_CYCLONEIII(intended_device_family);
+    constant ARRIAII_RX_STYLE : boolean := FEATURE_FAMILY_ARRIAIIGX(intended_device_family);
     constant FAMILY_HAS_FLEXIBLE_LVDS : boolean := FEATURE_FAMILY_HAS_FLEXIBLE_LVDS(intended_device_family) or
                                                     (((STRATIX_RX_STYLE = true) or (STRATIXII_RX_STYLE = true) or
                                                     (STRATIXIII_RX_STYLE = true)) and
@@ -30456,6 +31042,7 @@ end;
     constant IS_USING_EXTRA_PLL_CLK : boolean := (CYCLONE_RX_STYLE = false) and (CYCLONEII_RX_STYLE = false);
     constant IS_ADDING_EXTRA_LATENCY : boolean := (CYCLONE_RX_STYLE = true) or (CYCLONEII_RX_STYLE = true) or (CYCLONEIII_RX_STYLE = true);
     constant CLK_ENA_PHASE_SHIFT : string := get_clk_ena_phase_shift(inclock_data_alignment);
+    constant use_dpa_calibration : boolean := ((ARRIAII_RX_STYLE = true) and (enable_dpa_calibration = "ON"));
 
 -- TYPE DECLARATION
     type CHANNEL_CNT  is array (number_of_channels-1 downto 0) of integer;
@@ -30752,7 +31339,8 @@ end;
             enable_dpa_align_to_rising_edge_only  : string  := "OFF";
             enable_dpa_initial_phase_selection    : string  := "OFF";
             dpa_initial_phase_value     :natural  := 0;
-            registered_output           : string  := "ON" );
+            registered_output           : string  := "ON";
+            use_dpa_calibration         : boolean := false );
 
         port (
             rx_in                 : in std_logic_vector(number_of_channels-1 downto 0); --Required port
@@ -30766,6 +31354,8 @@ end;
             rx_fifo_reset         : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
             rx_channel_data_align : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
             rx_cda_reset          : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
+            rx_locked             : in std_logic := '1';
+            rx_dpa_lock_reset     : in std_logic_vector(number_of_channels-1 downto 0) := (others => '0');
             rx_out                : out std_logic_vector(deserialization_factor*number_of_channels -1 downto 0);
             rx_dpa_locked         : out std_logic_vector(number_of_channels-1 downto 0);
             rx_cda_max            : out std_logic_vector(number_of_channels-1 downto 0);
@@ -30895,6 +31485,7 @@ begin
                     else stratixiii_clock(0);
 
     stratixiii_slowclk <= '0' when (STRATIXIII_RX_STYLE = false) or (implement_in_les = "ON")
+                    else rx_syncclock when (use_external_pll = "ON")
                     else stratixiii_clock(2);
 
     stratixiii_enable  <= '0' when (STRATIXIII_RX_STYLE = false) or (implement_in_les = "ON")
@@ -30950,14 +31541,14 @@ begin
                     else '0';
                     
     flvds_rx_data_align <= rx_channel_data_align when ((port_rx_channel_data_align = "PORT_USED") or
-                                 ((port_rx_channel_data_align = "PORT_CONNECTIVITY") and
-                                 (rx_channel_data_align /= temp_z)))
+                                ((port_rx_channel_data_align = "PORT_CONNECTIVITY") and
+                                (rx_channel_data_align /= temp_z)))
                     else (others => rx_data_align_wire ) when (port_rx_data_align /= "PORT_UNUSED")
                     else (others => '0');
 
     flvds_rx_cda_reset <= rx_cda_reset when ((port_rx_channel_data_align = "PORT_USED") or
-                                 ((port_rx_channel_data_align = "PORT_CONNECTIVITY") and
-                                 (rx_channel_data_align /= temp_z)))
+                                ((port_rx_channel_data_align = "PORT_CONNECTIVITY") and
+                                (rx_channel_data_align /= temp_z)))
                     else (others => rx_data_align_reset ) when (port_rx_data_align /= "PORT_UNUSED")
                     else (others => '0');
 
@@ -31297,7 +31888,8 @@ begin
                     enable_dpa_align_to_rising_edge_only  => enable_dpa_align_to_rising_edge_only,
                     enable_dpa_initial_phase_selection    => enable_dpa_initial_phase_selection,
                     dpa_initial_phase_value     => dpa_initial_phase_value,
-                    registered_output           => registered_output )
+                    registered_output           => registered_output, 
+                    use_dpa_calibration         => use_dpa_calibration )
                 port map (
                     rx_in                 => rx_in,
                     rx_fastclk            => stratixiii_fastclk,
@@ -31318,15 +31910,6 @@ begin
 
 
 -- PROCESS DECLARATION
-    -- Check pll_areset for invalid input
-    PLL_ARESET_CHECK : process(pll_areset)
-    begin
-        if(pll_areset = 'U') then
-            ASSERT FALSE
-            REPORT  "'U' is NOT a valid input signal for pll_areset port!"
-            SEVERITY ERROR;
-        end if;
-    end process;
 
     STRATIXII_FCLK : process (rx_pll_sclkout0)
     begin
@@ -31422,8 +32005,13 @@ begin
             begin
                 if (rx_inclock'event and (rx_inclock = '1')) then
                     for i in 0 to number_of_channels -1 loop
-                        rx_ddio_in((i*2)) <= rx_in(i);
-                        rx_ddio_in((i*2)+1) <= datain_latched(i);
+                        if (CYCLONEIII_RX_STYLE = true) then
+                            rx_ddio_in((i*2)+1) <= rx_in(i);
+                            rx_ddio_in((i*2)) <= datain_latched(i);
+                        else
+                            rx_ddio_in((i*2)) <= rx_in(i);
+                            rx_ddio_in((i*2)+1) <= datain_latched(i);
+                        end if;
                     end loop;
                 -- falling edge of inclock
                 elsif (rx_inclock'event and (rx_inclock = '0')) then
@@ -33394,8 +33982,8 @@ architecture behavior of altlvds_tx is
 
     constant BYPASS_NEEDED      : boolean := (outclock_divide_by = 1);
 
-    constant INVERT_CLOCK_NEEDED       : boolean := (outclock_alignment = "180_DEGREES") or
-                                                    (outclock_alignment = "CENTER_ALIGNED");
+    constant INVERT_CLOCK_NEEDED       : boolean := ((outclock_alignment = "180_DEGREES") or
+                                                    (outclock_alignment = "CENTER_ALIGNED")) and  (use_external_pll = "ON");
 
     constant FALLING_CLOCK_EDGE_NEEDED : boolean := (outclock_phase_shift >= get_phase_delay("180_DEGREES")) or
                                                     (outclock_alignment = "180_DEGREES") or
@@ -34410,15 +34998,6 @@ begin
         wait;
     end process; -- INITIAL process
 
-    -- Check pll_areset for invalid input
-    PLL_ARESET_CHECK : process(pll_areset)
-    begin
-        if(pll_areset = 'U') then
-            ASSERT FALSE
-            REPORT  "'U' is NOT a valid input signal for pll_areset port!"
-            SEVERITY ERROR;
-        end if;
-    end process;
 
     DDIO_OUT_RECEIVE : process (tx_inclock, tx_in_int)
     begin
@@ -34672,7 +35251,7 @@ entity altcam is
     type lpm_memory is array
         (numwords-1 downto 0) of std_logic_vector(width-1 downto 0);
 
-    function hex_to_stdlogicarray (s: string) return lpm_memory is
+    impure function hex_to_stdlogicarray (s: string) return lpm_memory is
     variable mem_data : lpm_memory;
     variable mem_data_word : std_logic_vector(width-1 downto 0);
     variable i : integer := 0;
@@ -37104,13 +37683,13 @@ entity altdpram is
         data       : in std_logic_vector(width-1 downto 0);
         wraddress  : in std_logic_vector(widthad-1 downto 0);
         wraddressstall  : in std_logic := '0';
-        inclock    : in std_logic := '0';
+        inclock    : in std_logic := '1';
         inclocken  : in std_logic := '1';
         rden       : in std_logic := '1';
         rdaddress  : in std_logic_vector(widthad-1 downto 0);
         rdaddressstall  : in std_logic := '0';
         byteena         : in std_logic_vector(width_byteena-1 downto 0) := (others => '1');
-        outclock   : in std_logic := '0';
+        outclock   : in std_logic := '1';
         outclocken : in std_logic := '1';
         aclr       : in std_logic := '0';
         q          : out std_logic_vector(width-1 downto 0) );
@@ -37228,7 +37807,7 @@ begin
     variable init : boolean := false;
     begin
         if (not init) then
-            if ((((lpm_hint = "USE_EAB=ON") and (use_eab /= "OFF")) or (use_eab = "ON")) or (FEATURE_FAMILY_STRATIXIII(intended_device_family))) then
+            if ((((lpm_hint = "USE_EAB=ON") and (use_eab /= "OFF")) or (use_eab = "ON")) ) then
                 if (wrcontrol_reg = "INCLOCK") then
                     write_at_low_clock <= true;
                 end if;
@@ -37477,7 +38056,9 @@ begin
             i_byteena_mask_reg_hi <= m_byteena_mask_reg;
             i_byteena_mask_reg_x_hi <= m_byteena_mask_reg_x;
 
-            first_clk_rising_edge <= false;
+            if (inclocken = '1') then
+                first_clk_rising_edge <= false;
+            end if;
         elsif falling_edge(inclock) then
         
             i_byteena_mask_reg_out_lo <= i_byteena_mask_reg_out_hi;
@@ -38248,7 +38829,7 @@ entity altsyncram is
         intended_device_family             :  string  := "Stratix";
         power_up_uninitialized             :  string  := "FALSE";
         implement_in_les                   :  string  := "OFF";
-
+        sim_show_memory_data_in_port_b_layout :  string  := "OFF";
         lpm_hint                           :  string  := "UNUSED";
         lpm_type                           :  string  := "altsyncram"
         );
@@ -38346,6 +38927,7 @@ entity altsyncram is
         variable m_checksum : string(2 downto 1);
         variable m_startadd : string(4 downto 1);
         variable m_istartadd : integer := 0;
+        variable m_istartadd_pre : integer := 0;
         variable m_byte_int : integer := 0;
         variable m_check_sum_vec : std_logic_vector(7 downto 0);
         variable m_check_sum_vec_tmp : std_logic_vector(7 downto 0);
@@ -38362,6 +38944,9 @@ entity altsyncram is
         variable get_memory_content : boolean := false;
         variable get_start_Address : boolean := false;
         variable get_end_Address : boolean := false;
+        variable m_divide_factor : integer := 1;
+        variable first_normal_record : boolean := true;
+        variable is_word_address_format : boolean := false;
         file m_mem_data_file : text;
 
         begin
@@ -38407,7 +38992,7 @@ entity altsyncram is
                         report "[Line "& INT_TO_STR_RAM(m_line_no) & "]:Illegal Intel Hex Format! "
                         severity error;
                     end if;
-    
+                    m_istartadd_pre := m_istartadd;
                     m_istartadd := HEX_STR_TO_INT(m_startadd);
                     m_addr(2) := m_startadd(4);
                     m_addr(1) := m_startadd(3);
@@ -38443,6 +39028,16 @@ entity altsyncram is
                             m_num_of_bytes := (width_b + 7) / 8;
                         end if;
     
+                        if ((first_normal_record = false) and (m_istartadd /= m_num_of_bytes)) then
+                            is_word_address_format := true;
+                        end if;
+                                
+                        first_normal_record := false;
+
+                        if ((m_istartadd = m_num_of_bytes) and (is_word_address_format = false)) then                        
+                            m_divide_factor := m_num_of_bytes;
+                        end if;
+
                         while (i < m_byte_int) loop
     
                             if (use_a) then
@@ -38482,10 +39077,10 @@ entity altsyncram is
                                 i := i + 1;
                             end loop;
         
-                            if ((use_a) and ((m_ibase + m_istartadd) <= (2 ** widthad_a - 1)))then
-                                mem_data_a(m_ibase + m_istartadd) := m_mem_data_word_a;
-                            elsif ((m_ibase + m_istartadd) <= (2 ** widthad_b - 1)) then
-                                mem_data_b(m_ibase + m_istartadd) := m_mem_data_word_b;
+                            if ((use_a) and ((m_ibase + m_istartadd) / m_divide_factor <= (2 ** widthad_a - 1)))then
+                                mem_data_a((m_ibase + m_istartadd) / m_divide_factor) := m_mem_data_word_a;
+                            elsif ((m_ibase + m_istartadd) / m_divide_factor <= (2 ** widthad_b - 1)) then
+                                mem_data_b((m_ibase + m_istartadd) / m_divide_factor) := m_mem_data_word_b;
                             else
                                 assert false
                                 report "[Line "& INT_TO_STR_RAM(m_line_no) & "]: Unable to initialized memory with this data record since the specified address is out of valid address range!"
@@ -39207,6 +39802,9 @@ architecture translated of altsyncram is
     
     constant rden_reg_initial_value : std_logic := get_rden_reg_initial_value(intended_device_family);
     
+    constant enable_mem_data_b_reading : boolean :=  (sim_show_memory_data_in_port_b_layout = "ON") and ((operation_mode = "BIDIR_DUAL_PORT") or (operation_mode = "DUAL_PORT"));
+
+    
     constant all_z : std_logic_vector(width_byteena_b-1 downto 0) := (others => 'Z');
     
 
@@ -39765,23 +40363,35 @@ begin
     IFG171: if ((outdata_reg_a = "CLOCK0") and (clock_enable_output_a = "NORMAL")) generate
         i_outdata_clken_a <= clocken0;
     end generate IFG171;
-    IFG172: if  (clock_enable_output_a = "BYPASS") generate
+    IFG172b: if ((outdata_reg_a = "CLOCK0") and (clock_enable_output_a = "ALTERNATE")) generate
+        i_outdata_clken_a <= clocken2;
+    end generate IFG172b;
+    IFG172a: if  (clock_enable_output_a = "BYPASS") generate
         i_outdata_clken_a <= '1';
-    end generate IFG172;
+    end generate IFG172a;
     IFG173 : if ((outdata_reg_a = "CLOCK1") and (clock_enable_output_a = "NORMAL")) generate
         i_outdata_clken_a <= clocken1;
     end generate IFG173;
+    IFG173a : if ((outdata_reg_a = "CLOCK1") and (clock_enable_output_a = "ALTERNATE")) generate
+        i_outdata_clken_a <= clocken3;
+    end generate IFG173a;
 
     -- for data out b
     IFG17: if ((outdata_reg_b = "CLOCK0") and (clock_enable_output_b = "NORMAL")) generate
         i_outdata_clken_b <= clocken0;
     end generate IFG17;
+    IFG17b: if  ((outdata_reg_b = "CLOCK0") and (clock_enable_output_b = "ALTERNATE")) generate
+        i_outdata_clken_b <= clocken2;
+    end generate IFG17b;
     IFG17a: if  (clock_enable_output_b = "BYPASS") generate
         i_outdata_clken_b <= '1';
     end generate IFG17a;
     IFG18 : if ((outdata_reg_b = "CLOCK1") and (clock_enable_output_b = "NORMAL")) generate
         i_outdata_clken_b <= clocken1;
     end generate IFG18;
+    IFG18a : if ((outdata_reg_b = "CLOCK1") and (clock_enable_output_b = "ALTERNATE")) generate
+        i_outdata_clken_b <= clocken3;
+    end generate IFG18a;
 
     -- for core clock a
     IFG50a: if ((FEATURE_FAMILY_HAS_STRATIXIII_STYLE_RAM(intended_device_family)) and (clock_enable_core_a = "USE_INPUT_CLKEN")) generate
@@ -39996,16 +40606,28 @@ begin
                         (i_ram_block_type = "MEGARAM") or (i_ram_block_type = "M-RAM") or 
                         (power_up_uninitialized = "TRUE")) and 
                         (implement_in_les = "OFF") and
-                        not (FEATURE_FAMILY_HAS_STRATIXIII_STYLE_RAM(intended_device_family))) then
+                        not ((FEATURE_FAMILY_HAS_STRATIXIII_STYLE_RAM(intended_device_family)) and (power_up_uninitialized /= "TRUE"))) then
                         
                         for i in 0 to (2**widthad_a - 1) loop
                             m_mem_data_a(i) := (others => 'X');
                         end loop;
+
+                        if (enable_mem_data_b_reading = true) then
+                            for i in 0 to (2**widthad_b - 1) loop
+                                m_mem_data_b(i) := (others => 'X');
+                            end loop;
+                        end if;
                     else
                     
                         for i in 0 to (2**widthad_a - 1) loop
                             m_mem_data_a(i) := (others => '0');
                         end loop;
+
+                        if (enable_mem_data_b_reading = true) then
+                            for i in 0 to (2**widthad_b - 1) loop
+                                m_mem_data_b(i) := (others => '0');
+                            end loop;
+                        end if;
                     end if;
 
                 end if;
@@ -40022,10 +40644,22 @@ begin
                     for i in 0 to (2 ** widthad_a - 1) loop
                         m_mem_data_a(i) := (others => 'X');
                     end loop;
+
+                    if (enable_mem_data_b_reading = true) then
+                        for i in 0 to (2**widthad_b - 1) loop
+                            m_mem_data_b(i) := (others => 'X');
+                        end loop;
+                    end if;
                 else
                     for i in 0 to (2 ** widthad_a - 1) loop
                         m_mem_data_a(i) := (others => '0');
                     end loop;
+
+                    if (enable_mem_data_b_reading = true) then
+                        for i in 0 to (2**widthad_b - 1) loop
+                            m_mem_data_b(i) := (others => '0');
+                        end loop;
+                    end if;
                 end if;
 
                 if (init_file_layout = "UNUSED") then
@@ -40054,6 +40688,16 @@ begin
                     end loop;
                 else
                     read_my_memory (true, m_mem_data_a, m_mem_data_b);
+
+                    if (enable_mem_data_b_reading = true) then
+                        for i in 0 to (i_numwords_a * width_a - 1) loop
+                            m_temp_wa := m_mem_data_a(i / width_a);
+                            m_temp_wb2 := m_temp_wa((i)mod width_a);
+                            m_temp_wb := m_mem_data_b(i / width_b);
+                            m_temp_wb(i mod width_b) := m_temp_wb2;
+                            m_mem_data_b(i / width_b) := m_temp_wb;
+                        end loop;
+                    end if;
                 end if;
             end if;
             
@@ -40089,10 +40733,26 @@ begin
                             for i in 0 to (i_numwords_a - 1) loop
                                 m_mem_data_a(i) := (others => 'X');
                             end loop;
+
+                            if (enable_mem_data_b_reading = true) then
+                                for i in 0 to (i_numwords_b - 1) loop
+                                    m_mem_data_b(i) := (others => 'X');
+                                end loop;
+                            end if;
                         elsif (((i_indata_aclr_a = '1') and (i_data_reg_a /= i_data_zero_a)) or
                                 ((i_byteena_aclr_a = '1') and (i_byteena_mask_reg_a /= i_data_ones_a)) or
                                 ((i_wrcontrol_aclr_a = '1') and (i_wren_reg_a /= '0'))) then
                             m_mem_data_a (conv_integer(unsigned(i_address_reg_a))) := (others => 'X');
+
+                            j := conv_integer(unsigned(i_address_reg_a)) * width_a;
+
+                            if (enable_mem_data_b_reading = true) then
+                                for i in 0 to (width_a - 1) loop
+                                    m_temp_wb := m_mem_data_b((j + i) / width_b);
+                                    m_temp_wb((j + i) mod width_b) := 'X';
+                                    m_mem_data_b((j + i) / width_b) := m_temp_wb;
+                                end loop;
+                            end if;
                         else
                             port_a_bit_count_low := (conv_integer(unsigned(i_address_reg_a)) * width_a);
                             port_b_bit_count_low := (conv_integer(unsigned(i_address_reg_b)) * width_b);
@@ -40112,6 +40772,12 @@ begin
                                     end if;
                                 elsif (i_byteena_mask_reg_a(i) = '1') then
                                     m_temp_wa(i) := i_data_reg_a(i);
+                                end if;
+
+                                if (enable_mem_data_b_reading = true) then
+                                    m_temp_wb := m_mem_data_b(port_a_bit_count_high / width_b);
+                                    m_temp_wb(port_a_bit_count_high mod width_b)  := m_temp_wa(i);
+                                    m_mem_data_b(port_a_bit_count_high / width_b) := m_temp_wb;
                                 end if;
                             end loop;
                             
@@ -40143,6 +40809,12 @@ begin
                         for i in 0 to (i_numwords_a - 1) loop
                             m_mem_data_a(i) := (others => 'X');
                         end loop;
+
+                        if (enable_mem_data_b_reading = true) then
+                            for i in 0 to (i_numwords_b - 1) loop
+                                m_mem_data_b(i) := (others => 'X');
+                            end loop;
+                        end if;
                     elsif (((i_byteena_aclr_b = '1') and (i_byteena_mask_reg_b /= i_data_ones_b)) or
                             ((i_indata_aclr_b = '1') and (i_data_reg_b /= i_data_zero_b)) or
                             ((i_wrcontrol_aclr_b = '1') and (i_wren_reg_b /= '0'))) then
@@ -40159,6 +40831,9 @@ begin
                             end loop;
                         end if;
 
+                        if (enable_mem_data_b_reading = true) then
+                            m_mem_data_b(conv_integer(unsigned(i_address_reg_b))) := (others => 'X');
+                        end if;
                     else
 
                             port_b_bit_count_low := (conv_integer(unsigned(i_address_reg_b)) * width_b);
@@ -40179,8 +40854,12 @@ begin
                                 m_mem_data_a((port_b_bit_count_high) / width_a) := m_temp_wa2;
                                 
                                 m_current_written_data_b(i) := m_temp_wa2((port_b_bit_count_high) mod width_a);
+                                m_temp_wb(i) := m_temp_wa2((port_b_bit_count_high) mod width_a);
                             end loop;
 
+                        if (enable_mem_data_b_reading = true) then
+                            m_mem_data_b (conv_integer(unsigned(i_address_reg_b))) := m_temp_wb;
+                        end if;
                         write_by_b := write_by_b + 1;
                     end if; -- end of choice selection
                 end if; -- i_wren_reg_b = '1'
@@ -41180,18 +41859,18 @@ begin
                 if (i_q_tmp2_b'event or good_to_go_b'event or i_rden_reg_b'event or i_wren_reg_b'event or
                     i_data_reg_b'event or i_byteena_mask_reg_b_out'event or i_address_reg_b'event or
                     i_original_data_b'event or i_force_reread_signal_b'event) then
-            
-                    if ((conv_integer(unsigned(i_address_reg_b)) >= i_numwords_b)) then
-                        if ((i_wren_reg_b = '1') and (i_core_clocken_b = '1')) then
-                            i_q_tmp_b <= i_q_tmp2_b;
+                    i_q_tmp_b <= i_q_tmp2_b;
+                    if (((i_rden_reg_b = '1') and (i_force_reread_b1_flag = '0')) or (i_is_lutram)) then
+                        if ((conv_integer(unsigned(i_address_reg_b)) >= i_numwords_b)) then
+                            if ((i_wren_reg_b = '1') and (i_core_clocken_b = '1')) then
+                                i_q_tmp_b <= i_q_tmp2_b;
+                            else
+                                i_q_tmp_b <= (others => 'X');
+                            end if;
+                            assert false
+                            report "Address pointed at port B is out of bound! "
+                            severity warning;
                         else
-                            i_q_tmp_b <= (others => 'X');
-                        end if;
-                        assert false
-                        report "Address pointed at port B is out of bound! "
-                        severity warning;
-                    else
-                        if (((i_rden_reg_b = '1') and (i_force_reread_b1_flag = '0')) or (i_is_lutram)) then
                             i_q_tmp_b <= i_q_tmp2_b;
                         end if;
                     end if;
@@ -45028,6 +45707,7 @@ type lpm_memory is array (2**lpm_widthu-1 downto 0) of std_logic_vector(lpm_widt
 constant ZEROS    : std_logic_vector(lpm_width-1 downto 0)     := (OTHERS => '0');
 constant NIL      : std_logic_vector(2**lpm_widthu-1 downto 0) := (OTHERS => '0');
 constant UNKNOWNS : std_logic_vector(lpm_width-1 downto 0)     := (OTHERS => 'X');
+constant USEDW_UNKNOWNS : std_logic_vector(lpm_widthu-1 downto 0)     := (OTHERS => 'X');
 
 -- SIGNAL DECLARATION
 signal i_count_id          : integer                                := 0;
@@ -45069,7 +45749,6 @@ begin
     variable showahead_area         : boolean := (lpm_showahead = "ON" and add_ram_output_register = "OFF");
     variable showahead_speed        : boolean := (lpm_showahead = "ON" and add_ram_output_register = "ON");
     variable legacy_speed           : boolean := (lpm_showahead = "OFF" and add_ram_output_register = "ON");
-
     begin
         if (need_init) then
             if ((lpm_showahead /= "ON") and (lpm_showahead /= "OFF")) then
@@ -45103,7 +45782,6 @@ begin
                 REPORT "Error! ADD_RAM_OUTPUT_REGISTER must be ON or OFF."
                 SEVERITY ERROR;
             end if;   
-
             for i in 0 to (lpm_widthu - 1) loop
                 if (stratix_family)
                 then
@@ -45240,7 +45918,7 @@ begin
             -- READ operation only
                 if (valid_rreq)
                 then
-                    if (not i_set_q_to_x = '1') 
+                    if (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) 
                     then
                         if (not valid_wreq)
                         then
@@ -45305,8 +45983,10 @@ begin
                                     i_tmp_q <= ZEROS;
                                 end if;
                             else
-                                i_tmp_q <= UNKNOWNS;
                                 i_set_q_to_x_by_empty <= '1';
+                                ASSERT FALSE
+                                REPORT "Warning : Underflow occurred! Fifo output is unknown until the next reset is asserted"
+                                SEVERITY WARNING;
                             end if;
                             
                         else
@@ -45475,105 +46155,102 @@ begin
                 -- WRITE operation only
                 if (valid_wreq)
                 then
-                    if ((overflow_checking = "OFF" and full_flag and not valid_rreq) or (i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))
+                    if (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) 
                     then
-                        i_tmp_q <= UNKNOWNS;
-                        i_set_q_to_x <= '1';
-
-                        if (i_count_id >= max_widthu)
+                        if ((overflow_checking = "OFF") and full_flag)
                         then
-                            i_count_id <= 0;
+                            i_set_q_to_x <= '1';
+                            ASSERT FALSE
+                            REPORT "Warning : Overflow occurred! Fifo output is unknown until the next reset is asserted"
+                            SEVERITY WARNING;
                         else
-                            i_count_id <= i_count_id + 1; 
-                        end if;
-                    else
-                        tmp_data := data;
-                        write_flag := true;
-
-                        if (not((use_eab = "ON") and (stratix_family) and (showahead_speed or showahead_area or legacy_speed)))
-                        then
-                            i_empty_flag <= '0'; 
-                        else
-                            i_empty_latency1 <= '0';
-                        end if; 
-
-                        if (not valid_rreq)
-                        then
-                            i_wrt_count <= i_wrt_count + 1; 
-                        end if;
-
-                        if (not valid_rreq)
-                        then
-                            if (i_count_id >= max_widthu)
+                            tmp_data := data;
+                            write_flag := true;
+    
+                            if (not((use_eab = "ON") and (stratix_family) and (showahead_speed or showahead_area or legacy_speed)))
                             then
-                                i_count_id <= 0;
+                                i_empty_flag <= '0'; 
                             else
-                                i_count_id <= i_count_id + 1; 
-                            end if;
-                        else
-                            if (allow_rwcycle_when_full = "OFF")
-                            then
-                                i_full_flag <= '0';
-                            end if;
-                        end if;
-
-                        if (not(stratix_family) or(stratix_family and not(showahead_speed or showahead_area or legacy_speed)))
-                        then
+                                i_empty_latency1 <= '0';
+                            end if; 
+    
                             if (not valid_rreq)
                             then
-                                if ((i_count_id = numwords_minus_one) and (i_empty_flag = '0'))
-                                then
-                                    i_full_flag <= '1';
-                                    full_flag := true;
-                                end if;
+                                i_wrt_count <= i_wrt_count + 1; 
                             end if;
-                        else
+    
                             if (not valid_rreq)
                             then
-                                if (i_count_id = numwords_minus_one)
-                                then    
-                                    i_full_flag <= '1';
-                                    full_flag := true;
-                                end if;
-                            end if;
-                        end if;
-
-                        if (lpm_showahead = "ON")
-                        then
-                            if ((use_eab = "ON") and (stratix_family) and (showahead_speed or showahead_area))
-                            then
-                                i_write_latency1 <= i_write_id;
-                                
-                                if (i_write_id <= max_widthu)
+                                if (i_count_id >= max_widthu)
                                 then
-                                    i_data_shown(i_write_id) <= '1';
-                                    i_data_ready(i_write_id) <= 'X';
-                                end if;
-                            else
-                                if ((use_eab = "OFF") and stratix_family and (i_count_id = 0) and (not full_flag))
-                                then
-                                    i_tmp_q <= data;
+                                    i_count_id <= 0;
                                 else
-                                    if ((not i_empty_flag = '0') and (not valid_rreq))
+                                    i_count_id <= i_count_id + 1; 
+                                end if;
+                            else
+                                if (allow_rwcycle_when_full = "OFF")
+                                then
+                                    i_full_flag <= '0';
+                                end if;
+                            end if;
+    
+                            if (not(stratix_family) or(stratix_family and not(showahead_speed or showahead_area or legacy_speed)))
+                            then
+                                if (not valid_rreq)
+                                then
+                                    if ((i_count_id = numwords_minus_one) and (i_empty_flag = '0'))
                                     then
-                                        i_tmp_q <= mem_data(i_read_id);
+                                        i_full_flag <= '1';
+                                        full_flag := true;
+                                    end if;
+                                end if;
+                            else
+                                if (not valid_rreq)
+                                then
+                                    if (i_count_id = numwords_minus_one)
+                                    then    
+                                        i_full_flag <= '1';
+                                        full_flag := true;
                                     end if;
                                 end if;
                             end if;
-                        else
-                            if ((use_eab = "ON") and stratix_family and legacy_speed) 
+    
+                            if (lpm_showahead = "ON")
                             then
-                                i_write_latency1 <= i_write_id;
-                                
-                                if (i_write_id <= max_widthu)
+                                if ((use_eab = "ON") and (stratix_family) and (showahead_speed or showahead_area))
                                 then
-                                    i_data_shown(i_write_id) <= '1';
-                                    i_data_ready(i_write_id) <= 'X';
+                                    i_write_latency1 <= i_write_id;
+                                    
+                                    if (i_write_id <= max_widthu)
+                                    then
+                                        i_data_shown(i_write_id) <= '1';
+                                        i_data_ready(i_write_id) <= 'X';
+                                    end if;
+                                else
+                                    if ((use_eab = "OFF") and stratix_family and (i_count_id = 0) and (not full_flag))
+                                    then
+                                        i_tmp_q <= data;
+                                    else
+                                        if ((not i_empty_flag = '0') and (not valid_rreq))
+                                        then
+                                            i_tmp_q <= mem_data(i_read_id);
+                                        end if;
+                                    end if;
+                                end if;
+                            else
+                                if ((use_eab = "ON") and stratix_family and legacy_speed) 
+                                then
+                                    i_write_latency1 <= i_write_id;
+                                    
+                                    if (i_write_id <= max_widthu)
+                                    then
+                                        i_data_shown(i_write_id) <= '1';
+                                        i_data_ready(i_write_id) <= 'X';
+                                    end if;
                                 end if;
                             end if;
                         end if;
                     end if;
-                    
                 end if;
 
                 if (almost_full_value = 0)
@@ -45820,12 +46497,12 @@ begin
 
     end process;
 
-    q <= i_tmp_q;
-    full <= i_full_flag;
-    empty <= i_empty_flag;
-    almost_full <= i_almost_full_flag;
-    almost_empty <= i_almost_empty_flag;
-    usedw <= conv_std_logic_vector(i_count_id, lpm_widthu);
+    q <= i_tmp_q when (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) else UNKNOWNS;
+    full <= i_full_flag when (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) else 'X';
+    empty <= i_empty_flag when (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) else 'X';
+    almost_full <= i_almost_full_flag when (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) else 'X';
+    almost_empty <= i_almost_empty_flag when (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) else 'X';
+    usedw <= conv_std_logic_vector(i_count_id, lpm_widthu) when (not ((i_set_q_to_x = '1') or (i_set_q_to_x_by_empty = '1'))) else USEDW_UNKNOWNS ;
 
 end behavior; -- scfifo
 -- END OF ARCHITECTURE 
@@ -46188,8 +46865,8 @@ entity DCFIFO_ASYNC is
     lpm_numwords            : natural;
     delay_rdusedw           : natural := 1;
     delay_wrusedw           : natural := 1;
-    rdsync_delaypipe        : natural := 3;
-    wrsync_delaypipe        : natural := 3;
+    rdsync_delaypipe        : natural := 0;
+    wrsync_delaypipe        : natural := 0;
     intended_device_family  : string := "APEX20KE";
     lpm_showahead           : string := "OFF";
     underflow_checking      : string := "ON";
@@ -47180,8 +47857,8 @@ entity DCFIFO_LOW_LATENCY is
     lpm_numwords            : natural;
     delay_rdusedw           : natural := 2;
     delay_wrusedw           : natural := 2;
-    rdsync_delaypipe        : natural := 1;
-    wrsync_delaypipe        : natural := 1;
+    rdsync_delaypipe        : natural := 0;
+    wrsync_delaypipe        : natural := 0;
     intended_device_family  : string := "Stratix";
     lpm_showahead           : string := "OFF";
     underflow_checking      : string := "ON";
@@ -47872,8 +48549,8 @@ entity DCFIFO_MIXED_WIDTHS is
     lpm_numwords            : natural;
     delay_rdusedw           : natural := 1;
     delay_wrusedw           : natural := 1;
-    rdsync_delaypipe        : natural := 3;
-    wrsync_delaypipe        : natural := 3;
+    rdsync_delaypipe        : natural := 0;
+    wrsync_delaypipe        : natural := 0;
     intended_device_family  : string := "APEX20KE";
     lpm_showahead           : string := "OFF";
     underflow_checking      : string := "ON";
@@ -47923,6 +48600,36 @@ architecture behavior of DCFIFO_MIXED_WIDTHS is
         end if;
     end;
     
+    function get_rdsync_delaypipe(i_rdsync_delaypipe : natural) return natural is
+    begin
+        if (i_rdsync_delaypipe = 0) then
+            
+            if ((FEATURE_FAMILY_HAS_STRATIXII_STYLE_RAM (intended_device_family) or FEATURE_FAMILY_HAS_STRATIXIII_STYLE_RAM (intended_device_family))
+                and (clocks_are_synchronized = "FALSE")) then
+                return 4;
+            else
+                return 3;
+            end if;
+        else
+            return i_rdsync_delaypipe;
+        end if;
+    end;
+
+    function get_wrsync_delaypipe(i_wrsync_delaypipe : natural) return natural is
+    begin
+       if (i_wrsync_delaypipe = 0) then
+
+            if ((FEATURE_FAMILY_HAS_STRATIXII_STYLE_RAM (intended_device_family) or FEATURE_FAMILY_HAS_STRATIXIII_STYLE_RAM (intended_device_family))
+                and (clocks_are_synchronized = "FALSE")) then
+                return 4;
+            else
+                return 3;
+            end if;
+        else
+            return i_wrsync_delaypipe;
+        end if;
+    end;
+    
 
 -- CONSTANT DECLARATION
 constant USE_LOW_LATENCY_FIFO : boolean := (FEATURE_FAMILY_HAS_STRATIXII_STYLE_RAM (intended_device_family) and
@@ -47932,9 +48639,11 @@ constant USE_LOW_LATENCY_FIFO : boolean := (FEATURE_FAMILY_HAS_STRATIXII_STYLE_R
                                                 (((lpm_showahead = "ON") and (add_ram_output_register = "OFF")) or
                                                 (clocks_are_synchronized = "FALSE_LOW_LATENCY")));
 -- CONSTANT DECLARATION
+constant READ_SIDE_SYNCHRONIZERS : natural := get_rdsync_delaypipe(rdsync_delaypipe);
+constant WRITE_SIDE_SYNCHRONIZERS : natural := get_wrsync_delaypipe(wrsync_delaypipe);
 -- For low-latency FIFO, reduce the default number of synchronization stages by 2, but need at least 1 stage
-constant LOW_RDSYNC_DELAYPIPE : natural := dcfifo_max((rdsync_delaypipe - 2), 1);
-constant LOW_WRSYNC_DELAYPIPE : natural := dcfifo_max((wrsync_delaypipe - 2), 1);
+constant LOW_RDSYNC_DELAYPIPE : natural := dcfifo_max((READ_SIDE_SYNCHRONIZERS - 2), 1);
+constant LOW_WRSYNC_DELAYPIPE : natural := dcfifo_max((WRITE_SIDE_SYNCHRONIZERS - 2), 1);
 constant WIDTH_R              : natural := get_lpm_width_r(lpm_width, lpm_width_r);
 constant WIDTHU_R             : natural := get_lpm_widthu_r(lpm_widthu, lpm_widthu_r);
 
@@ -47970,8 +48679,8 @@ component DCFIFO_ASYNC
         lpm_numwords            : natural;
         delay_rdusedw           : natural := 1;
         delay_wrusedw           : natural := 1;
-        rdsync_delaypipe        : natural := 3;
-        wrsync_delaypipe        : natural := 3;
+        rdsync_delaypipe        : natural := 0;
+        wrsync_delaypipe        : natural := 0;
         intended_device_family  : string := "APEX20KE";
         lpm_showahead           : string := "OFF";
         underflow_checking      : string := "ON";
@@ -48030,8 +48739,8 @@ component DCFIFO_LOW_LATENCY
         lpm_numwords            : natural;
         delay_rdusedw           : natural := 2;
         delay_wrusedw           : natural := 2;
-        rdsync_delaypipe        : natural := 1;
-        wrsync_delaypipe        : natural := 1;
+        rdsync_delaypipe        : natural := 0;
+        wrsync_delaypipe        : natural := 0;
         intended_device_family  : string := "Stratix";
         lpm_showahead           : string := "OFF";
         underflow_checking      : string := "ON";
@@ -48064,8 +48773,8 @@ begin
         lpm_numwords => lpm_numwords,
         delay_rdusedw => delay_rdusedw,
         delay_wrusedw => delay_wrusedw,
-        rdsync_delaypipe => rdsync_delaypipe,
-        wrsync_delaypipe => wrsync_delaypipe,
+        rdsync_delaypipe => READ_SIDE_SYNCHRONIZERS,
+        wrsync_delaypipe => WRITE_SIDE_SYNCHRONIZERS,
         intended_device_family => intended_device_family,
         lpm_showahead => lpm_showahead,
         underflow_checking => underflow_checking,
@@ -48113,38 +48822,43 @@ begin
         wrusedw => i_wrusedw_s,
         q => i_q_s);
 
-    LOWLATENCY : DCFIFO_LOW_LATENCY
-    generic map (
-        lpm_width => lpm_width,
-        lpm_widthu => lpm_widthu,
-        lpm_width_r => WIDTH_R,
-        lpm_widthu_r => WIDTHU_R,
-        lpm_numwords => lpm_numwords,
-        delay_rdusedw => delay_rdusedw,
-        delay_wrusedw => delay_wrusedw,
-        rdsync_delaypipe => LOW_RDSYNC_DELAYPIPE,
-        wrsync_delaypipe => LOW_WRSYNC_DELAYPIPE,
-        intended_device_family => intended_device_family,
-        lpm_showahead => lpm_showahead,
-        underflow_checking => underflow_checking,
-        overflow_checking => overflow_checking,
-        add_usedw_msb_bit => add_usedw_msb_bit,
-        write_aclr_synch => write_aclr_synch,
-        lpm_hint => lpm_hint)
-    port map (
-        data => data,
-        rdclk => rdclk,
-        wrclk => wrclk,
-        aclr => aclr,
-        rdreq => rdreq,
-        wrreq => wrreq,
-        rdfull => i_rdfull_l,
-        wrfull => i_wrfull_l,
-        rdempty => i_rdempty_l,
-        wrempty => i_wrempty_l,
-        rdusedw => i_rdusedw_l,
-        wrusedw => i_wrusedw_l,
-        q => i_q_l);
+    LOWLATENCY_FIFO:
+    if (USE_LOW_LATENCY_FIFO = true)  generate
+
+        LOWLATENCY : DCFIFO_LOW_LATENCY
+        generic map (
+            lpm_width => lpm_width,
+            lpm_widthu => lpm_widthu,
+            lpm_width_r => WIDTH_R,
+            lpm_widthu_r => WIDTHU_R,
+            lpm_numwords => lpm_numwords,
+            delay_rdusedw => delay_rdusedw,
+            delay_wrusedw => delay_wrusedw,
+            rdsync_delaypipe => LOW_RDSYNC_DELAYPIPE,
+            wrsync_delaypipe => LOW_WRSYNC_DELAYPIPE,
+            intended_device_family => intended_device_family,
+            lpm_showahead => lpm_showahead,
+            underflow_checking => underflow_checking,
+            overflow_checking => overflow_checking,
+            add_usedw_msb_bit => add_usedw_msb_bit,
+            write_aclr_synch => write_aclr_synch,
+            lpm_hint => lpm_hint)
+        port map (
+            data => data,
+            rdclk => rdclk,
+            wrclk => wrclk,
+            aclr => aclr,
+            rdreq => rdreq,
+            wrreq => wrreq,
+            rdfull => i_rdfull_l,
+            wrfull => i_wrfull_l,
+            rdempty => i_rdempty_l,
+            wrempty => i_wrempty_l,
+            rdusedw => i_rdusedw_l,
+            wrusedw => i_wrusedw_l,
+            q => i_q_l);
+        
+    end generate LOWLATENCY_FIFO;
 
     rdfull <=    i_rdfull_l when USE_LOW_LATENCY_FIFO = true
             else i_rdfull_s when clocks_are_synchronized = "TRUE"
@@ -48167,6 +48881,21 @@ begin
     q       <=   i_q_l when USE_LOW_LATENCY_FIFO = true
             else i_q_s when clocks_are_synchronized = "TRUE"
             else i_q_a;
+
+
+-- PROCESS DECLARATION
+
+    INITIAL : process
+    begin
+        if (((wrsync_delaypipe = 0) or (rdsync_delaypipe = 0)) and (clocks_are_synchronized = "FALSE")) then
+            if (FEATURE_FAMILY_HAS_STRATIXII_STYLE_RAM (intended_device_family) or FEATURE_FAMILY_HAS_STRATIXIII_STYLE_RAM (intended_device_family)) then
+                ASSERT FALSE
+                REPORT "Number of metastability protection registers is not specified. Based on the parameter value CLOCKS_ARE_SYNCHRONIZED=FALSE, the synchronization register chain length between read and write clock domains will be 2."
+                SEVERITY WARNING;
+            end if;
+        end if;
+        wait;
+    end process; -- INITIAL process
 
 end behavior; -- DCFIFO_MIXED_WIDTHS
 -- END OF ARCHITECTURE
@@ -48198,8 +48927,8 @@ entity DCFIFO is
     lpm_numwords            : natural;
     delay_rdusedw           : natural := 1;
     delay_wrusedw           : natural := 1;
-    rdsync_delaypipe        : natural := 3;
-    wrsync_delaypipe        : natural := 3;
+    rdsync_delaypipe        : natural := 0;
+    wrsync_delaypipe        : natural := 0;
     intended_device_family  : string := "APEX20KE";
     lpm_showahead           : string := "OFF";
     underflow_checking      : string := "ON";
@@ -48657,6 +49386,3409 @@ begin
     end generate;
 end altsquare_syn; -- altsquare
 -- END OF ARCHITECTURE
+-- START_FILE_HEADER --------------------------------------------------
+-- Filename    : altdq_dqs.vhd
+--
+-- Description : Altdq_dqs VHDL behavioral model
+--
+-- Limitation  : Functional feature only
+--
+-- Author      : fkpang
+--
+-- Copyright (c) Altera Corporation 2008
+-- All rights reserved
+--
+-- END_FILE_HEADER ----------------------------------------------------
+--
+---START_ENTITY_HEADER----------------------------------------------------------
+--
+-- Entity Name      : altdq_dqs
+--
+-- Description      : Altdq_dqs model for Stratix III family
+--
+-- Limitation       :
+--
+---END_ENTITY_HEADER------------------------------------------------------------
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use ieee.vital_timing.all;
+use ieee.vital_primitives.all;
+use std.textio.all;
+use work.ALTERA_COMMON_CONVERSION.all;
+use work.ALTERA_DEVICE_FAMILIES.all;
+
+-- BEGINNING OF ENTITY
+
+-- ENTITY DECLARATION
+
+entity altdq_dqs is
+-- GENERIC DECLARATION
+    generic (
+            delay_buffer_mode                       :  string  := "LOW";
+            delay_dqs_enable_by_half_cycle          :  string  := "FALSE";
+            intended_device_family                  :  string  := "UNUSED";
+            dq_half_rate_use_dataoutbypass          :  string  := "FALSE";
+            dq_input_reg_async_mode                 :  string  := "NONE";
+            dq_input_reg_clk_source                 :  string  := "DQS_BUS";
+            dq_input_reg_mode                       :  string  := "NONE";
+            dq_input_reg_power_up                   :  string  := "LOW";
+            dq_input_reg_sync_mode                  :  string  := "NONE";
+            dq_input_reg_use_clkn                   :  string  := "FALSE";
+            dq_ipa_add_input_cycle_delay            :  string  := "FALSE";
+            dq_ipa_add_phase_transfer_reg           :  string  := "FALSE";
+            dq_ipa_bypass_output_register           :  string  := "FALSE";
+            dq_ipa_invert_phase                     :  string  := "FALSE";
+            dq_ipa_phase_setting                    :  integer := 0;
+            dq_oe_reg_async_mode                    :  string  := "NONE";
+            dq_oe_reg_mode                          :  string  := "NONE";
+            dq_oe_reg_power_up                      :  string  := "LOW";
+            dq_oe_reg_sync_mode                     :  string  := "NONE";
+            dq_output_reg_async_mode                :  string  := "NONE";
+            dq_output_reg_mode                      :  string  := "NONE";
+            dq_output_reg_power_up                  :  string  := "LOW";
+            dq_output_reg_sync_mode                 :  string  := "NONE";
+            dqs_ctrl_latches_enable                 :  string  := "FALSE";
+            dqs_delay_chain_delayctrlin_source      :  string  := "CORE";
+            dqs_delay_chain_phase_setting           :  integer := 0;
+            dqs_dqsn_mode                           :  string  := "NONE";
+            dqs_enable_ctrl_add_phase_transfer_reg  :  string  := "FALSE";
+            dqs_enable_ctrl_invert_phase            :  string  := "FALSE";
+            dqs_enable_ctrl_phase_setting           :  integer := 0;
+            dqs_input_frequency                     :  string  := "UNUSED";
+            dqs_oe_reg_async_mode                   :  string  := "NONE";
+            dqs_oe_reg_mode                         :  string  := "NONE";
+            dqs_oe_reg_power_up                     :  string  := "LOW";
+            dqs_oe_reg_sync_mode                    :  string  := "NONE";
+            dqs_offsetctrl_enable                   :  string  := "FALSE";
+            dqs_output_reg_async_mode               :  string  := "NONE";
+            dqs_output_reg_mode                     :  string  := "NONE";
+            dqs_output_reg_power_up                 :  string  := "LOW";
+            dqs_output_reg_sync_mode                :  string  := "NONE";
+            dqs_phase_shift                         :  integer := 0;
+            io_clock_divider_clk_source             :  string  := "CORE";
+            io_clock_divider_invert_phase           :  string  := "FALSE";
+            io_clock_divider_phase_setting          :  integer := 0;
+            level_dqs_enable                        :  string  := "FALSE";
+            number_of_bidir_dq                      :  integer range 0 to 48 := 1;
+            number_of_clk_divider                   :  integer range 0 to 8  := 1;
+            number_of_input_dq                      :  integer range 0 to 48 := 1;
+            number_of_output_dq                     :  integer range 0 to 48 := 1;
+            oct_reg_mode                            :  string  := "NONE";
+            use_dq_input_delay_chain                :  string  := "FALSE";
+            use_dq_ipa                              :  string  := "FALSE";
+            use_dq_ipa_phasectrlin                  :  string  := "TRUE";
+            use_dq_oe_delay_chain1                  :  string  := "FALSE";
+            use_dq_oe_delay_chain2                  :  string  := "FALSE";
+            use_dq_oe_path                          :  string  := "FALSE";
+            use_dq_output_delay_chain1              :  string  := "FALSE";
+            use_dq_output_delay_chain2              :  string  := "FALSE";
+            use_dqs                                 :  string  := "FALSE";
+            use_dqs_delay_chain                     :  string  := "FALSE";
+            use_dqs_delay_chain_phasectrlin         :  string  := "FALSE";
+            use_dqs_enable                          :  string  := "FALSE";
+            use_dqs_enable_ctrl                     :  string  := "FALSE";
+            use_dqs_enable_ctrl_phasectrlin         :  string  := "TRUE";
+            use_dqs_input_delay_chain               :  string  := "FALSE";
+            use_dqs_input_path                      :  string  := "FALSE";
+            use_dqs_oe_delay_chain1                 :  string  := "FALSE";
+            use_dqs_oe_delay_chain2                 :  string  := "FALSE";
+            use_dqs_oe_path                         :  string  := "FALSE";
+            use_dqs_output_delay_chain1             :  string  := "FALSE";
+            use_dqs_output_delay_chain2             :  string  := "FALSE";
+            use_dqs_output_path                     :  string  := "FALSE";
+            use_dqsbusout_delay_chain               :  string  := "FALSE";
+            use_dqsenable_delay_chain               :  string  := "FALSE";
+            use_dynamic_oct                         :  string  := "FALSE";
+            use_half_rate                           :  string  := "FALSE";
+            use_io_clock_divider_masterin           :  string  := "FALSE";
+            use_io_clock_divider_phasectrlin        :  string  := "TRUE";
+            use_oct_delay_chain1                    :  string  := "FALSE";
+            use_oct_delay_chain2                    :  string  := "FALSE";
+            lpm_hint                                :  string  := "UNUSED";
+            lpm_type                                :  string  := "altdq_dqs"
+        );
+-- PORT DECLARATION
+    port    (
+            -- INPUT PORT DECLARATION
+            bidir_dq_areset                 : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_hr_oct_in              : in std_logic_vector(2 * number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_hr_oe_in               : in std_logic_vector(2 * number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_hr_output_data_in      : in std_logic_vector(4 * number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_input_data_in          : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_io_config_ena          : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '1');
+            bidir_dq_oct_in                 : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_oe_in                  : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_output_data_in         : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_output_data_in_high    : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_output_data_in_low     : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            bidir_dq_sreset                 : in std_logic_vector(number_of_bidir_dq - 1 downto 0) := (others => '0');
+            config_clk                      : in std_logic := '0';
+            config_datain                   : in std_logic := '0';
+            config_update                   : in std_logic := '0';
+            core_delayctrlin                : in std_logic_vector(5 downto 0) := (others => '0');
+            dll_delayctrlin                 : in std_logic_vector(5 downto 0) := (others => '0');
+            dq_hr_output_reg_clk            : in std_logic := '0';
+            dq_input_reg_clk                : in std_logic := '0';
+            dq_input_reg_clkena             : in std_logic := '1';
+            dq_ipa_clk                      : in std_logic := '0';
+            dq_output_reg_clk               : in std_logic := '0';
+            dq_output_reg_clkena            : in std_logic := '1';
+            dqs_areset                      : in std_logic := '0';
+            dqs_config_ena                  : in std_logic := '1';
+            dqs_enable_ctrl_clk             : in std_logic := '1';
+            dqs_enable_ctrl_hr_datainhi     : in std_logic := '0';
+            dqs_enable_ctrl_hr_datainlo     : in std_logic := '0';
+            dqs_enable_ctrl_in              : in std_logic := '1';
+            dqs_enable_in                   : in std_logic := '1';
+            dqs_hr_oct_in                   : in std_logic_vector(1 downto 0) := (others => '0');
+            dqs_hr_oe_in                    : in std_logic_vector(1 downto 0) := (others => '0');
+            dqs_hr_output_data_in           : in std_logic_vector(3 downto 0) := (others => '0');
+            dqs_hr_output_reg_clk           : in std_logic := '0';
+            dqs_input_data_in               : in std_logic := '0';
+            dqs_io_config_ena               : in std_logic := '1';
+            dqs_oct_in                      : in std_logic := '0';
+            dqs_oe_in                       : in std_logic := '0';
+            dqs_output_data_in              : in std_logic := '0';
+            dqs_output_data_in_high         : in std_logic := '0';
+            dqs_output_data_in_low          : in std_logic := '0';
+            dqs_output_reg_clk              : in std_logic := '0';
+            dqs_output_reg_clkena           : in std_logic := '1';
+            dqs_sreset                      : in std_logic := '0';
+            dqsn_areset                     : in std_logic := '0';
+            dqsn_hr_oct_in                  : in std_logic_vector(1 downto 0) := (others => '0');
+            dqsn_hr_oe_in                   : in std_logic_vector(1 downto 0) := (others => '0');
+            dqsn_hr_output_data_in          : in std_logic_vector(3 downto 0) := (others => '0');
+            dqsn_input_data_in              : in std_logic := '0';
+            dqsn_io_config_ena              : in std_logic := '1';
+            dqsn_oct_in                     : in std_logic := '0';
+            dqsn_oe_in                      : in std_logic := '0';
+            dqsn_output_data_in             : in std_logic := '0';
+            dqsn_output_data_in_high        : in std_logic := '0';
+            dqsn_output_data_in_low         : in std_logic := '0';
+            dqsn_sreset                     : in std_logic := '0';
+            dqsupdateen                     : in std_logic := '0';
+            hr_oct_reg_clk                  : in std_logic := '0';
+            input_dq_areset                 : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+            input_dq_hr_oct_in              : in std_logic_vector(2 * number_of_input_dq - 1 downto 0) := (others => '0');
+            input_dq_input_data_in          : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+            input_dq_io_config_ena          : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '1');
+            input_dq_oct_in                 : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+            input_dq_sreset                 : in std_logic_vector(number_of_input_dq - 1 downto 0) := (others => '0');
+            io_clock_divider_clk            : in std_logic := '0';
+            io_clock_divider_masterin       : in std_logic := '0';
+            oct_reg_clk                     : in std_logic := '0';
+            offsetctrlin                    : in std_logic_vector(5 downto 0) := (others => '0');
+            output_dq_areset                : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_hr_oct_in             : in std_logic_vector(2 * number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_hr_oe_in              : in std_logic_vector(2 * number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_hr_output_data_in     : in std_logic_vector(4 * number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_io_config_ena         : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '1');
+            output_dq_oct_in                : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_oe_in                 : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_output_data_in        : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_output_data_in_high   : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_output_data_in_low    : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+            output_dq_sreset                : in std_logic_vector(number_of_output_dq - 1 downto 0) := (others => '0');
+
+            -- OUTPUT PORT DECLARATION
+            bidir_dq_hr_input_data_out      : out std_logic_vector(4 * number_of_bidir_dq - 1 downto 0);
+            bidir_dq_input_data_out         : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+            bidir_dq_input_data_out_high    : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+            bidir_dq_input_data_out_low     : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+            bidir_dq_oct_out                : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+            bidir_dq_oe_out                 : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+            bidir_dq_output_data_out        : out std_logic_vector(number_of_bidir_dq - 1 downto 0);
+            dqs_bus_out                     : out std_logic;
+            dqs_input_data_out              : out std_logic;
+            dqs_oct_out                     : out std_logic;
+            dqs_oe_out                      : out std_logic;
+            dqs_output_data_out             : out std_logic;
+            dqsn_bus_out                    : out std_logic;
+            dqsn_input_data_out             : out std_logic;
+            dqsn_oct_out                    : out std_logic;
+            dqsn_oe_out                     : out std_logic;
+            dqsn_output_data_out            : out std_logic;
+            input_dq_hr_input_data_out      : out std_logic_vector(4 * number_of_input_dq - 1 downto 0);
+            input_dq_input_data_out         : out std_logic_vector(number_of_input_dq - 1 downto 0);
+            input_dq_input_data_out_high    : out std_logic_vector(number_of_input_dq - 1 downto 0);
+            input_dq_input_data_out_low     : out std_logic_vector(number_of_input_dq - 1 downto 0);
+            input_dq_oct_out                : out std_logic_vector(number_of_input_dq - 1 downto 0);
+            io_clock_divider_clkout         : out std_logic_vector(number_of_clk_divider - 1 downto 0);
+            io_clock_divider_slaveout       : out std_logic;
+            output_dq_oct_out               : out std_logic_vector(number_of_output_dq - 1 downto 0);
+            output_dq_oe_out                : out std_logic_vector(number_of_output_dq - 1 downto 0);
+            output_dq_output_data_out       : out std_logic_vector(number_of_output_dq - 1 downto 0)
+            );
+
+end altdq_dqs;
+
+-- END OF ENTITY
+
+-- BEGINNING OF ARCHITECTURE
+
+architecture translated of altdq_dqs is
+
+-- FUNCTION DECLARATION
+
+function conv_int(arg : in std_logic_vector) return integer is
+    variable result : integer;
+    begin
+        result := 0;
+        for i in arg'range loop
+            if arg(i) = '1' then
+                result := result + 2**i;
+            end if;
+        end loop;
+        return result;
+end conv_int;
+
+function dll_gray_decoder(gin : in std_logic_vector) return std_logic_vector is
+    variable breg : std_logic_vector(gin'high downto 0) := (others => '0');
+    begin
+        for i in 0 to (gin'length - 2) loop
+            breg(i) := breg(i+1) xor gin(i);
+        end loop;
+        return breg;
+end dll_gray_decoder;
+
+function ddr_delay_chain_s(delayctrlin  : in std_logic_vector; phasectrlin : in std_logic_vector;
+                            use_phasectrlin : string; phase_setting : natural) return integer is
+    constant phasectrlin_limit : integer := 7;
+    variable delayctrl_bin : std_logic_vector(delayctrlin'range);
+    variable acell_delay : integer;
+    variable delay_chain_len : integer;
+    variable i_phasectrlin : integer;
+    variable clk_delay : integer;
+    begin
+        delayctrl_bin := dll_gray_decoder(delayctrlin);
+        acell_delay := 350 + (conv_int(delayctrl_bin) * 10);
+        i_phasectrlin := conv_int(phasectrlin);
+        if (use_phasectrlin = "FALSE") then
+            delay_chain_len := phase_setting;
+        else
+            if (i_phasectrlin > phasectrlin_limit) then
+                delay_chain_len :=  0;
+            else
+                delay_chain_len := i_phasectrlin;
+            end if;
+        end if;
+        clk_delay := delay_chain_len * acell_delay  + 1;
+        return clk_delay;
+end ddr_delay_chain_s;
+
+-- CONSTANT DECLARATION
+
+-- SIGNAL DECLARATION
+
+    signal io_config_dqs_shift_reg                                      : std_logic_vector(10 downto 0) := (others => '0');
+    signal io_config_dqs_shift_reg1                                     : std_logic_vector(10 downto 0) := (others => '0');
+    signal io_config_dqsn_shift_reg                                     : std_logic_vector(10 downto 0) := (others => '0');
+    signal io_config_dqsn_shift_reg1                                    : std_logic_vector(10 downto 0) := (others => '0');
+    signal io_config_bi_dq_shift_reg                                    : std_logic_vector((number_of_bidir_dq * 11 - 1) downto 0) := (others => '0');
+    signal io_config_bi_dq_shift_reg1                                   : std_logic_vector((number_of_bidir_dq * 11 - 1) downto 0) := (others => '0');
+    signal io_config_in_dq_shift_reg                                    : std_logic_vector((number_of_input_dq * 11 - 1) downto 0) := (others => '0');
+    signal io_config_in_dq_shift_reg1                                   : std_logic_vector((number_of_input_dq * 11 - 1) downto 0) := (others => '0');
+    signal io_config_out_dq_shift_reg                                   : std_logic_vector((number_of_output_dq * 11 - 1) downto 0) := (others => '0');
+    signal io_config_out_dq_shift_reg1                                  : std_logic_vector((number_of_output_dq * 11 - 1) downto 0) := (others => '0');
+    signal dqs_config_shift_reg                                         : std_logic_vector(45 downto 0) := (others => '0');
+    signal dqs_config_shift_reg1                                        : std_logic_vector(45 downto 0) := (others => '0');
+    signal io_config_dqs_outputdelaysetting1                            : std_logic_vector(3 downto 0) := (others => '0');
+    signal io_config_dqs_outputdelaysetting2                            : std_logic_vector(2 downto 0) := (others => '0');
+    signal io_config_dqs_padtoinputregisterdelaysetting                 : std_logic_vector(3 downto 0) := (others => '0');
+    signal io_config_dqsn_outputdelaysetting1                           : std_logic_vector(3 downto 0) := (others => '0');
+    signal io_config_dqsn_outputdelaysetting2                           : std_logic_vector(2 downto 0) := (others => '0');
+    signal io_config_dqsn_padtoinputregisterdelaysetting                : std_logic_vector(3 downto 0) := (others => '0');
+    signal io_config_bi_dq_outputdelaysetting1                          : std_logic_vector((number_of_bidir_dq * 4 - 1) downto 0) := (others => '0');
+    signal io_config_bi_dq_outputdelaysetting2                          : std_logic_vector((number_of_bidir_dq * 3 - 1) downto 0) := (others => '0');
+    signal io_config_bi_dq_padtoinputregisterdelaysetting               : std_logic_vector((number_of_bidir_dq * 4 - 1) downto 0) := (others => '0');
+    signal io_config_in_dq_padtoinputregisterdelaysetting               : std_logic_vector((number_of_input_dq * 4 - 1) downto 0) := (others => '0');
+    signal io_config_out_dq_outputdelaysetting1                         : std_logic_vector((number_of_output_dq * 4 - 1) downto 0) := (others => '0');
+    signal io_config_out_dq_outputdelaysetting2                         : std_logic_vector((number_of_output_dq * 3 - 1) downto 0) := (others => '0');
+    signal dqs_config_dqsinputphasesetting                              : std_logic_vector(2 downto 0) := (others => '0');
+    signal dqs_config_dqsbusoutdelaysetting                             : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqs_config_dqsenablectrlphasesetting                         : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqs_config_resyncinputphasesetting                           : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqs_config_dividerphasesetting                               : std_logic := '0';
+    signal dqs_config_enainputcycledelaysetting                         : std_logic := '0';
+    signal dqs_config_dqsenabledelaysetting                             : std_logic_vector(2 downto 0) := (others => '0');
+    signal dqs_config_octdelaysetting1                                  : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqs_config_octdelaysetting2                                  : std_logic_vector(2 downto 0) := (others => '0');
+    signal dqs_config_enadataoutbypass                                  : std_logic := '0';
+    signal dqs_config_enadqsenablephasetransferreg                      : std_logic := '0';
+    signal dqs_config_enainputphasetransferreg                          : std_logic := '0';
+    signal dqs_config_resyncinputphaseinvert                            : std_logic := '0';
+    signal dqs_config_dqsenablectrlphaseinvert                          : std_logic := '0';
+    
+    signal i_delayctrlin                                                : std_logic_vector(5 downto 0) := (others => '0');
+    signal i_delayctrl_reg                                              : std_logic_vector(5 downto 0) := (others => '0');
+    signal i_delayctrl_reg_mux                                          : std_logic_vector(5 downto 0) := (others => '0');
+    signal i_delayctrl_bin                                              : std_logic_vector(5 downto 0) := (others => '0');
+    signal i_offsetctrl_mux                                             : std_logic_vector(5 downto 0) := (others => '0');
+    signal i_offsetctrl_reg                                             : std_logic_vector(5 downto 0) := (others => '0');
+    signal i_offsetctrl_reg_mux                                         : std_logic_vector(5 downto 0) := (others => '0');
+    signal i_phasectrlin                                                : std_logic_vector(2 downto 0) := (others => '0');
+    
+        --INPUT PHASE ALIGNMENT--
+    signal input_phase_alignment_delayctrlin                             : std_logic_vector(5 downto 0) := (others => '0');
+    signal input_phase_alignment_phasectrlin                             : std_logic_vector(3 downto 0) := (others => '0');
+    signal input_phase_alignment_phaseinvertctrl                         : std_logic := '0';
+    signal input_phase_alignment_enainputcycledelay                      : std_logic := '0';
+    signal input_phase_alignment_enaphasetransferreg                     : std_logic := '0';
+    signal dq_ipa_phase_clkout                                           : std_logic := '0';
+    signal dq_ipa_delayed_clk                                            : std_logic := '0';
+    signal input_ff_clk                                                  : std_logic := '0';
+    signal dq_ddio_in_clk0                                               : std_logic := '0';
+    signal dq_ddio_in_clk1                                               : std_logic := '0';
+    signal half_rate_input_dataoutbypass                                 : std_logic := '0';
+    
+    signal dqsbusout_delay                                              : integer range 0 to 2**15 := 0;
+    signal dqs_enable_phase_ctrl_clk_delay                              : integer range 0 to 2**15 := 0;
+    signal io_clock_divider_phasectrlclkout_delay                       : integer range 0 to 2**15 := 0;
+    signal dq_ipa_phase_clkout_delay                                    : integer range 0 to 2**15 := 0;
+    signal dqs_enable_ctrl_delayctrlin                                  : std_logic_vector(5 downto 0) := (others => '0');
+    signal dqs_enable_phase_ctrl_clk                                    : std_logic := '0';
+    signal dqs_enable_ctrl_dly_clk                                      : std_logic := '0';
+    signal dqs_enable_ctrl_hr_datainhi_reg                              : std_logic := '0';
+    signal dqs_enable_ctrl_hr_datainhi_hr_reg                           : std_logic := '0';
+    signal dqs_enable_ctrl_hr_datainlo_reg                              : std_logic := '0';
+    signal dqs_enable_ctrl_hr_ddio_out_dataout                          : std_logic := '0';
+    signal dqs_enable_ctrl_dqsenablein_reg                              : std_logic := '0';
+    signal dqs_enable_ctrl_dqsenablein_dly_reg                          : std_logic := '0';
+    signal dqs_enable_ctrl_phasetransferdelay_mux_out                   : std_logic := '0';
+    signal dqs_enable_ctrl_dqsenablein_level_ena_reg                    : std_logic := '0';
+    signal dqs_enable_ctrl_dqsenablein_level_ena_dly_reg                : std_logic := '0';
+    signal dqs_enable_ctrl_dqsenableout                                 : std_logic := '0';
+    signal dqsenable_delay_chain_dataout                                : std_logic := '0';
+    signal dqs_enable_dqsenable                                         : std_logic := '0';
+    
+    signal io_clock_dividerclkout                                       : std_logic := '0';
+    signal io_clock_dividerclk                                          : std_logic := '0';
+    signal io_clock_divider_phasectrlclkout                             : std_logic := '0';
+    signal io_clock_divider_dlyclkout                                   : std_logic := '0';
+    signal io_clock_dividermasterin                                     : std_logic_vector((number_of_clk_divider - 1) downto 0) := (others => '0');
+    signal io_clock_dividerslaveout                                     : std_logic_vector((number_of_clk_divider - 1) downto 0) := (others => '0');
+    signal io_clock_dividerslaveout_prev                                : std_logic_vector(number_of_clk_divider downto 0) := (others => '0');
+    
+    --CLK_MUX--
+    signal dqs_hr_output_reg_clk_mux                                    : std_logic := '0';
+    signal dqs_output_reg_clk_mux                                       : std_logic := '0';
+    signal hr_oct_reg_clk_mux                                           : std_logic := '0';
+    signal dq_output_reg_clk_mux                                        : std_logic := '0';
+    signal dq_hr_output_reg_clk_mux                                     : std_logic := '0';
+    
+    --DQ_ARESET & DQ_SRESET--
+    signal i_bidir_dq_input_areset                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal i_bidir_dq_output_areset                                     : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal i_bidir_dq_oe_areset                                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal i_input_dq_input_areset                                      : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal i_output_dq_output_areset                                    : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal i_output_dq_oe_areset                                        : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal i_bidir_dq_input_sreset                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal i_bidir_dq_output_sreset                                     : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal i_bidir_dq_oe_sreset                                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal i_input_dq_input_sreset                                      : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal i_output_dq_output_sreset                                    : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal i_output_dq_oe_sreset                                        : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    
+    --DQS INPUT PATH--
+    signal dqs_input_delay_chain_dataout                                : std_logic := '0';
+    signal dqs_delay_chain_dqsbusout                                    : std_logic := '0';
+    signal dqsbusout_delay_chain_dataout                                : std_logic := '0';
+    signal dqs_enable_dqsin                                             : std_logic := '0';
+    signal dqs_enable_dqsbusout                                         : std_logic := '0';
+    signal dqs_bus_wire                                                 : std_logic := '0';
+    
+    --DQS OUTPUT PATH--
+    signal dqs_output_delay_chain2_datain                               : std_logic := '0';
+    signal dqs_output_delay_chain2_dataout                              : std_logic := '0';
+    signal dqs_output_delay_chain1_datain                               : std_logic := '0';
+    signal dqs_output_delay_chain1_dataout                              : std_logic := '0';
+    signal dqs_output_ff_q                                              : std_logic := '0';
+    signal dqs_output_hr_ddio_out_datain_bus                            : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqs_output_hr_ddio_out_datain_reg                            : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqs_output_hr_ddio_out_datain_reg1                           : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqs_output_hr_ddio_out_high_dataout                          : std_logic := '0';
+    signal dqs_output_hr_ddio_out_low_dataout                           : std_logic := '0';
+    signal dqs_output_ddio_out_datain_reg                               : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqs_output_ddio_out_dataout                                  : std_logic := '0';
+    
+    --DQS OE PATH--
+    signal dqs_oe_delay_chain2_datain                                   : std_logic := '0';
+    signal dqs_oe_delay_chain2_dataout                                  : std_logic := '0';
+    signal dqs_oe_delay_chain1_datain                                   : std_logic := '0';
+    signal dqs_oe_delay_chain1_dataout                                  : std_logic := '0';
+    signal dqs_oe_ff_q                                                  : std_logic := '0';
+    signal dqs_hr_oe_ddio_oe_datain_bus                                 : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqs_hr_oe_ddio_oe_datain_reg                                 : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqs_hr_oe_ddio_oe_datain_reg1                                : std_logic := '0';
+    signal dqs_oe_ddio_oe_datain_reg_hi                                 : std_logic := '0';
+    signal dqs_oe_ddio_oe_datain_reg_lo                                 : std_logic := '0';
+    signal dqs_oe_hr_ddio_out_dataout                                   : std_logic := '0';
+    signal dqs_oe_ddio_oe_dataout                                       : std_logic := '0';
+    
+    --DQ/DQS OCT PATH--
+    signal dqs_oct_delay_chain2_datain                                  : std_logic := '0';
+    signal dqs_oct_delay_chain2_dataout                                 : std_logic := '0';
+    signal dqs_oct_delay_chain1_datain                                  : std_logic := '0';
+    signal dqs_oct_delay_chain1_dataout                                 : std_logic := '0';
+    signal dqs_oct_ff_q                                                 : std_logic := '0';
+    signal dqs_oct_hr_ddio_out_datain_bus                               : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqs_oct_hr_ddio_out_datain_reg                               : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqs_oct_hr_ddio_out_datain_reg1                              : std_logic := '0';
+    signal dqs_oct_hr_ddio_out_dataout                                  : std_logic := '0';
+    signal dqs_oct_ddio_oe_datain_reg_hi                                : std_logic := '0';
+    signal dqs_oct_ddio_oe_datain_reg_lo                                : std_logic := '0';
+    signal dqs_oct_ddio_oe_dataout                                      : std_logic := '0';
+    signal dqsn_oct_delay_chain2_datain                                 : std_logic := '0';
+    signal dqsn_oct_delay_chain2_dataout                                : std_logic := '0';
+    signal dqsn_oct_delay_chain1_datain                                 : std_logic := '0';
+    signal dqsn_oct_delay_chain1_dataout                                : std_logic := '0';
+    signal dqsn_oct_ff_q                                                : std_logic := '0';
+    signal dqsn_oct_hr_ddio_out_datain_bus                              : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqsn_oct_hr_ddio_out_datain_reg                              : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqsn_oct_hr_ddio_out_datain_reg1                             : std_logic := '0';
+    signal dqsn_oct_hr_ddio_out_dataout                                 : std_logic := '0';
+    signal dqsn_oct_ddio_oe_datain_reg_hi                               : std_logic := '0';
+    signal dqsn_oct_ddio_oe_datain_reg_lo                               : std_logic := '0';
+    signal dqsn_oct_ddio_oe_dataout                                     : std_logic := '0';
+    signal bidir_dq_oct_delay_chain2_datain                             : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_delay_chain2_dataout                            : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_delay_chain1_datain                             : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_delay_chain1_dataout                            : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_ff_q                                            : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_oct_in_bus0                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_oct_in_bus1                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_oct_in_reg0                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_oct_in_reg1                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_oct_in_reg2                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_hr_ddio_out_dataout                             : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_ddio_oe_datain_hi                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_ddio_oe_datain_lo                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oct_ddio_oe_dataout                                 : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_delay_chain2_datain                            : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_delay_chain2_dataout                           : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_delay_chain1_datain                            : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_delay_chain1_dataout                           : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_ff_q                                           : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_oct_in_bus0                                     : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_oct_in_bus1                                     : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_oct_in_reg0                                     : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_oct_in_reg1                                     : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_oct_in_reg2                                     : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_hr_ddio_out_dataout                            : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_ddio_oe_datain_hi                              : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_ddio_oe_datain_lo                              : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oct_ddio_oe_dataout                                : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    
+    --DQ INPUT--
+    signal bidir_dq_input_ff_q                                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_input_delay_chain_dataout                           : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_datain                                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_datain_reg_hi                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_datain_reg_lo                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_datain_reg_lo1                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regouthi                                    : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regouthi_reg                                : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regouthi_reg1                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regouthi_reg2                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regouthi_reg3                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regouthi_wire                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regouthi_wire1                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regoutlo                                    : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regoutlo_reg                                : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regoutlo_reg1                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regoutlo_reg2                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regoutlo_reg3                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regoutlo_wire                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ddio_in_regoutlo_wire1                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_half_rate_input_datain_reg1                         : std_logic_vector((number_of_bidir_dq * 2 - 1) downto 0) := (others => '0');
+    signal bidir_dq_half_rate_input_datain_reg2                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_half_rate_input_datain_reg3                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_half_rate_input_datain_wire                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_half_rate_input_datain_wire1                        : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_half_rate_input_dataout                             : std_logic_vector((number_of_bidir_dq * 4 - 1) downto 0) := (others => '0');
+    signal bidir_dq_ipa_low_dataout                                     : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_ipa_high_dataout                                    : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal input_dq_input_ff_q                                          : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_input_delay_chain_dataout                           : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_datain                                      : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_datain_reg_hi                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_datain_reg_lo                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_datain_reg_lo1                              : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regouthi                                    : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regouthi_reg                                : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regouthi_reg1                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regouthi_reg2                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regouthi_reg3                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regouthi_wire                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regouthi_wire1                              : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regoutlo                                    : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regoutlo_reg                                : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regoutlo_reg1                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regoutlo_reg2                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regoutlo_reg3                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regoutlo_wire                               : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ddio_in_regoutlo_wire1                              : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_half_rate_input_datain_reg1                         : std_logic_vector((number_of_input_dq * 2 - 1) downto 0) := (others => '0');
+    signal input_dq_half_rate_input_datain_reg2                         : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_half_rate_input_datain_reg3                         : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_half_rate_input_datain_wire                         : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_half_rate_input_datain_wire1                        : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_half_rate_input_dataout                             : std_logic_vector((number_of_input_dq * 4 - 1) downto 0) := (others => '0');
+    signal input_dq_ipa_low_dataout                                     : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    signal input_dq_ipa_high_dataout                                    : std_logic_vector((number_of_input_dq - 1) downto 0) := (others => '0');
+    
+    --DQ OUTPUT--
+    signal bidir_dq_output_delay_chain2_datain                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_delay_chain2_dataout                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_delay_chain1_datain                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_delay_chain1_dataout                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_ff_q                                         : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_bus0                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_bus1                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_bus2                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_bus3                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_reg0                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_reg1                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_reg2                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_reg3                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_reg_high                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_hr_output_data_in_reg_low                           : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_hr_ddio_out_high_dataout                     : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_hr_ddio_out_low_dataout                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_ddio_out_high_datain_reg                     : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_ddio_out_low_datain_reg                      : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_output_ddio_out_dataout                             : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_delay_chain2_datain                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_delay_chain2_dataout                        : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_delay_chain1_datain                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_delay_chain1_dataout                        : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_ff_q                                        : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_bus0                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_bus1                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_bus2                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_bus3                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_reg0                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_reg1                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_reg2                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_reg3                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_reg_high                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_hr_output_data_in_reg_low                          : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_hr_ddio_out_high_dataout                    : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_hr_ddio_out_low_dataout                     : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_ddio_out_high_datain_reg                    : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_ddio_out_low_datain_reg                     : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_output_ddio_out_dataout                            : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    
+    --DQ OE--
+    signal bidir_dq_oe_delay_chain2_datain                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_delay_chain2_dataout                             : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_delay_chain1_datain                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_delay_chain1_dataout                             : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_ff_q                                             : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_hr_ddio_out_dataout                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_hr_ddio_out_datain_bus0                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_hr_ddio_out_datain_bus1                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_hr_ddio_out_datain_reg0                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_hr_ddio_out_datain_reg1                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_hr_ddio_out_datain_reg2                          : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_ddio_oe_datain_reg                               : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_ddio_oe_datain_reg1                              : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal bidir_dq_oe_ddio_oe_dataout                                  : std_logic_vector((number_of_bidir_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_delay_chain2_datain                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_delay_chain2_dataout                            : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_delay_chain1_datain                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_delay_chain1_dataout                            : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_ff_q                                            : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_hr_ddio_out_dataout                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_hr_ddio_out_datain_bus0                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_hr_ddio_out_datain_bus1                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_hr_ddio_out_datain_reg0                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_hr_ddio_out_datain_reg1                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_hr_ddio_out_datain_reg2                         : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_ddio_oe_datain_reg                              : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_ddio_oe_datain_reg1                             : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    signal output_dq_oe_ddio_oe_dataout                                 : std_logic_vector((number_of_output_dq - 1) downto 0) := (others => '0');
+    
+    --DQSN PATH--
+        --INPUT--
+    signal dqsn_input_delay_chain_dataout                               : std_logic := '0';
+    signal dqsn_delay_chain_dqsbusout                                   : std_logic := '0';
+    signal dqsnbusout_delay_chain_dataout                               : std_logic := '0';
+    signal dqsn_enable_dqsin                                            : std_logic := '0';
+    signal dqsn_enable_dqsbusout                                        : std_logic := '0';
+    signal dqsn_bus_wire                                                : std_logic := '0';
+        --OUTPUT--
+    signal dqsn_output_delay_chain2_datain                              : std_logic := '0';
+    signal dqsn_output_delay_chain2_dataout                             : std_logic := '0';
+    signal dqsn_output_delay_chain1_datain                              : std_logic := '0';
+    signal dqsn_output_delay_chain1_dataout                             : std_logic := '0';
+    signal dqsn_output_ff_q                                             : std_logic := '0';
+    signal dqsn_output_hr_ddio_out_datain_bus                           : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqsn_output_hr_ddio_out_datain_reg                           : std_logic_vector(3 downto 0) := (others => '0');
+    signal dqsn_output_hr_ddio_out_datain_reg1                          : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqsn_output_hr_ddio_out_high_dataout                         : std_logic := '0';
+    signal dqsn_output_hr_ddio_out_low_dataout                          : std_logic := '0';
+    signal dqsn_output_ddio_out_datain_reg                              : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqsn_output_ddio_out_dataout                                 : std_logic := '0';
+    
+        --OE--
+    signal dqsn_oe_delay_chain2_datain                                   : std_logic := '0';
+    signal dqsn_oe_delay_chain2_dataout                                  : std_logic := '0';
+    signal dqsn_oe_delay_chain1_datain                                   : std_logic := '0';
+    signal dqsn_oe_delay_chain1_dataout                                  : std_logic := '0';
+    signal dqsn_oe_ff_q                                                  : std_logic := '0';
+    signal dqsn_hr_oe_ddio_oe_datain_bus                                 : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqsn_hr_oe_ddio_oe_datain_reg                                 : std_logic_vector(1 downto 0) := (others => '0');
+    signal dqsn_hr_oe_ddio_oe_datain_reg1                                : std_logic := '0';
+    signal dqsn_oe_ddio_oe_datain_reg_hi                                 : std_logic := '0';
+    signal dqsn_oe_ddio_oe_datain_reg_lo                                 : std_logic := '0';
+    signal dqsn_oe_hr_ddio_out_dataout                                   : std_logic := '0';
+    signal dqsn_oe_ddio_oe_dataout                                       : std_logic := '0';
+
+begin
+
+    --------------------------
+    --IO_CONFIG & DQS_CONFIG--
+    --------------------------
+    IO_DQS_CONFIG_ENA : process (config_clk)
+                        begin
+                            if (rising_edge(config_clk)) then
+                                if (dqs_io_config_ena = '1') then
+                                    io_config_dqs_shift_reg(0) <= config_datain;
+                                    io_config_dqs_shift_reg(10 downto 1) <= io_config_dqs_shift_reg(9 downto 0);
+                                end if;
+                                
+                                if (dqsn_io_config_ena = '1') then
+                                    io_config_dqsn_shift_reg(0) <= config_datain;
+                                    io_config_dqsn_shift_reg(10 downto 1) <= io_config_dqsn_shift_reg(9 downto 0);
+                                end if;
+                                
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    if (bidir_dq_io_config_ena(i) = '1') then
+                                        io_config_bi_dq_shift_reg(i*11) <= config_datain;
+                                        io_config_bi_dq_shift_reg((i*11+10) downto (i*11+1)) <= io_config_bi_dq_shift_reg((i*11+9) downto (i*11));
+                                    end if;
+                                end loop;
+                                
+                                for i in 0 to (number_of_input_dq - 1) loop
+                                    if (input_dq_io_config_ena(i) = '1') then
+                                        io_config_in_dq_shift_reg(i*11) <= config_datain;
+                                        io_config_in_dq_shift_reg((i*11+10) downto (i*11+1)) <= io_config_in_dq_shift_reg((i*11+9) downto (i*11));
+                                    end if;
+                                end loop;
+                                
+                                for i in 0 to (number_of_output_dq - 1) loop
+                                    if (output_dq_io_config_ena(i) = '1') then
+                                        io_config_out_dq_shift_reg(i*11) <= config_datain;
+                                        io_config_out_dq_shift_reg((i*11+10) downto (i*11+1)) <= io_config_out_dq_shift_reg((i*11+9) downto (i*11));
+                                    end if;
+                                end loop;
+                                
+                                if (dqs_config_ena = '1') then
+                                    dqs_config_shift_reg(0) <= config_datain;
+                                    dqs_config_shift_reg(45 downto 1) <= dqs_config_shift_reg(44 downto 0);
+                                end if;
+                            end if;
+                        end process IO_DQS_CONFIG_ENA;
+    
+    IO_DQS_CONFIG_UPDATE :  process (config_clk)
+                            begin
+                                if (rising_edge(config_clk)) then
+                                    if (config_update = '1') then
+                                        io_config_dqs_shift_reg1 <= io_config_dqs_shift_reg;
+                                        io_config_dqsn_shift_reg1 <= io_config_dqsn_shift_reg;
+                                        io_config_bi_dq_shift_reg1 <= io_config_bi_dq_shift_reg;
+                                        io_config_in_dq_shift_reg1 <= io_config_in_dq_shift_reg;
+                                        io_config_out_dq_shift_reg1 <= io_config_out_dq_shift_reg;
+                                        dqs_config_shift_reg1 <= dqs_config_shift_reg;
+                                    end if;
+                                end if;
+                            end process IO_DQS_CONFIG_UPDATE;
+    
+    process (io_config_dqs_shift_reg1, io_config_dqsn_shift_reg1, io_config_bi_dq_shift_reg1, io_config_in_dq_shift_reg1, 
+            io_config_out_dq_shift_reg1)
+    begin
+        io_config_dqs_outputdelaysetting1 <= io_config_dqs_shift_reg1(3 downto 0);
+        io_config_dqs_outputdelaysetting2 <= io_config_dqs_shift_reg1(6 downto 4);
+        io_config_dqs_padtoinputregisterdelaysetting <= io_config_dqs_shift_reg1(10 downto 7);
+        
+        io_config_dqsn_outputdelaysetting1 <= io_config_dqsn_shift_reg1(3 downto 0);
+        io_config_dqsn_outputdelaysetting2 <= io_config_dqsn_shift_reg1(6 downto 4);
+        io_config_dqsn_padtoinputregisterdelaysetting <= io_config_dqsn_shift_reg1(10 downto 7);
+        
+        for i in 0 to (number_of_bidir_dq - 1) loop
+            io_config_bi_dq_outputdelaysetting1(i*4+3 downto i*4) <= io_config_bi_dq_shift_reg1(i*11+3 downto i*11);
+            io_config_bi_dq_outputdelaysetting2(i*3+2 downto i*3) <= io_config_bi_dq_shift_reg1(i*11+6 downto i*11+4);
+            io_config_bi_dq_padtoinputregisterdelaysetting(i*4+3 downto i*4) <= io_config_bi_dq_shift_reg1(i*11+10 downto i*11+7);
+        end loop;
+        
+        for i in 0 to (number_of_input_dq - 1) loop
+            io_config_in_dq_padtoinputregisterdelaysetting(i*4+3 downto i*4) <= io_config_in_dq_shift_reg1(i*11+10 downto i*11+7);
+        end loop;
+            
+        for i in 0 to (number_of_output_dq - 1) loop
+            io_config_out_dq_outputdelaysetting1(i*4+3 downto i*4) <= io_config_out_dq_shift_reg1(i*11+3 downto i*11);
+            io_config_out_dq_outputdelaysetting2(i*3+2 downto i*3) <= io_config_out_dq_shift_reg1(i*11+6 downto i*11+4);
+        end loop;
+    end process;
+    
+    dqs_config_dqsbusoutdelaysetting        <= dqs_config_shift_reg1(3 downto 0);
+    dqs_config_dqsinputphasesetting         <= dqs_config_shift_reg1(6 downto 4);
+    dqs_config_dqsenablectrlphasesetting    <= dqs_config_shift_reg1(10 downto 7);
+    dqs_config_resyncinputphasesetting      <= dqs_config_shift_reg1(22 downto 19);
+    dqs_config_dividerphasesetting          <= dqs_config_shift_reg1(23);
+    dqs_config_enainputcycledelaysetting    <= dqs_config_shift_reg1(25);
+    dqs_config_dqsenabledelaysetting        <= dqs_config_shift_reg1(29 downto 27);
+    dqs_config_octdelaysetting1             <= dqs_config_shift_reg1(33 downto 30);
+    dqs_config_octdelaysetting2             <= dqs_config_shift_reg1(36 downto 34);
+    dqs_config_enadataoutbypass             <= dqs_config_shift_reg1(37);
+    dqs_config_enadqsenablephasetransferreg <= dqs_config_shift_reg1(38);
+    dqs_config_enainputphasetransferreg     <= dqs_config_shift_reg1(41);
+    dqs_config_resyncinputphaseinvert       <= dqs_config_shift_reg1(42);
+    dqs_config_dqsenablectrlphaseinvert     <= dqs_config_shift_reg1(43);
+    
+    process (dqsupdateen)
+    begin
+        if (rising_edge(dqsupdateen)) then
+            i_delayctrl_reg <= i_delayctrlin;
+            i_offsetctrl_reg <= i_offsetctrl_mux;
+        end if;
+    end process;
+    
+    IFG01 : if (dqs_delay_chain_delayctrlin_source = "DLL") generate
+                i_delayctrlin <= dll_delayctrlin;
+    end generate IFG01;
+    
+    IFG02 : if (dqs_delay_chain_delayctrlin_source = "CORE") generate
+                i_delayctrlin <= core_delayctrlin;
+    end generate IFG02;
+    
+    IFG03 : if (dqs_offsetctrl_enable = "TRUE") generate
+                i_offsetctrl_mux <= offsetctrlin;
+    end generate IFG03;
+    
+    IFG04 : if (dqs_offsetctrl_enable = "FALSE") generate
+                i_offsetctrl_mux <= i_delayctrlin;
+    end generate IFG04;
+    
+    IFG05 : if (use_dqs_delay_chain_phasectrlin = "TRUE") generate
+                i_phasectrlin <= dqs_config_dqsinputphasesetting;
+    end generate IFG05;
+    
+    i_delayctrl_reg_mux <= i_delayctrl_reg when (dqs_ctrl_latches_enable = "TRUE") else i_delayctrlin;
+    i_offsetctrl_reg_mux <= i_offsetctrl_reg when (dqs_ctrl_latches_enable = "TRUE") else i_offsetctrl_mux;
+    i_delayctrl_bin <= dll_gray_decoder(i_delayctrl_reg_mux);
+    
+    process (i_delayctrl_bin, i_offsetctrl_reg_mux, i_phasectrlin)
+        variable acell_delay : integer;
+        variable aoffsetcell_delay : integer;
+        variable delay_chain_len : integer;
+    begin
+        if (delay_buffer_mode = "LOW") then
+            acell_delay := 350 + (conv_int(i_delayctrl_bin) * 10);
+        else
+            acell_delay := 175 + (conv_int(i_delayctrl_bin) * 10);
+        end if;
+        
+        if (dqs_offsetctrl_enable = "TRUE") then
+            if (delay_buffer_mode = "LOW") then
+                aoffsetcell_delay := 350 + (conv_int(dll_gray_decoder(i_offsetctrl_reg_mux)) * 10);
+            else
+                aoffsetcell_delay := 175 + (conv_int(dll_gray_decoder(i_offsetctrl_reg_mux)) * 10);
+            end if;
+        else
+            aoffsetcell_delay := acell_delay;
+        end if;
+        
+        if (i_phasectrlin(2) = '1') then
+            delay_chain_len := 0;
+        else
+            delay_chain_len := conv_int(i_phasectrlin) + 1;
+        end if;
+        
+        if (delay_chain_len = 0) then
+            dqsbusout_delay <= 0;
+        else
+            dqsbusout_delay <= (delay_chain_len - 1) * (acell_delay) + aoffsetcell_delay;
+        end if;
+        
+        if ((delay_buffer_mode = "HIGH") and (i_delayctrl_bin(5) = '1')) then
+            assert false
+            report "DELAYCTRLIN of DQS I/O exceeds 5-bit range in high-frequency mode"
+            severity warning;
+        end if;
+    end process;
+    
+    IFG06: if ((use_dqs_enable_ctrl_phasectrlin = "TRUE") or (dqs_enable_ctrl_phase_setting /= 0)) generate
+                dqs_enable_ctrl_delayctrlin <= dll_delayctrlin;
+    end generate IFG06;
+    
+    dqs_enable_phase_ctrl_clk_delay <= ddr_delay_chain_s(dqs_enable_ctrl_delayctrlin, dqs_config_dqsenablectrlphasesetting, 
+                                                            use_dqs_enable_ctrl_phasectrlin, dqs_enable_ctrl_phase_setting);
+
+    process (dqs_enable_ctrl_clk)
+    begin
+        dqs_enable_phase_ctrl_clk <= transport dqs_enable_ctrl_clk after (dqs_enable_phase_ctrl_clk_delay * 1 ps);
+        
+        if (rising_edge(dqs_enable_ctrl_clk)) then
+            if (use_half_rate = "TRUE") then
+                dqs_enable_ctrl_dqsenablein_reg <= dqs_enable_ctrl_hr_ddio_out_dataout;
+            else
+                dqs_enable_ctrl_dqsenablein_reg <= dqs_enable_ctrl_in;
+            end if;
+        end if;
+    end process;
+    
+    dqs_enable_ctrl_dly_clk <= not dqs_enable_phase_ctrl_clk when (dqs_enable_ctrl_invert_phase = "TRUE") else
+                                dqs_enable_phase_ctrl_clk when (dqs_enable_ctrl_invert_phase = "FALSE") else
+                                not dqs_enable_phase_ctrl_clk when (dqs_config_dqsenablectrlphaseinvert = '1') else
+                                dqs_enable_phase_ctrl_clk;
+                                
+    process (io_clock_dividerclkout)
+    begin
+        if (falling_edge(io_clock_dividerclkout)) then
+            dqs_enable_ctrl_hr_datainhi_reg <= dqs_enable_ctrl_hr_datainhi;
+            dqs_enable_ctrl_hr_datainlo_reg <= dqs_enable_ctrl_hr_datainlo;
+        elsif (rising_edge(io_clock_dividerclkout)) then
+            dqs_enable_ctrl_hr_datainhi_hr_reg <= dqs_enable_ctrl_hr_datainhi_reg;
+        end if;
+    end process;
+    
+    dqs_enable_ctrl_hr_ddio_out_dataout <=  dqs_enable_ctrl_hr_datainhi_hr_reg when (io_clock_dividerclkout = '1') else
+                                            dqs_enable_ctrl_hr_datainlo_reg;
+    
+    process (dqs_enable_ctrl_dly_clk)
+    begin
+        if (rising_edge(dqs_enable_ctrl_dly_clk)) then
+            dqs_enable_ctrl_dqsenablein_dly_reg <= dqs_enable_ctrl_dqsenablein_reg;
+            dqs_enable_ctrl_dqsenablein_level_ena_dly_reg <= dqs_enable_ctrl_dqsenablein_level_ena_reg;
+        end if;
+        
+        if (falling_edge(dqs_enable_ctrl_dly_clk)) then
+            if (level_dqs_enable = "TRUE") then
+                dqs_enable_ctrl_dqsenablein_level_ena_reg <= dqs_enable_ctrl_phasetransferdelay_mux_out;
+            elsif (use_half_rate = "TRUE") then
+                dqs_enable_ctrl_dqsenablein_level_ena_reg <= dqs_enable_ctrl_hr_ddio_out_dataout;
+            else
+                dqs_enable_ctrl_dqsenablein_level_ena_reg <= dqs_enable_ctrl_in;
+            end if;
+        end if;
+    end process;
+    
+    dqs_enable_ctrl_phasetransferdelay_mux_out <=   dqs_enable_ctrl_dqsenablein_dly_reg when (dqs_enable_ctrl_add_phase_transfer_reg = "TRUE") else
+                                                    dqs_enable_ctrl_dqsenablein_reg when (dqs_enable_ctrl_add_phase_transfer_reg = "FALSE") else
+                                                    dqs_enable_ctrl_dqsenablein_dly_reg when (dqs_config_enadqsenablephasetransferreg = '1') else
+                                                    dqs_enable_ctrl_dqsenablein_reg;
+                                                    
+    dqs_enable_ctrl_dqsenableout <= dqs_enable_ctrl_dqsenablein_level_ena_reg when (delay_dqs_enable_by_half_cycle = "FALSE") else
+                                    (dqs_enable_ctrl_dqsenablein_level_ena_reg and dqs_enable_ctrl_dqsenablein_level_ena_dly_reg);
+                                    
+    process (dqs_enable_ctrl_dqsenableout)
+    begin
+        dqsenable_delay_chain_dataout <= transport dqs_enable_ctrl_dqsenableout after (conv_int(dqs_config_dqsenabledelaysetting)* 1 ps);
+    end process;
+    
+    dqs_enable_dqsenable <= dqs_enable_in when (use_dqs_enable_ctrl = "FALSE") else
+                            dqsenable_delay_chain_dataout when (use_dqsenable_delay_chain = "TRUE") else
+                            dqs_enable_ctrl_dqsenableout;
+
+    --dqs_hr_output_reg_clk_mux--
+    process (dqs_hr_output_reg_clk)
+    begin
+        dqs_hr_output_reg_clk_mux <= dqs_hr_output_reg_clk;
+    end process;
+    
+    --dqs_output_reg_clk_mux--
+    process (dqs_output_reg_clk)
+    begin
+        dqs_output_reg_clk_mux <= dqs_output_reg_clk;
+    end process;
+    
+    --hr_oct_reg_clk_mux--
+    process (hr_oct_reg_clk)
+    begin
+        hr_oct_reg_clk_mux <= hr_oct_reg_clk;
+    end process;
+    
+    --dq_output_reg_clk_mux--
+    process (dq_output_reg_clk)
+    begin
+        dq_output_reg_clk_mux <= dq_output_reg_clk;
+    end process;
+    
+    --dq_hr_output_reg_clk_mux--
+    process (dq_hr_output_reg_clk)
+    begin
+        dq_hr_output_reg_clk_mux <= dq_hr_output_reg_clk;
+    end process;
+    
+    --dq_areset--
+        i_bidir_dq_input_areset     <= bidir_dq_areset when (dq_input_reg_async_mode /= "NONE") else (others => '0');
+        i_bidir_dq_output_areset    <= bidir_dq_areset when (dq_output_reg_async_mode /= "NONE") else (others => '0');
+        i_bidir_dq_oe_areset        <= bidir_dq_areset when (dq_oe_reg_async_mode /= "NONE") else (others => '0');
+        i_input_dq_input_areset     <= input_dq_areset when (dq_input_reg_async_mode /= "NONE") else (others => '0');
+        i_output_dq_output_areset   <= output_dq_areset when (dq_output_reg_async_mode /= "NONE") else (others => '0');
+        i_output_dq_oe_areset       <= output_dq_areset when (dq_oe_reg_async_mode /= "NONE") else (others => '0');
+
+    --dq_sreset--
+        i_bidir_dq_input_sreset     <= bidir_dq_sreset when (dq_input_reg_sync_mode /= "NONE") else (others => '0');
+        i_bidir_dq_output_sreset    <= bidir_dq_sreset when (dq_output_reg_sync_mode /= "NONE") else (others => '0');
+        i_bidir_dq_oe_sreset        <= bidir_dq_sreset when (dq_oe_reg_sync_mode /= "NONE") else (others => '0');
+        i_input_dq_input_sreset     <= input_dq_sreset when (dq_input_reg_sync_mode /= "NONE") else (others => '0');
+        i_output_dq_output_sreset   <= output_dq_sreset when (dq_output_reg_sync_mode /= "NONE") else (others => '0');
+        i_output_dq_oe_sreset       <= output_dq_sreset when (dq_oe_reg_sync_mode /= "NONE") else (others => '0');
+
+    --input_ff_clk--
+        input_ff_clk <= dq_input_reg_clk when (dq_input_reg_clk_source = "DQS_BUS") else
+                        dqs_bus_wire when (dq_input_reg_clk_source = "CORE") else '0';
+
+        dq_ddio_in_clk0 <=  dqs_bus_wire when ((dq_input_reg_use_clkn = "TRUE") or (dq_input_reg_clk_source = "DQS_BUS")) else
+                            dq_input_reg_clk when (dq_input_reg_clk_source = "CORE") else '0';
+                            
+        dq_ddio_in_clk1 <=  dqsn_bus_wire when (dq_input_reg_use_clkn = "TRUE") else not dq_ddio_in_clk0;
+        
+        half_rate_input_dataoutbypass <= dqs_config_enadataoutbypass when (dq_half_rate_use_dataoutbypass = "TRUE") else '0';
+        
+    input_phase_alignment_delayctrlin <=    dll_delayctrlin when ((use_dq_ipa_phasectrlin = "TRUE") or (dq_ipa_phase_setting /= 0)) else 
+                                            (others => '0');
+    
+    input_phase_alignment_phasectrlin <=    dqs_config_resyncinputphasesetting when (use_dq_ipa_phasectrlin = "TRUE") else 
+                                            (others => '0');
+    
+    input_phase_alignment_phaseinvertctrl <=    dqs_config_resyncinputphaseinvert when (dq_ipa_invert_phase = "DYNAMIC") else '0';
+    
+    input_phase_alignment_enainputcycledelay <= dqs_config_enainputcycledelaysetting when (dq_ipa_add_input_cycle_delay = "DYNAMIC") else '0';
+    
+    input_phase_alignment_enaphasetransferreg <=    dqs_config_enainputphasetransferreg when (dq_ipa_add_phase_transfer_reg = "DYNAMIC") else '0';
+
+    dq_ipa_phase_clkout_delay <= ddr_delay_chain_s( input_phase_alignment_delayctrlin, input_phase_alignment_phasectrlin, 
+                                                    use_dq_ipa_phasectrlin, dq_ipa_phase_setting);
+
+    process (dq_ipa_clk)
+    begin
+        dq_ipa_phase_clkout <= transport dq_ipa_clk after (dq_ipa_phase_clkout_delay * 1 ps);
+    end process;
+
+-----------------------
+-- 1. DQS INPUT PATH --
+-----------------------
+    --dqs_input_delay_chain_dataout--
+    --dqs_delay_chain_dqsbusout--
+        DQS_IN1 :   process (dqs_input_data_in)
+                    begin
+                        dqs_input_delay_chain_dataout <= transport dqs_input_data_in after 
+                                                        (conv_int(io_config_dqs_padtoinputregisterdelaysetting) * 50 ps);
+                        dqs_delay_chain_dqsbusout <= transport dqs_input_data_in after (dqsbusout_delay * 1 ps);
+                    end process DQS_IN1;
+    
+    --dqsbusout_delay_chain_dataout--
+        DQS_IN2 :   process (dqs_delay_chain_dqsbusout)
+                    begin
+                        dqsbusout_delay_chain_dataout <= transport dqs_delay_chain_dqsbusout after 
+                                                        (conv_int(dqs_config_dqsbusoutdelaysetting) * 50 ps);
+                    end process DQS_IN2;
+        
+    --dqs_enable_dqsbusout--
+        dqs_enable_dqsin <= dqsbusout_delay_chain_dataout when (use_dqsbusout_delay_chain = "TRUE") else
+                            dqs_delay_chain_dqsbusout when (use_dqs_delay_chain = "TRUE") else '0';
+        
+        dqs_enable_dqsbusout <= dqs_enable_dqsin and dqs_enable_dqsenable;
+        
+    --io_clock_divider_clkout & io_clock_divider_slaveout--
+        dqs_bus_wire <= dqs_enable_dqsbusout when (use_dqs_enable = "TRUE") else
+                        dqsbusout_delay_chain_dataout when (use_dqsbusout_delay_chain = "TRUE") else
+                        dqs_delay_chain_dqsbusout;
+                        
+        io_clock_dividerclk <= dqs_bus_wire when (io_clock_divider_clk_source = "DQS_BUS") else
+                                not dqs_bus_wire when (io_clock_divider_clk_source = "INVERTED_DQS_BUS") else
+                                io_clock_divider_clk when (io_clock_divider_clk_source = "CORE") else '0';
+                                
+        io_clock_divider_phasectrlclkout_delay <= ddr_delay_chain_s(dll_delayctrlin, dqs_config_resyncinputphasesetting,
+                                                                    use_io_clock_divider_phasectrlin, io_clock_divider_phase_setting);
+
+        DQS_IN3 :   process (io_clock_dividerclk)
+                    begin
+                        io_clock_divider_phasectrlclkout <= transport io_clock_dividerclk after (io_clock_divider_phasectrlclkout_delay * 1 ps);
+                    end process DQS_IN3;
+        
+        io_clock_divider_dlyclkout <=   not io_clock_divider_phasectrlclkout when (io_clock_divider_invert_phase = "TRUE") else
+                                        io_clock_divider_phasectrlclkout when (io_clock_divider_invert_phase = "FALSE") else
+                                        not io_clock_divider_phasectrlclkout when (dqs_config_resyncinputphaseinvert = '1') else
+                                        io_clock_divider_phasectrlclkout;
+                                        
+        DQS_IN4 :   process (io_clock_divider_dlyclkout)
+                    begin
+                        if (rising_edge(io_clock_divider_dlyclkout)) then
+                            for i in 0 to (number_of_clk_divider - 1) loop
+                                if (i = 0) then
+                                    if (use_io_clock_divider_masterin = "TRUE") then
+                                        io_clock_dividermasterin(i) <= io_clock_divider_masterin;
+                                    else
+                                        io_clock_dividermasterin(i) <= not io_clock_dividermasterin(i);
+                                    end if;
+                                else
+                                    io_clock_dividermasterin(i) <= io_clock_dividerslaveout_prev(i);
+                                end if;
+                            end loop;
+                        end if;
+                    end process DQS_IN4;
+        
+        io_clock_dividerslaveout <= not io_clock_dividermasterin;
+        
+        io_clock_dividerslaveout_prev(number_of_clk_divider downto 1) <= io_clock_dividerslaveout((number_of_clk_divider - 1) downto 0);
+        
+        io_clock_dividerclkout <= not io_clock_dividerslaveout(0) when (dqs_config_dividerphasesetting = '1') else io_clock_dividerslaveout(0);
+        
+    --external--        
+        --dqs_input_data_out--
+            dqs_input_data_out <= dqs_input_delay_chain_dataout when (use_dqs_input_delay_chain = "TRUE") else dqs_input_data_in;
+        
+        --dqs_bus_out--
+            dqs_bus_out <= dqs_enable_dqsbusout when (use_dqs_enable = "TRUE") else
+                            dqsbusout_delay_chain_dataout when (use_dqsbusout_delay_chain = "TRUE") else dqs_delay_chain_dqsbusout;
+        
+        --io_clock_divider_clkout--
+            io_clock_divider_clkout <= (others => io_clock_dividerclkout);
+        
+        --io_clock_divider_slaveout--
+            io_clock_divider_slaveout <= io_clock_dividerslaveout(number_of_clk_divider - 1) when (number_of_clk_divider > 1) else '0';
+        
+------------------------
+-- 2. DQS OUTPUT PATH --
+------------------------
+        --dqs_output_delay_chain2_dataout--
+            dqs_output_delay_chain2_datain <=   dqs_output_delay_chain1_dataout when (use_dqs_output_delay_chain1 = "TRUE") else
+                                                dqs_output_ff_q when (dqs_output_reg_mode = "FF") else
+                                                dqs_output_ddio_out_dataout when (dqs_output_reg_mode = "DDIO") else 
+                                                --(dqs_output_reg_mode = "OPA")
+                                                dqs_output_data_in;
+    
+            DQS_OUT1 :  process (dqs_output_delay_chain2_datain)
+                        begin
+                            dqs_output_delay_chain2_dataout <= transport dqs_output_delay_chain2_datain after 
+                                                                (conv_int(io_config_dqs_outputdelaysetting2) * 50 ps);
+                        end process DQS_OUT1;
+        
+        --dqs_output_delay_chain1_dataout--
+            dqs_output_delay_chain1_datain <=   dqs_output_ff_q when (dqs_output_reg_mode = "FF") else
+                                                dqs_output_ddio_out_dataout when (dqs_output_reg_mode = "DDIO") else
+                                                --(dqs_output_reg_mode = "OPA")
+                                                dqs_output_data_in;
+                                                
+            DQS_OUT2 :  process (dqs_output_delay_chain1_datain)
+                        begin
+                            dqs_output_delay_chain1_dataout <= transport dqs_output_delay_chain1_datain after 
+                                                                (conv_int(io_config_dqs_outputdelaysetting1) * 50 ps);
+                        end process DQS_OUT2;
+        
+        --dqs_output_ff_q--
+            DQS_OUT3 :  process (dqs_output_reg_clk, dqs_areset)
+                        begin
+                            if (now = 0 ns) then
+                                if (dqs_output_reg_power_up = "HIGH") then
+                                    dqs_output_ff_q <= '1';
+                                else
+                                    dqs_output_ff_q <= '0';
+                                end if;
+                            end if;
+                            if (dqs_areset = '1') then
+                                dqs_output_ff_q <= '0';
+                            elsif (rising_edge(dqs_output_reg_clk)) then
+                                if (dqs_output_reg_clkena = '1') then
+                                    if (dqs_sreset = '1') then
+                                        dqs_output_ff_q <= '0';
+                                    else
+                                        dqs_output_ff_q <= dqs_output_data_in;
+                                    end if;
+                                end if;
+                            end if;
+                        end process DQS_OUT3;
+
+        --dqs_output_ddio_out_dataout--
+            -- Half rate enable
+                DQS_OUT4 :  process (dqs_hr_output_data_in)
+                            begin
+                                dqs_output_hr_ddio_out_datain_bus <= dqs_hr_output_data_in;
+                            end process DQS_OUT4;
+                            
+                DQS_OUT5 :  process (dqs_hr_output_reg_clk, dqs_areset)
+                            begin
+                                if (now = 0 ns) then
+                                    if (dqs_output_reg_power_up = "HIGH") then
+                                        dqs_output_hr_ddio_out_datain_reg <= (others => '1');
+                                        dqs_output_hr_ddio_out_datain_reg1 <= (others => '1');
+                                    else
+                                        dqs_output_hr_ddio_out_datain_reg <= (others => '0');
+                                        dqs_output_hr_ddio_out_datain_reg1 <= (others => '0');
+                                    end if;
+                                end if;
+                                if (dqs_areset = '1') then
+                                    if (dqs_output_reg_async_mode = "PRESET") then
+                                        dqs_output_hr_ddio_out_datain_reg <= (others => '1');
+                                        dqs_output_hr_ddio_out_datain_reg1 <= (others => '1');
+                                    else
+                                        dqs_output_hr_ddio_out_datain_reg <= (others => '0');
+                                        dqs_output_hr_ddio_out_datain_reg1 <= (others => '0');
+                                    end if;
+                                elsif (rising_edge(dqs_hr_output_reg_clk)) then
+                                    dqs_output_hr_ddio_out_datain_reg <= dqs_output_hr_ddio_out_datain_bus;
+                                elsif (falling_edge(dqs_hr_output_reg_clk)) then
+                                    dqs_output_hr_ddio_out_datain_reg1 <= (dqs_output_hr_ddio_out_datain_reg(3), dqs_output_hr_ddio_out_datain_reg(1));
+                                end if;
+                            end process DQS_OUT5;
+
+            --dqs_output_hr_ddio_out_high--
+                dqs_output_hr_ddio_out_high_dataout <=  dqs_output_hr_ddio_out_datain_reg1(1) when (dqs_hr_output_reg_clk_mux = '1') else
+                                                        dqs_output_hr_ddio_out_datain_reg(2);
+
+            --dqs_output_hr_ddio_out_low--
+                dqs_output_hr_ddio_out_low_dataout <=   dqs_output_hr_ddio_out_datain_reg1(0) when (dqs_hr_output_reg_clk_mux = '1') else
+                                                        dqs_output_hr_ddio_out_datain_reg(0);
+
+            --dqs_output_ddio_out--
+                DQS_OUT6 :  process (dqs_output_reg_clk, dqs_areset)
+                            begin
+                                if (now = 0 ns) then
+                                    if (dqs_output_reg_power_up = "HIGH") then
+                                        dqs_output_ddio_out_datain_reg <= (others => '1');
+                                    else
+                                        dqs_output_ddio_out_datain_reg <= (others => '0');
+                                    end if;
+                                end if;
+                                if (dqs_areset = '1') then
+                                    if (dqs_output_reg_async_mode = "PRESET") then
+                                        dqs_output_ddio_out_datain_reg <= (others => '1');
+                                    else
+                                        dqs_output_ddio_out_datain_reg <= (others => '0');
+                                    end if;
+                                elsif (rising_edge(dqs_output_reg_clk)) then
+                                    if (dqs_output_reg_clkena = '1') then
+                                        if (dqs_sreset = '1') then
+                                            if (dqs_output_reg_sync_mode = "PRESET") then
+                                                dqs_output_ddio_out_datain_reg <= (others => '1');
+                                            else
+                                                dqs_output_ddio_out_datain_reg <= (others => '0');
+                                            end if;
+                                        else
+                                            if (use_half_rate = "TRUE") then
+                                                dqs_output_ddio_out_datain_reg <= (dqs_output_hr_ddio_out_high_dataout, dqs_output_hr_ddio_out_low_dataout);
+                                            else
+                                                dqs_output_ddio_out_datain_reg <= (dqs_output_data_in_high, dqs_output_data_in_low);
+                                            end if;
+                                        end if;
+                                    end if;
+                                end if;
+                            end process DQS_OUT6;
+                
+                dqs_output_ddio_out_dataout <=  dqs_output_ddio_out_datain_reg(1) when (dqs_output_reg_clk_mux = '1') else 
+                                            dqs_output_ddio_out_datain_reg(0);
+
+    --external--
+        dqs_output_data_out <=  dqs_output_delay_chain2_dataout when (use_dqs_output_delay_chain2 = "TRUE") else
+                                dqs_output_delay_chain1_dataout when (use_dqs_output_delay_chain1 = "TRUE") else
+                                dqs_output_ff_q when (dqs_output_reg_mode = "FF") else
+                                dqs_output_ddio_out_dataout when (dqs_output_reg_mode = "DDIO") else dqs_output_data_in;
+
+--------------------
+-- 3. DQS OE PATH --
+--------------------
+            --dqs_oe_delay_chain2_dataout--
+                dqs_oe_delay_chain2_datain <=   dqs_oe_delay_chain1_dataout when (use_dqs_oe_delay_chain1 = "TRUE") else
+                                                dqs_oe_ff_q when (dqs_oe_reg_mode = "FF") else
+                                                dqs_oe_ddio_oe_dataout when (dqs_oe_reg_mode = "DDIO") else dqs_oe_in;
+    
+                DQS_OE1 :   process (dqs_oe_delay_chain2_datain)
+                            begin
+                                dqs_oe_delay_chain2_dataout <= transport dqs_oe_delay_chain2_datain after 
+                                                                (conv_int(io_config_dqs_outputdelaysetting2) * 50 ps);
+                            end process DQS_OE1;
+
+            --dqs_oe_delay_chain1_dataout--
+                dqs_oe_delay_chain1_datain <=   dqs_oe_ff_q when (dqs_oe_reg_mode = "FF") else
+                                                dqs_oe_ddio_oe_dataout when (dqs_oe_reg_mode = "DDIO") else
+                                                dqs_oe_in;
+    
+                DQS_OE2 :   process (dqs_oe_delay_chain1_datain)
+                            begin
+                                dqs_oe_delay_chain1_dataout <= transport dqs_oe_delay_chain1_datain after
+                                                                (conv_int(io_config_dqs_outputdelaysetting1) * 50 ps);
+                            end process DQS_OE2;
+
+            --dqs_oe_ff_q--
+                DQS_OE3 :   process (dqs_output_reg_clk, dqs_areset)
+                            begin
+                                if (now = 0 ns) then
+                                    if (dqs_oe_reg_power_up = "HIGH") then
+                                        dqs_oe_ff_q <= '1';
+                                    else
+                                        dqs_oe_ff_q <= '0';
+                                    end if;
+                                end if;
+                                if (dqs_areset = '1') then
+                                    dqs_oe_ff_q <= '0';
+                                elsif (rising_edge(dqs_output_reg_clk)) then
+                                    if (dqs_output_reg_clkena = '1') then
+                                        if (dqs_sreset = '1') then
+                                            dqs_oe_ff_q <= '0';
+                                        else
+                                            if (use_half_rate = "TRUE") then
+                                                dqs_oe_ff_q <= dqs_oe_hr_ddio_out_dataout;
+                                            else
+                                                dqs_oe_ff_q <= dqs_oe_in;
+                                            end if;
+                                        end if;
+                                    end if;
+                                end if;
+                            end process DQS_OE3;
+
+            --dqs_oe_ddio_oe_dataout--
+                -- Half rate enable
+                DQS_OE4 :   process (dqs_hr_oe_in)
+                            begin
+                                dqs_hr_oe_ddio_oe_datain_bus <= dqs_hr_oe_in;
+                            end process DQS_OE4;
+
+                DQS_OE5 :   process (dqs_hr_output_reg_clk, dqs_areset)
+                            begin
+                                if (now = 0 ns) then
+                                    if (dqs_oe_reg_power_up = "HIGH") then
+                                        dqs_hr_oe_ddio_oe_datain_reg <= (others => '1');
+                                        dqs_hr_oe_ddio_oe_datain_reg1 <= '1';
+                                    else
+                                        dqs_hr_oe_ddio_oe_datain_reg <= (others => '0');
+                                        dqs_hr_oe_ddio_oe_datain_reg1 <= '0';
+                                    end if;
+                                end if;
+                                if (dqs_areset = '1') then
+                                    if (dqs_oe_reg_async_mode = "PRESET") then
+                                        dqs_hr_oe_ddio_oe_datain_reg <= (others => '1');
+                                        dqs_hr_oe_ddio_oe_datain_reg1 <= '1';
+                                    else
+                                        dqs_hr_oe_ddio_oe_datain_reg <= (others => '0');
+                                        dqs_hr_oe_ddio_oe_datain_reg1 <= '0';
+                                    end if;
+                                elsif (rising_edge(dqs_hr_output_reg_clk)) then
+                                    dqs_hr_oe_ddio_oe_datain_reg <= dqs_hr_oe_ddio_oe_datain_bus;
+                                elsif (falling_edge(dqs_hr_output_reg_clk)) then
+                                    dqs_hr_oe_ddio_oe_datain_reg1 <= dqs_hr_oe_ddio_oe_datain_reg(1);
+                                end if;
+                            end process DQS_OE5;
+
+                dqs_oe_hr_ddio_out_dataout <=   dqs_hr_oe_ddio_oe_datain_reg1 when (dqs_hr_output_reg_clk_mux = '1') else
+                                                dqs_hr_oe_ddio_oe_datain_reg(0);
+
+                DQS_OE6 :   process (dqs_output_reg_clk, dqs_areset)
+                            begin
+                                if (now = 0 ns) then
+                                    if (dqs_oe_reg_power_up = "HIGH") then
+                                        dqs_oe_ddio_oe_datain_reg_hi <= '1';
+                                        dqs_oe_ddio_oe_datain_reg_lo <= '1';
+                                    else
+                                        dqs_oe_ddio_oe_datain_reg_hi <= '0';
+                                        dqs_oe_ddio_oe_datain_reg_lo <= '0';
+                                    end if;
+                                end if;
+                                if (dqs_areset = '1') then
+                                    if (dqs_oe_reg_async_mode = "PRESET") then
+                                        dqs_oe_ddio_oe_datain_reg_hi <= '1';
+                                        dqs_oe_ddio_oe_datain_reg_lo <= '1';
+                                    else
+                                        dqs_oe_ddio_oe_datain_reg_hi <= '0';
+                                        dqs_oe_ddio_oe_datain_reg_lo <= '0';
+                                    end if;
+                                elsif (rising_edge(dqs_output_reg_clk)) then
+                                    if (dqs_output_reg_clkena = '1') then
+                                        if (dqs_sreset = '1') then
+                                            if (dqs_oe_reg_sync_mode = "PRESET") then
+                                                dqs_oe_ddio_oe_datain_reg_hi <= '1';
+                                            else
+                                                dqs_oe_ddio_oe_datain_reg_hi <= '0';
+                                            end if;
+                                        else
+                                            if (use_half_rate = "TRUE") then
+                                                dqs_oe_ddio_oe_datain_reg_hi <= dqs_oe_hr_ddio_out_dataout;
+                                            else
+                                                dqs_oe_ddio_oe_datain_reg_hi <= dqs_oe_in;
+                                            end if;
+                                        end if;
+                                    end if;
+                                elsif (falling_edge(dqs_output_reg_clk)) then
+                                    if (dqs_output_reg_clkena = '1') then
+                                        if (dqs_oe_reg_sync_mode = "PRESET") then
+                                            dqs_oe_ddio_oe_datain_reg_lo <= '1';
+                                        else
+                                            dqs_oe_ddio_oe_datain_reg_lo <= '0';
+                                        end if;
+                                    else
+                                        dqs_oe_ddio_oe_datain_reg_lo <= dqs_oe_ddio_oe_datain_reg_hi;
+                                    end if;
+                                end if;
+                            end process DQS_OE6;
+
+                dqs_oe_ddio_oe_dataout <=   dqs_oe_ddio_oe_datain_reg_lo when (dqs_oe_ddio_oe_datain_reg_lo = '1') else
+                                            dqs_oe_ddio_oe_datain_reg_hi;
+
+        --external--
+            dqs_oe_out <=   not dqs_oe_delay_chain2_dataout when (use_dqs_oe_delay_chain2 = "TRUE") else
+                            not dqs_oe_delay_chain1_dataout when (use_dqs_oe_delay_chain1 = "TRUE") else
+                            not dqs_oe_ff_q when (dqs_oe_reg_mode = "FF") else
+                            not dqs_oe_ddio_oe_dataout when (dqs_oe_reg_mode = "DDIO") else
+                            not dqs_oe_in;
+
+------------------------
+-- 4. DQ/DQS OCT PATH --
+------------------------
+        --dqs_oct_delay_chain2_dataout--
+        --dqsn_oct_delay_chain2_dataout--
+        --bidir_dq_oct_delay_chain2_dataout--
+        --output_dq_oct_delay_chain2_dataout--
+            dqs_oct_delay_chain2_datain <=  dqs_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                                            dqs_oct_ff_q when (oct_reg_mode = "FF") else
+                                            dqs_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                            dqs_oct_in;
+
+            dqsn_oct_delay_chain2_datain <= dqsn_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                                            dqsn_oct_ff_q when (oct_reg_mode = "FF") else
+                                            dqsn_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                            dqsn_oct_in;
+                                            
+            bidir_dq_oct_delay_chain2_dataout <=    bidir_dq_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                                                    bidir_dq_oct_ff_q when (oct_reg_mode = "FF") else
+                                                    bidir_dq_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                                    bidir_dq_oct_in;
+
+            output_dq_oct_delay_chain2_datain <=    output_dq_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                                                    output_dq_oct_ff_q when (oct_reg_mode = "FF") else
+                                                    output_dq_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                                    output_dq_oct_in;
+
+            DQ_DQS_OCT1 :   process (dqs_oct_delay_chain2_datain)
+                            begin
+                                dqs_oct_delay_chain2_dataout <= transport dqs_oct_delay_chain2_datain after
+                                                                (conv_int(dqs_config_octdelaysetting2)* 50 ps);
+                            end process DQ_DQS_OCT1;
+                            
+            DQ_DQS_OCT2 :   process (dqsn_oct_delay_chain2_datain)
+                            begin
+                                dqsn_oct_delay_chain2_dataout <= transport dqsn_oct_delay_chain2_datain after
+                                                                (conv_int(dqs_config_octdelaysetting2)* 50 ps);
+                            end process DQ_DQS_OCT2;
+
+            DQ_DQS_OCT3 :   process (bidir_dq_oct_delay_chain2_datain)
+                            begin
+                                bidir_dq_oct_delay_chain2_dataout <= transport bidir_dq_oct_delay_chain2_datain after
+                                                                (conv_int(dqs_config_octdelaysetting2)* 50 ps);
+                            end process DQ_DQS_OCT3;
+
+            DQ_DQS_OCT4 :   process (output_dq_oct_delay_chain2_datain)
+                            begin
+                                output_dq_oct_delay_chain2_dataout <= transport output_dq_oct_delay_chain2_datain after
+                                                                (conv_int(dqs_config_octdelaysetting2)* 50 ps);
+                            end process DQ_DQS_OCT4;
+
+        --dqs_oct_delay_chain1_dataout--
+        --dqsn_oct_delay_chain1_dataout--
+        --bidir_dq_oct_delay_chain1_dataout--
+        --output_dq_oct_delay_chain1_dataout--
+            dqs_oct_delay_chain1_datain <=  dqs_oct_ff_q when (oct_reg_mode = "FF") else
+                                            dqs_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                            dqs_oct_in;
+
+            dqsn_oct_delay_chain1_datain <= dqsn_oct_ff_q when (oct_reg_mode = "FF") else
+                                            dqsn_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                            dqsn_oct_in;
+
+            bidir_dq_oct_delay_chain1_datain <= bidir_dq_oct_ff_q when (oct_reg_mode = "FF") else
+                                                bidir_dq_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                                bidir_dq_oct_in;
+
+            output_dq_oct_delay_chain1_datain <=    output_dq_oct_ff_q when (oct_reg_mode = "FF") else
+                                                    output_dq_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                                    output_dq_oct_in;
+
+            DQ_DQS_OCT5 :   process (dqs_oct_delay_chain1_datain)
+                            begin
+                                dqs_oct_delay_chain1_dataout <= transport dqs_oct_delay_chain1_datain after
+                                                                (conv_int(dqs_config_octdelaysetting1)* 50 ps);
+                            end process DQ_DQS_OCT5;
+                            
+            DQ_DQS_OCT6 :   process (dqsn_oct_delay_chain1_datain)
+                            begin
+                                dqsn_oct_delay_chain1_dataout <= transport dqsn_oct_delay_chain1_datain after
+                                                                (conv_int(dqs_config_octdelaysetting1)* 50 ps);
+                            end process DQ_DQS_OCT6;
+
+            DQ_DQS_OCT7 :   process (bidir_dq_oct_delay_chain1_datain)
+                            begin
+                                bidir_dq_oct_delay_chain1_dataout <= transport bidir_dq_oct_delay_chain1_datain after
+                                                                (conv_int(dqs_config_octdelaysetting1)* 50 ps);
+                            end process DQ_DQS_OCT7;
+
+            DQ_DQS_OCT8 :   process (output_dq_oct_delay_chain1_datain)
+                            begin
+                                output_dq_oct_delay_chain1_dataout <= transport output_dq_oct_delay_chain1_datain after
+                                                                (conv_int(dqs_config_octdelaysetting1)* 50 ps);
+                            end process DQ_DQS_OCT8;
+
+        --dqs_oct_ddio_oe_dataout--
+        --dqsn_oct_ddio_oe_dataout--
+        --bidir_dq_oct_ddio_oe_dataout--
+        --output_dq_oct_ddio_oe_dataout--
+            DQ_DQS_OCT9 :   process (oct_reg_clk)
+                            begin
+                                if (rising_edge(oct_reg_clk)) then
+                                    if (use_half_rate = "TRUE") then
+                                        dqs_oct_ff_q <= dqs_oct_hr_ddio_out_dataout;
+                                        dqsn_oct_ff_q <= dqsn_oct_hr_ddio_out_dataout;
+                                        bidir_dq_oct_ff_q <= bidir_dq_oct_hr_ddio_out_dataout;
+                                        output_dq_oct_ff_q <= output_dq_oct_hr_ddio_out_dataout;
+                                    else
+                                        dqs_oct_ff_q <= dqs_oct_in;
+                                        dqsn_oct_ff_q <= dqsn_oct_in;
+                                        bidir_dq_oct_ff_q <= bidir_dq_oct_in;
+                                        output_dq_oct_ff_q <= output_dq_oct_in;
+                                    end if;
+                                end if;
+                            end process DQ_DQS_OCT9;
+
+        --dqs_oct_ddio_oe_dataout--
+        --dqsn_oct_ddio_oe_dataout--
+        --bidir_dq_oct_ddio_oe_dataout--
+        --output_dq_oct_ddio_oe_dataout--
+            DQ_DQS_OCT10 :  process (dqs_hr_oct_in)
+                            begin
+                                dqs_oct_hr_ddio_out_datain_bus <= dqs_hr_oct_in;
+                            end process DQ_DQS_OCT10;
+                            
+            DQ_DQS_OCT11 :  process (dqsn_hr_oct_in)
+                            begin
+                                dqsn_oct_hr_ddio_out_datain_bus <= dqsn_hr_oct_in;
+                            end process DQ_DQS_OCT11;
+                            
+            DQ_DQS_OCT12 :  process (bidir_dq_hr_oct_in)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    bidir_dq_hr_oct_in_bus0(i) <= bidir_dq_hr_oct_in(i*2);
+                                    bidir_dq_hr_oct_in_bus1(i) <= bidir_dq_hr_oct_in(i*2+1);
+                                end loop;
+                            end process DQ_DQS_OCT12;
+                            
+            DQ_DQS_OCT13 :  process (output_dq_hr_oct_in)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    output_dq_hr_oct_in_bus0(i) <= output_dq_hr_oct_in(i*2);  
+                                    output_dq_hr_oct_in_bus1(i) <= output_dq_hr_oct_in(i*2+1);
+                                end loop;
+                            end process DQ_DQS_OCT13;
+
+            DQ_DQS_OCT14 :  process (hr_oct_reg_clk)
+                            begin
+                                if (rising_edge(hr_oct_reg_clk)) then
+                                    dqs_oct_hr_ddio_out_datain_reg <= dqs_oct_hr_ddio_out_datain_bus;
+                                    dqsn_oct_hr_ddio_out_datain_reg <= dqsn_oct_hr_ddio_out_datain_bus;
+                                    bidir_dq_hr_oct_in_reg0 <= bidir_dq_hr_oct_in_bus0;
+                                    bidir_dq_hr_oct_in_reg1 <= bidir_dq_hr_oct_in_bus1;
+                                    output_dq_hr_oct_in_reg0 <= output_dq_hr_oct_in_bus0;
+                                    output_dq_hr_oct_in_reg1 <= output_dq_hr_oct_in_bus1;
+                                elsif (falling_edge(hr_oct_reg_clk)) then
+                                    dqs_oct_hr_ddio_out_datain_reg1 <= dqs_oct_hr_ddio_out_datain_reg(1);
+                                    dqsn_oct_hr_ddio_out_datain_reg1 <= dqsn_oct_hr_ddio_out_datain_reg(1);
+                                    bidir_dq_hr_oct_in_reg2 <= bidir_dq_hr_oct_in_reg1;
+                                    output_dq_hr_oct_in_reg2 <= output_dq_hr_oct_in_reg1;
+                                end if;
+                            end process DQ_DQS_OCT14;
+
+            dqs_oct_hr_ddio_out_dataout <=  dqs_oct_hr_ddio_out_datain_reg1 when (hr_oct_reg_clk_mux = '1') else
+                                            dqs_oct_hr_ddio_out_datain_reg(0);
+
+            dqsn_oct_hr_ddio_out_dataout <= dqsn_oct_hr_ddio_out_datain_reg1 when (hr_oct_reg_clk_mux = '1') else
+                                            dqsn_oct_hr_ddio_out_datain_reg(0);
+
+            bidir_dq_oct_hr_ddio_out_dataout <= bidir_dq_hr_oct_in_reg2 when (hr_oct_reg_clk_mux = '1') else
+                                                bidir_dq_hr_oct_in_reg0;
+
+            output_dq_oct_hr_ddio_out_dataout <=    output_dq_hr_oct_in_reg2 when (hr_oct_reg_clk_mux = '1') else
+                                                    output_dq_hr_oct_in_reg0;
+
+            DQ_DQS_OCT15 :  process (oct_reg_clk)
+                            begin
+                                if (rising_edge(oct_reg_clk)) then
+                                    if (use_half_rate = "TRUE") then
+                                        dqs_oct_ddio_oe_datain_reg_hi <= dqs_oct_hr_ddio_out_dataout;
+                                        dqsn_oct_ddio_oe_datain_reg_hi <= dqsn_oct_hr_ddio_out_dataout;
+                                        bidir_dq_oct_ddio_oe_datain_hi <= bidir_dq_oct_hr_ddio_out_dataout;
+                                        output_dq_oct_ddio_oe_datain_hi <= output_dq_oct_hr_ddio_out_dataout;
+                                    else
+                                        dqs_oct_ddio_oe_datain_reg_hi <= dqs_oct_in;
+                                        dqsn_oct_ddio_oe_datain_reg_hi <= dqsn_oct_in;
+                                        bidir_dq_oct_ddio_oe_datain_hi <= bidir_dq_oct_in;
+                                        output_dq_oct_ddio_oe_datain_hi <= output_dq_oct_in;
+                                    end if;
+                                elsif (falling_edge(oct_reg_clk)) then
+                                    dqs_oct_ddio_oe_datain_reg_lo <= dqs_oct_ddio_oe_datain_reg_hi;
+                                    dqsn_oct_ddio_oe_datain_reg_lo <= dqsn_oct_ddio_oe_datain_reg_hi;
+                                    bidir_dq_oct_ddio_oe_datain_lo <= bidir_dq_oct_ddio_oe_datain_hi;
+                                    output_dq_oct_ddio_oe_datain_lo <= output_dq_oct_ddio_oe_datain_hi;
+                                end if;
+                            end process DQ_DQS_OCT15;
+
+            dqs_oct_ddio_oe_dataout <=  dqs_oct_ddio_oe_datain_reg_lo when (dqs_oct_ddio_oe_datain_reg_lo = '1') else
+                                        dqs_oct_ddio_oe_datain_reg_hi;
+
+            dqsn_oct_ddio_oe_dataout <= dqsn_oct_ddio_oe_datain_reg_lo when (dqsn_oct_ddio_oe_datain_reg_lo = '1') else
+                                        dqsn_oct_ddio_oe_datain_reg_hi;
+
+            DQ_DQS_OCT16 :  process (bidir_dq_oct_ddio_oe_datain_lo, bidir_dq_oct_ddio_oe_datain_hi)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    if (bidir_dq_oct_ddio_oe_datain_lo(i) = '1') then
+                                        bidir_dq_oct_ddio_oe_dataout(i) <= bidir_dq_oct_ddio_oe_datain_lo(i);
+                                    else
+                                        bidir_dq_oct_ddio_oe_dataout(i) <= bidir_dq_oct_ddio_oe_datain_hi(i);
+                                    end if;
+                                end loop;
+                            end process DQ_DQS_OCT16;
+            
+            DQ_DQS_OCT17 :  process (output_dq_oct_ddio_oe_datain_lo, output_dq_oct_ddio_oe_datain_hi)
+                            begin
+                                for i in 0 to (number_of_output_dq - 1) loop
+                                    if (output_dq_oct_ddio_oe_datain_lo(i) = '1') then
+                                        output_dq_oct_ddio_oe_dataout(i) <= output_dq_oct_ddio_oe_datain_lo(i);
+                                    else
+                                        output_dq_oct_ddio_oe_dataout(i) <= output_dq_oct_ddio_oe_datain_hi(i);
+                                    end if;
+                                end loop;
+                            end process DQ_DQS_OCT17;
+
+        --external--
+            dqs_oct_out <=  dqs_oct_delay_chain2_dataout when (use_oct_delay_chain2 = "TRUE") else
+                            dqs_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                            dqs_oct_ff_q when (oct_reg_mode = "FF") else
+                            dqs_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                            dqs_oct_in;
+
+            dqsn_oct_out <= dqsn_oct_delay_chain2_dataout when (use_oct_delay_chain2 = "TRUE") else
+                            dqsn_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                            dqsn_oct_ff_q when (oct_reg_mode = "FF") else
+                            dqsn_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                            dqsn_oct_in;
+
+            bidir_dq_oct_out <= bidir_dq_oct_delay_chain2_dataout when (use_oct_delay_chain2 = "TRUE") else
+                                bidir_dq_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                                bidir_dq_oct_ff_q when (oct_reg_mode = "FF") else
+                                bidir_dq_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                bidir_dq_oct_in;
+
+            output_dq_oct_out <=    output_dq_oct_delay_chain2_dataout when (use_oct_delay_chain2 = "TRUE") else
+                                    output_dq_oct_delay_chain1_dataout when (use_oct_delay_chain1 = "TRUE") else
+                                    output_dq_oct_ff_q when (oct_reg_mode = "FF") else
+                                    output_dq_oct_ddio_oe_dataout when (oct_reg_mode = "DDIO") else
+                                    output_dq_oct_in;
+
+----------------------
+-- 5. DQ INPUT PATH --
+----------------------
+        --bidir_dq_input_delay_chain_dataout--
+            DQ_IN1 :    process (bidir_dq_input_data_in)
+                        begin
+                            for i in 0 to (number_of_bidir_dq - 1) loop
+                                bidir_dq_input_delay_chain_dataout(i) <=    transport bidir_dq_input_data_in(i) after
+                                                                            (conv_int((io_config_bi_dq_padtoinputregisterdelaysetting(i*4+3),
+                                                                            io_config_bi_dq_padtoinputregisterdelaysetting(i*4+2),
+                                                                            io_config_bi_dq_padtoinputregisterdelaysetting(i*4+1),
+                                                                            io_config_bi_dq_padtoinputregisterdelaysetting(i*4)))* 50 ps);
+                            end loop;
+                        end process DQ_IN1;
+
+        --input_dq_input_delay_chain_dataout--
+            DQ_IN2 :    process (input_dq_input_data_in)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                input_dq_input_delay_chain_dataout(i) <=    transport input_dq_input_data_in(i) after
+                                                                            (conv_int((io_config_in_dq_padtoinputregisterdelaysetting(i*4+3),
+                                                                            io_config_in_dq_padtoinputregisterdelaysetting(i*4+2),
+                                                                            io_config_in_dq_padtoinputregisterdelaysetting(i*4+1),
+                                                                            io_config_in_dq_padtoinputregisterdelaysetting(i*4)))* 50 ps);
+                            end loop;
+                        end process DQ_IN2;
+
+        --bidir_dq_input_ff_q--
+            DQ_IN3 :    process (input_ff_clk, i_bidir_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_bidir_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        bidir_dq_input_ff_q(i) <= '1';
+                                    else
+                                        bidir_dq_input_ff_q(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_bidir_dq_input_areset(i) = '1') then
+                                    bidir_dq_input_ff_q(i) <= '0';
+                                elsif (rising_edge(input_ff_clk)) then
+                                    if (dq_input_reg_clkena = '1') then
+                                        if (i_input_dq_input_sreset(i) = '1') then
+                                            bidir_dq_input_ff_q(i) <= '0';
+                                        else
+                                            if (use_dq_input_delay_chain = "TRUE") then
+                                                bidir_dq_input_ff_q(i) <= bidir_dq_input_delay_chain_dataout(i);
+                                            else
+                                                bidir_dq_input_ff_q(i) <= bidir_dq_input_data_in(i);
+                                            end if;
+                                        end if;
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_IN3;
+
+        --input_dq_input_ff_q--
+            DQ_IN4 :    process (input_ff_clk, i_input_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        input_dq_input_ff_q(i) <= '1';
+                                    else
+                                        input_dq_input_ff_q(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_input_dq_input_areset(i) = '1') then
+                                    input_dq_input_ff_q(i) <= '0';
+                                elsif (rising_edge(input_ff_clk)) then
+                                    if (dq_input_reg_clkena = '1') then
+                                        if (i_input_dq_input_sreset(i) = '1') then
+                                            input_dq_input_ff_q(i) <= '0';
+                                        else
+                                            if (use_dq_input_delay_chain = "TRUE") then
+                                                input_dq_input_ff_q(i) <= input_dq_input_delay_chain_dataout(i);
+                                            else
+                                                input_dq_input_ff_q(i) <= input_dq_input_data_in(i);
+                                            end if;
+                                        end if;
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_IN4;
+                        
+        --bidir_dq_ddio_in_regouthi--
+        --bidir_dq_ddio_in_regoutlo--
+            bidir_dq_ddio_in_datain <=  bidir_dq_input_delay_chain_dataout when (use_dq_input_delay_chain = "TRUE") else
+                                        bidir_dq_input_data_in;
+
+            DQ_IN5 :    process (dq_ddio_in_clk0, i_bidir_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_bidir_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        bidir_dq_ddio_in_datain_reg_hi(i) <= '1';
+                                        bidir_dq_ddio_in_datain_reg_lo1(i) <= '1';
+                                    else
+                                        bidir_dq_ddio_in_datain_reg_hi(i) <= '0';
+                                        bidir_dq_ddio_in_datain_reg_lo1(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_bidir_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        bidir_dq_ddio_in_datain_reg_hi(i) <= '1';
+                                        bidir_dq_ddio_in_datain_reg_lo1(i) <= '1';
+                                    else
+                                        bidir_dq_ddio_in_datain_reg_hi(i) <= '0';
+                                        bidir_dq_ddio_in_datain_reg_lo1(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_ddio_in_clk0)) then
+                                    if (dq_input_reg_clkena = '1') then
+                                        if (i_bidir_dq_input_sreset(i) = '1') then
+                                            if (dq_input_reg_async_mode = "PRESET") then
+                                                bidir_dq_ddio_in_datain_reg_hi(i) <= '1';
+                                                bidir_dq_ddio_in_datain_reg_lo1(i) <= '1';
+                                            else
+                                                bidir_dq_ddio_in_datain_reg_hi(i) <= '0';
+                                                bidir_dq_ddio_in_datain_reg_lo1(i) <= '0';
+                                            end if;
+                                        else
+                                            bidir_dq_ddio_in_datain_reg_hi(i) <= bidir_dq_ddio_in_datain(i);
+                                            bidir_dq_ddio_in_datain_reg_lo1(i) <= bidir_dq_ddio_in_datain_reg_lo(i);
+                                        end if;
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_IN5;
+
+            DQ_IN6 :    process (dq_ddio_in_clk1, i_bidir_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_bidir_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        bidir_dq_ddio_in_datain_reg_lo(i) <= '1';
+                                    else
+                                        bidir_dq_ddio_in_datain_reg_lo(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_bidir_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        bidir_dq_ddio_in_datain_reg_lo(i) <= '1';
+                                    else
+                                        bidir_dq_ddio_in_datain_reg_lo(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_ddio_in_clk1)) then
+                                    if (dq_input_reg_clkena = '1') then
+                                        if (i_bidir_dq_input_sreset(i) = '1') then
+                                            if (dq_input_reg_async_mode = "PRESET") then
+                                                bidir_dq_ddio_in_datain_reg_lo(i) <= '1';
+                                            else
+                                                bidir_dq_ddio_in_datain_reg_lo(i) <= '0';
+                                            end if;
+                                        else
+                                            bidir_dq_ddio_in_datain_reg_lo(i) <= bidir_dq_ddio_in_datain(i);
+                                        end if;
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_IN6;
+
+            bidir_dq_ddio_in_regouthi <= bidir_dq_ddio_in_datain_reg_hi;
+            bidir_dq_ddio_in_regoutlo <= bidir_dq_ddio_in_datain_reg_lo1;
+
+        --input_dq_ddio_in_regouthi--
+        --input_dq_ddio_in_regoutlo--
+            input_dq_ddio_in_datain <=  input_dq_input_delay_chain_dataout when (use_dq_input_delay_chain = "TRUE") else
+                                        input_dq_input_data_in;
+
+            DQ_IN7 :    process (dq_ddio_in_clk0, i_input_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        input_dq_ddio_in_datain_reg_hi(i) <= '1';
+                                        input_dq_ddio_in_datain_reg_lo1(i) <= '1';
+                                    else
+                                        input_dq_ddio_in_datain_reg_hi(i) <= '0';
+                                        input_dq_ddio_in_datain_reg_lo1(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_input_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        input_dq_ddio_in_datain_reg_hi(i) <= '1';
+                                        input_dq_ddio_in_datain_reg_lo1(i) <= '1';
+                                    else
+                                        input_dq_ddio_in_datain_reg_hi(i) <= '0';
+                                        input_dq_ddio_in_datain_reg_lo1(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_ddio_in_clk0)) then
+                                    if (dq_input_reg_clkena = '1') then
+                                        if (i_input_dq_input_sreset(i) = '1') then
+                                            if (dq_input_reg_async_mode = "PRESET") then
+                                                input_dq_ddio_in_datain_reg_hi(i) <= '1';
+                                                input_dq_ddio_in_datain_reg_lo1(i) <= '1';
+                                            else
+                                                input_dq_ddio_in_datain_reg_hi(i) <= '0';
+                                                input_dq_ddio_in_datain_reg_lo1(i) <= '0';
+                                            end if;
+                                        else
+                                            input_dq_ddio_in_datain_reg_hi(i) <= input_dq_ddio_in_datain(i);
+                                            input_dq_ddio_in_datain_reg_lo1(i) <= input_dq_ddio_in_datain_reg_lo(i);
+                                        end if;
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_IN7;
+
+            DQ_IN8 :    process (dq_ddio_in_clk1, i_input_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        input_dq_ddio_in_datain_reg_lo(i) <= '1';
+                                    else
+                                        input_dq_ddio_in_datain_reg_lo(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_input_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        input_dq_ddio_in_datain_reg_lo(i) <= '1';
+                                    else
+                                        input_dq_ddio_in_datain_reg_lo(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_ddio_in_clk1)) then
+                                    if (dq_input_reg_clkena = '1') then
+                                        if (i_input_dq_input_sreset(i) = '1') then
+                                            if (dq_input_reg_async_mode = "PRESET") then
+                                                input_dq_ddio_in_datain_reg_lo(i) <= '1';
+                                            else
+                                                input_dq_ddio_in_datain_reg_lo(i) <= '0';
+                                            end if;
+                                        else
+                                            input_dq_ddio_in_datain_reg_lo(i) <= input_dq_ddio_in_datain(i);
+                                        end if;
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_IN8;
+
+            input_dq_ddio_in_regouthi <= input_dq_ddio_in_datain_reg_hi;
+            input_dq_ddio_in_regoutlo <= input_dq_ddio_in_datain_reg_lo1;
+
+        --bidir_dq_ipa_high_dataout--
+        --bidir_dq_ipa_low_dataout--
+            DQ_IN9 :    process (dq_ipa_delayed_clk, i_bidir_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        bidir_dq_ddio_in_regoutlo_reg(i) <= '1';
+                                        bidir_dq_ddio_in_regoutlo_reg1(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg2(i) <= '1';
+                                        bidir_dq_ddio_in_regoutlo_reg3(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg1(i) <= '1';
+                                        bidir_dq_ddio_in_regoutlo_reg2(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg3(i) <= '1';
+                                    else
+                                        bidir_dq_ddio_in_regoutlo_reg(i) <= '0';
+                                        bidir_dq_ddio_in_regoutlo_reg1(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg2(i) <= '0';
+                                        bidir_dq_ddio_in_regoutlo_reg3(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg1(i) <= '0';
+                                        bidir_dq_ddio_in_regoutlo_reg2(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg3(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_bidir_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        bidir_dq_ddio_in_regoutlo_reg(i) <= '1';
+                                        bidir_dq_ddio_in_regoutlo_reg1(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg2(i) <= '1';
+                                        bidir_dq_ddio_in_regoutlo_reg3(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg1(i) <= '1';
+                                        bidir_dq_ddio_in_regoutlo_reg2(i) <= '1';
+                                        bidir_dq_ddio_in_regouthi_reg3(i) <= '1';
+                                    else
+                                        bidir_dq_ddio_in_regoutlo_reg(i) <= '0';
+                                        bidir_dq_ddio_in_regoutlo_reg1(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg2(i) <= '0';
+                                        bidir_dq_ddio_in_regoutlo_reg3(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg1(i) <= '0';
+                                        bidir_dq_ddio_in_regoutlo_reg2(i) <= '0';
+                                        bidir_dq_ddio_in_regouthi_reg3(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_ipa_delayed_clk)) then
+                                    bidir_dq_ddio_in_regoutlo_reg(i) <= bidir_dq_ddio_in_regoutlo(i);
+                                    bidir_dq_ddio_in_regoutlo_reg1(i) <= bidir_dq_ddio_in_regoutlo_reg(i);
+                                    bidir_dq_ddio_in_regoutlo_reg3(i) <= bidir_dq_ddio_in_regoutlo_wire1(i);
+                                    bidir_dq_ddio_in_regouthi_reg(i) <= bidir_dq_ddio_in_regouthi(i);
+                                    bidir_dq_ddio_in_regouthi_reg1(i) <= bidir_dq_ddio_in_regouthi_reg(i);
+                                    bidir_dq_ddio_in_regouthi_reg3(i) <= bidir_dq_ddio_in_regouthi_wire1(i);
+                                elsif (falling_edge(dq_ipa_delayed_clk)) then
+                                    bidir_dq_ddio_in_regoutlo_reg2(i) <= bidir_dq_ddio_in_regoutlo_wire(i);
+                                    bidir_dq_ddio_in_regouthi_reg2(i) <= bidir_dq_ddio_in_regouthi_wire(i);
+                                end if;
+                            end loop;
+                        end process DQ_IN9;
+
+            bidir_dq_ddio_in_regoutlo_wire <=   bidir_dq_ddio_in_regoutlo_reg1 when (dq_ipa_add_input_cycle_delay = "TRUE") else
+                                                bidir_dq_ddio_in_regoutlo_reg when (dq_ipa_add_input_cycle_delay = "FALSE") else
+                                                bidir_dq_ddio_in_regoutlo_reg1 when (input_phase_alignment_enainputcycledelay = '1') else
+                                                bidir_dq_ddio_in_regoutlo_reg;
+            
+            bidir_dq_ddio_in_regouthi_wire <=   bidir_dq_ddio_in_regouthi_reg1 when (dq_ipa_add_input_cycle_delay = "TRUE") else
+                                                bidir_dq_ddio_in_regouthi_reg when (dq_ipa_add_input_cycle_delay = "FALSE") else
+                                                bidir_dq_ddio_in_regouthi_reg1 when (input_phase_alignment_enainputcycledelay = '1') else
+                                                bidir_dq_ddio_in_regouthi_reg;
+
+            bidir_dq_ddio_in_regoutlo_wire1 <=  bidir_dq_ddio_in_regoutlo_reg2 when (dq_ipa_add_phase_transfer_reg = "TRUE") else
+                                                bidir_dq_ddio_in_regoutlo_wire when (dq_ipa_add_phase_transfer_reg = "FALSE") else
+                                                bidir_dq_ddio_in_regoutlo_reg2 when (input_phase_alignment_enaphasetransferreg = '1') else
+                                                bidir_dq_ddio_in_regoutlo_wire;
+
+            bidir_dq_ddio_in_regouthi_wire1 <=  bidir_dq_ddio_in_regouthi_reg2 when (dq_ipa_add_phase_transfer_reg = "TRUE") else
+                                                bidir_dq_ddio_in_regouthi_wire when (dq_ipa_add_phase_transfer_reg = "FALSE") else
+                                                bidir_dq_ddio_in_regouthi_reg2 when (input_phase_alignment_enaphasetransferreg = '1') else
+                                                bidir_dq_ddio_in_regouthi_wire;
+
+            bidir_dq_ipa_low_dataout <= bidir_dq_ddio_in_regoutlo_wire1 when (dq_ipa_bypass_output_register = "TRUE") else
+                                        bidir_dq_ddio_in_regoutlo_reg3;
+            
+            bidir_dq_ipa_high_dataout <=    bidir_dq_ddio_in_regouthi_wire1 when (dq_ipa_bypass_output_register = "TRUE") else
+                                            bidir_dq_ddio_in_regouthi_reg3;
+
+        --input_dq_ipa_high_dataout--
+        --input_dq_ipa_low_dataout--
+            DQ_IN10 :   process (dq_ipa_delayed_clk, i_input_dq_input_areset)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        input_dq_ddio_in_regoutlo_reg(i) <= '1';
+                                        input_dq_ddio_in_regoutlo_reg1(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg2(i) <= '1';
+                                        input_dq_ddio_in_regoutlo_reg3(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg1(i) <= '1';
+                                        input_dq_ddio_in_regoutlo_reg2(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg3(i) <= '1';
+                                    else
+                                        input_dq_ddio_in_regoutlo_reg(i) <= '0';
+                                        input_dq_ddio_in_regoutlo_reg1(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg2(i) <= '0';
+                                        input_dq_ddio_in_regoutlo_reg3(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg1(i) <= '0';
+                                        input_dq_ddio_in_regoutlo_reg2(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg3(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_input_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        input_dq_ddio_in_regoutlo_reg(i) <= '1';
+                                        input_dq_ddio_in_regoutlo_reg1(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg2(i) <= '1';
+                                        input_dq_ddio_in_regoutlo_reg3(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg1(i) <= '1';
+                                        input_dq_ddio_in_regoutlo_reg2(i) <= '1';
+                                        input_dq_ddio_in_regouthi_reg3(i) <= '1';
+                                    else
+                                        input_dq_ddio_in_regoutlo_reg(i) <= '0';
+                                        input_dq_ddio_in_regoutlo_reg1(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg2(i) <= '0';
+                                        input_dq_ddio_in_regoutlo_reg3(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg1(i) <= '0';
+                                        input_dq_ddio_in_regoutlo_reg2(i) <= '0';
+                                        input_dq_ddio_in_regouthi_reg3(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_ipa_delayed_clk)) then
+                                    input_dq_ddio_in_regoutlo_reg(i) <= input_dq_ddio_in_regoutlo(i);
+                                    input_dq_ddio_in_regoutlo_reg1(i) <= input_dq_ddio_in_regoutlo_reg(i);
+                                    input_dq_ddio_in_regoutlo_reg3(i) <= input_dq_ddio_in_regoutlo_wire1(i);
+                                    input_dq_ddio_in_regouthi_reg(i) <= input_dq_ddio_in_regouthi(i);
+                                    input_dq_ddio_in_regouthi_reg1(i) <= input_dq_ddio_in_regouthi_reg(i);
+                                    input_dq_ddio_in_regouthi_reg3(i) <= input_dq_ddio_in_regouthi_wire1(i);
+                                elsif (falling_edge(dq_ipa_delayed_clk)) then
+                                    input_dq_ddio_in_regoutlo_reg2(i) <= input_dq_ddio_in_regoutlo_wire(i);
+                                    input_dq_ddio_in_regouthi_reg2(i) <= input_dq_ddio_in_regouthi_wire(i);
+                                end if;
+                            end loop;
+                        end process DQ_IN10;
+
+            input_dq_ddio_in_regoutlo_wire <=   input_dq_ddio_in_regoutlo_reg1 when (dq_ipa_add_input_cycle_delay = "TRUE") else
+                                                input_dq_ddio_in_regoutlo_reg when (dq_ipa_add_input_cycle_delay = "FALSE") else
+                                                input_dq_ddio_in_regoutlo_reg1 when (input_phase_alignment_enainputcycledelay = '1') else
+                                                input_dq_ddio_in_regoutlo_reg;
+            
+            input_dq_ddio_in_regouthi_wire <=   input_dq_ddio_in_regouthi_reg1 when (dq_ipa_add_input_cycle_delay = "TRUE") else
+                                                input_dq_ddio_in_regouthi_reg when (dq_ipa_add_input_cycle_delay = "FALSE") else
+                                                input_dq_ddio_in_regouthi_reg1 when (input_phase_alignment_enainputcycledelay = '1') else
+                                                input_dq_ddio_in_regouthi_reg;
+
+            input_dq_ddio_in_regoutlo_wire1 <=  input_dq_ddio_in_regoutlo_reg2 when (dq_ipa_add_phase_transfer_reg = "TRUE") else
+                                                input_dq_ddio_in_regoutlo_wire when (dq_ipa_add_phase_transfer_reg = "FALSE") else
+                                                input_dq_ddio_in_regoutlo_reg2 when (input_phase_alignment_enaphasetransferreg = '1') else
+                                                input_dq_ddio_in_regoutlo_wire;
+
+            input_dq_ddio_in_regouthi_wire1 <=  input_dq_ddio_in_regouthi_reg2 when (dq_ipa_add_phase_transfer_reg = "TRUE") else
+                                                input_dq_ddio_in_regouthi_wire when (dq_ipa_add_phase_transfer_reg = "FALSE") else
+                                                input_dq_ddio_in_regouthi_reg2 when (input_phase_alignment_enaphasetransferreg = '1') else
+                                                input_dq_ddio_in_regouthi_wire;
+
+            input_dq_ipa_low_dataout <= input_dq_ddio_in_regoutlo_wire1 when (dq_ipa_bypass_output_register = "TRUE") else
+                                        input_dq_ddio_in_regoutlo_reg3;
+            
+            input_dq_ipa_high_dataout <=    input_dq_ddio_in_regouthi_wire1 when (dq_ipa_bypass_output_register = "TRUE") else
+                                            input_dq_ddio_in_regouthi_reg3;
+
+        --bidir_dq_half_rate_input_dataout--
+            DQ_IN11 :   process (io_clock_dividerclkout, i_bidir_dq_input_areset, bidir_dq_half_rate_input_datain_wire1, 
+                                bidir_dq_half_rate_input_datain_wire)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        bidir_dq_half_rate_input_datain_reg1(i*2) <= '1';
+                                        bidir_dq_half_rate_input_datain_reg1(i*2+1) <= '1';
+                                        bidir_dq_half_rate_input_datain_reg2(i) <= '1';
+                                        bidir_dq_half_rate_input_datain_reg3(i) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4+1) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4+2) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4+3) <= '1';
+                                    else
+                                        bidir_dq_half_rate_input_datain_reg1(i*2) <= '0';
+                                        bidir_dq_half_rate_input_datain_reg1(i*2+1) <= '0';
+                                        bidir_dq_half_rate_input_datain_reg2(i) <= '0';
+                                        bidir_dq_half_rate_input_datain_reg3(i) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4+1) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4+2) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4+3) <= '0';
+                                    end if;
+                                end if;
+                                if (i_bidir_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        bidir_dq_half_rate_input_datain_reg1(i*2) <= '1';
+                                        bidir_dq_half_rate_input_datain_reg1(i*2+1) <= '1';
+                                        bidir_dq_half_rate_input_datain_reg2(i) <= '1';
+                                        bidir_dq_half_rate_input_datain_reg3(i) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4+1) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4+2) <= '1';
+                                        bidir_dq_half_rate_input_dataout(i*4+3) <= '1';
+                                    else
+                                        bidir_dq_half_rate_input_datain_reg1(i*2) <= '0';
+                                        bidir_dq_half_rate_input_datain_reg1(i*2+1) <= '0';
+                                        bidir_dq_half_rate_input_datain_reg2(i) <= '0';
+                                        bidir_dq_half_rate_input_datain_reg3(i) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4+1) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4+2) <= '0';
+                                        bidir_dq_half_rate_input_dataout(i*4+3) <= '0';
+                                    end if;
+                                elsif (rising_edge(io_clock_dividerclkout)) then
+                                    bidir_dq_half_rate_input_datain_reg2(i) <= bidir_dq_ipa_high_dataout(i);
+                                    bidir_dq_half_rate_input_datain_reg3(i) <= bidir_dq_ipa_low_dataout(i);
+                                    bidir_dq_half_rate_input_dataout(i*4) <= bidir_dq_half_rate_input_datain_reg1(i*2);
+                                    bidir_dq_half_rate_input_dataout(i*4+1) <= bidir_dq_half_rate_input_datain_reg1(i*2+1);
+                                elsif (falling_edge(io_clock_dividerclkout)) then
+                                    bidir_dq_half_rate_input_datain_reg1(i*2) <= bidir_dq_ipa_low_dataout(i);
+                                    bidir_dq_half_rate_input_datain_reg1(i*2+1) <= bidir_dq_ipa_high_dataout(i);
+                                end if;
+                                bidir_dq_half_rate_input_dataout(i*4+2) <= bidir_dq_half_rate_input_datain_wire1(i);
+                                bidir_dq_half_rate_input_dataout(i*4+3) <= bidir_dq_half_rate_input_datain_wire(i);
+                            end loop;
+                        end process DQ_IN11;
+
+            bidir_dq_half_rate_input_datain_wire <= bidir_dq_input_data_in when ((half_rate_input_dataoutbypass = '0') and 
+                                                    (dq_half_rate_use_dataoutbypass = "TRUE")) else
+                                                    bidir_dq_half_rate_input_datain_reg2;
+
+            bidir_dq_half_rate_input_datain_wire1 <=    bidir_dq_input_data_in when ((half_rate_input_dataoutbypass = '0') and 
+                                                        (dq_half_rate_use_dataoutbypass = "TRUE")) else
+                                                        bidir_dq_half_rate_input_datain_reg3;
+
+        --input_dq_half_rate_input_dataout--
+            DQ_IN12 :   process (io_clock_dividerclkout, i_input_dq_input_areset, input_dq_half_rate_input_datain_wire1,
+                                input_dq_half_rate_input_datain_wire)
+                        begin
+                            for i in 0 to (number_of_input_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_input_reg_power_up = "HIGH") then
+                                        input_dq_half_rate_input_datain_reg1(i*2) <= '1';
+                                        input_dq_half_rate_input_datain_reg1(i*2+1) <= '1';
+                                        input_dq_half_rate_input_datain_reg2(i) <= '1';
+                                        input_dq_half_rate_input_datain_reg3(i) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4+1) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4+2) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4+3) <= '1';
+                                    else
+                                        input_dq_half_rate_input_datain_reg1(i*2) <= '0';
+                                        input_dq_half_rate_input_datain_reg1(i*2+1) <= '0';
+                                        input_dq_half_rate_input_datain_reg2(i) <= '0';
+                                        input_dq_half_rate_input_datain_reg3(i) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4+1) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4+2) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4+3) <= '0';
+                                    end if;
+                                end if;
+                                if (i_input_dq_input_areset(i) = '1') then
+                                    if (dq_input_reg_async_mode = "PRESET") then
+                                        input_dq_half_rate_input_datain_reg1(i*2) <= '1';
+                                        input_dq_half_rate_input_datain_reg1(i*2+1) <= '1';
+                                        input_dq_half_rate_input_datain_reg2(i) <= '1';
+                                        input_dq_half_rate_input_datain_reg3(i) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4+1) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4+2) <= '1';
+                                        input_dq_half_rate_input_dataout(i*4+3) <= '1';
+                                    else
+                                        input_dq_half_rate_input_datain_reg1(i*2) <= '0';
+                                        input_dq_half_rate_input_datain_reg1(i*2+1) <= '0';
+                                        input_dq_half_rate_input_datain_reg2(i) <= '0';
+                                        input_dq_half_rate_input_datain_reg3(i) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4+1) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4+2) <= '0';
+                                        input_dq_half_rate_input_dataout(i*4+3) <= '0';
+                                    end if;
+                                elsif (rising_edge(io_clock_dividerclkout)) then
+                                    input_dq_half_rate_input_datain_reg2(i) <= input_dq_ipa_high_dataout(i);
+                                    input_dq_half_rate_input_datain_reg3(i) <= input_dq_ipa_low_dataout(i);
+                                    input_dq_half_rate_input_dataout(i*4) <= input_dq_half_rate_input_datain_reg1(i*2);
+                                    input_dq_half_rate_input_dataout(i*4+1) <= input_dq_half_rate_input_datain_reg1(i*2+1);
+                                elsif (falling_edge(io_clock_dividerclkout)) then
+                                    input_dq_half_rate_input_datain_reg1(i*2) <= input_dq_ipa_low_dataout(i);
+                                    input_dq_half_rate_input_datain_reg1(i*2+1) <= input_dq_ipa_high_dataout(i);
+                                end if;
+                                input_dq_half_rate_input_dataout(i*4+2) <= input_dq_half_rate_input_datain_wire1(i);
+                                input_dq_half_rate_input_dataout(i*4+3) <= input_dq_half_rate_input_datain_wire(i);
+                            end loop;
+                        end process DQ_IN12;
+
+            input_dq_half_rate_input_datain_wire <= input_dq_input_data_in when ((half_rate_input_dataoutbypass = '0') and 
+                                                    (dq_half_rate_use_dataoutbypass = "TRUE")) else
+                                                    input_dq_half_rate_input_datain_reg2;
+
+            input_dq_half_rate_input_datain_wire1 <=    input_dq_input_data_in when ((half_rate_input_dataoutbypass = '0') and 
+                                                        (dq_half_rate_use_dataoutbypass = "TRUE")) else
+                                                        input_dq_half_rate_input_datain_reg3;
+
+    --external--
+        bidir_dq_input_data_out <=  bidir_dq_input_ff_q when (dq_input_reg_mode = "FF") else
+                                    bidir_dq_input_delay_chain_dataout when (use_dq_input_delay_chain = "TRUE") else
+                                    bidir_dq_input_data_in;
+        
+        bidir_dq_input_data_out_high <= bidir_dq_ipa_high_dataout when ((use_dq_ipa = "TRUE") and (dq_input_reg_mode = "DDIO")) else
+                                        bidir_dq_ddio_in_regouthi when ((use_dq_ipa = "FALSE") and (dq_input_reg_mode = "DDIO")) else
+                                        (others => '0');
+        
+        bidir_dq_input_data_out_low <=  bidir_dq_ipa_low_dataout when ((use_dq_ipa = "TRUE") and (dq_input_reg_mode = "DDIO")) else
+                                        bidir_dq_ddio_in_regoutlo when ((use_dq_ipa = "FALSE") and (dq_input_reg_mode = "DDIO")) else
+                                        (others => '0');
+        
+        bidir_dq_hr_input_data_out <=   bidir_dq_half_rate_input_dataout when (use_half_rate = "TRUE") else 
+                                        (others => '0');
+
+        input_dq_input_data_out <=  input_dq_input_ff_q when (dq_input_reg_mode = "FF") else
+                                    input_dq_input_delay_chain_dataout when (use_dq_input_delay_chain = "TRUE") else
+                                    input_dq_input_data_in;
+        
+        input_dq_input_data_out_high <= input_dq_ipa_high_dataout when ((use_dq_ipa = "TRUE") and (dq_input_reg_mode = "DDIO")) else
+                                        input_dq_ddio_in_regouthi when ((use_dq_ipa = "FALSE") and (dq_input_reg_mode = "DDIO")) else
+                                        (others => '0');
+        
+        input_dq_input_data_out_low <=  input_dq_ipa_low_dataout when ((use_dq_ipa = "TRUE") and (dq_input_reg_mode = "DDIO")) else
+                                        input_dq_ddio_in_regoutlo when ((use_dq_ipa = "FALSE") and (dq_input_reg_mode = "DDIO")) else
+                                        (others => '0');
+        
+        input_dq_hr_input_data_out <=   input_dq_half_rate_input_dataout when (use_half_rate = "TRUE") else 
+                                        (others => '0');
+
+-----------------------
+-- 6. DQ OUTPUT PATH --
+-----------------------
+        --bidir_dq_output_delay_chain2_dataout--
+        bidir_dq_output_delay_chain2_datain <=  bidir_dq_output_delay_chain1_dataout when (use_dq_output_delay_chain1 = "TRUE") else
+                                                bidir_dq_output_ff_q when (dq_output_reg_mode = "FF") else
+                                                bidir_dq_output_ddio_out_dataout when (dq_output_reg_mode = "DDIO") else
+                                                bidir_dq_output_data_in;
+
+        DQ_OUT1 :   process (bidir_dq_output_delay_chain2_datain)
+                    begin
+                        for i in 0 to (number_of_bidir_dq - 1) loop
+                            bidir_dq_output_delay_chain2_dataout(i) <=  transport bidir_dq_output_delay_chain2_datain(i) after
+                                                                        (conv_int((io_config_bi_dq_outputdelaysetting2(i*3+2),
+                                                                        io_config_bi_dq_outputdelaysetting2(i*3+1),
+                                                                        io_config_bi_dq_outputdelaysetting2(i*3))) * 50 ps);
+                        end loop;
+                    end process DQ_OUT1;
+
+        --output_dq_output_delay_chain2_dataout--
+        output_dq_output_delay_chain2_datain <= output_dq_output_delay_chain1_dataout when (use_dq_output_delay_chain1 = "TRUE") else
+                                                output_dq_output_ff_q when (dq_output_reg_mode = "FF") else
+                                                output_dq_output_ddio_out_dataout when (dq_output_reg_mode = "DDIO") else
+                                                output_dq_output_data_in;
+
+        DQ_OUT2 :   process (output_dq_output_delay_chain2_datain)
+                    begin
+                        for i in 0 to (number_of_output_dq - 1) loop
+                            output_dq_output_delay_chain2_dataout(i) <= transport output_dq_output_delay_chain2_datain(i) after
+                                                                        (conv_int((io_config_out_dq_outputdelaysetting2(i*3+2),
+                                                                        io_config_out_dq_outputdelaysetting2(i*3+1),
+                                                                        io_config_out_dq_outputdelaysetting2(i*3))) * 50 ps);
+                        end loop;
+                    end process DQ_OUT2;
+
+        --bidir_dq_output_delay_chain1_dataout--
+        bidir_dq_output_delay_chain1_datain <=  bidir_dq_output_ff_q when (dq_output_reg_mode = "FF") else
+                                                bidir_dq_output_ddio_out_dataout when (dq_output_reg_mode = "DDIO") else
+                                                bidir_dq_output_data_in;
+
+        DQ_OUT3 :   process (bidir_dq_output_delay_chain1_datain)
+                    begin
+                        for i in 0 to (number_of_bidir_dq - 1) loop
+                            bidir_dq_output_delay_chain1_dataout(i) <=  transport bidir_dq_output_delay_chain1_datain(i) after
+                                                                        (conv_int((io_config_bi_dq_outputdelaysetting1(i*4+3),
+                                                                        io_config_bi_dq_outputdelaysetting1(i*4+2),
+                                                                        io_config_bi_dq_outputdelaysetting1(i*4+1),
+                                                                        io_config_bi_dq_outputdelaysetting1(i*4))) * 50 ps);
+                        end loop;
+                    end process DQ_OUT3;
+
+        --output_dq_output_delay_chain1_dataout--
+        output_dq_output_delay_chain1_datain <= output_dq_output_ff_q when (dq_output_reg_mode = "FF") else
+                                                output_dq_output_ddio_out_dataout when (dq_output_reg_mode = "DDIO") else
+                                                output_dq_output_data_in;
+
+        DQ_OUT4 :   process (output_dq_output_delay_chain1_datain)
+                    begin
+                        for i in 0 to (number_of_output_dq - 1) loop
+                            output_dq_output_delay_chain1_dataout(i) <= transport output_dq_output_delay_chain1_datain(i) after
+                                                                        (conv_int((io_config_out_dq_outputdelaysetting1(i*4+3),
+                                                                        io_config_out_dq_outputdelaysetting1(i*4+2),
+                                                                        io_config_out_dq_outputdelaysetting1(i*4+1),
+                                                                        io_config_out_dq_outputdelaysetting1(i*4))) * 50 ps);
+                        end loop;
+                    end process DQ_OUT4;
+
+        --bidir_dq_output_ff_q--
+        DQ_OUT5 :   process (dq_output_reg_clk, i_bidir_dq_output_areset)
+                    begin
+                        for i in 0 to (number_of_bidir_dq - 1) loop
+                            if (now = 0 ns) then
+                                if (dq_output_reg_power_up = "HIGH") then
+                                    bidir_dq_output_ff_q(i) <= '1';
+                                else
+                                    bidir_dq_output_ff_q(i) <= '0';
+                                end if;
+                            end if;
+                            if (i_bidir_dq_output_areset(i) = '1') then
+                                bidir_dq_output_ff_q(i) <= '0';
+                            elsif (rising_edge(dq_output_reg_clk)) then
+                                if (dq_output_reg_clkena = '1') then
+                                    if (i_bidir_dq_output_sreset(i) = '1') then
+                                        bidir_dq_output_ff_q(i) <= '0';
+                                    else
+                                        bidir_dq_output_ff_q(i) <= bidir_dq_output_data_in(i);
+                                    end if;
+                                end if;
+                            end if;
+                        end loop;
+                    end process DQ_OUT5;
+
+        --output_dq_output_ff_q--
+        DQ_OUT6 :   process (dq_output_reg_clk, i_output_dq_output_areset)
+                    begin
+                        for i in 0 to (number_of_output_dq - 1) loop
+                            if (now = 0 ns) then
+                                if (dq_output_reg_power_up = "HIGH") then
+                                    output_dq_output_ff_q(i) <= '1';
+                                else
+                                    output_dq_output_ff_q(i) <= '0';
+                                end if;
+                            end if;
+                            if (i_output_dq_output_areset(i) = '1') then
+                                output_dq_output_ff_q(i) <= '0';
+                            elsif (rising_edge(dq_output_reg_clk)) then
+                                if (dq_output_reg_clkena = '1') then
+                                    if (output_dq_sreset(i) = '1') then
+                                        output_dq_output_ff_q(i) <= '0';
+                                    else
+                                        output_dq_output_ff_q(i) <= output_dq_output_data_in(i);
+                                    end if;
+                                end if;
+                            end if;
+                        end loop;
+                    end process DQ_OUT6;
+
+        --bidir_dq_output_ddio_out_dataout--
+            -- Half rate enable
+                DQ_OUT7 :   process (bidir_dq_hr_output_data_in)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    bidir_dq_hr_output_data_in_bus0(i) <= bidir_dq_hr_output_data_in(i*4);
+                                    bidir_dq_hr_output_data_in_bus1(i) <= bidir_dq_hr_output_data_in(i*4+1);
+                                    bidir_dq_hr_output_data_in_bus2(i) <= bidir_dq_hr_output_data_in(i*4+2);
+                                    bidir_dq_hr_output_data_in_bus3(i) <= bidir_dq_hr_output_data_in(i*4+3);
+                                end loop;
+                            end process DQ_OUT7;
+    
+                DQ_OUT8 :   process (dq_hr_output_reg_clk, i_bidir_dq_output_areset)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    if (now = 0 ns) then
+                                        if (dq_output_reg_power_up = "HIGH") then
+                                            bidir_dq_hr_output_data_in_reg0(i) <= '1';
+                                            bidir_dq_hr_output_data_in_reg1(i) <= '1';
+                                            bidir_dq_hr_output_data_in_reg2(i) <= '1';
+                                            bidir_dq_hr_output_data_in_reg3(i) <= '1';
+                                        else
+                                            bidir_dq_hr_output_data_in_reg0(i) <= '0';
+                                            bidir_dq_hr_output_data_in_reg1(i) <= '0';
+                                            bidir_dq_hr_output_data_in_reg2(i) <= '0';
+                                            bidir_dq_hr_output_data_in_reg3(i) <= '0';
+                                        end if;
+                                    end if;
+                                    if (i_bidir_dq_output_areset(i) = '1') then
+                                        if (dq_output_reg_async_mode = "PRESET") then
+                                            bidir_dq_hr_output_data_in_reg0(i) <= '1';
+                                            bidir_dq_hr_output_data_in_reg1(i) <= '1';
+                                            bidir_dq_hr_output_data_in_reg2(i) <= '1';
+                                            bidir_dq_hr_output_data_in_reg3(i) <= '1';
+                                        else
+                                            bidir_dq_hr_output_data_in_reg0(i) <= '0';
+                                            bidir_dq_hr_output_data_in_reg1(i) <= '0';
+                                            bidir_dq_hr_output_data_in_reg2(i) <= '0';
+                                            bidir_dq_hr_output_data_in_reg3(i) <= '0';
+                                        end if;
+                                        bidir_dq_hr_output_data_in_reg_high(i) <= '0';
+                                        bidir_dq_hr_output_data_in_reg_low(i) <= '0';
+                                    elsif (rising_edge(dq_hr_output_reg_clk)) then
+                                        bidir_dq_hr_output_data_in_reg0(i) <= bidir_dq_hr_output_data_in_bus0(i);
+                                        bidir_dq_hr_output_data_in_reg1(i) <= bidir_dq_hr_output_data_in_bus1(i);
+                                        bidir_dq_hr_output_data_in_reg2(i) <= bidir_dq_hr_output_data_in_bus2(i);
+                                        bidir_dq_hr_output_data_in_reg3(i) <= bidir_dq_hr_output_data_in_bus3(i);
+                                    elsif (falling_edge(dq_hr_output_reg_clk)) then
+                                        bidir_dq_hr_output_data_in_reg_high(i) <= bidir_dq_hr_output_data_in_reg3(i);
+                                        bidir_dq_hr_output_data_in_reg_low(i) <= bidir_dq_hr_output_data_in_reg1(i);
+                                    end if;
+                                end loop;
+                            end process DQ_OUT8;
+    
+                bidir_dq_output_hr_ddio_out_high_dataout <= bidir_dq_hr_output_data_in_reg_high when (dq_hr_output_reg_clk_mux = '1') else
+                                                            bidir_dq_hr_output_data_in_reg2;
+    
+                bidir_dq_output_hr_ddio_out_low_dataout <=  bidir_dq_hr_output_data_in_reg_low when (dq_hr_output_reg_clk_mux = '1') else
+                                                            bidir_dq_hr_output_data_in_reg0;
+    
+                DQ_OUT9 :   process (dq_output_reg_clk, i_bidir_dq_output_areset)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    if (now = 0 ns) then
+                                        if (dq_output_reg_power_up = "HIGH") then
+                                            bidir_dq_output_ddio_out_high_datain_reg(i) <= '1';
+                                            bidir_dq_output_ddio_out_low_datain_reg(i) <= '1';
+                                        else
+                                            bidir_dq_output_ddio_out_high_datain_reg(i) <= '0';
+                                            bidir_dq_output_ddio_out_low_datain_reg(i) <= '0';
+                                        end if;
+                                    end if;
+                                    if (i_bidir_dq_output_areset(i) = '1') then
+                                        bidir_dq_output_ddio_out_high_datain_reg(i) <= '0';
+                                        bidir_dq_output_ddio_out_low_datain_reg(i) <= '0';
+                                    elsif (rising_edge(dq_output_reg_clk)) then
+                                        if (i_bidir_dq_output_sreset(i) = '1') then
+                                            bidir_dq_output_ddio_out_high_datain_reg(i) <= '0';
+                                            bidir_dq_output_ddio_out_low_datain_reg(i) <= '0';
+                                        else
+                                            if (use_half_rate = "TRUE") then
+                                                bidir_dq_output_ddio_out_high_datain_reg(i) <= bidir_dq_output_hr_ddio_out_high_dataout(i);
+                                                bidir_dq_output_ddio_out_low_datain_reg(i) <= bidir_dq_output_hr_ddio_out_low_dataout(i);
+                                            else
+                                                bidir_dq_output_ddio_out_high_datain_reg(i) <= bidir_dq_output_data_in_high(i);
+                                                bidir_dq_output_ddio_out_low_datain_reg(i) <= bidir_dq_output_data_in_low(i);
+                                            end if;
+                                        end if;
+                                    end if;
+                                end loop;
+                            end process DQ_OUT9;
+    
+                bidir_dq_output_ddio_out_dataout <= bidir_dq_output_ddio_out_high_datain_reg when (dq_output_reg_clk_mux = '1') else
+                                                    bidir_dq_output_ddio_out_low_datain_reg;
+
+        --output_dq_output_ddio_out_dataout--
+            -- Half rate enable
+                DQ_OUT10 :  process (output_dq_hr_output_data_in)
+                            begin
+                                for i in 0 to (number_of_output_dq - 1) loop
+                                    output_dq_hr_output_data_in_bus0(i) <= output_dq_hr_output_data_in(i*4);
+                                    output_dq_hr_output_data_in_bus1(i) <= output_dq_hr_output_data_in(i*4+1);
+                                    output_dq_hr_output_data_in_bus2(i) <= output_dq_hr_output_data_in(i*4+2);
+                                    output_dq_hr_output_data_in_bus3(i) <= output_dq_hr_output_data_in(i*4+3);
+                                end loop;
+                            end process DQ_OUT10;
+
+                DQ_OUT11 :  process (dq_hr_output_reg_clk, i_output_dq_output_areset)
+                            begin
+                                for i in 0 to (number_of_output_dq - 1) loop
+                                    if (now = 0 ns) then
+                                        if (dq_output_reg_power_up = "HIGH") then
+                                            output_dq_hr_output_data_in_reg0(i) <= '1';
+                                            output_dq_hr_output_data_in_reg1(i) <= '1';
+                                            output_dq_hr_output_data_in_reg2(i) <= '1';
+                                            output_dq_hr_output_data_in_reg3(i) <= '1';
+                                        else
+                                            output_dq_hr_output_data_in_reg0(i) <= '0';
+                                            output_dq_hr_output_data_in_reg1(i) <= '0';
+                                            output_dq_hr_output_data_in_reg2(i) <= '0';
+                                            output_dq_hr_output_data_in_reg3(i) <= '0';
+                                        end if;
+                                    end if;
+                                    if (i_output_dq_output_areset(i) = '1') then
+                                        if (dq_output_reg_async_mode = "PRESET") then
+                                            output_dq_hr_output_data_in_reg0(i) <= '1';
+                                            output_dq_hr_output_data_in_reg1(i) <= '1';
+                                            output_dq_hr_output_data_in_reg2(i) <= '1';
+                                            output_dq_hr_output_data_in_reg3(i) <= '1';
+                                        else
+                                            output_dq_hr_output_data_in_reg0(i) <= '0';
+                                            output_dq_hr_output_data_in_reg1(i) <= '0';
+                                            output_dq_hr_output_data_in_reg2(i) <= '0';
+                                            output_dq_hr_output_data_in_reg3(i) <= '0';
+                                        end if;
+                                        output_dq_hr_output_data_in_reg_high(i) <= '0';
+                                        output_dq_hr_output_data_in_reg_low(i) <= '0';
+                                    elsif (rising_edge(dq_hr_output_reg_clk)) then
+                                        output_dq_hr_output_data_in_reg0(i) <= output_dq_hr_output_data_in_bus0(i);
+                                        output_dq_hr_output_data_in_reg1(i) <= output_dq_hr_output_data_in_bus1(i);
+                                        output_dq_hr_output_data_in_reg2(i) <= output_dq_hr_output_data_in_bus2(i);
+                                        output_dq_hr_output_data_in_reg3(i) <= output_dq_hr_output_data_in_bus3(i);
+                                    elsif (falling_edge(dq_hr_output_reg_clk)) then
+                                        output_dq_hr_output_data_in_reg_high(i) <= output_dq_hr_output_data_in_reg3(i);
+                                        output_dq_hr_output_data_in_reg_low(i) <= output_dq_hr_output_data_in_reg1(i);
+                                    end if;
+                                end loop;
+                            end process DQ_OUT11;
+    
+                output_dq_output_hr_ddio_out_high_dataout <=    output_dq_hr_output_data_in_reg_high when (dq_hr_output_reg_clk_mux = '1') else
+                                                                output_dq_hr_output_data_in_reg2;
+    
+                output_dq_output_hr_ddio_out_low_dataout <=     output_dq_hr_output_data_in_reg_low when (dq_hr_output_reg_clk_mux = '1') else
+                                                                output_dq_hr_output_data_in_reg0;
+    
+                DQ_OUT12 :  process (dq_output_reg_clk, i_output_dq_output_areset)
+                            begin
+                                for i in 0 to (number_of_output_dq - 1) loop
+                                    if (now = 0 ns) then
+                                        if (dq_output_reg_power_up = "HIGH") then
+                                            output_dq_output_ddio_out_high_datain_reg(i) <= '1';
+                                            output_dq_output_ddio_out_low_datain_reg(i) <= '1';
+                                        else
+                                            output_dq_output_ddio_out_high_datain_reg(i) <= '0';
+                                            output_dq_output_ddio_out_low_datain_reg(i) <= '0';
+                                        end if;
+                                    end if;
+                                    if (i_output_dq_output_areset(i) = '1') then
+                                        output_dq_output_ddio_out_high_datain_reg(i) <= '0';
+                                        output_dq_output_ddio_out_low_datain_reg(i) <= '0';
+                                    elsif (rising_edge(dq_output_reg_clk)) then
+                                        if (output_dq_sreset(i) = '1') then
+                                            output_dq_output_ddio_out_high_datain_reg(i) <= '0';
+                                            output_dq_output_ddio_out_low_datain_reg(i) <= '0';
+                                        else
+                                            if (use_half_rate = "TRUE") then
+                                                output_dq_output_ddio_out_high_datain_reg(i) <= output_dq_output_hr_ddio_out_high_dataout(i);
+                                                output_dq_output_ddio_out_low_datain_reg(i) <= output_dq_output_hr_ddio_out_low_dataout(i);
+                                            else
+                                                output_dq_output_ddio_out_high_datain_reg(i) <= output_dq_output_data_in_high(i);
+                                                output_dq_output_ddio_out_low_datain_reg(i) <= output_dq_output_data_in_low(i);
+                                            end if;
+                                        end if;
+                                    end if;
+                                end loop;
+                            end process DQ_OUT12;
+    
+                output_dq_output_ddio_out_dataout <=    output_dq_output_ddio_out_high_datain_reg when (dq_output_reg_clk_mux = '1') else
+                                                        output_dq_output_ddio_out_low_datain_reg;
+
+    --external--
+        bidir_dq_output_data_out <= bidir_dq_output_delay_chain2_dataout when (use_dq_output_delay_chain2 = "TRUE") else
+                                    bidir_dq_output_delay_chain1_dataout when (use_dq_output_delay_chain1 = "TRUE") else
+                                    bidir_dq_output_ff_q when (dq_output_reg_mode = "FF") else
+                                    bidir_dq_output_ddio_out_dataout when (dq_output_reg_mode = "DDIO") else
+                                    bidir_dq_output_data_in;
+
+        output_dq_output_data_out <=    output_dq_output_delay_chain2_dataout when (use_dq_output_delay_chain2 = "TRUE") else
+                                        output_dq_output_delay_chain1_dataout when (use_dq_output_delay_chain1 = "TRUE") else
+                                        output_dq_output_ff_q when (dq_output_reg_mode = "FF") else
+                                        output_dq_output_ddio_out_dataout when (dq_output_reg_mode = "DDIO") else
+                                        output_dq_output_data_in;
+
+-------------------
+-- 7. DQ OE PATH --
+-------------------
+        --bidir_dq_oe_delay_chain2_dataout--
+        bidir_dq_oe_delay_chain2_datain <=  bidir_dq_oe_delay_chain1_dataout when (use_dqs_oe_delay_chain1 = "TRUE") else
+                                            bidir_dq_oe_ff_q when (dq_oe_reg_mode = "FF") else
+                                            bidir_dq_oe_ddio_oe_dataout when (dq_oe_reg_mode = "DDIO") else
+                                            bidir_dq_oe_in;
+
+        DQ_OE1 :    process (bidir_dq_oe_delay_chain2_datain)
+                    begin
+                        for i in 0 to (number_of_bidir_dq - 1) loop
+                            bidir_dq_oe_delay_chain2_dataout(i) <=  transport bidir_dq_oe_delay_chain2_datain(i) after
+                                                                    (conv_int((io_config_bi_dq_outputdelaysetting2(i*3+2),
+                                                                        io_config_bi_dq_outputdelaysetting2(i*3+1),
+                                                                        io_config_bi_dq_outputdelaysetting2(i*3))) * 50 ps);
+                        end loop;
+                    end process DQ_OE1;
+
+        --output_dq_oe_delay_chain2_dataout--
+        output_dq_oe_delay_chain2_datain <= output_dq_oe_delay_chain1_dataout when (use_dq_oe_delay_chain1 = "TRUE") else
+                                            output_dq_oe_ff_q when (dq_oe_reg_mode = "FF") else
+                                            output_dq_oe_ddio_oe_dataout when (dq_oe_reg_mode = "DDIO") else
+                                            output_dq_oe_in;
+
+        DQ_OE2 :   process (output_dq_oe_delay_chain2_datain)
+                    begin
+                        for i in 0 to (number_of_output_dq - 1) loop
+                            output_dq_oe_delay_chain2_dataout(i) <= transport output_dq_oe_delay_chain2_datain(i) after
+                                                                    (conv_int((io_config_out_dq_outputdelaysetting2(i*3+2),
+                                                                    io_config_out_dq_outputdelaysetting2(i*3+1),
+                                                                    io_config_out_dq_outputdelaysetting2(i*3))) * 50 ps);
+                        end loop;
+                    end process DQ_OE2;
+
+        --bidir_dq_oe_delay_chain1_dataout--
+        bidir_dq_oe_delay_chain1_datain <=  bidir_dq_oe_ff_q when (dq_oe_reg_mode = "FF") else
+                                            bidir_dq_oe_ddio_oe_dataout when (dq_oe_reg_mode = "DDIO") else
+                                            bidir_dq_oe_in;
+
+        DQ_OE3 :   process (bidir_dq_oe_delay_chain1_datain)
+                    begin
+                        for i in 0 to (number_of_bidir_dq - 1) loop
+                            bidir_dq_oe_delay_chain1_dataout(i) <=  transport bidir_dq_oe_delay_chain1_datain(i) after
+                                                                    (conv_int((io_config_bi_dq_outputdelaysetting1(i*4+3),
+                                                                    io_config_bi_dq_outputdelaysetting1(i*4+2),
+                                                                    io_config_bi_dq_outputdelaysetting1(i*4+1),
+                                                                    io_config_bi_dq_outputdelaysetting1(i*4))) * 50 ps);
+                        end loop;
+                    end process DQ_OE3;
+
+        --output_dq_oe_delay_chain1_dataout--
+        output_dq_oe_delay_chain1_datain <= output_dq_oe_ff_q when (dq_oe_reg_mode = "FF") else
+                                                output_dq_oe_ddio_oe_dataout when (dq_oe_reg_mode = "DDIO") else
+                                                output_dq_oe_in;
+
+        DQ_OE4 :   process (output_dq_oe_delay_chain1_datain)
+                    begin
+                        for i in 0 to (number_of_bidir_dq - 1) loop
+                            output_dq_oe_delay_chain1_dataout(i) <= transport output_dq_oe_delay_chain1_datain(i) after
+                                                                        (conv_int((io_config_out_dq_outputdelaysetting1(i*4+3),
+                                                                        io_config_out_dq_outputdelaysetting1(i*4+2),
+                                                                        io_config_out_dq_outputdelaysetting1(i*4+1),
+                                                                        io_config_out_dq_outputdelaysetting1(i*4))) * 50 ps);
+                        end loop;
+                    end process DQ_OE4;
+
+        --bidir_dq_oe_ff_q--
+        DQ_OE5 :    process (dq_output_reg_clk, i_bidir_dq_oe_areset)
+                    begin
+                        for i in 0 to (number_of_bidir_dq - 1) loop
+                            if (now = 0 ns) then
+                                if (dq_oe_reg_power_up = "HIGH") then
+                                    bidir_dq_oe_ff_q(i) <= '1';
+                                else
+                                    bidir_dq_oe_ff_q(i) <= '0';
+                                end if;
+                            end if;
+                            if (i_bidir_dq_oe_areset(i) = '1') then
+                                bidir_dq_oe_ff_q(i) <= '0';
+                            elsif (rising_edge(dq_output_reg_clk)) then
+                                if (dq_output_reg_clkena = '1') then
+                                    if (i_bidir_dq_oe_sreset(i) = '1') then
+                                        bidir_dq_oe_ff_q(i) <= '0';
+                                    else
+                                        bidir_dq_oe_ff_q(i) <= bidir_dq_oe_in(i);
+                                    end if;
+                                end if;
+                            end if;
+                        end loop;
+                    end process DQ_OE5;
+
+        --output_dq_oe_ff_q--
+        DQ_OE6 :    process (dq_output_reg_clk, i_output_dq_oe_areset)
+                    begin
+                        for i in 0 to (number_of_output_dq - 1) loop
+                            if (now = 0 ns) then
+                                if (dq_oe_reg_power_up = "HIGH") then
+                                    output_dq_oe_ff_q(i) <= '1';
+                                else
+                                    output_dq_oe_ff_q(i) <= '0';
+                                end if;
+                            end if;
+                            if (i_output_dq_oe_areset(i) = '1') then
+                                output_dq_oe_ff_q(i) <= '0';
+                            elsif (rising_edge(dq_output_reg_clk)) then
+                                if (dq_output_reg_clkena = '1') then
+                                    if (i_output_dq_oe_sreset(i) = '1') then
+                                        output_dq_oe_ff_q(i) <= '0';
+                                    else
+                                        output_dq_oe_ff_q(i) <= output_dq_oe_in(i);
+                                    end if;
+                                end if;
+                            end if;
+                        end loop;
+                    end process DQ_OE6;
+
+        --bidir_dq_oe_ddio_oe_dataout--
+            -- Half rate enable
+                DQ_OE7 :    process (bidir_dq_hr_oe_in)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    bidir_dq_oe_hr_ddio_out_datain_bus0(i) <= bidir_dq_hr_oe_in(i*2);
+                                    bidir_dq_oe_hr_ddio_out_datain_bus1(i) <= bidir_dq_hr_oe_in(i*2+1);
+                                end loop;
+                            end process DQ_OE7;
+
+                DQ_OE8 :    process (dq_hr_output_reg_clk, i_bidir_dq_oe_areset)
+                            begin
+                                for i in 0 to (number_of_bidir_dq - 1) loop
+                                    if (now = 0 ns) then
+                                        if (dq_oe_reg_power_up = "HIGH") then
+                                            bidir_dq_oe_hr_ddio_out_datain_reg0(i) <= '1';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg1(i) <= '1';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg2(i) <= '1';
+                                        else
+                                            bidir_dq_oe_hr_ddio_out_datain_reg0(i) <= '0';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg1(i) <= '0';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg2(i) <= '0';
+                                        end if;
+                                    end if;
+                                    if (i_bidir_dq_oe_areset(i) = '1') then
+                                        if (dqs_oe_reg_async_mode = "PRESET") then
+                                            bidir_dq_oe_hr_ddio_out_datain_reg0(i) <= '1';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg1(i) <= '1';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg2(i) <= '1';
+                                        else
+                                            bidir_dq_oe_hr_ddio_out_datain_reg0(i) <= '0';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg1(i) <= '0';
+                                            bidir_dq_oe_hr_ddio_out_datain_reg2(i) <= '0';
+                                        end if;
+                                    elsif (rising_edge(dq_hr_output_reg_clk)) then
+                                        bidir_dq_oe_hr_ddio_out_datain_reg0(i) <= bidir_dq_oe_hr_ddio_out_datain_bus0(i);
+                                        bidir_dq_oe_hr_ddio_out_datain_reg1(i) <= bidir_dq_oe_hr_ddio_out_datain_bus1(i);
+                                    elsif (falling_edge(dq_hr_output_reg_clk)) then
+                                        bidir_dq_oe_hr_ddio_out_datain_reg2(i) <= bidir_dq_oe_hr_ddio_out_datain_reg1(i);
+                                    end if;
+                                end loop;
+                            end process DQ_OE8;
+                            
+                bidir_dq_oe_hr_ddio_out_dataout <=  bidir_dq_oe_hr_ddio_out_datain_reg2 when (dq_hr_output_reg_clk_mux = '1') else
+                                                    bidir_dq_oe_hr_ddio_out_datain_reg0;
+
+            --oe_ddio_out--
+            DQ_OE9 :    process (dq_output_reg_clk, i_bidir_dq_oe_areset)
+                        begin
+                            for i in 0 to (number_of_bidir_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_oe_reg_power_up = "HIGH") then
+                                        bidir_dq_oe_ddio_oe_datain_reg(i) <= '1';
+                                        bidir_dq_oe_ddio_oe_datain_reg1(i) <= '1';
+                                    else
+                                        bidir_dq_oe_ddio_oe_datain_reg(i) <= '0';
+                                        bidir_dq_oe_ddio_oe_datain_reg1(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_bidir_dq_oe_areset(i) = '1') then
+                                    if (dq_oe_reg_async_mode = "PRESET") then
+                                        bidir_dq_oe_ddio_oe_datain_reg(i) <= '1';
+                                        bidir_dq_oe_ddio_oe_datain_reg1(i) <= '1';
+                                    else
+                                        bidir_dq_oe_ddio_oe_datain_reg(i) <= '0';
+                                        bidir_dq_oe_ddio_oe_datain_reg1(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_output_reg_clk)) then
+                                    if (i_bidir_dq_oe_sreset(i) = '1') then
+                                        if (dq_oe_reg_async_mode = "PRESET") then
+                                            bidir_dq_oe_ddio_oe_datain_reg(i) <= '1';
+                                        else
+                                            bidir_dq_oe_ddio_oe_datain_reg(i) <= '0';
+                                        end if;
+                                    else
+                                        if (use_half_rate = "TRUE") then
+                                            bidir_dq_oe_ddio_oe_datain_reg(i) <= bidir_dq_oe_hr_ddio_out_dataout(i);
+                                        else
+                                            bidir_dq_oe_ddio_oe_datain_reg(i) <= bidir_dq_oe_in(i);
+                                        end if;
+                                    end if;
+                                elsif (falling_edge(dq_output_reg_clk)) then
+                                    if (i_bidir_dq_oe_sreset(i) = '1') then
+                                        if (dq_oe_reg_async_mode = "PRESET") then
+                                            bidir_dq_oe_ddio_oe_datain_reg1(i) <= '1';
+                                        else
+                                            bidir_dq_oe_ddio_oe_datain_reg1(i) <= '0';
+                                        end if;
+                                    else
+                                        bidir_dq_oe_ddio_oe_datain_reg1(i) <= bidir_dq_oe_ddio_oe_datain_reg(i);
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_OE9;
+
+            DQ_OE10 :   process (bidir_dq_oe_ddio_oe_datain_reg1, bidir_dq_oe_ddio_oe_datain_reg)
+                        begin
+                            for i in 0 to (number_of_bidir_dq - 1) loop
+                                if (bidir_dq_oe_ddio_oe_datain_reg1(i) = '1') then
+                                    bidir_dq_oe_ddio_oe_dataout(i) <= bidir_dq_oe_ddio_oe_datain_reg1(i);
+                                else
+                                    bidir_dq_oe_ddio_oe_dataout(i) <= bidir_dq_oe_ddio_oe_datain_reg(i);
+                                end if;
+                            end loop;
+                        end process DQ_OE10;
+
+        --output_dq_oe_ddio_oe_dataout--
+            -- Half rate enable
+                DQ_OE11 :   process (output_dq_hr_oe_in)
+                            begin
+                                for i in 0 to (number_of_output_dq - 1) loop
+                                    output_dq_oe_hr_ddio_out_datain_bus0(i) <= output_dq_hr_oe_in(i*2);
+                                    output_dq_oe_hr_ddio_out_datain_bus1(i) <= output_dq_hr_oe_in(i*2+1);
+                                end loop;
+                            end process DQ_OE11;
+
+                DQ_OE12 :   process (dq_hr_output_reg_clk, i_output_dq_oe_areset)
+                            begin
+                                for i in 0 to (number_of_output_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_oe_reg_power_up = "HIGH") then
+                                        output_dq_oe_hr_ddio_out_datain_reg0(i) <= '1';
+                                        output_dq_oe_hr_ddio_out_datain_reg1(i) <= '1';
+                                        output_dq_oe_hr_ddio_out_datain_reg2(i) <= '1';
+                                    else
+                                        output_dq_oe_hr_ddio_out_datain_reg0(i) <= '0';
+                                        output_dq_oe_hr_ddio_out_datain_reg1(i) <= '0';
+                                        output_dq_oe_hr_ddio_out_datain_reg2(i) <= '0';
+                                    end if;
+                                end if;
+                                    if (i_output_dq_oe_areset(i) = '1') then
+                                        if (dqs_oe_reg_async_mode = "PRESET") then
+                                            output_dq_oe_hr_ddio_out_datain_reg0(i) <= '1';
+                                            output_dq_oe_hr_ddio_out_datain_reg1(i) <= '1';
+                                            output_dq_oe_hr_ddio_out_datain_reg2(i) <= '1';
+                                        else
+                                            output_dq_oe_hr_ddio_out_datain_reg0(i) <= '0';
+                                            output_dq_oe_hr_ddio_out_datain_reg1(i) <= '0';
+                                            output_dq_oe_hr_ddio_out_datain_reg2(i) <= '0';
+                                        end if;
+                                    elsif (rising_edge(dq_hr_output_reg_clk)) then
+                                        output_dq_oe_hr_ddio_out_datain_reg0(i) <= output_dq_oe_hr_ddio_out_datain_bus0(i);
+                                        output_dq_oe_hr_ddio_out_datain_reg1(i) <= output_dq_oe_hr_ddio_out_datain_bus1(i);
+                                    elsif (falling_edge(dq_hr_output_reg_clk)) then
+                                        output_dq_oe_hr_ddio_out_datain_reg2(i) <= output_dq_oe_hr_ddio_out_datain_reg1(i);
+                                    end if;
+                                end loop;
+                            end process DQ_OE12;
+                            
+                output_dq_oe_hr_ddio_out_dataout <= output_dq_oe_hr_ddio_out_datain_reg2 when (dq_hr_output_reg_clk_mux = '1') else
+                                                    output_dq_oe_hr_ddio_out_datain_reg0;
+
+            --oe_ddio_out--
+            DQ_OE13 :   process (dq_output_reg_clk, i_output_dq_oe_areset)
+                        begin
+                            for i in 0 to (number_of_output_dq - 1) loop
+                                if (now = 0 ns) then
+                                    if (dq_oe_reg_power_up = "HIGH") then
+                                        output_dq_oe_ddio_oe_datain_reg(i) <= '1';
+                                        output_dq_oe_ddio_oe_datain_reg1(i) <= '1';
+                                    else
+                                        output_dq_oe_ddio_oe_datain_reg(i) <= '0';
+                                        output_dq_oe_ddio_oe_datain_reg1(i) <= '0';
+                                    end if;
+                                end if;
+                                if (i_output_dq_oe_areset(i) = '1') then
+                                    if (dq_oe_reg_async_mode = "PRESET") then
+                                        output_dq_oe_ddio_oe_datain_reg(i) <= '1';
+                                        output_dq_oe_ddio_oe_datain_reg1(i) <= '1';
+                                    else
+                                        output_dq_oe_ddio_oe_datain_reg(i) <= '0';
+                                        output_dq_oe_ddio_oe_datain_reg1(i) <= '0';
+                                    end if;
+                                elsif (rising_edge(dq_output_reg_clk)) then
+                                    if (i_output_dq_oe_sreset(i) = '1') then
+                                        if (dq_oe_reg_async_mode = "PRESET") then
+                                            output_dq_oe_ddio_oe_datain_reg(i) <= '1';
+                                        else
+                                            output_dq_oe_ddio_oe_datain_reg(i) <= '0';
+                                        end if;
+                                    else
+                                        if (use_half_rate = "TRUE") then
+                                            output_dq_oe_ddio_oe_datain_reg(i) <= output_dq_oe_hr_ddio_out_dataout(i);
+                                        else
+                                            output_dq_oe_ddio_oe_datain_reg(i) <= output_dq_oe_in(i);
+                                        end if;
+                                    end if;
+                                elsif (falling_edge(dq_output_reg_clk)) then
+                                    if (i_output_dq_oe_sreset(i) = '1') then
+                                        if (dq_oe_reg_async_mode = "PRESET") then
+                                            output_dq_oe_ddio_oe_datain_reg1(i) <= '1';
+                                        else
+                                            output_dq_oe_ddio_oe_datain_reg1(i) <= '0';
+                                        end if;
+                                    else
+                                        output_dq_oe_ddio_oe_datain_reg1(i) <= output_dq_oe_ddio_oe_datain_reg(i);
+                                    end if;
+                                end if;
+                            end loop;
+                        end process DQ_OE13;
+
+            DQ_OE14 :   process (output_dq_oe_ddio_oe_datain_reg1, output_dq_oe_ddio_oe_datain_reg)
+                        begin
+                            for i in 0 to (number_of_output_dq - 1) loop
+                                if (output_dq_oe_ddio_oe_datain_reg1(i) = '1') then
+                                    output_dq_oe_ddio_oe_dataout(i) <= output_dq_oe_ddio_oe_datain_reg1(i);
+                                else
+                                    output_dq_oe_ddio_oe_dataout(i) <= output_dq_oe_ddio_oe_datain_reg(i);
+                                end if;
+                            end loop;
+                        end process DQ_OE14;
+
+    --external--
+        bidir_dq_oe_out <=  not bidir_dq_oe_delay_chain2_dataout when (use_dq_oe_delay_chain2 = "TRUE") else
+                            not bidir_dq_oe_delay_chain1_dataout when (use_dq_oe_delay_chain1 = "TRUE") else
+                            not bidir_dq_oe_ff_q when (dq_oe_reg_mode = "FF") else
+                            not bidir_dq_oe_ddio_oe_dataout when (dq_oe_reg_mode = "DDIO") else
+                            not bidir_dq_oe_in;
+
+        output_dq_oe_out <= not output_dq_oe_delay_chain2_dataout when (use_dq_oe_delay_chain2 = "TRUE") else
+                            not output_dq_oe_delay_chain1_dataout when (use_dq_oe_delay_chain1 = "TRUE") else
+                            not output_dq_oe_ff_q when (dq_oe_reg_mode = "FF") else
+                            not output_dq_oe_ddio_oe_dataout when (dq_oe_reg_mode = "DDIO") else
+                            not output_dq_oe_in;
+
+------------------
+-- 8. DQSN PATH --
+------------------
+    --INPUT--
+            --dqsn_input_delay_chain_dataout--
+            --dqsn_delay_chain_dqsbusout--
+            DQSN_IN1 :  process (dqsn_input_data_in)
+                        begin
+                            dqsn_input_delay_chain_dataout <= transport dqsn_input_data_in after 
+                                                                (conv_int(io_config_dqsn_padtoinputregisterdelaysetting) * 50 ps);
+                            dqsn_delay_chain_dqsbusout <= transport dqsn_input_data_in after (dqsbusout_delay * 1 ps);
+                        end process DQSN_IN1;
+        
+            --dqsnbusout_delay_chain_dataout--
+            DQSN_IN2 :  process (dqsn_delay_chain_dqsbusout)
+                        begin
+                            dqsnbusout_delay_chain_dataout <= transport dqsn_delay_chain_dqsbusout after 
+                                                                (conv_int(dqs_config_dqsbusoutdelaysetting) * 50 ps);
+                        end process;
+            
+            --dqsn_enable_dqsbusout--
+            dqsn_enable_dqsin <= dqsnbusout_delay_chain_dataout when (use_dqsbusout_delay_chain = "TRUE") else
+                                dqsn_delay_chain_dqsbusout when (use_dqs_delay_chain = "TRUE") else '0';
+            
+            dqsn_enable_dqsbusout <= dqsn_enable_dqsin and dqs_enable_dqsenable;
+            
+            dqsn_bus_wire <= dqsn_enable_dqsbusout when (use_dqs_enable = "TRUE") else
+                            dqsnbusout_delay_chain_dataout when (use_dqsbusout_delay_chain = "TRUE") else
+                            dqsn_delay_chain_dqsbusout;
+            
+            --dqsn_bus_out--
+            dqsn_bus_out <= dqsn_enable_dqsbusout when (use_dqs_enable = "TRUE") else
+                            dqsbusout_delay_chain_dataout when (use_dqsbusout_delay_chain = "TRUE") else dqsn_delay_chain_dqsbusout;
+    
+    --OUTPUT--
+            --dqsn_output_delay_chain2_dataout--
+            dqsn_output_delay_chain2_datain <=   dqsn_output_delay_chain1_dataout when (use_dqs_output_delay_chain1 = "TRUE") else
+                                                dqsn_output_ff_q when (dqs_output_reg_mode = "FF") else
+                                                dqsn_output_ddio_out_dataout when (dqs_output_reg_mode = "DDIO") else 
+                                                --(dqs_output_reg_mode = "OPA")
+                                                dqsn_output_data_in;
+    
+            DQSN_OUT1 : process (dqsn_output_delay_chain2_datain)
+                        begin
+                            dqsn_output_delay_chain2_dataout <= transport dqsn_output_delay_chain2_datain after 
+                                                                (conv_int(io_config_dqsn_outputdelaysetting2) * 50 ps);
+                        end process DQSN_OUT1;
+            
+            --dqsn_output_delay_chain1_dataout--
+            dqsn_output_delay_chain1_datain <=   dqsn_output_ff_q when (dqs_output_reg_mode = "FF") else
+                                                dqsn_output_ddio_out_dataout when (dqs_output_reg_mode = "DDIO") else
+                                                --(dqs_output_reg_mode = "OPA")
+                                                dqsn_output_data_in;
+                                                
+            DQSN_OUT2 : process (dqsn_output_delay_chain1_datain)
+                        begin
+                            dqsn_output_delay_chain1_dataout <= transport dqsn_output_delay_chain1_datain after 
+                                                                (conv_int(io_config_dqsn_outputdelaysetting1) * 50 ps);
+                        end process DQSN_OUT2;
+            
+            --dqsn_output_ff_q--
+            DQSN_OUT3 :  process (dqs_output_reg_clk, dqsn_areset)
+                        begin
+                            if (dqsn_areset = '1') then
+                                dqsn_output_ff_q <= '0';
+                            elsif (rising_edge(dqs_output_reg_clk)) then
+                                if (dqsn_sreset = '1') then
+                                    dqsn_output_ff_q <= '0';
+                                else
+                                    dqsn_output_ff_q <= dqsn_output_data_in;
+                                end if;
+                            end if;
+                        end process DQSN_OUT3;
+    
+            --dqsn_output_ddio_out_dataout--
+                -- Half rate enable
+                DQSN_OUT4 : process (dqsn_hr_output_data_in)
+                            begin
+                                dqsn_output_hr_ddio_out_datain_bus <= dqsn_hr_output_data_in;
+                            end process DQSN_OUT4;
+                            
+                DQSN_OUT5 :  process (dqs_hr_output_reg_clk, dqsn_areset)
+                            begin
+                                if (dqsn_areset = '1') then
+                                    if (dqs_output_reg_async_mode = "PRESET") then
+                                        dqsn_output_hr_ddio_out_datain_reg <= (others => '1');
+                                    else
+                                        dqsn_output_hr_ddio_out_datain_reg <= (others => '0');
+                                    end if;
+                                elsif (rising_edge(dqs_hr_output_reg_clk)) then
+                                    dqsn_output_hr_ddio_out_datain_reg <= dqsn_output_hr_ddio_out_datain_bus;
+                                end if;
+                                
+                                if (dqsn_areset = '1') then
+                                    if (dqs_output_reg_async_mode = "PRESET") then
+                                        dqsn_output_hr_ddio_out_datain_reg1 <= (others => '1');
+                                    else
+                                        dqsn_output_hr_ddio_out_datain_reg1 <= (others => '0');
+                                    end if;
+                                elsif (falling_edge(dqs_hr_output_reg_clk)) then
+                                    dqsn_output_hr_ddio_out_datain_reg1 <= (dqsn_output_hr_ddio_out_datain_reg(3), dqsn_output_hr_ddio_out_datain_reg(1));
+                                end if;
+                            end process DQSN_OUT5;
+    
+                --dqsn_output_hr_ddio_out_high--
+                dqsn_output_hr_ddio_out_high_dataout <=  dqsn_output_hr_ddio_out_datain_reg1(1) when (dqs_hr_output_reg_clk_mux = '1') else
+                                                        dqsn_output_hr_ddio_out_datain_reg(2);
+    
+                --dqsn_output_hr_ddio_out_low--
+                dqsn_output_hr_ddio_out_low_dataout <=   dqsn_output_hr_ddio_out_datain_reg1(0) when (dqs_hr_output_reg_clk_mux = '1') else
+                                                        dqsn_output_hr_ddio_out_datain_reg(0);
+    
+                --dqsn_output_ddio_out--
+                DQSN_OUT6 : process (dqs_output_reg_clk, dqsn_areset)
+                            begin
+                                if (dqsn_areset = '1') then
+                                    if (dqs_output_reg_async_mode = "PRESET") then
+                                        dqsn_output_ddio_out_datain_reg <= (others => '1');
+                                    else
+                                        dqsn_output_ddio_out_datain_reg <= (others => '0');
+                                    end if;
+                                elsif (rising_edge(dqs_output_reg_clk)) then
+                                    if (dqsn_sreset = '1') then
+                                        if (dqs_output_reg_sync_mode = "PRESET") then
+                                            dqsn_output_ddio_out_datain_reg <= (others => '1');
+                                        else
+                                            dqsn_output_ddio_out_datain_reg <= (others => '0');
+                                        end if;
+                                    else
+                                        if (use_half_rate = "TRUE") then
+                                            dqsn_output_ddio_out_datain_reg <= (dqsn_output_hr_ddio_out_high_dataout, dqsn_output_hr_ddio_out_low_dataout);
+                                        else
+                                            dqsn_output_ddio_out_datain_reg <= (dqsn_output_data_in_high, dqsn_output_data_in_low);
+                                        end if;
+                                    end if;
+                                end if;
+                            end process DQSN_OUT6;
+                
+                dqsn_output_ddio_out_dataout <=  dqsn_output_ddio_out_datain_reg(1) when (dqs_output_reg_clk_mux = '1') else 
+                                                dqsn_output_ddio_out_datain_reg(0);
+
+    --OE--
+            --dqsn_oe_delay_chain2_dataout--
+            dqsn_oe_delay_chain2_datain <=  dqsn_oe_delay_chain1_dataout when (use_dqs_oe_delay_chain1 = "TRUE") else
+                                            dqsn_oe_ff_q when (dqs_oe_reg_mode = "FF") else
+                                            dqsn_oe_ddio_oe_dataout when (dqs_oe_reg_mode = "DDIO") else dqsn_oe_in;
+
+            DQSN_OE1 :  process (dqsn_oe_delay_chain2_datain)
+                        begin
+                            dqsn_oe_delay_chain2_dataout <= transport dqsn_oe_delay_chain2_datain after 
+                                                            (conv_int(io_config_dqsn_outputdelaysetting2) * 50 ps);
+                        end process DQSN_OE1;
+
+            --dqsn_oe_delay_chain1_dataout--
+            dqsn_oe_delay_chain1_datain <=  dqsn_oe_ff_q when (dqs_oe_reg_mode = "FF") else
+                                            dqsn_oe_ddio_oe_dataout when (dqs_oe_reg_mode = "DDIO") else
+                                            dqsn_oe_in;
+
+            DQSN_OE2 :  process (dqsn_oe_delay_chain1_datain)
+                        begin
+                            dqsn_oe_delay_chain1_dataout <= transport dqsn_oe_delay_chain1_datain after
+                                                            (conv_int(io_config_dqsn_outputdelaysetting1) * 50 ps);
+                        end process DQSN_OE2;
+
+            --dqsn_oe_ff_q--
+            DQSN_OE3 :  process (dqs_output_reg_clk, dqsn_areset)
+                        begin
+                            if (dqsn_areset = '1') then
+                                dqsn_oe_ff_q <= '0';
+                            elsif (rising_edge(dqs_output_reg_clk)) then
+                                if (dqs_output_reg_clkena = '1') then
+                                    if (dqsn_sreset = '1') then
+                                        dqsn_oe_ff_q <= '0';
+                                    else
+                                        if (use_half_rate = "TRUE") then
+                                            dqsn_oe_ff_q <= dqsn_oe_hr_ddio_out_dataout;
+                                        else
+                                            dqsn_oe_ff_q <= dqsn_oe_in;
+                                        end if;
+                                    end if;
+                                end if;
+                            end if;
+                        end process DQSN_OE3;
+
+            --dqsn_oe_ddio_oe_dataout--
+                -- Half rate enable
+                DQSN_OE4 :  process (dqsn_hr_oe_in)
+                            begin
+                                dqsn_hr_oe_ddio_oe_datain_bus <= dqsn_hr_oe_in;
+                            end process DQSN_OE4;
+
+                DQSN_OE5 :  process (dqs_hr_output_reg_clk, dqsn_areset)
+                            begin
+                                if (dqsn_areset = '1') then
+                                    if (dqs_oe_reg_async_mode = "PRESET") then
+                                        dqsn_hr_oe_ddio_oe_datain_reg <= (others => '1');
+                                        dqsn_hr_oe_ddio_oe_datain_reg1 <= '1';
+                                    else
+                                        dqsn_hr_oe_ddio_oe_datain_reg <= (others => '0');
+                                        dqsn_hr_oe_ddio_oe_datain_reg1 <= '0';
+                                    end if;
+                                elsif (rising_edge(dqs_hr_output_reg_clk)) then
+                                    dqsn_hr_oe_ddio_oe_datain_reg <= dqsn_hr_oe_ddio_oe_datain_bus;
+                                elsif (falling_edge(dqs_hr_output_reg_clk)) then
+                                    dqsn_hr_oe_ddio_oe_datain_reg1 <= dqsn_hr_oe_ddio_oe_datain_reg(1);
+                                end if;
+                            end process DQSN_OE5;
+
+                dqsn_oe_hr_ddio_out_dataout <=  dqsn_hr_oe_ddio_oe_datain_reg1 when (dqs_hr_output_reg_clk_mux = '1') else
+                                                dqsn_hr_oe_ddio_oe_datain_reg(0);
+
+                DQSN_OE6 :   process (dqs_output_reg_clk, dqsn_areset)
+                            begin
+                                if (dqsn_areset = '1') then
+                                    if (dqs_oe_reg_async_mode = "PRESET") then
+                                        dqsn_oe_ddio_oe_datain_reg_hi <= '1';
+                                        dqsn_oe_ddio_oe_datain_reg_lo <= '1';
+                                    else
+                                        dqsn_oe_ddio_oe_datain_reg_hi <= '0';
+                                        dqsn_oe_ddio_oe_datain_reg_lo <= '0';
+                                    end if;
+                                elsif (rising_edge(dqs_output_reg_clk)) then
+                                    if (dqs_output_reg_clkena = '1') then
+                                        if (dqsn_sreset = '1') then
+                                            if (dqs_oe_reg_sync_mode = "PRESET") then
+                                                dqsn_oe_ddio_oe_datain_reg_hi <= '1';
+                                            else
+                                                dqsn_oe_ddio_oe_datain_reg_hi <= '0';
+                                            end if;
+                                        else
+                                            if (use_half_rate = "TRUE") then
+                                                dqsn_oe_ddio_oe_datain_reg_hi <= dqsn_oe_hr_ddio_out_dataout;
+                                            else
+                                                dqsn_oe_ddio_oe_datain_reg_hi <= dqsn_oe_in;
+                                            end if;
+                                        end if;
+                                    end if;
+                                elsif (falling_edge(dqs_output_reg_clk)) then
+                                    if (dqs_output_reg_clkena = '1') then
+                                        if (dqs_oe_reg_sync_mode = "PRESET") then
+                                            dqsn_oe_ddio_oe_datain_reg_lo <= '1';
+                                        else
+                                            dqsn_oe_ddio_oe_datain_reg_lo <= '0';
+                                        end if;
+                                    else
+                                        dqsn_oe_ddio_oe_datain_reg_lo <= dqsn_oe_ddio_oe_datain_reg_hi;
+                                    end if;
+                                end if;
+                            end process DQSN_OE6;
+
+                dqsn_oe_ddio_oe_dataout <=  dqsn_oe_ddio_oe_datain_reg_lo when (dqsn_oe_ddio_oe_datain_reg_lo = '1') else
+                                            dqsn_oe_ddio_oe_datain_reg_hi;
+
+        --external--
+            dqsn_input_data_out <= dqsn_input_delay_chain_dataout when (use_dqs_input_delay_chain = "TRUE") else dqsn_input_data_in;
+
+            dqsn_output_data_out <= dqsn_output_delay_chain2_dataout when (use_dqs_output_delay_chain2 = "TRUE") else
+                                    dqsn_output_delay_chain1_dataout when (use_dqs_output_delay_chain1 = "TRUE") else
+                                    dqsn_output_ff_q when (dqs_output_reg_mode = "FF") else
+                                    dqsn_output_ddio_out_dataout when (dqs_output_reg_mode = "DDIO") else dqsn_output_data_in;
+
+            dqsn_oe_out <=  not dqsn_oe_delay_chain2_dataout when (use_dqs_oe_delay_chain2 = "TRUE") else
+                            not dqsn_oe_delay_chain1_dataout when (use_dqs_oe_delay_chain1 = "TRUE") else
+                            not dqsn_oe_ff_q when (dqs_oe_reg_mode = "FF") else
+                            not dqsn_oe_ddio_oe_dataout when (dqs_oe_reg_mode = "DDIO") else
+                            not dqsn_oe_in;
+                        
+end translated;
+-- END OF ARCHITECTURE ALTDQ_DQS
+-- START_FILE_HEADER ----------------------------------------------------------
+--
+-- Filename    : altera_std_synchronizer.vhd
+--
+-- Description : Contains the simulation model for the altera_std_synchronizer
+--
+-- Owner       : Paul Scheidt
+--
+-- Copyright (C) Altera Corporation 2008, All Rights Reserved
+--
+-- END_FILE_HEADER ------------------------------------------------------------
+--
+-- START_ENTITY_HEADER --------------------------------------------------------
+--
+-- Entity Name     : altera_std_synchronizer
+--
+-- Description     : Single bit clock domain crossing synchronizer. 
+--                   Composed of two flip flops connected in series.
+--
+-- Limitations     :
+--
+-- END_FILE_HEADER ------------------------------------------------------------
+--
+library ieee ;
+use ieee.std_logic_1164.all;
+use work.all;
+
+-- BEGINNING OF ENTITY
+entity altera_std_synchronizer is
+    -- GENERIC DECLARATION
+    generic (depth : integer := 3);              -- must be >= 2
+    
+    -- PORT DECLARATION
+    port (
+          clk     : in  std_logic;
+    	  reset_n : in  std_logic;
+    	  din     : in  std_logic;
+    	  dout    : out std_logic
+         );
+end altera_std_synchronizer;
+-- END OF ENTITY
+
+-- BEGINNING OF ARCHITECTURE
+architecture behavioral of altera_std_synchronizer is
+-- SIGNAL DECLARATION
+    signal din_s1 : std_logic;
+    signal dreg : std_logic_vector(depth-2 downto 0);
+begin
+    process (din, clk) begin
+        if (clk'event and clk='1') then
+            if reset_n='0' then
+                din_s1 <= '0';
+            else
+                din_s1 <= din;
+            end if;
+        end if;
+    end process;
+
+    g1: if depth = 1 generate
+        -- normally this is an illegal condition
+        dout <= din_s1;	    
+    end generate g1;
+
+    g2: if depth = 2 generate
+        process (din, clk) begin
+            if (clk'event and clk='1') then
+                if reset_n='0' then
+                    dout <= '0';
+                else
+                    dout <= din_s1;
+                end if;
+            end if;
+        end process;
+    end generate g2;
+
+    g3: if depth >= 3 generate
+        process (din, clk) begin
+            if (clk'event and clk='1') then
+                if reset_n='0' then
+                    dreg <= (others => '0');
+                else
+		    dreg <= dreg(depth-3 downto 0) & din_s1;   
+                end if;
+            end if;
+        end process;
+        dout <= dreg(depth-2);	    
+    end generate g3;
+
+end behavioral;
+-- END OF ARCHITECTURE
+
+-- START_FILE_HEADER ----------------------------------------------------------
+--
+-- Filename    : altera_std_synchronizer_bundle.vhd
+--
+-- Description : Contains the simulation model for the altera_std_synchronizer_bundle
+--
+-- Owner       : Paul Scheidt
+--
+-- Copyright (C) Altera Corporation 2008, All Rights Reserved
+--
+-- END_FILE_HEADER ------------------------------------------------------------
+--
+-- START_ENTITY_HEADER --------------------------------------------------------
+--
+-- Entity Name     : altera_std_synchronizer_bundle
+--
+-- Description     : Bundle of bit synchronizers. 
+--                   WARNING: only use this to synchronize a bundle of 
+--                   *independent* single bit signals or a Gray encoded 
+--                   bus of signals. Also remember that pulses entering 
+--                   the synchronizer will be swallowed upon a metastable
+--                   condition if the pulse width is shorter than twice
+--                   the synchronizing clock period.
+--
+-- Limitations     :
+--
+-- END_FILE_HEADER -------------------------------------------------------------
+--
+
+library ieee ;
+use ieee.std_logic_1164.all;
+use work.all;
+
+-- BEGINNNG OF ENTITY
+entity altera_std_synchronizer_bundle is
+    -- GENERIC DECLARATION
+    generic (depth : integer := 3;              -- must be >= 2
+             width : integer := 1);
+
+    -- PORT DECLARATION
+    port (
+          clk     : in  std_logic;
+    	  reset_n : in  std_logic;
+    	  din     : in  std_logic_vector(width-1 downto 0);
+    	  dout    : out std_logic_vector(width-1 downto 0)
+         );
+end altera_std_synchronizer_bundle;
+-- END OF ENTITY
+
+-- BEGINNING OF ARCHITECTURE
+architecture behavioral of altera_std_synchronizer_bundle is
+-- COMPONENT DECLARATION
+  component altera_std_synchronizer
+    generic (depth : integer := 3); 
+    port (
+          clk     : in  std_logic;
+    	  reset_n : in  std_logic;
+    	  din     : in  std_logic;
+    	  dout    : out std_logic
+         );
+  end component;
+begin
+    g1: for i in 0 to width-1 generate
+        s: altera_std_synchronizer
+          generic map (depth => depth)
+          port map (clk => clk, 
+                    reset_n => reset_n, 
+                    din => din(i), 
+                    dout => dout(i)
+                    );
+    end generate g1;
+end behavioral;
+-- END OF ARCHITECTURE
+
+ LIBRARY ieee;
+ USE ieee.std_logic_unsigned.all;
+
+--synthesis_resources = lut 4 reg 5 
+ LIBRARY ieee;
+ USE ieee.std_logic_1164.all;
+
+ ENTITY  alt_cal IS 
+	 generic (
+	    number_of_channels		:  integer := 1;
+	    channel_address_width 	:  integer := 1;
+            sim_model_mode  		:  string  := "TRUE";
+            lpm_hint        		:  string  := "UNUSED";
+            lpm_type        		:  string  := "alt_cal"
+	  );
+	 PORT 
+	 ( 
+		 busy	:	OUT  STD_LOGIC;
+		 cal_error	:	OUT  STD_LOGIC_VECTOR (number_of_channels - 1 DOWNTO 0);
+		 clock	:	IN  STD_LOGIC;
+		 dprio_addr	:	OUT  STD_LOGIC_VECTOR (15 DOWNTO 0);
+		 dprio_busy	:	IN  STD_LOGIC;
+		 dprio_datain	:	IN  STD_LOGIC_VECTOR (15 DOWNTO 0);
+		 dprio_dataout	:	OUT  STD_LOGIC_VECTOR (15 DOWNTO 0);
+		 dprio_rden	:	OUT  STD_LOGIC;
+		 dprio_wren	:	OUT  STD_LOGIC;
+		 quad_addr	:	OUT  STD_LOGIC_VECTOR (6 DOWNTO 0);
+		 remap_addr	:	IN  STD_LOGIC_VECTOR (9 DOWNTO 0) := (OTHERS => '0');
+		 reset	:	IN  STD_LOGIC := '0';
+		 retain_addr	:	OUT  STD_LOGIC_VECTOR (0 DOWNTO 0);
+		 start	:	IN  STD_LOGIC := '0';
+		 testbuses	:	IN  STD_LOGIC_VECTOR (4 * number_of_channels - 1 DOWNTO 0) := (OTHERS => '0')
+	 ); 
+ END alt_cal;
+
+ ARCHITECTURE RTL OF alt_cal IS
+
+	 ATTRIBUTE synthesis_clearbox : natural;
+	 ATTRIBUTE synthesis_clearbox OF RTL : ARCHITECTURE IS 1;
+	 ATTRIBUTE ALTERA_ATTRIBUTE : string;
+	 ATTRIBUTE ALTERA_ATTRIBUTE OF RTL : ARCHITECTURE IS "PRESERVE_REGISTER=ON";
+
+	 SIGNAL	 p0addr_sim	:	STD_LOGIC_VECTOR(0 DOWNTO 0)
+	 -- synopsys translate_off
+	  := (OTHERS => '0')
+	 -- synopsys translate_on
+	 ;
+	 ATTRIBUTE ALTERA_ATTRIBUTE OF p0addr_sim : SIGNAL IS "PRESERVE_REGISTER=ON;POWER_UP_LEVEL=LOW";
+
+	 SIGNAL  wire_p0addr_sim_w_lg_w_lg_q4w5w	:	STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  wire_p0addr_sim_w_lg_w_lg_w_lg_q4w5w6w	:	STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  wire_p0addr_sim_w_lg_q4w	:	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL	 sim_counter_reg	:	STD_LOGIC_VECTOR(3 DOWNTO 0)
+	 -- synopsys translate_off
+	  := (OTHERS => '0')
+	 -- synopsys translate_on
+	 ;
+	 ATTRIBUTE ALTERA_ATTRIBUTE OF sim_counter_reg : SIGNAL IS "POWER_UP_LEVEL=LOW";
+
+	 SIGNAL  wire_next_scount_num_dataa	:		STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  wire_next_scount_num_datab	:		STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  wire_next_scount_num_result	:		STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  wire_w_lg_w_lg_w_lg_reset7w8w9w	:	STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  wire_w_lg_w_lg_reset7w8w	:	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL  wire_w_lg_w_lg_sim_counter_and2w3w	:	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL  wire_w_lg_sim_counter_and1w	:	STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  wire_w_lg_reset7w	:	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL  wire_w_lg_sim_counter_and2w	:	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL  busy_sim :	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL  sim_activator :	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL  sim_counter_and :	STD_LOGIC_VECTOR (0 DOWNTO 0);
+	 SIGNAL  sim_counter_next :	STD_LOGIC_VECTOR (3 DOWNTO 0);
+	 SIGNAL  sim_counter_or :	STD_LOGIC_VECTOR (0 DOWNTO 0);
+ BEGIN
+
+	loop0 : FOR i IN 0 TO 3 GENERATE 
+		wire_w_lg_w_lg_w_lg_reset7w8w9w(i) <= wire_w_lg_w_lg_reset7w8w(0) AND wire_p0addr_sim_w_lg_w_lg_w_lg_q4w5w6w(i);
+	END GENERATE loop0;
+	wire_w_lg_w_lg_reset7w8w(0) <= wire_w_lg_reset7w(0) AND sim_activator(0);
+	wire_w_lg_w_lg_sim_counter_and2w3w(0) <= wire_w_lg_sim_counter_and2w(0) AND sim_counter_or(0);
+	loop1 : FOR i IN 0 TO 3 GENERATE 
+		wire_w_lg_sim_counter_and1w(i) <= sim_counter_and(0) AND sim_counter_reg(i);
+	END GENERATE loop1;
+	wire_w_lg_reset7w(0) <= NOT reset;
+	wire_w_lg_sim_counter_and2w(0) <= NOT sim_counter_and(0);
+	busy <= busy_sim(0);
+	busy_sim(0) <= (p0addr_sim(0) AND wire_w_lg_sim_counter_and2w(0));
+	cal_error <= (OTHERS => '0');
+	dprio_addr <= (OTHERS => '0');
+	dprio_dataout <= (OTHERS => '0');
+	dprio_rden <= '0';
+	dprio_wren <= '0';
+	quad_addr <= (OTHERS => '0');
+	retain_addr <= (OTHERS => '0');
+	sim_activator <= p0addr_sim;
+	sim_counter_and(0) <= (((sim_counter_reg(0) AND sim_counter_reg(1)) AND sim_counter_reg(2)) AND sim_counter_reg(3));
+	sim_counter_next <= wire_next_scount_num_result;
+	sim_counter_or(0) <= (((sim_counter_reg(0) OR sim_counter_reg(1)) OR sim_counter_reg(2)) OR sim_counter_reg(3));
+	PROCESS (clock)
+	BEGIN
+		IF (clock = '1' AND clock'event) THEN p0addr_sim <= "1";
+		END IF;
+	END PROCESS;
+	loop2 : FOR i IN 0 TO 3 GENERATE 
+		wire_p0addr_sim_w_lg_w_lg_q4w5w(i) <= wire_p0addr_sim_w_lg_q4w(0) AND sim_counter_next(i);
+	END GENERATE loop2;
+	loop3 : FOR i IN 0 TO 3 GENERATE 
+		wire_p0addr_sim_w_lg_w_lg_w_lg_q4w5w6w(i) <= wire_p0addr_sim_w_lg_w_lg_q4w5w(i) OR wire_w_lg_sim_counter_and1w(i);
+	END GENERATE loop3;
+	wire_p0addr_sim_w_lg_q4w(0) <= p0addr_sim(0) OR wire_w_lg_w_lg_sim_counter_and2w3w(0);
+	PROCESS (clock)
+	BEGIN
+		IF (clock = '1' AND clock'event) THEN sim_counter_reg <= wire_w_lg_w_lg_w_lg_reset7w8w9w;
+		END IF;
+	END PROCESS;
+	wire_next_scount_num_result <= wire_next_scount_num_dataa + wire_next_scount_num_datab;
+	wire_next_scount_num_dataa <= sim_counter_reg;
+	wire_next_scount_num_datab <= "0001";
+
+ END RTL; --alt_cal
+--VALID FILE
+
 -------------------------------------------------------------------------------
 
 library ieee;
@@ -50204,18 +54336,24 @@ entity    sld_signaltap    is
         SLD_ADVANCED_TRIGGER_6    :    string    :=    "NONE";
         SLD_ADVANCED_TRIGGER_9    :    string    :=    "NONE";
         SLD_ADVANCED_TRIGGER_7    :    string    :=    "NONE";
+        SLD_STORAGE_QUALIFIER_ADVANCED_CONDITION_ENTITY    :    string    :=    "basic";
+        SLD_STORAGE_QUALIFIER_GAP_RECORD    :    natural    :=    0;
         SLD_INCREMENTAL_ROUTING    :    natural    :=    0;
+        SLD_STORAGE_QUALIFIER_PIPELINE    :    natural    :=    0;
         SLD_TRIGGER_IN_ENABLED    :    natural    :=    0;
-        SLD_STATE_BITS    :    natural    :=    5;
+        SLD_STATE_BITS    :    natural    :=    11;
         SLD_STATE_FLOW_USE_GENERATED    :    natural    :=    0;
         SLD_INVERSION_MASK_LENGTH    :    integer    :=    1;
         SLD_DATA_BITS    :    natural    :=    1;
         SLD_BUFFER_FULL_STOP    :    natural    :=    1;
+        SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH    :    natural    :=    0;
         SLD_ATTRIBUTE_MEM_MODE    :    string    :=    "OFF";
+        SLD_STORAGE_QUALIFIER_MODE    :    string    :=    "OFF";
         SLD_STATE_FLOW_MGR_ENTITY    :    string    :=    "state_flow_mgr_entity.vhd";
         SLD_NODE_CRC_LOWORD    :    natural    :=    50132;
         SLD_ADVANCED_TRIGGER_5    :    string    :=    "NONE";
         SLD_TRIGGER_BITS    :    natural    :=    1;
+        SLD_STORAGE_QUALIFIER_BITS    :    natural    :=    1;
         SLD_ADVANCED_TRIGGER_10    :    string    :=    "NONE";
         SLD_MEM_ADDRESS_BITS    :    natural    :=    7;
         SLD_ADVANCED_TRIGGER_ENTITY    :    string    :=    "basic";
@@ -50232,6 +54370,7 @@ entity    sld_signaltap    is
         SLD_ENABLE_ADVANCED_TRIGGER    :    natural    :=    0;
         SLD_SEGMENT_SIZE    :    natural    :=    0;
         SLD_NODE_INFO    :    natural    :=    0;
+        SLD_STORAGE_QUALIFIER_ENABLE_ADVANCED_CONDITION    :    natural    :=    0;
         SLD_NODE_CRC_HIWORD    :    natural    :=    41394;
         SLD_TRIGGER_LEVEL_PIPELINE    :    natural    :=    1;
         SLD_ADVANCED_TRIGGER_3    :    string    :=    "NONE"
@@ -50246,11 +54385,12 @@ entity    sld_signaltap    is
         jtag_state_uir    :    in    std_logic    :=    '0';
         acq_trigger_in    :    in    std_logic_vector(SLD_TRIGGER_BITS-1 downto 0)   :=   (others => '0');
         trigger_out    :    out    std_logic;
+        storage_enable    :    in    std_logic    :=    '0';
         acq_data_out    :    out    std_logic_vector(SLD_DATA_BITS-1 downto 0);
         acq_data_in    :    in    std_logic_vector(SLD_DATA_BITS-1 downto 0)   :=   (others => '0');
+        acq_storage_qualifier_in    :    in    std_logic_vector(SLD_STORAGE_QUALIFIER_BITS-1 downto 0)   :=   (others => '0');
         jtag_state_udr    :    in    std_logic    :=    '0';
         tdo    :    out    std_logic;
-        clrn    :    in    std_logic    :=    '0';
         crc    :    in    std_logic_vector(SLD_NODE_CRC_BITS-1 downto 0)   :=   (others => '0');
         jtag_state_e1dr    :    in    std_logic    :=    '0';
         raw_tck    :    in    std_logic    :=    '0';
@@ -50258,6 +54398,7 @@ entity    sld_signaltap    is
         acq_clk    :    in    std_logic;
         shift    :    in    std_logic    :=    '0';
         ena    :    in    std_logic    :=    '0';
+        clr    :    in    std_logic    :=    '0';
         trigger_in    :    in    std_logic    :=    '0';
         update    :    in    std_logic    :=    '0';
         rti    :    in    std_logic    :=    '0'
@@ -50303,6 +54444,7 @@ entity    altparallel_flash_loader    is
         dclk_divisor    :    natural    :=    1;
         safe_mode_retry    :    natural    :=    1;
         features_cfg    :    natural    :=    1;
+        burst_mode_numonyx    :    natural    :=    0;
         burst_mode_intel    :    natural    :=    0;
         burst_mode    :    natural    :=    0;
         clk_divisor    :    natural    :=    1;
@@ -50313,6 +54455,7 @@ entity    altparallel_flash_loader    is
         page_mode    :    natural    :=    0;
         lpm_type    :    string    :=    "ALTPARALLEL_FLASH_LOADER";
         features_pgm    :    natural    :=    1;
+        n_flash    :    natural    :=    1;
         burst_mode_spansion    :    natural    :=    0;
         auto_restart    :    STRING    :=    "OFF";
         page_clk_divisor    :    natural    :=    1;
@@ -50354,6 +54497,8 @@ use work.altera_mf_components.all;
 
 entity    altserial_flash_loader    is
     generic    (
+        enhanced_mode    :    natural    :=    0;
+        intended_device_family    :    STRING    :=    "Cyclone";
         enable_shared_access    :    STRING    :=    "OFF";
         lpm_type    :    STRING    :=    "ALTSERIAL_FLASH_LOADER"
     );

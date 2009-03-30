@@ -4,7 +4,7 @@
 -- File       : DSOConfig-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-03-11
+-- Last update: 2009-03-30
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -58,6 +58,7 @@ package pDSOConfig is
   constant cADCClkRate       : natural    := 100E6;
   constant cDesignClkRate    : natural    := 100E6;
   constant cCPUClkRate       : natural    := 50E6;
+  constant cAnSettStrobeRate : natural    := 2E3;  -- 1 kHz calibrator freq.
   constant cResetActive      : std_ulogic := '0';
   constant cADCBitWidth      : natural    := 14;
   constant cBitWidth         : natural    := cADCBitWidth;
