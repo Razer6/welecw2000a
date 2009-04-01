@@ -30,7 +30,7 @@ set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:07:45  MAY 15, 2008"
 set_global_assignment -name LAST_QUARTUS_VERSION 9.0
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
-set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
+#set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
 set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id "3.3-V LVTTL"
 set_global_assignment -name OUTPUT_PIN_LOAD 3 -section_id "1.8 V"
 set_global_assignment -name FMAX_REQUIREMENT "250 MHz"
@@ -443,7 +443,16 @@ set_location_assignment PIN_AA13 -to oDesh[2]
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 
-set_global_assignment -name VHDL_FILE jtag_uart_0.vhd
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name FLOW_ENABLE_IO_ASSIGNMENT_ANALYSIS ON
+
+
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name FITTER_AUTO_EFFORT_DESIRED_SLACK_MARGIN "100 ps"
+
+set_global_assignment -name VHDL_FILE ../../Altera/src/jtag_uart_0.vhd
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/version.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/stdlib.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/sparc/sparc.vhd"
@@ -672,11 +681,3 @@ set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAcce
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SignalAccess-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/W2000ROM.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/leon3mini.vhd"
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name FLOW_ENABLE_IO_ASSIGNMENT_ANALYSIS ON
-
-
-set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
-set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
-set_global_assignment -name FITTER_AUTO_EFFORT_DESIRED_SLACK_MARGIN "100 ps"
