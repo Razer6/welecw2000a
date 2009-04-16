@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-21
+-- Last update: 2009-04-05
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -61,6 +61,7 @@ package pSpecialFunctionRegister is
                      Trigger        : aTriggerInput;
                      --                  Uart            : aCPUtoUart;
                      Leds           : aLeds;
+                     nConfigADC     : std_ulogic_vector(cChannels-1 downto 0);
                      AnalogSettings : aAnalogSettings;
                    end record;
   -- addresses
@@ -69,37 +70,32 @@ package pSpecialFunctionRegister is
   constant cInterruptMaskAddr      : natural := 2;
   constant cSamplingFreqAddr       : natural := 4;
   constant cFilterEnableAddr       : natural := 5;
+  constant cExtTriggerSrcAddr      : natural := 6;
+  constant cExtTriggerPWMAddr      : natural := 7;
   constant cInputCh0Addr           : natural := 8;
   constant cInputCh1Addr           : natural := 9;
   constant cInputCh2Addr           : natural := 10;
   constant cInputCh3Addr           : natural := 11;
-  constant cInputCh0GainAddr       : natural := 12;
-  constant cInputCh1GainAddr       : natural := 13;
-  constant cInputCh2GainAddr       : natural := 14;
-  constant cInputCh3GainAddr       : natural := 15;
-  constant cTriggerOnChAddr        : natural := 24;
-  constant cTriggerOnceAddr        : natural := 25;
-  constant cTriggerPrefetchAddr    : natural := 26;
-  constant cTriggerStorageModeAddr : natural := 27;
-  constant cTriggerReadOffSetAddr  : natural := 28;
-  constant cTriggerTypeAddr        : natural := 29;
-  constant cTriggerLowValueAddr    : natural := 30;
-  constant cTriggerLowTimeAddr     : natural := 31;
-  constant cTriggerHighValueAddr   : natural := 32;
-  constant cTriggerHighTimeAddr    : natural := 33;
-  constant cTriggerStatusRegister  : natural := 34;
-  constant cTriggerCurrentAddr     : natural := 35;
-  constant cExtTriggerSrcAddr      : natural := 36;
-  constant cExtTriggerPWMAddr      : natural := 37;
-  constant cUart16550Addr          : natural := 41;
-  constant cUart16550Data          : natural := 42;
-  constant cLedAddr                : natural := 48;
-  constant cKeyAddr0               : natural := 49;
-  constant cKeyAddr1               : natural := 50;
-  constant cAnalogSettingsPWMAddr  : natural := 51;
-  constant cAnalogSettingsBank7    : natural := 52;
-  constant cAnalogSettingsBank6    : natural := 53;
-  constant cAnalogSettingsBank5    : natural := 54;
-  constant cLastAddr               : natural := 55;
+  constant cTriggerOnChAddr        : natural := 12;
+  constant cTriggerOnceAddr        : natural := 13;
+  constant cTriggerPrefetchAddr    : natural := 14;
+  constant cTriggerStorageModeAddr : natural := 15;
+  constant cTriggerReadOffSetAddr  : natural := 16;
+  constant cTriggerTypeAddr        : natural := 17;
+  constant cTriggerLowValueAddr    : natural := 18;
+  constant cTriggerLowTimeAddr     : natural := 19;
+  constant cTriggerHighValueAddr   : natural := 20;
+  constant cTriggerHighTimeAddr    : natural := 21;
+  constant cTriggerStatusRegister  : natural := 22;
+  constant cTriggerCurrentAddr     : natural := 23;
+  constant cConfigADCEnable        : natural := 24;
+  constant cLedAddr                : natural := 25;
+  constant cKeyAddr0               : natural := 26;
+  constant cKeyAddr1               : natural := 27;
+  constant cAnalogSettingsPWMAddr  : natural := 28;
+  constant cAnalogSettingsBank7    : natural := 29;
+  constant cAnalogSettingsBank6    : natural := 30;
+  constant cAnalogSettingsBank5    : natural := 31;
+  constant cLastAddr               : natural := 32;
   
 end package;

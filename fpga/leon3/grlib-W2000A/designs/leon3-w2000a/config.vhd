@@ -68,7 +68,7 @@ package config is
 
 -- Clock generator
   constant CFG_CLKTECH : integer := altera;
-  constant CFG_CLKMUL : integer := (5);
+  constant CFG_CLKMUL : integer := (1);
   constant CFG_CLKDIV : integer := (2);
   constant CFG_OCLKDIV : integer := 2;
   constant CFG_PCIDLL : integer := 0;
@@ -151,18 +151,18 @@ package config is
   constant CFG_ETH_ENL : integer := 16#CC0001#;
 
 -- PROM/SRAM controller
-  constant CFG_SRCTRL : integer := 0;
-  constant CFG_SRCTRL_PROMWS : integer := 0;
-  constant CFG_SRCTRL_RAMWS : integer := 0;
-  constant CFG_SRCTRL_IOWS : integer := 0;
+  constant CFG_SRCTRL : integer := 1;
+  constant CFG_SRCTRL_PROMWS : integer := (3);
+  constant CFG_SRCTRL_RAMWS : integer := (2);
+  constant CFG_SRCTRL_IOWS : integer := (2);
   constant CFG_SRCTRL_RMW : integer := 0;
   constant CFG_SRCTRL_8BIT : integer := 0;
 
   constant CFG_SRCTRL_SRBANKS : integer := 1;
-  constant CFG_SRCTRL_BANKSZ : integer := 0;
-  constant CFG_SRCTRL_ROMASEL : integer := 0;
+  constant CFG_SRCTRL_BANKSZ : integer := 8;
+  constant CFG_SRCTRL_ROMASEL : integer := (19);
 -- LEON2 memory controller
-  constant CFG_MCTRL_LEON2 : integer := 1;
+  constant CFG_MCTRL_LEON2 : integer := 0;
   constant CFG_MCTRL_RAM8BIT : integer := 0;
   constant CFG_MCTRL_RAM16BIT : integer := 0;
   constant CFG_MCTRL_5CS : integer := 0;

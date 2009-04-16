@@ -41,9 +41,9 @@ unsigned int ReceiveSamples(uart_regs * uart,
 			int * FastMode,
 			unsigned int * RawData);
 
-void Record1Ch8Bit (FILE * Handle,aWaveFileInfo FileInfo,int * buffer);
-void Record1Ch16Bit(FILE * Handle,aWaveFileInfo FileInfo,int * buffer);
-void Record2Ch8Bit (FILE * Handle,aWaveFileInfo FileInfo,int * buffer);
+void FastRecord1Ch8Bit (FILE * Handle,aWaveFileInfo FileInfo,int * buffer);
+void FastRecord1Ch16Bit(FILE * Handle,aWaveFileInfo FileInfo,int * buffer);
+void FastRecord2Ch8Bit (FILE * Handle,aWaveFileInfo FileInfo,int * buffer);
 void RecordNormal  (FILE * Handle,aWaveFileInfo FileInfo,int * buffer);
 
 #endif

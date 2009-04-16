@@ -162,7 +162,7 @@ bool SetTrigger(const unsigned int Trigger,
 	TriggerR->TriggerLowTimeAddr   = LowReferenceTime;
 	TriggerR->TriggerHighValueAddr = HighReference;
 	TriggerR->TriggerHighTimeAddr  = HighReferenceTime;
-
+#if 0
     if ((loadmem((int)&TriggerR->TriggerLowValueAddr)  != LowReference)     ||
 	(loadmem((int)&TriggerR->TriggerLowTimeAddr)   != LowReferenceTime) ||
 	(loadmem((int)&TriggerR->TriggerHighValueAddr) != HighReference)    ||
@@ -171,6 +171,7 @@ bool SetTrigger(const unsigned int Trigger,
 	/*	Print.TriggerSettingsOutofRange();*/
 		return false;
 	}
+#endif
     return true;
 }
 
@@ -178,13 +179,6 @@ bool SetTrigger(const unsigned int Trigger,
 bool SetAnalogInputRange(const unsigned int NoCh, 
 			 const SetAnalog * Settings) 
 {
-/* TODO must be implemented for each target in HW before this can be used!*/
-/*	CaptureR->InputCh0Gain = 0;       */
-/*	CaptureR->InputCh1Gain = 0;      */
-/*	CaptureR->InputCh2Gain = 0;        */
-/*	CaptureR->InputCh3Gain = 0;*/
-/*	Print.AnalogInputGainNotSupported();*/
-/*	*/
 	unsigned int i = 0;
 	unsigned int temp = 0;
 	unsigned int j = 0;

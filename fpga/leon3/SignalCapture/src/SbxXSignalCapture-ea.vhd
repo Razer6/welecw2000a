@@ -4,7 +4,7 @@
 -- File       : SBxXSignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-03-21
+-- Last update: 2009-04-05
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -79,9 +79,10 @@ architecture RTL of SbxXSignalCapture is
   signal SelectorOut       : aTriggerData;
   signal SelectorOutValid  : std_ulogic;
   signal SlowInputData     : aLongValues(0 to cChannels-1);
+  signal FromLVDSData      : aLongValues(0 to cChannels-1);
   signal SlowInputValid    : std_ulogic;
   signal DownSampler       : aDownSampler;
-  signal ExtTrigger : std_ulogic;
+  signal ExtTrigger        : std_ulogic;
 begin
 
   -- oResetAsync <= ResetAsync;
@@ -96,16 +97,38 @@ begin
       c0     => ClkCPU,
       locked => oResetAsync);
 
+  pCMOS: if cLVDSADCs = 0 generate
+    process (iResetAsync, ClkDesign)
+    begin
+      if iResetAsync = cResetActive then
+        SlowInputData <= (others => (others => '0'));
+      elsif rising_edge(ClkDesign) then
+        SlowInputData(0)(SlowInputData(0)'high downto SlowInputData(0)'high-iADC(0)(0)'length+1) <=
+          signed(iADC(0)(0));
+      end if;
+    end process;
+  end generate;
 
-  process (ResetAsync, ClkDesign)
-  begin
-    if iResetAsync = cResetActive then
-      SlowInputData <= (others => (others => '0'));
-    elsif rising_edge(ClkDesign) then
-      SlowInputData(0)(SlowInputData(0)'high downto SlowInputData(0)'high-iADC(0)(0)'length+1) <=
-        signed(iADC(0)(0));
-    end if;
-  end process;
+  pLVDS: if cLVDSADCs /= 0 generate
+    process (iResetAsync, ClkDesign)
+      constant cOffset : natural := cBitWidth-(2*cADCBitWidth);
+    begin
+      if iResetAsync = cResetActive then
+        SlowInputData <= (others => (others => '0'));
+        FromLVDSData  <= (others => (others => '0'));
+      elsif rising_edge(ClkDesign) then
+        SlowInputData <= FromLVDSData;
+        for i in 0 to cADCBitWidth-1 loop
+          FromLVDSData(0)((i*2)+cOffset) <= iADC(0)(0)(i);
+        end loop;
+      elsif falling_edge(ClkDesign) then
+        for i in 0 to cADCBitWidth-1 loop
+          FromLVDSData(0)((i*2)+cOffset+1) <= iADC(0)(0)(i);
+        end loop;
+      end if;
+    end process;
+  end generate;
+
 
   DecimatorIn    <= (others => (others => (others => '0')));
   SlowInputValid <= '1';
@@ -131,17 +154,20 @@ begin
 
   SignalSelector : process (DecimatorOut)
   begin
-    for i in 0 to cCoefficients-1 loop
-      SelectorOut(0)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(27 downto 20));
-      SelectorOut(1)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(19 downto 12));
-      SelectorOut(2)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(11 downto 4));
-      SelectorOut(3)(i)(7 downto 4) <= std_ulogic_vector(DecimatorOut(0)(i)(3 downto 0));
-      SelectorOut(3)(i)(3 downto 0) <= (others => '0');
+    for j in 0 to 3 loop
+      for i in 0 to cCoefficients-1 loop
+        SelectorOut(j)(i) <= std_ulogic_vector(DecimatorOut(0)(i)((8*(j+1))-1 downto 8*j));
+--      SelectorOut(0)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(27 downto 20));
+--      SelectorOut(1)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(19 downto 12));
+--      SelectorOut(2)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(11 downto 4));
+--      SelectorOut(3)(i) <= std_ulogic_vector(DecimatorOut(0)(i)(3 downto 0));
+--      SelectorOut(3)(i)(3 downto 0) <= (others => '0');
+      end loop;
     end loop;
   end process;
 
   SelectorOutValid <= DecimatorOutValid;
-  
+
   ExtTriggerInput : entity DSO.ExtTriggerInput
     port map(
       iClk           => ClkDesign,

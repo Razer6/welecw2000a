@@ -1,50 +1,5 @@
-/*
- * querySerial v0.1 9/17/01
- * www.embeddedlinuxinterfacing.com
- *
- * The original  location of this source is
- * http://www.embeddedlinuxinterfacing.com/chapters/06/querySerial.c
- *
- *
- * Copyright (C) 2001 by Craig Hollabaugh
- *
- * Changes for the welec DSO project are from Alexander Lindert
- * Copyright (C) 2009 by Alexander Lindert
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Library General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
-
-/* querySerial
- * querySerial provides bash scripts with serial communications. This
- * program sends a query out a serial port and waits a specific amount
- * of time then returns all the characters received. The command line
- * parameters allow the user to select the serial port, select the
- * baud rate, select the timeout and the serial command to send.
- * A simple hash function converts the baud rate
- * command line parameter into an integer.  */
-
-/*
-gcc -o querySerial querySerial.c
-*/
-
 
 #include <stdio.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <termios.h>
 #include <stdlib.h>
 #include "string.h"
 
@@ -74,10 +29,17 @@ gcc -o querySerial querySerial.c
 #define FIFO_TX_INT 0x200
 #define FIFO_RX_INT 0x400
 
-
+#ifdef WINNT 
+#include "windows.h"
+#define uart_regs HANDLE
+#else
+#define HANDLE int
 #define uart_regs int
+#endif
 
 #include "types.h"
+
+void UartClose (uart_regs * uart);
 
 bool UartInit(	char * UartAddr,
 		const int BaudRate,

@@ -12,11 +12,11 @@
 int main () {
 	int ReadData = 0;
 	uart_regs * uart = (uart_regs *)GENERIC_UART_BASE_ADDR;
+	uart_regs * uart2 = (uart_regs *)DEBUG_UART_BASE_ADDR;
 	int Data[CAPTURESIZE];
 	SetAnalog Analog[2];
 /*	bool succ = false;*/
-	char loopback = '0';
-	char M1[] = "DSO Test programm: start testing SetTriggerInput\n";
+	char M1[] = "DSO Test programm:\nstart testing SetTriggerInput\n";
 	char M2[] = "testing SetTrigger\n";
 	char M3[] = "testing SetAnalogInputRange\n";
 	char M4[] = "testing FastCapture\n";
@@ -53,7 +53,7 @@ int main () {
 	strsize = strlen(M2);
 	SendStringBlock(uart,M2,&strsize);
 	strsize = strlen(ack);
-	if (SetTrigger(2,0,64,-16,3,16,3) == true){
+	if (SetTrigger(0,0,64,-16,3,16,3) == true){
 		strsize = strlen(ack);
 		SendStringBlock(uart,ack,&strsize);
 	} else {
@@ -78,13 +78,16 @@ int main () {
 	SendStringBlock(uart,M5,&strsize);
 	ReadData = CaptureData(1000000, true, CAPTURESIZE, Data, 512, 1000000, FIXED_CPU_FREQUENCY);
 
-	ReadData = 3;
+/*	ReadData = 3;
 	strsize = strlen(M6);
 	SendStringBlock(uart,M6,&strsize);
 	ReceiveStringBlock(uart, M6, &ReadData);
-	SendStringBlock(uart,M6, &ReadData);
+	SendStringBlock(uart,M6, &ReadData);*/
 	SendCharBlock(uart,'\n');
 	
+	UartInit(FIXED_CPU_FREQUENCY,115200, ENABLE_RX | ENABLE_TX, uart2);
+	SendCharBlock(uart2,M6);
+	RemoteSlave(uart2,CAPTURESIZE,Data);	
 /*	printf("End SFR Test\n");*/
 	return 0;
 }

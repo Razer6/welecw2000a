@@ -170,7 +170,7 @@ begin
     variable status : file_open_status; -- status for fopen
   begin  -- process
     if initial = true then
-      file_open (status, text_handle, "C:/ProjekteArbeiten/Welec/SF/fpga/leon3/Scope/synW2000A/jtag_sim/jtag_uart_0_output_stream.dat", WRITE_MODE);
+      file_open (status, text_handle, "jtag_uart_output.dat", WRITE_MODE);
       initial := false;                 -- done!
     end if;
     wait;                               -- wait forever
@@ -189,7 +189,7 @@ begin
         write (data_string,To_bitvector(data)); -- every char flushes line
         writeline (text_handle,data_string);
         file_close (text_handle);     -- flush buffer
-        file_open (status, text_handle, "C:/ProjekteArbeiten/Welec/SF/fpga/leon3/Scope/synW2000A/jtag_sim/jtag_uart_0_output_stream.dat", APPEND_MODE);
+        file_open (status, text_handle, "jtag_uart_stream.dat", APPEND_MODE);
                            
         -- save up characters into a line to send to the screen
         write (echo_string,bin_to_char(data));

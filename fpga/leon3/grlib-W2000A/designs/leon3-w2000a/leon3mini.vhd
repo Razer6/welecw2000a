@@ -133,8 +133,8 @@ entity leon3mini is
 
     --CONTROL of inputs
     iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
-    iUx11       : in  std_ulogic;  -- not soldering register channels 1,2
-    iAAQpin5    : in  std_ulogic;  -- ? does not fit to analog_inputs.png
+    iUx11       : in  std_ulogic;       -- not soldering register channels 1,2
+    iAAQpin5    : in  std_ulogic;       -- ? does not fit to analog_inputs.png
     oCalibrator : out std_ulogic;
 
     -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
@@ -205,8 +205,8 @@ architecture rtl of leon3mini is
   -- signal CPUIn          : aSharedRamAccess;
   -- signal CPUOut         : aSharedRamReturn;
 
-  signal memi     : memory_in_type;
-  signal memo     : memory_out_type;
+  signal memi : memory_in_type;
+  signal memo : memory_out_type;
 
   signal apbi  : apb_slv_in_type;
   signal apbo  : apb_slv_out_vector := (others => apb_none);
@@ -234,14 +234,14 @@ architecture rtl of leon3mini is
   signal gpti : gptimer_in_type;
 
 --  signal errorn         : std_ulogic;
-  signal dsuact         : std_logic;
-  signal dsuen          : std_ulogic;
+  signal dsuact : std_logic;
+  signal dsuen  : std_ulogic;
 --  signal oen_ctrl       : std_logic;
 --  signal sdram_selected : std_logic;
 
 --  signal shortcut : std_logic;
-  signal rx       : std_logic;
-  signal tx       : std_logic;
+  signal rx : std_logic;
+  signal tx : std_logic;
 
   signal rxd1   : std_logic;
   signal txd1   : std_logic;
@@ -515,7 +515,7 @@ begin
 ---  Memory controllers ----------------------------------------------
 ----------------------------------------------------------------------
 
-  mg2 : if CFG_MCTRL_LEON2 = 1 generate  -- LEON2 memory controller
+  mg1 : if CFG_MCTRL_LEON2 = 1 generate  -- LEON2 memory controller
 --    sr1 : mctrl
 --      generic map (
 --        hindex    => 0,
@@ -548,10 +548,11 @@ begin
 --        syncrst   => 1,
 --        pageburst => 0)
 --      port map (rstn, clkm, memi, memo, ahbsi, ahbso(0), apbi, apbo(0), wpo, sdo);
-    
-    
+  end generate;
+
+  mg2 : if CFG_SRCTRL = 1 generate
     srctrl0 : srctrl
-      generic map -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
+      generic map  -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
       (hindex  => 0,
        romaddr => 0,
        rommask => 16#ff8#,
@@ -559,15 +560,15 @@ begin
        rammask => 16#ffe#,
        ioaddr  => 16#200#,
        iomask  => 16#ffe#,
-       ramws   => 0,
-       romws   => 2,
-       iows    => 2,
-       rmw     => 0,                    -- read-modify-write enable
-       prom8en => 0,
+       ramws   => CFG_SRCTRL_RAMWS,
+       romws   => CFG_SRCTRL_PROMWS,
+       iows    => CFG_SRCTRL_IOWS,
+       rmw     => CFG_SRCTRL_RMW,       -- read-modify-write enable
+       prom8en => CFG_SRCTRL_8BIT,
        oepol   => 0,
-       srbanks => 1,
-       banksz  => 13,
-       romasel => 19)
+       srbanks => CFG_SRCTRL_SRBANKS,
+       banksz  => CFG_SRCTRL_BANKSZ,
+       romasel => CFG_SRCTRL_ROMASEL)
       port map (rstn, clkm, ahbsi, ahbso(0), memi, memo, open);
 
 --    addr_pad : outpadv generic map (width => 14, tech => padtech)
@@ -577,22 +578,22 @@ begin
 --        port map (data(31-i*8 downto 24-i*8), memo.data(31-i*8 downto 24-i*8),
 --                  memo.bdrive(i), memi.data(31-i*8 downto 24-i*8));
 --    end generate;
-    
-    bD_SRAM <= memo.data after 1 ns when
-               (memo.writen = '0' and memo.ramsn(0) = '0')
-               else (others => 'Z');    --  when others;
-    memi.data <= bD_SRAM after 1 ns when
-                 (memo.writen = '1' and memo.ramsn(0) = '0')
-                 else (others => 'Z');  -- when others;
-    oA_SRAM   <= std_ulogic_vector(memo.address(oA_SRAM'length+1 downto 2));
-    oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
-    oOE_SRAM  <= memo.ramoen(0);
-    oWE_SRAM  <= memo.writen;
-    oLB1_SRAM <= memo.wrn(0);
-    oUB1_SRAM <= memo.wrn(1);
-    oLB2_SRAM <= memo.wrn(2);
-    oUB2_SRAM <= memo.wrn(3);
   end generate;
+
+  bD_SRAM <= memo.data after 1 ns when
+             (memo.writen = '0' and memo.ramsn(0) = '0')
+             else (others => 'Z');      --  when others;
+  memi.data <= bD_SRAM after 1 ns when
+               (memo.writen = '1' and memo.ramsn(0) = '0')
+               else (others => 'Z');    -- when others;
+  oA_SRAM   <= std_ulogic_vector(memo.address(oA_SRAM'length+1 downto 2));
+  oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
+  oOE_SRAM  <= memo.ramoen(0);
+  oWE_SRAM  <= memo.writen;
+  oLB1_SRAM <= memo.wrn(0);
+  oUB1_SRAM <= memo.wrn(1);
+  oLB2_SRAM <= memo.wrn(2);
+  oUB2_SRAM <= memo.wrn(3);
 
   memi.brdyn  <= '1'; memi.bexcn <= '1';
   memi.writen <= '1'; memi.wrn <= "1111"; memi.bwidth <= "10";
@@ -741,7 +742,7 @@ begin
 --  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
 --  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
 --  oDCLK  <= iclk25_2;
-  oDENA  <= '0';
+  oDENA <= '0';
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,

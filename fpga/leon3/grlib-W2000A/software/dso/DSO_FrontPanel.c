@@ -85,7 +85,7 @@ char Mk1[][20] = {
 	int c1 = -1;
 	int value = 0;
 	
-	// led test
+	/* led test */
 	
 	for (i = 0; i < 14; ++i){
 		sprintf(Message,"Switching leds %s on!\n",Ml[i]);

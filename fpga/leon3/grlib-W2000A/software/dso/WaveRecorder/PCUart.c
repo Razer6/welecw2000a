@@ -1,13 +1,79 @@
-#include "PCUart.h"
-#include "unistd.h"
 
+
+
+#include "PCUart.h"
+
+
+#ifdef WINNT 
+#include "windows.h"
+#include "conio.h"
+#else
+#include "unistd.h"
+#include <fcntl.h>
+#include "termios.h"
 struct termios tio;
+#endif
+
+void UartClose (uart_regs * uart){
+#ifdef WINNT 
+       CloseHandle(*uart);
+#else 
+       close(huart);
+#endif
+}
 
 
 bool UartInit(	char * UartAddr,
 		const int BaudRate,
 		uart_regs * uart){
+#ifdef WINNT
+    BOOL     m_bPortReady;
+    DCB      m_dcb;
+    COMMTIMEOUTS m_CommTimeouts;
+    *uart = CreateFile(UartAddr, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if (GetLastError() != ERROR_SUCCESS) {
+       printf("CreateFile(): %lu\n", GetLastError());              
+       return false;
+    }
+    
+   /* m_bPortReady = SetupComm(*uart, 128, 128); 
+    if (GetLastError() != ERROR_SUCCESS) {
+       printf("SetupComm(): %lu\n", GetLastError());              
+       return false;
+    }*/
+    m_bPortReady = GetCommState(*uart, &m_dcb);
+    if (GetLastError() != ERROR_SUCCESS) {
+       printf("GetCommState(): %lu\n", GetLastError());              
+       return false;
+    }
+    m_dcb.BaudRate = BaudRate;
+    m_dcb.ByteSize = 8;
+    m_dcb.Parity = NOPARITY;
+    m_dcb.StopBits = ONESTOPBIT;
+    m_dcb.fAbortOnError = TRUE;
+    m_dcb.fRtsControl = RTS_CONTROL_DISABLE;
+    
+    m_bPortReady = SetCommState(*uart, &m_dcb);
+    if (GetLastError() != ERROR_SUCCESS) {
+       printf("SetCommState(): %lu\n", GetLastError());              
+       return false;
+    }
+    m_bPortReady = GetCommTimeouts (*uart, &m_CommTimeouts);
+    
+    m_CommTimeouts.ReadIntervalTimeout = 500;
+    m_CommTimeouts.ReadTotalTimeoutConstant = 500;
+    m_CommTimeouts.ReadTotalTimeoutMultiplier = 100;
+    m_CommTimeouts.WriteTotalTimeoutConstant = 500;
+    m_CommTimeouts.WriteTotalTimeoutMultiplier = 100;
+    m_bPortReady = SetCommTimeouts (*uart, &m_CommTimeouts);
+    if (GetLastError() != ERROR_SUCCESS) {
+       printf("SetCommTimeouts(): %lu\n", GetLastError());              
+       return false;
+    }
+    ClearCommError(*uart, NULL, NULL);
+    /*ClearCommError(*uart, CE_FRAME | CE_BREAK | CE_OVERRUN | CE_RXOVER | CE_RXPARITY, NULL);*/
 
+#else
 	int fd = 0;
   	long baud = 0;
 
@@ -33,7 +99,6 @@ bool UartInit(	char * UartAddr,
       return false;
       break;
   }
-
 /* open the serial port device file
  * O_NDELAY - tells port to operate and ignore the DCD line
  * O_NOCTTY - this process is not to become the controlling
@@ -63,54 +128,80 @@ bool UartInit(	char * UartAddr,
 
   tio.c_cc[VTIME] = 0;   /* no time delay */
   tio.c_cc[VMIN]  = 0;   /* no char delay */
-
+  cfsetospeed(&tio,baud);
+  cfsetispeed(&tio,baud);
   tcflush(fd, TCIFLUSH); /* flush the buffer */
-  tcsetattr(fd, TCSANOW, &tio); /* set the attributes */
-
+  tcsetattr(fd, TCSADRAIN, &tio);  /* set the attributes */
 /* Set up for no delay, ie nonblocking reads will occur.
    When we read, we'll get what's in the input buffer or nothing */
-  fcntl(fd, F_SETFL, FNDELAY);
+/*  fcntl(fd, F_SETFL, FNDELAY); */
+
+#endif 
+
   return true;
 }
-#if 0
-/* write the users command out the serial port */
-  result = write(fd, argv[4], strlen(argv[4]));
-  if (result < 0)
-  {
-    fputs("write failed\n", stderr);
-    close(fd);
-    return 5;
-  }
 
-/* wait for awhile, based on the user's timeout value in mS*/
-  usleep(atoi(argv[3]) * 1000);
-
-/* read the input buffer and print it */
-  result = read(fd,buffer,255);
-  buffer[result] = 0; // zero terminate so printf works
-  printf("%s\n",buffer);
-
-/* close the device file */
-  close(fd);
-}
-#endif
 
 char ReceiveCharBlock(uart_regs * uart){
 	char ch;
-	read(*uart,&ch,1);
+	unsigned int ret = 0;
+#ifdef WINNT
+   do {
+      ReadFile(*uart,&ch,1,&ret,NULL);
+   } while (ret == 0);
+#else
+	while(read(uart,&ch,1));
+#endif
 	return ch;
 }	
 
 void SendCharBlock(uart_regs * uart, char c){
-	write(*uart,&c,1);
+#ifdef WINNT
+   unsigned int ret = 0;
+   do {
+     WriteFile(*uart,&c,1,&ret,NULL);
+   } while (ret == 0);
+#else
+	write(uart,c,1);
+#endif
 }
 
 
 void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size){
-	*size = read(*uart,c,*size);
+#ifdef WINNT
+     DWORD ret = 0;
+     LPDWORD lpret = &ret;
+     DWORD  r = 0;
+#else
+     unsigned int ret = 0;
+     unsigned int r = 0;
+#endif
+/*     printf("Receive %d chars with HANDLE %d \n", *size, *uart);*/
+      while (r != *size) {
+#ifdef WINNT
+        ReadFile(*uart,&c[r],*size-r,lpret,NULL);
+#else     
+        ret = read(uart,&c[r], *size-r);
+#endif  
+        r = r + ret;
+      }    
 }
 
 void SendStringBlock (uart_regs * uart, char * c, unsigned int * size){
-	*size = write(*uart,c,*size);
+#ifdef WINNT
+     DWORD ret = 0;
+     LPDWORD lpret = &ret;
+     DWORD written = 0;
+#else
+     unsigned int ret = 0;
+     unsigned int written = 0;
+#endif
+     while (written != *size) {
+#ifdef WINNT
+       WriteFile(*uart,&c[written],*size-written,lpret,NULL);
+#else 
+	   ret = write(uart,&c[written], *size-written);	
+#endif 	
+        written = written + ret;
+     } 
 }
-

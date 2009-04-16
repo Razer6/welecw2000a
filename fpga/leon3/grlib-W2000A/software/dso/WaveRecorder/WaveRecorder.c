@@ -8,14 +8,15 @@
 
 #define DSO_NAK_MESSAGE "At least one argument was not accepted from the target!\n"
 
-int CheckArgCount (	const struct arg_lit * 	IsX[], 
+bool CheckArgCount (	struct arg_lit * 	IsX[], 
+                  const struct arg_str * Command,
 			const int		count,
 			const int		size){ 
 	int i = 0;
 	int nerrors = 0;
 	for(i = 0; i < size; ++i){
 		if (IsX[i]->count != count){
-			printf("With Command=TriggerInput also %d %s argument is/are needed!\n", count, IsX[i]->hdr.longopts);
+			printf("With --Command=%s also %d --%s= argument is/are needed!\n", Command->sval[0], count, IsX[i]->hdr.longopts);
 			nerrors++;		
 		}
 	}
@@ -87,17 +88,26 @@ int main(int argc, char * argv[]) {
 	AnPWM,AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3,ForceAddr,
 	ForceSize,ForceFile,CapWTime,CapSize,WavForceFS,
 	WaveFile,UartAddr,BaudRate,help,end};
+#ifdef WINNT
+    HANDLE hUart = 0;
+#else	
+    uart_regs hUart = 0;
+#endif      
+    uart_regs * huart = &hUart; /* uart handle */
 
-	uart_regs * huart = 0; /* uart handle */
+
+
 	int nerrors = arg_parse(argc,argv,argtable);
        	if (nerrors != 0) {
 		arg_print_errors(stdout,end,argv[0]);
 		arg_print_syntax(stdout,argtable,"");
+		printf("\n");
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 1;
 	}	
 	if (help->count != 0){
 		arg_print_syntax(stdout,argtable,"");
+		printf("\n");
 	}
 	if (!UartInit(UartAddr->sval[0],BaudRate->ival[0],huart)){
 		return 5;
@@ -106,12 +116,22 @@ int main(int argc, char * argv[]) {
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,AACFilterStart,AACFilterEnd,
 			Ch0Src,Ch1Src,Ch2Src,Ch3Src};
-		
-		bool Ret = CheckArgCount(IsOnce,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+			UartClose(huart);
 			return 2;
 		}	
+/*		printf("C %d SS %d fs %d st %d, stp %d, ch0 %d ch1 %d ch2 %d ch3 %d\n", 
+                Channels->ival[0],
+				SampleSize->ival[0],
+				SampleFS->ival[0],
+				AACFilterStart->ival[0],
+				AACFilterEnd->ival[0],
+				Ch0Src->ival[0],
+				Ch1Src->ival[0],
+				Ch2Src->ival[0],
+				Ch3Src->ival[0]); */
 		Ret = SendTriggerInput(huart,
 				Channels->ival[0],
 				SampleSize->ival[0],
@@ -124,8 +144,10 @@ int main(int argc, char * argv[]) {
 				Ch3Src->ival[0]);
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		if (Ret == true){
+            UartClose(huart);
 			return 0;
 		 } else {
+            UartClose(huart);
 			printf(DSO_NAK_MESSAGE); 
 			return 3;
 		 }			
@@ -136,9 +158,10 @@ int main(int argc, char * argv[]) {
 			Trigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
 			TriggerLowTime,TriggerHighTime};
 		int TriggerNo = 2;
-		bool Ret = CheckArgCount(IsOnce,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+			UartClose(huart);
 			return 2;
 		}	
 		if (strcmp("ExtLH",Trigger->sval[0]) == 0){
@@ -163,8 +186,10 @@ int main(int argc, char * argv[]) {
 				TriggerHighTime->ival[0]);
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		if (Ret == true){
+            UartClose(huart);
 			return 0;
 		} else {
+            UartClose(huart);
 			printf(DSO_NAK_MESSAGE); 
 			return 3;
 		}			
@@ -174,16 +199,16 @@ int main(int argc, char * argv[]) {
 			AnGainCh0,AnGainCh1,AnGainCh2,AnGainCh3,AnDA_OffsetCh0,
 			AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,AnPWM,AnSrc2Ch0,
 			AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3};
-		int Trigger = 2;
 		int i = 0;
 		SetAnalog Settings[4];
 		struct arg_int * Gain[4] = {AnGainCh0,AnGainCh1,AnGainCh2,AnGainCh3};
 		struct arg_lit * AC[4]   = {AnAC_Ch0,AnAC_Ch1,AnAC_Ch2,AnAC_Ch3};
 		struct arg_int * DAoff[4]= {AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3};	
 		struct arg_str * Src2[4] = {AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3}; 
-		bool Ret = CheckArgCount(IsOnce,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+            UartClose(huart);
 			return 2;
 		}
 		for (i = 0; i < Channels->ival[0]; ++i) {
@@ -205,8 +230,10 @@ int main(int argc, char * argv[]) {
 		Ret = SendAnalogInput(huart,Channels->ival[0], Settings);
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		if (Ret == true){
+            UartClose(huart);
 			return 0;
 		} else {
+            UartClose(huart);
 			printf(DSO_NAK_MESSAGE); 
 			return 3;
 		}			
@@ -216,7 +243,7 @@ int main(int argc, char * argv[]) {
 			Channels,SampleSize,SampleFS,CapWTime,CapSize,
 			WavForceFS,WaveFile};
 		
-		bool Ret = CheckArgCount(IsOnce,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		int * buffer = (int*)malloc(CapSize->ival[0]*sizeof(int));
 		int FastMode = 0;
 		if (buffer == 0){
@@ -225,6 +252,7 @@ int main(int argc, char * argv[]) {
 		}
 		if (Ret == false) {
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+            UartClose(huart);
 			return 2;
 		}	
 		Ret = ReceiveSamples(huart, 
@@ -232,20 +260,23 @@ int main(int argc, char * argv[]) {
 				1,
 				CapSize->ival[0],
 				&FastMode,
-				buffer);
+				(unsigned int *)buffer);
 		
-		if (Ret == true){
-			FILE * Handle;
+        if (Ret != 0){
+			FILE * Handle = 0;
+			FILE ** pHandle = &Handle;
 			aWaveFileInfo FileInfo = {
 				(short)SampleSize->ival[0],
 				Channels->ival[0],
-				CapSize->ival[0],
+				Ret,
 				SampleFS->ival[0]};
-
-			Ret = OpenWaveFileWrite(WaveFile->filename[0],Handle,FileInfo);
+			printf("DataTyp=%d, Channels=%d DataSize=%d SamplingRate=%d\n",
+				FileInfo.DataTyp,FileInfo.Channels,FileInfo.DataSize,FileInfo.SamplingRate);
+			Ret = OpenWaveFileWrite(WaveFile->filename[0],pHandle,FileInfo);
 			if (Ret == false){
+                printf("Generating %s failed!\n",WaveFile->filename[0]);
 				arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-				free(buffer);
+				UartClose(huart);
 				return 4;
 			}
 			/* one Dword = 32 bit 
@@ -284,14 +315,17 @@ int main(int argc, char * argv[]) {
 			free(buffer);
 			buffer = 0;
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+			UartClose(huart);
 			return 0;
 		 } else {
 			printf(DSO_NAK_MESSAGE); 
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+			UartClose(huart);
 			return 3;
 		 }			
 	}
 
 	arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+	UartClose(huart);
 	return 0;
 }

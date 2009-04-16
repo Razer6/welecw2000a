@@ -4,7 +4,7 @@
 -- File       : TopPolyPhaseDecimator-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-06
+-- Last update: 2009-04-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -61,14 +61,14 @@ architecture RTL of TopPolyPhaseDecimator is
 
   type     aR is record
                    ShiftEnable  : std_ulogic;
-                   ReadAddr     : unsigned(7 downto 0);
-                   WriteAddr    : unsigned(7 downto 0);
-                   Delay        : unsigned(7 downto 0);
+                   ReadAddr     : unsigned(cDelayMemWidth-1 downto 0);
+                   WriteAddr    : unsigned(cDelayMemWidth-1 downto 0);
+                   Delay        : unsigned(cDelayMemWidth-1 downto 0);
                    Valid        : std_ulogic_vector(1 to cValidDelay-1);
                    ResultValid  : std_ulogic_vector(1 to cValidDelay);
                    FirIdx       : aFirAddr;
                    PhaseCounter : natural range 0 to 10-1;
-                   FirCounter   : natural range 0 to 8-1;
+                   FirCounter   : natural range 0 to cCoefficients-1;
                  end record;
   signal R : aR;
 begin

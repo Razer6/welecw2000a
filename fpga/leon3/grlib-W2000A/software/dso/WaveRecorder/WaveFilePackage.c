@@ -21,28 +21,29 @@ bool ReadString(	FILE * 			WaveFileHandle,
 
 unsigned int ReadDword(	FILE * 			WaveFileHandle)  {
 	unsigned int  Ret = 0;
-	fscanf(WaveFileHandle,"%d",&Ret);
+	fread(&Ret,sizeof(Ret),1,WaveFileHandle);
 	return Ret;
 }
 
 unsigned short ReadWord(FILE * 			WaveFileHandle)  {
 	unsigned short  Ret = 0;
-	char  ch;
+/*	char  ch;
 	int i = 0;
 
 	for(i = 0; i <  1; ++i) {
 		fscanf(WaveFileHandle,"%c", &ch);
 		Ret = Ret + (short)(ch <<(8*i));
-	}
+	}*/
+	fread(&Ret,sizeof(Ret),1,WaveFileHandle);
 	return Ret;
 }
 
 bool OpenWaveFileRead(	const char * 		FileName,
-			FILE * 			WaveFileHandle,
+			FILE ** 			Handle,
  			aWaveFileInfo 		FileInfo) {
-	int  Dummy;
-
-	WaveFileHandle = fopen(FileName,"r");
+	int  Dummy = 0;
+	
+	FILE * WaveFileHandle = fopen(FileName,"r");
 	if (WaveFileHandle == 0){
 		printf("Cannot open file %s !\n",FileName);
 		return false;
@@ -74,34 +75,38 @@ bool OpenWaveFileRead(	const char * 		FileName,
 	Dummy = ReadWord(WaveFileHandle); /* block align */
 	FileInfo.DataTyp = ReadWord(WaveFileHandle);
 	if (ReadString(WaveFileHandle, "data")){
-		printf("The file %s { not a wave file!\n", FileName);
+		printf("The file %s is not a wave file!\n", FileName);
 		return false;
 	}
+	*Handle = WaveFileHandle;
 	return true;
 }
 
 
 int ReadSignedDword(FILE * WaveFileHandle)  {
 	int  Ret = 0;
-	fscanf(WaveFileHandle,"%d",&Ret);
+	fread(&Ret,sizeof(Ret),1,WaveFileHandle);
+	/*fscanf(WaveFileHandle,"%d",&Ret);*/
 	return Ret;
 }
 
 short ReadSignedWord(FILE * WaveFileHandle)  {
 	short  Ret = 0;
-	char  ch;
+/*	char  ch;
 	int i = 0;
 	for(i = 0; i <  1; ++i) {
 		fscanf(WaveFileHandle,"%c", &ch);
 		Ret = Ret + (short)(ch << (i*8));
-	}
+	}*/
+	fread(&Ret,sizeof(Ret),1,WaveFileHandle);
 	return Ret;
 }
 
 char ReadSignedByte(FILE * WaveFileHandle)  {
-	char  ch;
-	fscanf(WaveFileHandle,"%c", &ch);
-	return ch;
+	char  Ret;
+	/*fscanf(WaveFileHandle,"%c", &ch);*/
+	fread(&Ret,sizeof(Ret),1,WaveFileHandle);
+	return Ret;
 }
 
 bool ReadSample(	FILE * 			WaveFileHandle,
@@ -109,7 +114,7 @@ bool ReadSample(	FILE * 			WaveFileHandle,
 			int * 			RemainingData,
 			const short 	DataTyp) {
 	if (feof(WaveFileHandle) == true) {
-		if (RemainingData < 0) {
+		if (*RemainingData < 0) {
 			printf("Unexpected end of file!\n");
 			return false;
 		} else {
@@ -119,15 +124,15 @@ bool ReadSample(	FILE * 			WaveFileHandle,
 	switch (DataTyp) {
 		case 8:
 			*Sample = (int)ReadSignedByte(WaveFileHandle);
-			RemainingData = RemainingData-1;
+			*RemainingData = *RemainingData-1;
 			break;
 		case 16:
 			*Sample = (int)ReadSignedWord(WaveFileHandle);
-			RemainingData = RemainingData-2;
+			*RemainingData = *RemainingData-2;
 			break;
 		case 32:
 			*Sample = ReadSignedDword(WaveFileHandle);
-			RemainingData = RemainingData-4;
+			*RemainingData = *RemainingData-4;
 			break;
 		default:
 			return false;
@@ -161,30 +166,31 @@ void WriteString(	FILE * 			WaveFileHandle,
 
 void WriteChar(		FILE * 			WaveFileHandle,
 			char 			Value) {
-	fprintf(WaveFileHandle,"%c",Value);
+	fwrite(&Value,sizeof(Value),1,WaveFileHandle);
 }
 
 void WriteDword(	FILE * 			WaveFileHandle,
 			int const 		Value) {
-	fprintf(WaveFileHandle,"%d",Value);
+	fwrite(&Value,sizeof(Value),1,WaveFileHandle);
 }
 
 void WriteWord(		FILE * 			WaveFileHandle,
 			short 	 		Value) {
-	int i = 0;
-	for(i = 0; i < 1; ++i) {
+/*	int i = 0; */
+	fwrite(&Value,sizeof(Value),1,WaveFileHandle);
+/*	for(i = 0; i < 1; ++i) {
 		fprintf(WaveFileHandle,"%c",Value);
 		Value = Value >> 8;
-	}
+	}*/
 }
 
 
 bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE *	 		WaveFileHandle,
+			FILE **	 		Handle,
  			aWaveFileInfo 		WaveFile) {
-	int  Size;
+	int  Size = 0;
 	
-	WaveFileHandle = fopen(FileName, "r");
+	FILE * WaveFileHandle = fopen(FileName, "w");
 	if(WaveFileHandle == 0){
 		printf("Cannot open file %s!\n", FileName);
 		return false;
@@ -200,12 +206,13 @@ bool OpenWaveFileWrite(	const char * 		FileName,
 	WriteWord(WaveFileHandle, Size); 
 	WriteWord(WaveFileHandle, WaveFile.Channels);
 	WriteDword(WaveFileHandle, WaveFile.SamplingRate); 
-	Size = WaveFile.DataTyp;
+	Size = WaveFile.DataTyp/8;
 	WriteDword(WaveFileHandle, WaveFile.SamplingRate*WaveFile.Channels*Size); 
 	WriteWord(WaveFileHandle, WaveFile.Channels*Size); 
 	WriteWord(WaveFileHandle, Size);
 	WriteString(WaveFileHandle, "data");
 	WriteDword(WaveFileHandle, WaveFile.DataSize);
+    *Handle = WaveFileHandle;
 	return true;
 }
 
@@ -214,19 +221,19 @@ bool WriteSample(	FILE * 			WaveFileHandle,
 			int * 			RemainingData,
 			const short 	DataTyp) {
 
-	if (RemainingData > 0) {
+	if (*RemainingData > 0) {
 		switch (DataTyp) {
 			case 8:
 				WriteChar(WaveFileHandle, Sample);
-				RemainingData = RemainingData -1;
+				*RemainingData = *RemainingData -1;
 				break;
 			case 16:
 				WriteWord(WaveFileHandle, Sample);
-				RemainingData = RemainingData -2;
+				*RemainingData = *RemainingData -2;
 				break;
 			case 32:
 				WriteDword(WaveFileHandle, Sample);
-				RemainingData = RemainingData -4;
+				*RemainingData = *RemainingData -4;
 				break;
 			default: break;
 		}

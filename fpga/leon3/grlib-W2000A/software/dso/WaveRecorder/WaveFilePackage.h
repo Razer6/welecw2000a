@@ -13,7 +13,7 @@ typedef struct {
 } aWaveFileInfo;
 
 bool OpenWaveFileRead(	const char * 		FileName,
-			FILE * 			WaveFileHandle,
+			FILE ** 			WaveFileHandle,
  			aWaveFileInfo		FileInfo);
 
 
@@ -29,7 +29,7 @@ bool ReadSamples(	FILE * 			WaveFileHandle,
 			const short 	DataTyp);
 
 bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE *	 		WaveFileHandle,
+			FILE **	 		WaveFileHandle,
  			aWaveFileInfo 		WaveFile);
 
 bool WriteSample(	FILE * 			WaveFileHandle,

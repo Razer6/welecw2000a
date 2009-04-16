@@ -73,8 +73,6 @@ add wave -noupdate -format Logic /testbench/d3/clklocked
 add wave -noupdate -format Literal /testbench/d3/adcin
 add wave -noupdate -format Literal /testbench/d3/ledstopanel
 add wave -noupdate -format Literal /testbench/d3/keysfrompanel
-add wave -noupdate -format Literal /testbench/d3/vcc
-add wave -noupdate -format Literal /testbench/d3/gnd
 add wave -noupdate -format Literal /testbench/d3/memi
 add wave -noupdate -format Literal /testbench/d3/memo
 add wave -noupdate -format Literal /testbench/d3/apbi
@@ -99,24 +97,13 @@ add wave -noupdate -format Literal /testbench/d3/dbgo
 add wave -noupdate -format Literal /testbench/d3/dsui
 add wave -noupdate -format Literal /testbench/d3/dsuo
 add wave -noupdate -format Literal /testbench/d3/gpti
-add wave -noupdate -format Logic /testbench/d3/emddis
-add wave -noupdate -format Logic /testbench/d3/ereset
-add wave -noupdate -format Logic /testbench/d3/epwrdwn
-add wave -noupdate -format Logic /testbench/d3/esleep
-add wave -noupdate -format Logic /testbench/d3/epause
 add wave -noupdate -format Logic /testbench/d3/dsuact
-add wave -noupdate -format Logic /testbench/d3/oen_ctrl
-add wave -noupdate -format Logic /testbench/d3/sdram_selected
-add wave -noupdate -format Logic /testbench/d3/shortcut
 add wave -noupdate -format Logic /testbench/d3/rx
 add wave -noupdate -format Logic /testbench/d3/tx
 add wave -noupdate -format Logic /testbench/d3/rxd1
 add wave -noupdate -format Logic /testbench/d3/txd1
 add wave -noupdate -format Logic /testbench/d3/dsutx
 add wave -noupdate -format Logic /testbench/d3/dsurx
-add wave -noupdate -format Logic /testbench/d3/drive_bus
-add wave -noupdate -format Literal /testbench/d3/dbg_rdata
-add wave -noupdate -format Literal /testbench/d3/dbg_wdata
 add wave -noupdate -format Literal /testbench/d3/vgao
 add wave -noupdate -format Logic /testbench/d3/video_clk
 add wave -noupdate -format Literal /testbench/d3/clk_sel
@@ -253,7 +240,7 @@ add wave -noupdate -format Literal /testbench/ch1_regh/oq
 add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {454684083 ps} 0} {{Cursor 2} {122914000 ps} 0} {{Cursor 3} {5243000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {454684083 ps} 0} {{Cursor 2} {135878306 ps} 0} {{Cursor 3} {5243000 ps} 0}
 configure wave -namecolwidth 375
 configure wave -valuecolwidth 180
 configure wave -justifyvalue left
@@ -267,4 +254,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {5229492 ps} {5270508 ps}
+WaveRestoreZoom {135872035 ps} {135913051 ps}

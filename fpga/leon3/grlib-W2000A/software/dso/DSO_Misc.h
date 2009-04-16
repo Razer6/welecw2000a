@@ -30,7 +30,7 @@ volatile int WaitUntilMaskedAndNotZero(volatile int * volatile addr, int mask);
 volatile bool WaitTimeoutAndZero   (volatile int * volatile addr, int mask, int timeout);
 volatile bool WaitTimeoutAndNotZero(volatile int * volatile addr, int mask, int timeout);
 
-inline int loadmem(volatile int addr);
-inline char loadb(volatile int addr);
+int loadmem(volatile int addr);
+char loadb(volatile int addr);
 
 #endif

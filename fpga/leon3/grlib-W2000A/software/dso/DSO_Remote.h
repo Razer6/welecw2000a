@@ -3,6 +3,8 @@
 #ifndef DSO_REMOTE_H
 #define DSO_REMOTE_H
 
+#include "types.h"
+
 #define DSO_MASTER_HEADER "Digital Storage Scope Master "
 #define DSO_SLAVE_HEADER  "Digital Storage Scope Slave  "
 #define DSO_NAK_RESP      "NAK"
@@ -38,8 +40,8 @@ void SendHeader(uart_regs * uart);
 bool SendData(uart_regs * uart, int datasize, int * data);
 int ReceiveData(uart_regs * uart, int buffersize, int * FastMode, int * data);
 bool ReceiveACK(uart_regs * uart);
-bool GetHeader(uart_regs * uart);
-int  GetInt(uart_regs * uart);
-void SendInt(uart_regs * uart, int data);
+bool ReceiveHeader(uart_regs * uart);
+unsigned int  GetInt(uart_regs * uart);
+void SendInt(uart_regs * uart, unsigned int data);
 
 #endif

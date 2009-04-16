@@ -89,6 +89,7 @@ void SendStringBlock (uart_regs * uart, char * c, unsigned int * size) {
 	unsigned int i = 0;
 	while (i < (*size)){
 		SendCharBlock(uart,c[i]);
+	/*	printf("Sending %c %d\n",c[i],i);*/
 		i++;
 	}
 }

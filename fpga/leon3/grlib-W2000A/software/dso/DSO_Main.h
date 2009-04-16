@@ -29,7 +29,16 @@
 #define DSO_SFR_BASE_ADDR              0x80000500
 
 /* The CPU frequency must be set correctly or the function CaptureData gets sometimes crasy!*/
+#ifdef W2000A 
 #define FIXED_CPU_FREQUENCY  31250000
+#else
+#ifdef SBX
+#define FIXED_CPU_FREQUENCY  12500000
+#else
+#define FIXED_CPU_FREQUENCY  12500000
+#endif
+#endif
+
 /*int return SamplingFrequency/(CPUFrequency*FASTMODEFACTOR);*/
 #define FASTMODEFACTOR       10
 /* time in ms */
@@ -48,5 +57,6 @@
 #define INTERRUPT_CTL_BASE_ADDR  0x80000200
 #define TIMER_BASE_ADDR          0x80000300
 #define DEBUG_UART_BASE_ADDR     0x80000700 
+#define UART_CHCFG_BASE_ADDR     0x80000800
 
 #endif

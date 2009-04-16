@@ -8,42 +8,37 @@
 #define INTERRUPTMASKADDR        (DSO_SFR_BASE_ADDR+ 4*2)
 #define SAMPLINGFREQADDR         (DSO_SFR_BASE_ADDR+ 4*4)
 #define FILTERENABLEADDR         (DSO_SFR_BASE_ADDR+ 4*5)
+#define EXTTRIGGERSRCADDR        (DSO_SFR_BASE_ADDR+ 4*6)
+#define EXTTRIGGERPWMADDR        (DSO_SFR_BASE_ADDR+ 4*7)
 #define INPUTCH0ADDR             (DSO_SFR_BASE_ADDR+ 4*8)
 #define INPUTCH1ADDR             (DSO_SFR_BASE_ADDR+ 4*9)
 #define INPUTCH2ADDR             (DSO_SFR_BASE_ADDR+ 4*10)
 #define INPUTCH3ADDR             (DSO_SFR_BASE_ADDR+ 4*11)
-/*#define INPUTCH0GAINADDR         (DSO_SFR_BASE_ADDR+ 4*12)*/
-/*#define INPUTCH0GAINADDR         (DSO_SFR_BASE_ADDR+ 4*13)*/
-/*#define INPUTCH1GAINADDR         (DSO_SFR_BASE_ADDR+ 4*14)*/
-/*#define INPUTCH2GAINADDR         (DSO_SFR_BASE_ADDR+ 4*15)*/
-#define TRIGGERONCHADDR          (DSO_SFR_BASE_ADDR+ 4*24)
-#define TRIGGERONCEADDR          (DSO_SFR_BASE_ADDR+ 4*25)
-#define TRIGGERPREFETCHADDR      (DSO_SFR_BASE_ADDR+ 4*26)
-#define TRIGGERSTORAGEMODEADDR   (DSO_SFR_BASE_ADDR+ 4*27)
-#define TRIGGERREADOFFSETADDR    (DSO_SFR_BASE_ADDR+ 4*28)
-#define TRIGGERTYPEADDR          (DSO_SFR_BASE_ADDR+ 4*29)
-#define TRIGGERLOWVALUEADDR      (DSO_SFR_BASE_ADDR+ 4*30)
-#define TRIGGERLOWTIMEADDR       (DSO_SFR_BASE_ADDR+ 4*31)
-#define TRIGGERHIGHVALUEADDR     (DSO_SFR_BASE_ADDR+ 4*32)
-#define TRIGGERHIGHTIMEADDR      (DSO_SFR_BASE_ADDR+ 4*33)
-#define TRIGGERSTATUSREGISTER    (DSO_SFR_BASE_ADDR+ 4*34)
-#define TRIGGERCURRENTADDR       (DSO_SFR_BASE_ADDR+ 4*35)
-#define EXTTRIGGERSRCADDR        (DSO_SFR_BASE_ADDR+ 4*36)
-#define EXTTRIGGERPWMADDR        (DSO_SFR_BASE_ADDR+ 4*37)
-#define UART16550ADDR            (DSO_SFR_BASE_ADDR+ 4*41)
-#define UART16550DATA            (DSO_SFR_BASE_ADDR+ 4*42)
-#define LEDADDR                  (DSO_SFR_BASE_ADDR+ 4*48)
-#define KEYADDR0                 (DSO_SFR_BASE_ADDR+ 4*49)
-#define KEYADDR1                 (DSO_SFR_BASE_ADDR+ 4*50)
-#define ANALOGSETTINGSPWMADDR    (DSO_SFR_BASE_ADDR+ 4*51)
+#define TRIGGERONCHADDR          (DSO_SFR_BASE_ADDR+ 4*12)
+#define TRIGGERONCEADDR          (DSO_SFR_BASE_ADDR+ 4*13)
+#define TRIGGERPREFETCHADDR      (DSO_SFR_BASE_ADDR+ 4*14)
+#define TRIGGERSTORAGEMODEADDR   (DSO_SFR_BASE_ADDR+ 4*15)
+#define TRIGGERREADOFFSETADDR    (DSO_SFR_BASE_ADDR+ 4*16)
+#define TRIGGERTYPEADDR          (DSO_SFR_BASE_ADDR+ 4*17)
+#define TRIGGERLOWVALUEADDR      (DSO_SFR_BASE_ADDR+ 4*18)
+#define TRIGGERLOWTIMEADDR       (DSO_SFR_BASE_ADDR+ 4*19)
+#define TRIGGERHIGHVALUEADDR     (DSO_SFR_BASE_ADDR+ 4*20)
+#define TRIGGERHIGHTIMEADDR      (DSO_SFR_BASE_ADDR+ 4*21)
+#define TRIGGERSTATUSREGISTER    (DSO_SFR_BASE_ADDR+ 4*22)
+#define TRIGGERCURRENTADDR       (DSO_SFR_BASE_ADDR+ 4*23)
+#define CONFIGADCENABLE          (DSO_SFR_BASE_ADDR+ 4*24)
+#define LEDADDR                  (DSO_SFR_BASE_ADDR+ 4*25)
+#define KEYADDR0                 (DSO_SFR_BASE_ADDR+ 4*26)
+#define KEYADDR1                 (DSO_SFR_BASE_ADDR+ 4*27)
+#define ANALOGSETTINGSPWMADDR    (DSO_SFR_BASE_ADDR+ 4*28)
 /* If you wish, the following 3 Addresses can be merged to one addr*/
 /* look for this to the analog_inputs.png and */
 /* registers_for_control_inputs.png*/
-#define ANALOGSETTINGSBANK7      (DSO_SFR_BASE_ADDR+ 4*52) 
-#define ANALOGSETTINGSBANK6      (DSO_SFR_BASE_ADDR+ 4*53) 
-#define ANALOGSETTINGSBANK5      (DSO_SFR_BASE_ADDR+ 4*54) 
-#define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*55)
-
+#define ANALOGSETTINGSBANK7      (DSO_SFR_BASE_ADDR+ 4*29) 
+#define ANALOGSETTINGSBANK6      (DSO_SFR_BASE_ADDR+ 4*30) 
+#define ANALOGSETTINGSBANK5      (DSO_SFR_BASE_ADDR+ 4*31) 
+#define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*32)
+#define DSO_REG_SIZE             4*32
 
 /* DEVICEADDR*/
 #define WELEC2012   (2012)
@@ -72,6 +67,24 @@
 #define D100MHZTO10MHZ 1
 #define D10MHZTO1MHZ   2
 #define D1MHZTO100KHZ  3
+
+/* EXTTRIGGERSRCADDR*/
+#define FORCETOGGE  0
+#define EXTTRIGGER1 1
+/* Note that most devices have none only one Exttrigger input!*/
+/* Welec W20xx devices have 1*/
+/* SandboxX has also only 1*/
+#define EXTTRIGGER2 2
+#define EXTTRIGGER3 3
+#define EXTTRIGGER4 4
+/* ...*/
+
+/* EXTTRIGGERPWMADDR*/
+#define EXTTRIGGERPWM0_STARTBIT 0 
+#define EXTTRIGGERPWM1_STARTBIT 8
+#define EXTTRIGGERPWM2_STARTBIT 16
+#define EXTTRIGGERPWM3_STARTBIT 24
+
 
 /* INPUTCH0ADDR INPUTCH0ADDR INPUTCH1ADDR INPUTCH2ADDR*/
 /* Signal Selector: The trigger does always have on each device 4 channels with each 8 bits*/
@@ -143,27 +156,14 @@
 
 /* TRIGGERCURRENTADDR  */
 /* read only */
-/**/
-/* EXTTRIGGERSRCADDR*/
-#define FORCETOGGE  0
-#define EXTTRIGGER1 1
-/* Note that most devices have none only one Exttrigger input!*/
-/* Welec W20xx devices have 1*/
-/* SandboxX has also only 1*/
-#define EXTTRIGGER2 2
-#define EXTTRIGGER3 3
-#define EXTTRIGGER4 4
-/* ...*/
 
-/* EXTTRIGGERPWMADDR*/
-#define EXTTRIGGERPWM0_STARTBIT 0 
-#define EXTTRIGGERPWM1_STARTBIT 8
-#define EXTTRIGGERPWM2_STARTBIT 16
-#define EXTTRIGGERPWM3_STARTBIT 24
-
-/* These Memory mapped addresses are for simple processors and unused when using the LEON3*/
-/* UART16550ADDR            */
-/* UART16550DATA           */
+/* CONFIGADCENABLE */
+/* for SandboxX and possible other boards which using a seperate microprocessor to 
+ * make the analog settings now this is a wake up legacy interrupt to enable the uart
+ * communication */
+#define ADC0 0
+#define ADC1 1
+/* ... */
 
 /* LEDADDR*/
 /* switch on the led by setting the corresponding bit to 1*/
@@ -288,19 +288,12 @@ typedef struct {
 	volatile int Reseverd3;
 	volatile int Decimator;
 	volatile int FilterEnable;
-	volatile int Reserved6;
-	volatile int Reserved7;
-
 	volatile int InputCh0Addr;
 	volatile int InputCh1Addr;
 	volatile int InputCh2Addr;
 	volatile int InputCh3Addr;
-	/* The following 4 confort regs are not implemented!*/
-	/* use ANALOGSETTINGSBANK istead*/
-	volatile int InputCh0Gain;
-	volatile int InputCh1Gain;
-	volatile int InputCh2Gain;
-	volatile int InputCh3Gain;
+	volatile int ExtTriggerSrcAddr;
+	volatile int ExtTriggerPWMAddr;
 } volatile CaptureRegs;
 
 typedef struct {

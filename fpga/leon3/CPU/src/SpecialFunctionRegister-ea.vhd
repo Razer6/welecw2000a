@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-30
+-- Last update: 2009-04-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -45,7 +45,6 @@ use DSO.Global.all;
 use DSO.pSpecialFunctionRegister.all;
 use DSO.pTrigger.all;
 use DSO.pPolyphaseDecimator.all;
---use DSO.pUart.all;
 use DSO.pLedsKeysAnalogSettings.all;
 
 entity SpecialFunctionRegister is
@@ -70,8 +69,8 @@ architecture RTL of SpecialFunctionRegister is
   signal SignalSelector            : aSignalSelector;
   signal ExtTriggerSrc             : aExtTriggerInput;
   signal Trigger                   : aTriggerInput;
-  --signal UartOut                   : aCPUtoUart;
   signal Leds                      : aLeds;
+  signal nConfigADC                : std_ulogic_vector(cChannels-1 downto 0);
   signal AnalogSettings            : aAnalogSettings;
   signal PrevTriggerBusy           : std_ulogic;
   signal PrevTriggerStartRecording : std_ulogic;
@@ -82,7 +81,7 @@ begin
   oSFRControl.SignalSelector <= SignalSelector;
   oSFRControl.ExtTriggerSrc  <= ExtTriggerSrc;
   oSFRControl.Trigger        <= Trigger;
-  -- oSFRControl.Uart            <= UartOut;
+  oSFRControl.nConfigADC     <= nConfigADC;
   oSFRControl.Leds           <= Leds;
   oSFRControl.AnalogSettings <= AnalogSettings;
   Addr                       <= to_integer(unsigned(iAddr(7 downto 2)));
@@ -133,16 +132,16 @@ begin
       case cCurrentDevice is
         when cWelec2012 | cWelec2022 =>
           SignalSelector <= (
-            0                => O"0",
-            1                => O"1",
-            2                => O"0",
-            3                => O"1");
+            0 => O"0",
+            1 => O"1",
+            2 => O"0",
+            3 => O"1");
         when cWelec2014 | cWelec2024 =>
           SignalSelector <= (
-            0                => O"0",
-            1                => O"1",
-            2                => O"2",
-            3                => O"3");
+            0 => O"0",
+            1 => O"1",
+            2 => O"2",
+            3 => O"3");
 --        when cSandboxX =>
 --          SignalSelector <= (
 --            0                => O"0",
@@ -172,9 +171,9 @@ begin
         HighTime        => std_ulogic_vector(to_signed(50, Trigger.HighTime'length)),
         SetReadOffset   => '0',
         ReadOffset      => (others => '0'));
-      --    UartOut <= (WriteEn => '0',
-      --                Addr    => (others => '0'),
-      --                Data    => (others => '0'));
+
+      nConfigADC <= (others => cLowActive);
+      
       Leds <= (
         BTN_CH3        => '0',
         Beam1On        => '0',
@@ -207,7 +206,6 @@ begin
       Trigger.ForceIdle     <= '0';
       Trigger.SetReadOffset <= '0';
       AnalogSettings.Set    <= '0';
-      --  UartOut.WriteEn     <= '0';
 
       if iWr = '1' then
         case Addr is
@@ -225,14 +223,21 @@ begin
             for i in Decimator.EnableFilter'range loop
               Decimator.EnableFilter(i) <= iData(i);
             end loop;
+          when cExtTriggerSrcAddr =>
+            -- a software bug can here cause a simulation failure! :-)
+            ExtTriggerSrc.Addr <= to_integer(unsigned(iData));
+          when cExtTriggerPWMAddr =>
+            for i in 1 to cExtTriggers loop
+              ExtTriggerSrc.PWM(i) <= iData(i*8-1 downto (i-1)*8);
+            end loop;
           when cInputCh0Addr =>
-            SignalSelector(0)<= iData(SignalSelector(0)'range);
+            SignalSelector(0) <= iData(SignalSelector(0)'range);
           when cInputCh1Addr =>
             SignalSelector(1) <= iData(SignalSelector(1)'range);
           when cInputCh2Addr =>
             SignalSelector(2) <= iData(SignalSelector(2)'range);
           when cInputCh3Addr =>
-            SignalSelector(3) <= iData(SignalSelector(3)'range);           
+            SignalSelector(3) <= iData(SignalSelector(3)'range);
           when cTriggerOnChAddr =>
             Trigger.TriggerChannel <= to_integer(unsigned(iData(1 downto 0)));
           when cTriggerOnceAddr =>
@@ -263,13 +268,8 @@ begin
             null;
           when cTriggerCurrentAddr =>
             null;
-          when cExtTriggerSrcAddr =>
-            -- a software bug can here cause a simulation failure! :-)
-            ExtTriggerSrc.Addr <= to_integer(unsigned(iData));
-          when cExtTriggerPWMAddr =>
-            for i in 1 to cExtTriggers loop
-              ExtTriggerSrc.PWM(i) <= iData(i*8-1 downto (i-1)*8);
-            end loop;
+          when cConfigADCEnable =>
+            nConfigADC <= not iData(nConfigADC'range);
           when cLedAddr =>
             Leds <= (
               BTN_CH3        => iData(0),
@@ -331,11 +331,6 @@ begin
             AnalogSettings.DAC_Offset <= iData(15 downto 0);
             AnalogSettings.DAC_Ch     <= iData(16);
             
-          when cUart16550Addr =>
-            --     UartOut.Addr <= iData(cUART_ADDR_WIDTH-1 downto 0);
-          when cUart16550Data =>
-            --     UartOut.WriteEn <= '1';
-            --     UartOut.Data    <= iData(cUART_DATA_WIDTH-1 downto 0);
           when others         =>
             null;
         end case;
@@ -344,7 +339,7 @@ begin
   end process;
 
   pRead : process (Addr, iSFRControl, InterruptVector,
-                   InterruptMask, Decimator,
+                   InterruptMask, Decimator, nConfigADC,
                    SignalSelector, Trigger, Leds, ExtTriggerSrc, AnalogSettings)
   begin
     oData <= (others => '0');
@@ -361,6 +356,12 @@ begin
       when cFilterEnableAddr =>
         for i in Decimator.EnableFilter'range loop
           oData(i) <= Decimator.EnableFilter(i);
+        end loop;
+      when cExtTriggerSrcAddr =>
+        oData <= std_ulogic_vector(to_unsigned(ExtTriggerSrc.Addr,32));
+      when cExtTriggerPWMAddr =>
+        for i in 1 to cExtTriggers loop
+          oData(i*8-1 downto (i-1)*8) <= ExtTriggerSrc.PWM(i);
         end loop;
       when cInputCh0Addr =>
         oData(SignalSelector(0)'range) <= SignalSelector(0);
@@ -400,17 +401,8 @@ begin
       when cTriggerCurrentAddr =>
         oData(iSFRControl.Trigger.CurrentTriggerAddr'high+3 downto 3) <=
           std_ulogic_vector(iSFRControl.Trigger.CurrentTriggerAddr);
-        
-      when cExtTriggerPWMAddr =>
-        for i in 1 to cExtTriggers loop
-          oData(i*8-1 downto (i-1)*8) <= ExtTriggerSrc.PWM(i);
-        end loop;
-        
-      when cUart16550Addr =>
-        --     oData(cUART_ADDR_WIDTH-1 downto 0) <= UartOut.Addr;
-      when cUart16550Data =>
-        --     oData(cUART_DATA_WIDTH-1 downto 0) <= iSFRControl.Uart.Data;
-
+      when cConfigADCEnable =>
+        oData(nConfigADC'range) <= nConfigADC;
       when cLedAddr =>
         oData(0)  <= Leds.BTN_CH3;
         oData(1)  <= Leds.Beam1On;

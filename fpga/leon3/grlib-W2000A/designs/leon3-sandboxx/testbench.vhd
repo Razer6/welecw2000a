@@ -98,7 +98,7 @@ architecture behav of testbench is
   signal   Rst : std_logic := '0';      -- Reset
   constant ct  : integer   := clkperiod/2;
 
-  signal address : std_logic_vector(cSRAMAddrWidth+1 downto 0);
+  signal address : std_logic_vector(27 downto 0);
   signal data    : std_logic_vector(31 downto 0);
 
   signal ramsn  : std_logic_vector(4 downto 0);
@@ -264,9 +264,13 @@ architecture behav of testbench is
       iResetAsync : in  std_ulogic;
       oData       : out std_ulogic_vector(gBitWidth-1 downto 0));
   end component;
-  
+
+  signal RXADC   : std_ulogic;
+  signal TXADC   : std_ulogic;
+  signal WakeADC : std_ulogic;
   
 begin
+  
   ADCClk <= (others => clk);
 
   ADC : for i in 0 to cChannels-1 generate
@@ -300,10 +304,11 @@ begin
 
 
   -- original hpe mini testbench
-  dsubren             <= not dsubre;
-  disrams             <= '0';
---  address(27 downto 16) <= (others => '0');
-  address(1 downto 0) <= (others => '0');
+  dsubren               <= not dsubre;
+  disrams               <= '0';
+  address(27 downto 16) <= (others => '0');
+  address(15 downto 14) <= (others => '0');  -- mroland: init unused bits
+  address(1 downto 0)   <= (others => '0');
 -- clock and reset
 
   clk     <= not clk after ct * 1 ns;
@@ -318,33 +323,35 @@ begin
       pclow   => pclow)
     port map (
       iCh1ADC1 => ADCData(0)(0),
-
-      resetn  => rst,
-      resoutn => resoutn,
-      clk     => clk,
-      errorn  => error,
-      address => address(address'high downto 2),
-      data    => data,
-      sdclk   => sdclk,
-      sdcke   => sdcke(0),
-      sdcsn   => sdcsn(0),
-      sdwen   => sdwen,
-      sdrasn  => sdrasn,
-      sdcasn  => sdcasn,
-      sddqm   => sddqm(3 downto 0),     -- topmost bits are undriven
-      sdba    => sa(14 downto 13),
+      iRXADC   => RXADC,
+      oTXADC   => TXADC,
+      oWakeADC => WakeADC,
+      resetn   => rst,
+      resoutn  => resoutn,
+      clk      => clk,
+      errorn   => error,
+      address  => address(cSRAMAddrWidth-1 downto 2),
+      data     => data,
+      sdclk    => sdclk,
+      sdcke    => sdcke(0),
+      sdcsn    => sdcsn(0),
+      sdwen    => sdwen,
+      sdrasn   => sdrasn,
+      sdcasn   => sdcasn,
+      sddqm    => sddqm(3 downto 0),    -- topmost bits are undriven
+      sdba     => sa(14 downto 13),
 
 --      sertx     => dsutx,
 --      serrx     => dsurx,
 --      sersrcsel => gnd,                 -- select serial DCL
 
 --      dsuen   => dsuen,
-      dsubre => dsubre,
+--      dsubre => dsubre,
 --      dsuactn => dsuactn,
-      dsutx  => dsutx,
-      dsurx  => dsurx,
-      txd1   => txd1,
-      rxd1   => rxd1,
+      dsutx => dsutx,
+      dsurx => dsurx,
+      txd1  => txd1,
+      rxd1  => rxd1,
 
       --    gpio => gpio,
 

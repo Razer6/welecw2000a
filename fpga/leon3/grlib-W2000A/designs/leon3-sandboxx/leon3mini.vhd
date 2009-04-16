@@ -65,22 +65,27 @@ entity leon3mini is
     clktech : integer := CFG_CLKTECH;
     disas   : integer := CFG_DISAS;     -- Enable disassembly to console
     dbguart : integer := CFG_DUART;     -- Print UART on console
+    dbguADC : integer := 0;             -- Print ADC UART on console
     pclow   : integer := CFG_PCLOW;
     freq    : integer := 25000       -- frequency of main clock (used for PLLs)
     );
   port (
     iCh1ADC1 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
-    resetn   : in  std_ulogic;
-    resoutn  : out std_logic;
-    clk      : in  std_ulogic;
+    iRXADC   : in  std_ulogic;
+    oTXADC   : out std_ulogic;
+    oWakeADC : out std_ulogic;
 
-    errorn  : out   std_ulogic;
-    address : out   std_logic_vector(cSRAMAddrWidth+1 downto 2);
+    resetn  : in  std_ulogic;
+    resoutn : out std_logic;
+    clk     : in  std_ulogic;
+
+    address : out   std_logic_vector(cSRAMAddrWidth-1 downto 2);
     data    : inout std_logic_vector(31 downto 0);
 
 -- pragma translate_off
-    ramsn  : out std_logic_vector (4 downto 0);
-    ramoen : out std_logic_vector (4 downto 0);
+    errorn : out std_ulogic;
+    ramsn  : out std_logic_vector(4 downto 0);
+    ramoen : out std_logic_vector(4 downto 0);
     rben   : out std_logic_vector(3 downto 0);
     rwen   : out std_logic_vector(3 downto 0);
 
@@ -102,7 +107,7 @@ entity leon3mini is
 
     -- debug support unit
     --   dsuen   : in  std_ulogic;
-    dsubre : in std_ulogic;
+--    dsubre : in std_ulogic;
 --    dsuactn : out std_ulogic;
 
     -- UART for serial DCL/console I/O
@@ -114,6 +119,7 @@ entity leon3mini is
     dsurx : in  std_ulogic;             -- DSU rx data
     rxd1  : in  std_ulogic;
     txd1  : out std_ulogic;
+
 --    gpio   : inout std_logic_vector(7 downto 0);  -- I/O port, unused at the moment
 
     -- ethernet signals
@@ -158,7 +164,7 @@ entity leon3mini is
 -------------------------------------------------------------------------------
 
 
-    dac       : out std_ulogic;
+--    dac       : out std_ulogic;
     vga_vsync : out std_ulogic;
     vga_hsync : out std_ulogic;
     vga_rd    : out std_logic_vector(1 downto 0);
@@ -205,11 +211,11 @@ architecture rtl of leon3mini is
   signal ahbmi : ahb_mst_in_type;
   signal ahbmo : ahb_mst_out_vector := (others => ahbm_none);
 
-  signal clkm, rstn, sdclkl : std_ulogic;
-  signal cgi                : clkgen_in_type;
-  signal cgo                : clkgen_out_type;
-  signal u1i, dui           : uart_in_type;
-  signal u1o, duo           : uart_out_type;
+  signal clkm, rstn, sdclkl   : std_ulogic;
+  signal cgi                  : clkgen_in_type;
+  signal cgo                  : clkgen_out_type;
+  signal u1i, dui, UartADCIn  : uart_in_type;
+  signal u1o, duo, UartADCOut : uart_out_type;
 
   signal irqi : irq_in_vector(0 to CFG_NCPU-1);
   signal irqo : irq_out_vector(0 to CFG_NCPU-1);
@@ -220,6 +226,7 @@ architecture rtl of leon3mini is
   signal dsui    : dsu_in_type;
   signal dsuo    : dsu_out_type;
   signal dsuen   : std_ulogic;
+  signal dsubre  : std_ulogic;
   signal dsuact  : std_logic;
   signal dsuactn : std_logic;
 
@@ -276,7 +283,6 @@ architecture rtl of leon3mini is
 
   signal dbg_rdata : std_logic_vector(15 downto 0);
   signal dbg_wdata : std_logic_vector(15 downto 0);
-  ---------------------------------------------------------------------------------------
 
   signal vgao      : apbvga_out_type;
   signal video_clk : std_logic;
@@ -286,11 +292,11 @@ architecture rtl of leon3mini is
   constant CPU_FREQ   : integer := BOARD_FREQ * CFG_CLKMUL / CFG_CLKDIV;  -- cpu frequency in KHz
 begin
 
-  ---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
 -- DSO: Scope Components without direct AHB or APB access
 ---------------------------------------------------------------------------------------
 
-  
+  oWakeADC <= SFRControlfromCPU.nConfigADC(0);
   
   ADCIn <= (                            -- only for SandboxX
     0   => (
@@ -312,6 +318,8 @@ begin
       iExtTrigger     => '0',
       oExtTriggerPWM  => open);
 
+
+  -- pragma translate_off
   BootRomRd <= memo.romsn(0) or memo.oen;
   Bootloader : entity work.BootRom
     generic map (
@@ -324,7 +332,7 @@ begin
       --  odata => memi.data,
       odata => data,
       oACK  => BootACK);
-
+  -- pragma translate_on
 
 ----------------------------------------------------------------------
 ---  Reset and Clock generation  -------------------------------------
@@ -333,17 +341,24 @@ begin
   vcc         <= (others => '1'); gnd <= (others => '0');
   cgi.pllctrl <= "00"; cgi.pllrst <= not resetn; cgi.pllref <= clk;  --'0'; --pllref;
 
-  clkgen0 : clkgen  -- clock generator using toplevel generic 'freq'
-    generic map (tech    => CFG_CLKTECH, clk_mul => CFG_CLKMUL,
-                 clk_div => CFG_CLKDIV, sdramen => CFG_MCTRL_SDEN,
-                 noclkfb => CFG_CLK_NOFB, freq => freq)
-    port map (clkin => clk, pciclkin => gnd(0), clk => clkm, clkn => open,
-              clk2x => open, sdclk => sdclkl, pciclk => open,
-              cgi   => cgi, cgo => cgo);
+--  clkgen0 : clkgen  -- clock generator using toplevel generic 'freq'
+--    generic map (tech    => CFG_CLKTECH, clk_mul => CFG_CLKMUL,
+--                 clk_div => CFG_CLKDIV, sdramen => CFG_MCTRL_SDEN,
+--                 noclkfb => CFG_CLK_NOFB, freq => freq)
+--    port map (clkin => clk, pciclkin => gnd(0), clk => clkm, clkn => open,
+--              clk2x => open, sdclk => sdclkl, pciclk => open,
+--              cgi   => cgi, cgo => cgo);
+-- rst0 : rstgen                         -- reset generator
+--   port map (resetn, clkm, cgo.clklock, rstn);
+
+  sdclkl <= ClkCPU;
+  clkm   <= ClkCPU;
 
   rst0 : rstgen                         -- reset generator
-    port map (resetn, clkm, cgo.clklock, rstn);
-
+    port map (ResetAsync, clkm, cgo.clklock, rstn);
+  
+  cgo <= (others => '1') after 1 ns,
+         (others => '1') after 100 ns;
 ---------------------------------------------------------------------- 
 ---  AHB CONTROLLER --------------------------------------------------
 ----------------------------------------------------------------------
@@ -371,20 +386,20 @@ begin
         port map (clkm, rstn, ahbmi, ahbmo(i), ahbsi, ahbso,
                   irqi(i), irqo(i), dbgi(i), dbgo(i));
     end generate;
-    errorn_pad : odpad generic map (tech => padtech) port map (errorn, dbgo(0).error);
+    -- errorn_pad : odpad generic map (tech => padtech) port map (errorn, dbgo(0).error);
 
     dsugen : if CFG_DSU = 1 generate
       dsu0 : dsu3                       -- LEON3 Debug Support Unit
-        generic map (hindex => 2, haddr => 16#900#, hmask => 16#F00#,
+        generic map (hindex => CFG_NCPU+1, haddr => 16#900#, hmask => 16#F00#,
                      ncpu   => CFG_NCPU, tbits => 30, tech => memtech, irq => 0, kbytes => CFG_ATBSZ)
-        port map (rstn, clkm, ahbmi, ahbsi, ahbso(2), dbgo, dbgi, dsui, dsuo);
+        port map (rstn, clkm, ahbmi, ahbsi, ahbso(CFG_NCPU+1), dbgo, dbgi, dsui, dsuo);
       dsuen_pad  : inpad generic map (tech  => padtech) port map (dsuen, dsui.enable);
       --    **** tame: do not use inversion
       dsubre_pad : inpad generic map (tech  => padtech) port map (dsubre, dsui.break);
       dsuact_pad : outpad generic map (tech => padtech) port map (dsuact, dsuo.active);
     end generate;
   end generate;
-  nodcom : if CFG_DSU = 0 generate ahbso(2) <= ahbs_none; end generate;
+  nodcom : if CFG_DSU = 0 generate ahbso(CFG_NCPU+1) <= ahbs_none; end generate;
 
   dcomgen : if CFG_AHB_UART = 1 generate
     dcom0 : ahbuart                     -- Debug UART
@@ -393,11 +408,11 @@ begin
     dsurx_pad : inpad generic map (tech  => padtech) port map (dsurx, dui.rxd);
     dsutx_pad : outpad generic map (tech => padtech) port map (dsutx, duo.txd);
   end generate;
-  nouah : if CFG_AHB_UART = 0 generate apbo(4) <= apb_none; end generate;
+  -- nouah : if CFG_AHB_UART = 0 generate apbo(4) <= apb_none; end generate;
 
   ahbjtaggen0 : if CFG_AHB_JTAG = 1 generate
-    ahbjtag0 : ahbjtag generic map(tech => fabtech, hindex => CFG_NCPU+CFG_AHB_UART)
-      port map(rstn, clkm, tck, tms, tdi, tdo, ahbmi, ahbmo(CFG_NCPU+CFG_AHB_UART),
+    ahbjtag0 : ahbjtag generic map(tech => fabtech, hindex => CFG_NCPU)
+      port map(rstn, clkm, tck, tms, tdi, tdo, ahbmi, ahbmo(CFG_NCPU),
                open, open, open, open, open, open, open, gnd(0));
   end generate;
 
@@ -424,21 +439,23 @@ begin
       sdcsn_pad : outpad generic map (tech => padtech)
         port map (sdcsn, sdo.sdcsn(0));
     end generate;
-    addr_pad : outpadv generic map (width => cSRAMAddrWidth, tech => padtech)
-      port map (address, memo.address(cSRAMAddrWidth+1 downto 2));
-    bdr : for i in 0 to 3 generate
-      data_pad : iopadv generic map (tech => padtech, width => 8)
-        port map (data(31-i*8 downto 24-i*8), memo.data(31-i*8 downto 24-i*8),
-                  memo.bdrive(i), memi.data(31-i*8 downto 24-i*8));
-    end generate;
---     data <= memo.data after 1 ns when
---             (memo.writen = '0' and memo.ramsn(0) = '0') or
---             (sdo.sdwen = '0' and sdo.casn = '0')
---               else (others => 'Z');--  when others;
---     memi.data <= data after 1 ns when
---                 (memo.writen = '1' and memo.ramsn(0) = '0') or
---             (sdo.sdwen = '1' and sdo.casn = '0')
---               else  (others =>  'Z'); -- when others;
+    addr_pad : outpadv generic map (width => cSRAMAddrWidth-2, tech => padtech)
+      port map (address, memo.address(cSRAMAddrWidth-1 downto 2));
+--    bdr : for i in 0 to 3 generate
+--      data_pad : iopadv generic map (tech => padtech, width => 8)
+--        port map (data(31-i*8 downto 24-i*8), memo.data(31-i*8 downto 24-i*8),
+--                  memo.bdrive(i), memi.data(31-i*8 downto 24-i*8));
+--    end generate;
+    data <= memo.data after 1 ns when
+            (memo.writen = '0' and memo.ramsn(0) = '0') or
+            (memo.writen = '0' and memo.romsn(0) = '0') or
+            (sdo.sdwen = '0' and sdo.casn = '0')
+            else (others => 'Z');            --  when others;
+    memi.data <= data after 1 ns;            -- when
+    --            (memo.writen = '1' and memo.ramsn(0) = '0') or
+    --            (memo.writen = '1' and memo.romsn(0) = '0') or
+    --            (sdo.sdwen = '1' and sdo.casn = '0')
+    --            else (others => 'Z');       -- when others;
   end generate;
 
   nosd0 : if (CFG_MCTRL_SDEN = 0) generate  -- no SDRAM controller
@@ -481,7 +498,7 @@ begin
   genDSO : if CFG_DSO_ENABLE /= 0 generate
     TriggerMem : SignalAccess
       generic map (
-        hindex => 3,
+        hindex => CFG_NCPU+3,
         haddr  => 16#A00#,
         hmask  => 16#FFF#,
         kbytes => 16
@@ -490,7 +507,7 @@ begin
         rst_in      => rstn,
         clk_i       => clkm,
         ahbsi       => ahbsi,
-        ahbso       => ahbso(3),
+        ahbso       => ahbso(CFG_NCPU+3),
         iClkDesign  => clk,
         iResetAsync => ResetAsync,
         iTriggerMem => TriggerMemtoCPU,
@@ -503,8 +520,8 @@ begin
 ----------------------------------------------------------------------
 
   apb0 : apbctrl                        -- AHB/APB bridge
-    generic map (hindex => 1, haddr => CFG_APBADDR)
-    port map (rstn, clkm, ahbsi, ahbso(1), apbi, apbo);
+    generic map (hindex => CFG_NCPU+2, haddr => CFG_APBADDR)
+    port map (rstn, clkm, ahbsi, ahbso(CFG_NCPU+2), apbi, apbo);
 
   ua1 : if CFG_UART1_ENABLE /= 0 generate
     uart1 : apbuart                     -- UART 1
@@ -541,6 +558,21 @@ begin
 --- DSO: SFR ----------------------------------------------------------
 -----------------------------------------------------------------------
   genSFRDSO : if CFG_DSO_ENABLE /= 0 generate
+
+    -- generic uart instead of the debug uart
+    GenericUart : apbuart
+      generic map (pindex   => 4, paddr => 7, pirq => 7, console => dbguADC,
+                   fifosize => CFG_UART1_FIFO)
+      port map (rstn, clkm, apbi, apbo(4), dui, duo);
+    dui.rxd <= dsurx; dui.ctsn <= '0'; dui.extclk <= '0';
+    dsutx   <= duo.txd;
+
+    UartADC : apbuart
+      generic map (pindex   => 8, paddr => 8, pirq => 3, console => 0,
+                   fifosize => CFG_UART1_FIFO)
+      port map (rstn, clkm, apbi, apbo(8), UartADCIn, UartADCOut);
+    UartADCIn.rxd <= iRXADC; UartADCIn.ctsn <= '0'; UartADCIn.extclk <= '0';
+    oTXADC        <= UartADCOut.txd;
     SFR0 : SFR
       generic map(pindex => 5,
                   paddr  => 5,
@@ -573,12 +605,13 @@ begin
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,
-                                 hindex  => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG,
+                                 hindex  => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_GRETH,
                                  clk0    => 40000, clk1 => 1000000000/((BOARD_FREQ * CFG_CLKMUL)/CFG_CLKDIV),
                                  clk2    => 20000, clk3 => 15385, burstlen => 6)
       port map(rstn, clkm, video_clk, apbi, apbo(6), vgao, ahbmi,
-               ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG), clk_sel);
-    video_clk <= clk when clk_sel = "00" else clkm;
+               ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_GRETH), clk_sel);
+    --  video_clk <= clk when clk_sel = "00" else clkm;
+    video_clk <= clkm;
   end generate;
 
   novga : if CFG_VGA_ENABLE+CFG_SVGA_ENABLE = 0 generate
@@ -590,14 +623,14 @@ begin
 -----------------------------------------------------------------------
 
   eth0 : if CFG_GRETH = 1 generate      -- Gaisler ethernet MAC
-    e1 : greth generic map(hindex    => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_SVGA_ENABLE,
+    e1 : greth generic map(hindex    => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG,
                            pindex    => 15, paddr => 15, pirq => 12, memtech => memtech,
                            mdcscaler => CPU_FREQ/1000, enable_mdio => 1, fifosize => CFG_ETH_FIFO,
                            nsync     => 1, edcl => CFG_DSU_ETH, edclbufsz => CFG_ETH_BUF,
                            macaddrh  => CFG_ETH_ENM, macaddrl => CFG_ETH_ENL,
                            ipaddrh   => CFG_ETH_IPM, ipaddrl => CFG_ETH_IPL)
       port map(rst   => rstn, clk => clkm, ahbmi => ahbmi,
-               ahbmo => ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_SVGA_ENABLE), apbi => apbi,
+               ahbmo => ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG), apbi => apbi,
                apbo  => apbo(15), ethi => ethi, etho => etho); 
 
     emdio_pad : iopad generic map (tech => padtech)
@@ -703,9 +736,9 @@ begin
       generic map (hindex => 6, haddr => CFG_AHBRODDR, pipe => CFG_AHBROPIP)
       port map (rstn, clkm, ahbsi, ahbso(6));
   end generate;
-  nobpromgen : if CFG_AHBROMEN = 0 generate
-    ahbso(6) <= ahbs_none;
-  end generate;
+--  nobpromgen : if CFG_AHBROMEN = 0 generate
+--    ahbso(6) <= ahbs_none;
+--  end generate;
 
 -----------------------------------------------------------------------
 ---  AHB RAM ----------------------------------------------------------
@@ -716,7 +749,7 @@ begin
                                   tech   => CFG_MEMTECH, kbytes => CFG_AHBRSZ)
       port map (rstn, clkm, ahbsi, ahbso(4));
   end generate;
-  nram : if CFG_AHBRAMEN = 0 generate ahbso(4) <= ahbs_none; end generate;
+--  nram : if CFG_AHBRAMEN = 0 generate ahbso(4) <= ahbs_none; end generate;
 
 -----------------------------------------------------------------------
 ---  AHB DAC IF -------------------------------------------------------
@@ -780,8 +813,8 @@ begin
   nam1 : for i in (CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_SVGA_ENABLE+CFG_GRETH) to NAHBMST-1 generate
     ahbmo(i) <= ahbm_none;
   end generate;
-  nap0 : for i in 7 to NAPBSLV-1-CFG_GRETH generate apbo(i) <= apb_none; end generate;
-  nah0 : for i in 8 to NAHBSLV-1 generate ahbso(i)          <= ahbs_none; end generate;
+  nap0 : for i in 9 to NAPBSLV-1-CFG_GRETH generate apbo(i) <= apb_none; end generate;
+  nah0 : for i in 6 to NAHBSLV-1 generate ahbso(i)          <= ahbs_none; end generate;
 
 
 -----------------------------------------------------------------------
@@ -791,6 +824,7 @@ begin
   resoutn  <= rstn;
   dsuactn  <= not dsuact;
   dsuen    <= '1';
+  dsubre   <= '0';
   select_o <= "101";
 --  segments_o <= dsuact & errorn & ("000000");
 

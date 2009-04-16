@@ -4,6 +4,7 @@ add wave -noupdate -format Literal /testbench/d3/ich1adc1
 add wave -noupdate -format Logic /testbench/d3/resoutn
 add wave -noupdate -format Logic /testbench/d3/clk
 add wave -noupdate -format Logic /testbench/d3/errorn
+add wave -noupdate -format Literal /testbench/address
 add wave -noupdate -format Literal /testbench/d3/address
 add wave -noupdate -format Literal /testbench/d3/data
 add wave -noupdate -format Literal /testbench/d3/ramsn
@@ -157,8 +158,8 @@ add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/isfrcont
 add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/osfrcontrol
 add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/addr
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rd
-add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/idata
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/wr
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/idata
 add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/odata
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
 add wave -noupdate -divider CaptureSignals
@@ -198,7 +199,7 @@ add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggerd
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/triggerinvalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/aclr
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {371278518 ps} 0}
+WaveRestoreCursors {{Cursor 1} {13374021289 ps} 0}
 configure wave -namecolwidth 341
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -212,4 +213,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {364337500 ps} {377462500 ps}
+WaveRestoreZoom {12914035450 ps} {13374021289 ps}

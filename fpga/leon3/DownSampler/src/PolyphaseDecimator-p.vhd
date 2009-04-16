@@ -4,7 +4,7 @@
 -- File       : PolyphaseDecimator-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-07
--- Last update: 2009-03-04
+-- Last update: 2009-04-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -115,8 +115,8 @@ package pPolyphaseDecimator is
       iResultValid  : in  std_ulogic;
       iShiftEnable  : in  std_ulogic;
       iFirCounter   : in  natural range 0 to 8-1;
-      iReadAddr     : in  unsigned(7 downto 0);
-      iWriteAddr    : in  unsigned(7 downto 0);
+      iReadAddr     : in  unsigned(cDelayMemWidth-1 downto 0);
+      iWriteAddr    : in  unsigned(cDelayMemWidth-1 downto 0);
       iCoeff        : in  aLongValue;
       oData         : out aLongValue);  
   end component;
