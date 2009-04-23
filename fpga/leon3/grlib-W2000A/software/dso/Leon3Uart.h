@@ -1,6 +1,40 @@
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : Leon3Uart.h
+* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
 
-#ifndef LEON3UART_H 
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
+#ifndef LEON3UART_H
 #define LEON3UART_H
+
 
 /* UART control bits */
 /* example: Control = ENABLE_RX | ENABLE_TX;*/
@@ -31,6 +65,7 @@ bool UartInit(	const unsigned int CPUFreq,
 		uart_regs * uart);
 
 char ReceiveCharBlock(uart_regs * uart);
+char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error);
 
 void SendCharBlock(uart_regs * uart, char c);
 
@@ -42,6 +77,6 @@ void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size);
 /* interrupts if the tx buffer is full!*/
 void SendString (uart_regs * uart, char * c, unsigned int * size);
 
-void SendStringBlock (uart_regs * uart, char * c, unsigned int * size);
+void SendStringBlock (uart_regs * uart, char * c);
 
 #endif

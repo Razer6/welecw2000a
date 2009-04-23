@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-04-04
+-- Last update: 2009-04-17
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -218,7 +218,7 @@ begin
             
           when cSamplingFreqAddr =>
             --  vData                := iData(31 downto 12)& X"000";
-            Decimator.Stages <= iData;
+            Decimator.Stages <= iData(Decimator.Stages'range);
           when cFilterEnableAddr =>
             for i in Decimator.EnableFilter'range loop
               Decimator.EnableFilter(i) <= iData(i);
@@ -252,7 +252,8 @@ begin
             Trigger.StorageMode <= iData(Trigger.StorageMode'range);
           when cTriggerReadOffSetAddr =>
             Trigger.SetReadOffset <= '1';
-            Trigger.ReadOffset    <= unsigned(iData(Trigger.ReadOffset'high+3 downto 3));
+          --  Trigger.ReadOffset    <= unsigned(iData(Trigger.ReadOffset'high+3 downto 3));
+            Trigger.ReadOffset    <= unsigned(iData(Trigger.ReadOffset'high downto 0));
           when cTriggerTypeAddr =>
             Trigger.Trigger <= to_integer(unsigned(iData(cDiffTriggers-1 downto 0)));
             
@@ -352,7 +353,7 @@ begin
         oData <= InterruptMask;
       when cSamplingFreqAddr =>
         -- oData <= std_ulogic_vector(to_unsigned(Decimator.SampleTime, oData'length));
-        oData <= Decimator.Stages;
+        oData(Decimator.Stages'range) <= Decimator.Stages;
       when cFilterEnableAddr =>
         for i in Decimator.EnableFilter'range loop
           oData(i) <= Decimator.EnableFilter(i);
@@ -378,7 +379,8 @@ begin
       when cTriggerStorageModeAddr =>
         oData(Trigger.StorageMode'range) <= Trigger.StorageMode;
       when cTriggerReadOffSetAddr =>
-        oData(iSFRControl.Trigger.ReadOffSet'high+3 downto 3) <= std_ulogic_vector(iSFRControl.Trigger.ReadOffSet);
+ --       oData(iSFRControl.Trigger.ReadOffSet'high+3 downto 3) <= std_ulogic_vector(iSFRControl.Trigger.ReadOffSet);
+        oData(iSFRControl.Trigger.ReadOffSet'high downto 0) <= std_ulogic_vector(iSFRControl.Trigger.ReadOffSet);
       when cTriggerTypeAddr =>
         oData <= std_ulogic_vector(to_unsigned(Trigger.Trigger, oData'length));
       when cTriggerLowValueAddr =>

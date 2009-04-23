@@ -1,7 +1,7 @@
 [Project]
 FileName=WaveRecorder.dev
 Name=WaveRecorder
-UnitCount=13
+UnitCount=15
 Type=1
 Ver=1
 ObjFiles=
@@ -10,7 +10,7 @@ Libs=
 PrivateResource=WaveRecorder_private.rc
 ResourceIncludes=
 MakeIncludes=
-Compiler=-DWINNT -g3_@@_
+Compiler=-DWINNT -DLITTLE_ENDIAN_@@_
 CppCompiler=
 Linker=libargtable2.a_@@_
 IsCpp=0
@@ -169,6 +169,26 @@ AutoIncBuildNr=0
 
 [Unit13]
 FileName=..\DSO_Remote.c
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit14]
+FileName=..\crc.c
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit15]
+FileName=..\crc.h
 CompileCpp=0
 Folder=WaveRecorder
 Compile=1

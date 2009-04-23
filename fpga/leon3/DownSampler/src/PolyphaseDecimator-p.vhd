@@ -4,7 +4,7 @@
 -- File       : PolyphaseDecimator-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-07
--- Last update: 2009-04-02
+-- Last update: 2009-04-17
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -54,7 +54,7 @@ package pPolyphaseDecimator is
   constant cDecAvgMax : natural                      := 10;
 
   type aDownSampler is record
-                         Stages       : aDword;
+                         Stages       : std_ulogic_vector((cDecimationStages*4)-1 downto 0);
                          EnableFilter : std_ulogic_vector(0 to cDecimationStages-1);
                        end record;
   type aStage is record

@@ -1,3 +1,37 @@
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : WaveRecorder.c
+* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
+
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
 
 
 #include "stdio.h"
@@ -5,6 +39,7 @@
 #include "WaveFilePackage.h"
 #include "DSO_Remote_Master.h"
 #include "argtable2.h"
+#include "crc.h"
 
 #define DSO_NAK_MESSAGE "At least one argument was not accepted from the target!\n"
 
@@ -88,17 +123,16 @@ int main(int argc, char * argv[]) {
 	AnPWM,AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3,ForceAddr,
 	ForceSize,ForceFile,CapWTime,CapSize,WavForceFS,
 	WaveFile,UartAddr,BaudRate,help,end};
+	int Retry = 0;
 #ifdef WINNT
     HANDLE hUart = 0;
 #else	
     uart_regs hUart = 0;
 #endif      
     uart_regs * huart = &hUart; /* uart handle */
-
-
-
 	int nerrors = arg_parse(argc,argv,argtable);
-       	if (nerrors != 0) {
+
+	if (nerrors != 0) {
 		arg_print_errors(stdout,end,argv[0]);
 		arg_print_syntax(stdout,argtable,"");
 		printf("\n");
@@ -132,7 +166,10 @@ int main(int argc, char * argv[]) {
 				Ch1Src->ival[0],
 				Ch2Src->ival[0],
 				Ch3Src->ival[0]); */
-		Ret = SendTriggerInput(huart,
+		Retry = 0;
+		Ret = 0;
+		while ((Retry != 2) &&  (Ret == 0)){
+			Ret = SendTriggerInput(huart,
 				Channels->ival[0],
 				SampleSize->ival[0],
 				SampleFS->ival[0],
@@ -142,6 +179,8 @@ int main(int argc, char * argv[]) {
 				Ch1Src->ival[0],
 				Ch2Src->ival[0],
 				Ch3Src->ival[0]);
+			Retry++;
+		}
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		if (Ret == true){
             UartClose(huart);
@@ -176,7 +215,10 @@ int main(int argc, char * argv[]) {
 		if (strcmp("SchmittHL",Trigger->sval[0]) == 0){
 			TriggerNo = 3;
 		}
-		Ret = SendTrigger(huart,
+		Retry = 0;
+		Ret = 0;
+		while ((Retry != 2) &&  (Ret == 0)){
+			Ret = SendTrigger(huart,
 				TriggerNo,
 				TrPrefetch->ival[0],
 				TriggerChannel->ival[0],
@@ -184,6 +226,8 @@ int main(int argc, char * argv[]) {
 				TriggerHighRef->ival[0],
 				TriggerLowTime->ival[0],
 				TriggerHighTime->ival[0]);
+			Retry++;
+		}
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		if (Ret == true){
             UartClose(huart);
@@ -215,7 +259,7 @@ int main(int argc, char * argv[]) {
 			Settings[i].myVperDiv 	= Gain[i]->ival[0];
 			Settings[i].AC 		= AC[i]->count;
 			Settings[i].DA_Offset	= DAoff[i]->ival[0];
-			Settings[i].PWM_Offset	= AnPWM->ival[0];
+			Settings[i].Specific	= AnPWM->ival[0];
 			Settings[i].Mode = 0;
 			if (strcmp("pwm",Src2[i]->sval[0]) == 0){
 					Settings[i].Mode = 1;
@@ -227,13 +271,17 @@ int main(int argc, char * argv[]) {
 					Settings[i].Mode = 3;
 			}
 		}	
-		Ret = SendAnalogInput(huart,Channels->ival[0], Settings);
+		Retry = 0;
+		Ret = 0;
+		while ((Retry != 2) &&  (Ret == 0)){
+			Ret = SendAnalogInput(huart,Channels->ival[0], Settings);
+			Retry++;
+		}
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+		UartClose(huart);
 		if (Ret == true){
-            UartClose(huart);
 			return 0;
 		} else {
-            UartClose(huart);
 			printf(DSO_NAK_MESSAGE); 
 			return 3;
 		}			
@@ -242,76 +290,63 @@ int main(int argc, char * argv[]) {
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,CapWTime,CapSize,
 			WavForceFS,WaveFile};
-		
 		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		int * buffer = (int*)malloc(CapSize->ival[0]*sizeof(int));
+		uSample * buffer = (unsigned int*)malloc(CapSize->ival[0]*sizeof(int));
 		int FastMode = 0;
 		if (buffer == 0){
 			printf("Not enough memory aviable!\n");
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-		}
-		if (Ret == false) {
-			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-            UartClose(huart);
-			return 2;
+			UartClose(huart);
+			return 4;
 		}	
-		Ret = ReceiveSamples(huart, 
+		Retry = 0;
+		Ret = 0;
+		while ((Retry != 2) &&  (Ret == 0)){
+			Ret = ReceiveSamples(huart, 
 				CapWTime->ival[0],
 				1,
 				CapSize->ival[0],
 				&FastMode,
 				(unsigned int *)buffer);
-		
-        if (Ret != 0){
-			FILE * Handle = 0;
-			FILE ** pHandle = &Handle;
-			aWaveFileInfo FileInfo = {
-				(short)SampleSize->ival[0],
-				Channels->ival[0],
-				Ret,
-				SampleFS->ival[0]};
-			printf("DataTyp=%d, Channels=%d DataSize=%d SamplingRate=%d\n",
-				FileInfo.DataTyp,FileInfo.Channels,FileInfo.DataSize,FileInfo.SamplingRate);
-			Ret = OpenWaveFileWrite(WaveFile->filename[0],pHandle,FileInfo);
-			if (Ret == false){
-                printf("Generating %s failed!\n",WaveFile->filename[0]);
-				arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-				UartClose(huart);
-				return 4;
-			}
-			/* one Dword = 32 bit 
-			 * 4Ch: one sample = 8 bit 
-			 * 2Ch: one sample may be 8 or 16 bit, if they are 8 bit,
-			 * take care about the capture mode (normal of fast)
-			 * 1Ch: one sample may be 8,16 or 32 bit, if they are not 32 bit 
-			 * also take care about the capture mode (normal of fast)*/
-			if (FastMode != 0){
-				switch (Channels->ival[0]) {
-					case 1:
-						switch (SampleSize->ival[0]){
-							case 8:  FastRecord1Ch8Bit(Handle,FileInfo,buffer);
-								break;
-							case 16: FastRecord1Ch16Bit(Handle,FileInfo,buffer);
-								break;
-							case 32: RecordNormal(Handle,FileInfo,buffer);
-								break;
-						}
+			Retry++;
+		}
+/*		{
+		int i = 0;
+		int j = 0;
+		FastMode = 1;
+		for (i = 1; i <= 4; ++i){
+			for (j = 8; j <= 32; j*=2){
+			SampleSize->ival[0] = j;
+			Channels->ival[0] = i;
+			if (i*j <= 32){
+
+		sprintf(WaveFile->filename[0],"c%d_b_%d.csv",i,j);
+		Ret = 16;
+		{
+			unsigned int i = 0;
+			for(;i < Ret; ++i){
+				switch (j) {
+					case 8:
+						buffer[i].c[0] = 10+i;
+						buffer[i].c[1] = 20+i;
+						buffer[i].c[2] = -10-i;
+						buffer[i].c[3] = -20-i;
 						break;
-					case 2:
-						switch (SampleSize->ival[0]){
-							case 8:  FastRecord2Ch8Bit(Handle,FileInfo,buffer); 
-								break;
-							case 16: RecordNormal(Handle,FileInfo,buffer);
-								break;
-						}
+					case 16:
+						buffer[i].s[0] = i;
+						buffer[i].s[1] = -i;
 						break;
-					case 4: RecordNormal(Handle,FileInfo,buffer);
+					case 32:
+						buffer[i].i = i;
 						break;
 				}
-			} else {
-				RecordNormal(Handle,FileInfo,buffer);
 			}
-			fclose(Handle);
+		}
+*/		
+        if (Ret != 0){
+			RecordWave(buffer,WaveFile->filename[0],
+				Ret,SampleFS->ival[0],Channels->ival[0],
+				SampleSize->ival[0],FastMode);
 			free(buffer);
 			buffer = 0;
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
@@ -322,7 +357,8 @@ int main(int argc, char * argv[]) {
 			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 			UartClose(huart);
 			return 3;
-		 }			
+		 }		
+	/*	}}}} */
 	}
 
 	arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));

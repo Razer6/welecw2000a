@@ -1,3 +1,37 @@
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : DSO_FrontPanel.c
+* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
+
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
 
 #include "DSO_SFR.h"
 #include "DSO_Misc.h"
@@ -79,7 +113,6 @@ char Mk1[][20] = {
 
 	int * addr = (int *)LEDADDR;
 	char Message[80] = ""; 
-	int size = 0;
 	int i = 0;
 	int c0 = -1;
 	int c1 = -1;
@@ -89,22 +122,18 @@ char Mk1[][20] = {
 	
 	for (i = 0; i < 14; ++i){
 		sprintf(Message,"Switching leds %s on!\n",Ml[i]);
-		size = strlen(Message);
-		SendStringBlock(uart,Message,&size);
+		SendStringBlock(uart,Message);
 		WaitMs(5000);
 		*addr |= (1 << i);
 	}
 
 	for (i = 0; i < 14; ++i){
 		sprintf(Message,"Switching leds %s off!\n",Ml[i]);
-		size = strlen(Message);
-		SendStringBlock(uart,Message,&size);
+		SendStringBlock(uart,Message);
 		WaitMs(5000);
 		*addr &= ~(1 << i);
 	}
-
-	
-	sprintf(Message,"Reporting key changes!\n");
+	SendStringBlock(uart,"Reporting key changes!\n");
 	while(1) {
 		addr = (int *)KEYADDR0;
 		value = *addr;
@@ -128,8 +157,7 @@ void TestKeys(uart_regs * uart, int value, int change, char * M[20], int size) {
 			} else {
 				sprintf(Message,"Key %s is off!\n",M[i]);
 			}
-			size = strlen(Message);
-			SendStringBlock(uart,Message,&size);
+			SendStringBlock(uart,Message);
 		}
 	}
 }

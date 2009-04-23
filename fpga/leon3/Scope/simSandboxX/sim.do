@@ -38,8 +38,10 @@ vcom -quiet -93 -work DSO {../../uart16550/src/Uart-p.vhd}
 #vcom -quiet -93 -work DSO {../../Altera/src/PLL1.vhd}
 #vcom -quiet -93 -work DSO {../../Altera/src/PLL2.vhd}
 #vcom -quiet -93 -work DSO {../../Altera/src/PLL3.vhd}
-vcom -quiet -93 -work DSO {../../Altera/src/SbXPLL.vhd}
+#vcom -quiet -93 -work DSO {../../Altera/src/SbXPLL.vhd}
+vcom -quiet -93 -work DSO {../../SignalCapture/src/SbXPLL.vhd}
 #vcom -quiet -93 -work DSO {../../SignalCapture/src/ADC-ea.vhd}
+vcom -quiet -93 -work DSO {../../SignalCapture/src/PatternGenerator-ea.vhd}
 vcom -quiet -93 -work DSO {../../SignalCapture/src/SbxXSignalCapture-ea.vhd}
 vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-p.vhd}
 vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-ea.vhd}

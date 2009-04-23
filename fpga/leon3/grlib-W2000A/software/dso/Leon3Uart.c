@@ -1,8 +1,43 @@
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : Leon3Uart.c
+* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
+
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
 
 
 #include "DSO_Main.h"
 #include "Leon3Uart.h"
 #include "DSO_Misc.h"
+#include "string.h"
 
 /*
 31: 26 Receiver FIFO count (RCNT) - shows the number of data frames in the receiver FIFO.
@@ -49,6 +84,9 @@ char ReceiveCharBlock(uart_regs * uart) {
 	}
 	return loadmem((int)&uart->data);
 }
+char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
+	return 0;
+}
 
 void SendCharBlock(uart_regs * uart, char c) {
 	volatile int temp = 0;
@@ -85,9 +123,10 @@ void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size) {
 }
 
 
-void SendStringBlock (uart_regs * uart, char * c, unsigned int * size) {
+void SendStringBlock (uart_regs * uart, char * c) {
 	unsigned int i = 0;
-	while (i < (*size)){
+	unsigned int size = strlen(c);
+	while (i < size){
 		SendCharBlock(uart,c[i]);
 	/*	printf("Sending %c %d\n",c[i],i);*/
 		i++;
@@ -95,9 +134,10 @@ void SendStringBlock (uart_regs * uart, char * c, unsigned int * size) {
 }
 
 /* interrupts if the tx buffer is full!*/
-void SendString (uart_regs * uart, char * c, unsigned int * size) {
+void SendString (uart_regs * uart, char * c, unsigned int *size) {
 	unsigned int i = 0;
 	volatile int temp = 0;
+	*size = strlen(c);
 	while (i < (*size)){
 		temp = loadmem((int)&uart->status);
 		if ((temp & TX_FULL) != 0){

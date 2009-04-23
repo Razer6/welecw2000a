@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-03-24
+-- Last update: 2009-04-17
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -67,7 +67,7 @@ architecture RTL of TopTrigger is
                            WrEn        : std_ulogic_vector(0 to 3);
                            --          TriggerData : aWords(0 to cCoefficients-1);
                            Addr        : unsigned(cStorageModeLength+cTriggerAddrLength-cTriggerAlign-1 downto 0);
-                           StartAddr   : aTriggerAddr;
+                           StopAddr    : aTriggerAddr;
                          end record;
   signal R              : aTopTriggerFSM;
   signal TriggerStrobes : aTrigger2D(0 to cDiffTriggers-1);
@@ -133,7 +133,7 @@ begin
       Busy        => '0',
       WrEn        => (others => '0'),
       Addr        => (others => '0'),
-      StartAddr   => (others => '0'));
+      StopAddr    => (others => '0'));
   begin
     
     if iResetAsync = cResetActive then
@@ -202,15 +202,15 @@ begin
           end if;
           
         when Triggering =>
-          R.StartAddr(R.StartAddr'high downto cTriggerAlign) <= R.Addr - R.Counter;
+          R.StopAddr(R.StopAddr'high downto cTriggerAlign) <= R.Addr - R.Counter;
           case iCPUPort.StorageMode is
             -- when cStorageMode4CH =>
             when "00" =>
-              R.StartAddr(R.StartAddr'high downto R.StartAddr'high+1 - cStorageModeLength)
+              R.StopAddr(R.StopAddr'high downto R.StopAddr'high+1 - cStorageModeLength)
  <= (others => '0');
               -- when cStorageMode2CH =>
             when "01" =>
-              R.StartAddr(R.StartAddr'high downto R.StartAddr'high+2 - cStorageModeLength)
+              R.StopAddr(R.StopAddr'high downto R.StopAddr'high+2 - cStorageModeLength)
  <= (others => '0');
             when others =>
               null;
@@ -223,7 +223,7 @@ begin
 
           for i in cCoefficients-1 downto 0 loop
             if TriggerStrobes(iCPUPort.Trigger)(i) = '1' then
-              R.StartAddr(cTriggerAlign-1 downto 0) <= to_unsigned(i, cTriggerAlign);
+              R.StopAddr(cTriggerAlign-1 downto 0) <= to_unsigned(i, cTriggerAlign);
             end if;
           end loop;
 
@@ -232,7 +232,7 @@ begin
             R.State            <= Recording;
             oCPUPort.Recording <= '1';
           end if;
-          --     R.StartAddr(R.StartAddr'high downto cTriggerAlign) <=
+          --     R.StopAddr(R.StopAddr'high downto cTriggerAlign) <=
           --       std_ulogic_vector(unsigned(R.Addr) - unsigned(R.Counter));
         when Recording =>
           oCPUPort.Recording <= '1';
@@ -241,18 +241,18 @@ begin
               -- when cStorageMode4CH =>
               when "00" =>
                 if R.Addr(R.Addr'high-cStorageModeLength downto 0) =
-                  R.StartAddr(R.StartAddr'high-cStorageModeLength downto cTriggerAlign) then
+                  R.StopAddr(R.StopAddr'high-cStorageModeLength downto cTriggerAlign) then
                   R.State <= Idle;
                 end if;
                 -- when cStorageMode2CH =>
               when "01" =>
                 if R.Addr(R.Addr'high+1-cStorageModeLength downto 0) =
-                  R.StartAddr(R.StartAddr'high+1-cStorageModeLength downto cTriggerAlign) then
+                  R.StopAddr(R.StopAddr'high+1-cStorageModeLength downto cTriggerAlign) then
                   R.State <= Idle;
                 end if;
                 -- when cStorageMode1CH =>
               when "11" =>
-                if R.Addr = R.StartAddr(R.StartAddr'high downto cTriggerAlign) then
+                if R.Addr = R.StopAddr(R.StopAddr'high downto cTriggerAlign) then
                   R.State <= Idle;
                 end if;
               when others =>
@@ -264,7 +264,7 @@ begin
       -- free storage space while the trigger data capture is running.
       -- it is also possible to stop the trigger earlier
       if iCPUPort.SetReadOffset = '1' then
-        R.StartAddr <= iCPUPort.ReadOffset;
+        R.StopAddr <= iCPUPort.ReadOffset;
       end if;
       if iCPUPort.ForceIdle = '1' then
         R.State <= Idle;
@@ -272,7 +272,7 @@ begin
     end if;
   end process;
 
-  oCPUPort.ReadOffset         <= R.StartAddr;
+  oCPUPort.ReadOffset         <= R.StopAddr;
   oCPUPort.CurrentTriggerAddr <= R.Addr(oCPUPort.CurrentTriggerAddr'range);
   oCPUPort.Busy               <= R.Busy;
   oTriggerMem.ACK             <= ReadValid(ReadValid'high);

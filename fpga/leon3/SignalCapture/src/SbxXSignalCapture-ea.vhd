@@ -4,7 +4,7 @@
 -- File       : SBxXSignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-04-05
+-- Last update: 2009-04-17
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -83,6 +83,7 @@ architecture RTL of SbxXSignalCapture is
   signal SlowInputValid    : std_ulogic;
   signal DownSampler       : aDownSampler;
   signal ExtTrigger        : std_ulogic;
+  signal Channels : integer range 0 to 3;
 begin
 
   -- oResetAsync <= ResetAsync;
@@ -97,7 +98,7 @@ begin
       c0     => ClkCPU,
       locked => oResetAsync);
 
-  pCMOS: if cLVDSADCs = 0 generate
+  pCMOS : if cLVDSADCs = 0 generate
     process (iResetAsync, ClkDesign)
     begin
       if iResetAsync = cResetActive then
@@ -109,7 +110,7 @@ begin
     end process;
   end generate;
 
-  pLVDS: if cLVDSADCs /= 0 generate
+  pLVDS : if cLVDSADCs /= 0 generate
     process (iResetAsync, ClkDesign)
       constant cOffset : natural := cBitWidth-(2*cADCBitWidth);
     begin
@@ -140,33 +141,42 @@ begin
     DownSampler.Stages(3 downto 0) <= X"A";
   end process;
 
-  Decimator : entity work.TopDownSampler
-    generic map (gUseStage0 => false)
+--  Decimator : entity work.TopDownSampler
+--    generic map (gUseStage0 => false)
+--    port map (
+--      iClk        => ClkDesign,
+--      iResetAsync => iResetAsync,
+--      iADC        => DecimatorIn,       -- fixpoint 1.x range -0.5 to 0.5
+--      iCPU        => DownSampler,
+--      iData       => SlowInputData,
+--      iValid      => SlowInputValid,
+--      oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
+--      oValid      => DecimatorOutValid);
+
+--  SignalSelector : process (DecimatorOut)
+--  begin
+--    for j in 0 to 3 loop
+--      for i in 0 to cCoefficients-1 loop
+--        SelectorOut(j)(i) <= std_ulogic_vector(DecimatorOut(0)(i)((8*(j+1))-1 downto 8*j));
+--      end loop;
+--    end loop;
+--  end process;
+
+--  SelectorOutValid <= DecimatorOutValid;
+
+-----------------------------------------------------------------------------------------
+-- The pattern generator can be used instead of the DownSampler and the
+-- SignalSelector, it only for debugging on the real hardware!
+----------------------------------------------------------------------------------------- 
+  Channels <= to_integer(unsigned(iExtTriggerSrc.PWM(1)(1 downto 0)));
+  PG : entity DSO.PatternGenerator
     port map (
-      iClk        => ClkDesign,
-      iResetAsync => iResetAsync,
-      iADC        => DecimatorIn,       -- fixpoint 1.x range -0.5 to 0.5
-      iCPU        => DownSampler,
-      iData       => SlowInputData,
-      iValid      => SlowInputValid,
-      oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
-      oValid      => DecimatorOutValid);
-
-  SignalSelector : process (DecimatorOut)
-  begin
-    for j in 0 to 3 loop
-      for i in 0 to cCoefficients-1 loop
-        SelectorOut(j)(i) <= std_ulogic_vector(DecimatorOut(0)(i)((8*(j+1))-1 downto 8*j));
---      SelectorOut(0)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(27 downto 20));
---      SelectorOut(1)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(19 downto 12));
---      SelectorOut(2)(i)             <= std_ulogic_vector(DecimatorOut(0)(i)(11 downto 4));
---      SelectorOut(3)(i) <= std_ulogic_vector(DecimatorOut(0)(i)(3 downto 0));
---      SelectorOut(3)(i)(3 downto 0) <= (others => '0');
-      end loop;
-    end loop;
-  end process;
-
-  SelectorOutValid <= DecimatorOutValid;
+      iClk         => ClkDesign,
+      iResetAsync  => iResetAsync,
+      iDownSampler => iDownSampler,
+      iChannels    => Channels,
+      oData        => SelectorOut,
+      oValid       => SelectorOutValid);
 
   ExtTriggerInput : entity DSO.ExtTriggerInput
     port map(

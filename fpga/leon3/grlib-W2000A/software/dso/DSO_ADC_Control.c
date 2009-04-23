@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : WaveFilePackage.h
+* File           : DSO_ADC_Control.c
 * Author		 : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 20.04.2009
+* Date           : 23.04.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,55 +32,47 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef WAVEFILEPACKAGE_H
-#define WAVEFILEPACKAGE_H
 
-#include "stdio.h"
+
 #include "types.h"
+#include "DSO_ADC_Control.h"
+#include "DSO_Remote.h"
+#include "stdio.h"
 
-typedef struct { 
-	short DataTyp;
-	int Channels;
-	int DataSize;
-	unsigned int SamplingRate;
-} aWaveFileInfo;
+/*uint8_t SendADCConfig(int Request,*/ 
 
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
+bool SendADCSerial(uart_regs * adc_uart, uint8_t addr, uint8_t data) {
+	uint8_t temp = 0;
+	SendStringBlock(adc_uart, ADC_PCB_REQUEST);
+	SendCharBlock(adc_uart, ADC_CMD_WRITE);
+	SendCharBlock(adc_uart, addr);
+	SendCharBlock(adc_uart, data);
+	ReceiveHeader(adc_uart,ADC_PCB_REPLAY,0);
+	/* A xor A is always 0*/
+	temp =  ADC_CMD_WRITE ^ ReceiveCharBlock(adc_uart);
+	addr ^= ReceiveCharBlock(adc_uart);
+	data ^= ReceiveCharBlock(adc_uart);
+	temp = temp + addr + data;
+	if (temp == 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool SendADCSerialConfig(uart_regs * adc_uart, ADCSerial cmd[], unsigned int size){
+	unsigned int i = 0;
+	uint8_t missmatches = 0;
+	for (i = 0; i < size; ++i) {
+		if (SendADCSerial(adc_uart, cmd[i].addr, cmd[i].data) != cmd[i].data){
+			printf("Possible ADC configuration error at addr %d!\n",cmd[i].addr);
+			missmatches++;
+		}
+	}
+	if (missmatches != 0){
+		return false;
+	} 
+	return true;
+}
 
 
-bool OpenWaveFileRead(	const char * 		FileName,
-			FILE ** 			WaveFileHandle,
- 			aWaveFileInfo		FileInfo);
-
-
-bool ReadSample(	FILE * 			WaveFileHandle,
-			int * 			Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool ReadSamples(	FILE * 			WaveFileHandle,
-			int * 			Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE **	 		WaveFileHandle,
- 			aWaveFileInfo 		WaveFile);
-
-bool WriteSample(	FILE * 			WaveFileHandle,
-			int const 		Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool WriteSamples(	FILE * 			WaveFileHandle,
-			const int * 		Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-#endif

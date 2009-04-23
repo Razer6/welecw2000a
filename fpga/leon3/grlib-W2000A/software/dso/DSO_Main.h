@@ -1,4 +1,38 @@
-#ifndef DSO_MAIN_H 
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : DSO_Main.h
+* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
+
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
+#ifndef DSO_MAIN_H
 #define DSO_MAIN_H
 
 #include "types.h"
@@ -19,9 +53,8 @@
 
 #define RAM_BASE_ADDR_UNCACHED_MIRROR  0x20000000
 #define RAM_BASE_ADDR                  0x40000000
-#define RAM_SIZE                       0x00200000
 
-#define VGA_FRAMEBUFFER_BASE_ADDR      (0x20200000-(640*480))
+/* only for SRAM DSOs */
 
 #define TRIGGER_MEM_BASE_ADDR          0xa0000000
 #define TRIGGER_MEM_SIZE               0x00008000
@@ -30,11 +63,17 @@
 
 /* The CPU frequency must be set correctly or the function CaptureData gets sometimes crasy!*/
 #ifdef W2000A 
+/* 2 MB */
+#define RAM_SIZE             0x00200000
 #define FIXED_CPU_FREQUENCY  31250000
 #else
 #ifdef SBX
+/* 16 MB */
+#define RAM_SIZE             0x01000000
 #define FIXED_CPU_FREQUENCY  12500000
 #else
+/* 16 MB */
+#define RAM_SIZE             0x01000000
 #define FIXED_CPU_FREQUENCY  12500000
 #endif
 #endif

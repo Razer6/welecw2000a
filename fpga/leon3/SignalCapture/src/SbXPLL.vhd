@@ -1,15 +1,15 @@
 -------------------------------------------------------------------------------
--- Project    : Welec W2000A 
+-- Project    : Welec W2000A
 -------------------------------------------------------------------------------
--- File       : PLL3.vhd
+-- File       : SbXPLL.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
--- Created    : 2009-03-24
+-- Created    : 2009-04-17
 -- Last update: 2009-04-17
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
 -------------------------------------------------------------------------------
---  Copyright (c) 2008, Alexander Lindert
+--  Copyright (c) 2009, Alexander Lindert
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -31,28 +31,27 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-03-24  1.0      
+-- 2009-04-17  1.0
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity PLL3 is
+library altera_mf;
+use altera_mf.all;
+
+entity SbXPLL is
   port
     (
+      areset : in  std_logic := '0';
       inclk0 : in  std_logic := '0';
-      pllena : in  std_logic := '1';
       c0     : out std_logic;
-      c1     : out std_logic;
-      c2     : out std_logic;
       locked : out std_logic
       );
-end PLL3;
+end SbXPLL;
 
-architecture bhv of PLL3 is
-  signal   Clk0     : std_ulogic := '1';
-  signal   Clk1     : std_ulogic := '1';
-  signal   Clk2     : std_ulogic := '1';
-  constant cClkTime : time       := 1 sec /(2*250E6);
+
+architecture bhv of sbxpll is
+  signal Clk0 : std_ulogic := '1';
 begin
   
   process
@@ -64,39 +63,9 @@ begin
     locked <= '1';
     loop
       Clk0 <= not Clk0;
-      wait for cClkTime;
+      wait until inclk0 = '1';
     end loop;
   end process;
   c0 <= Clk0;
-
-  process
-  begin
-    locked <= '0';
---    wait until pllena = '1';
-    wait until inclk0 = '0';
-    wait until inclk0 = '1';
-    locked <= '1';
-    wait for 3 sec /(4*250E6);
-    loop
-      Clk1 <= not Clk1;
-      wait for 2*cClkTime;
-    end loop;
-  end process;
-  c1 <= Clk1;
-
-  process
-  begin
-    locked <= '0';
---    wait until pllena = '1';
-    wait until inclk0 = '0';
-    wait until inclk0 = '1';
-    locked <= '1';
-    wait for 3 sec /(4*250E6);
-    loop
-      Clk2 <= not Clk2;
-      wait for 4*cClkTime;
-    end loop;
-  end process;
-  c2 <= Clk2;
   
-end architecture;
+end bhv;

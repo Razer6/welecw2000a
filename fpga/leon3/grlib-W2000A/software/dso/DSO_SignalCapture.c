@@ -1,3 +1,38 @@
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : DSO_SignalCapture.c
+* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
+
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,22 +41,32 @@
 #include "DSO_SignalCapture.h"
 #include "DSO_Debugprint.h"
 #include "DSO_Misc.h"
+#include "DSO_ADC_Control.h"
+#include "Leon3Uart.h"
 
 Debugprint Print;
-volatile CaptureRegs * volatile CaptureR;
-volatile TriggerRegs * volatile TriggerR;
+volatile CaptureRegs    * volatile CaptureR;
+volatile TriggerRegs    * volatile TriggerR;
 volatile AnalogSettings * volatile AnalogR;
+volatile uart_regs      * volatile adc_uart;
 
-int FastMode(const unsigned int SamplingFrequency, 
-			 const unsigned int CPUFrequency)
-{
+static unsigned int FMode;
+
+unsigned int FastMode(	const unsigned int SamplingFrequency, 
+			const unsigned int CPUFrequency){
 	return SamplingFrequency > (CPUFrequency*FASTMODEFACTOR);
+}
+unsigned int IsFastMode() {
+	return FMode;
 }
 
 bool InitSignalCapture(Debugprint * Init, Target T, Language L){
 	CaptureR = (CaptureRegs *)   DEVICEADDR;
 	TriggerR = (TriggerRegs *)   TRIGGERONCHADDR;
 	AnalogR  = (AnalogSettings *)ANALOGSETTINGSBANK7;
+	adc_uart = (uart_regs *)     UART_CHCFG_BASE_ADDR;    
+	UartInit(FIXED_CPU_FREQUENCY, DSO_CHCFG_BAUDRATE, 
+			ENABLE_RX | ENABLE_TX, adc_uart);
 	Init = &Print;
 	return InitDebugprint(Init,T,L);
 }
@@ -37,10 +82,10 @@ bool SetTriggerInput (	const unsigned int noChannels,
 			const unsigned int Ch2, 
 			const unsigned int Ch3)
 {
-	const int FMode = FastMode(SamplingFrequency,CPUFrequency);
-	int Decimaton = 0;
-	int Stage = 0;
-	int M = 0;
+	FMode = FastMode(SamplingFrequency,CPUFrequency);
+	unsigned int Decimaton = 0;
+	unsigned int Stage = 0;
+	unsigned int M = 0;
 
 	if ((Ch0 > 3) || (Ch1 > 3) || (Ch2 > 3) || (Ch3 > 3)) {
 /*		Print.ChannelsNotSupported();*/
@@ -266,6 +311,63 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 					WaitUntilMaskedAndZero(&AnalogR->Bank6, (1 << ANALOGSETTINGSBUSY));
 				}
 				break;
+			case SANDBOXX:
+				{
+					ADCSerial cmds[]= {
+					      {ADC_ADDR_SPEED,  (1 << ADC_PIN_LSPEED)},
+					      {ADC_ADDR_POWER,  (1 << ADC_PIN_MODE0)},
+					      {ADC_ADDR_DFS,    (3 << ADC_PIN_DFS0)},
+					      {ADC_ADDR_CLK,    (5 << ADC_PIN_RISE0) 
+							   |    (5 << ADC_PIN_FALL0)},
+					      {ADC_ADDR_FORMAT, (2 << ADC_PIN_FORMAT0)},
+					      {ADC_ADDR_OFFSETE,(1 << ADC_PIN_OFFSETE)}};
+					unsigned int cmd = Settings[i].Specific;
+					uint8_t temp = 0;
+				        bool ret = true;	
+					int * ADCConfig = (unsigned int *)CONFIGADCENABLE; 
+					*ADCConfig = ~1;/* low active, one ADC */
+					WaitMs(2); /* Wait until the AVR is ready */
+
+					if (SendADCSerialConfig(adc_uart, cmds, sizeof(cmd)) == false) {
+						return false;
+					}
+					if (((1 << ADC_SPEC_PGM_CLK) & cmd) != 0){
+					       temp = (uint8_t)(cmd >> ADC_SPEC_CLKF);
+					       ret   = SendADCSerial(adc_uart, ADC_ADDR_CLK,temp);
+					       if (ret != temp) {
+						       return false;
+					       }
+					}       
+					if (((1 << ADC_SPEC_PGM_OFS) & cmd) != 0){
+						temp = (uint8_t)(cmd >> ADC_SPEC_OTIME);
+						ret  = SendADCSerial(adc_uart, ADC_ADDR_OFFSETD,temp);
+						if (ret != temp) {
+						       return false;
+						}
+					}
+					if ((( 1 << ADC_SPEC_PGM_PAT) & cmd) != 0){
+						temp = (uint8_t)(cmd >> ADC_SPEC_PATTERN);
+						ret  = SendADCSerial(adc_uart, ADC_ADDR_OFFSETD,temp);
+						if (ret != temp) {
+						       return false;
+						}
+					}
+
+				/*	SendStringBlock(adc_uart, ADC_PCB_REQUEST);
+					SendCharBlock(adc_uart, ADC_MODE);
+					SendCharBlock(adc_uart,0);
+					SendCharBlock(adc_uart, ADC_MODE_CMOS_2S);
+					SendCharBlock(adc_uart, ADC_DFS_CMOS_2S);
+					SendCharBlock(1); *//* enable output */
+					/* dont care about the answer */
+					
+					SendStringBlock(adc_uart, ADC_PCB_REQUEST);
+					SendCharBlock(adc_uart,ADC_RELEASE);
+					WaitMs(2);
+					*ADCConfig = -1; /* high inactive */
+					return true;	
+				}
+				
 			default: 
 				return false;
 				break;
@@ -279,8 +381,10 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 		unsigned int * RawData) 
 {
 	unsigned int i = 0;
-	int * StopAddr = 0;
-	volatile int * Addr = 0;
+	unsigned int * StopAddr = 0;
+	volatile unsigned int * Addr = 0;
+	unsigned int StartSize = 0;
+	unsigned int StartData[8] = {};
 	/* The compiler has bugs in the loop optimisation with the keyword volatile 
 	 * even with function call to get the data from an hw address + masking in a condition */
 	volatile int temp = 0; 
@@ -292,8 +396,8 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 			(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
 		return 0;
 	}
-	temp = loadmem((int)&TriggerR->TriggerReadOffSetAddr);
-	StopAddr = (int *)(TRIGGER_MEM_BASE_ADDR + temp);
+	temp = loadmem((unsigned int)&TriggerR->TriggerReadOffSetAddr);
+	StopAddr = (unsigned int *)(TRIGGER_MEM_BASE_ADDR + temp);
 
 	StopAddr++; /* matching 0 to end-1 */
 	Addr = StopAddr;
@@ -302,31 +406,30 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 	 * which is overwriting up the first 7 samples at the end!       
 	 * It is caused, because the trigger always writes 8 Samples per Channel at once */
 	while(1){
-		temp = loadmem((int)&TriggerR->TriggerCurrentAddr); 
+		temp = loadmem((unsigned int)&TriggerR->TriggerCurrentAddr); 
 		if (((int)StopAddr + 8) < temp){
 			break;
 		}
 	}
 	if (8 > CaptureSize){
-		i = CaptureSize;
+		StartSize = CaptureSize;
 	} else {
-		i = 8;
+		StartSize = 8;
 	}
-	for (; i < 8; ++i){
-		RawData[0] = *Addr;
+	for (i = 0; i < StartSize; ++i){
+		StartData[i] = *Addr;
 		Addr++;
 		if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
 			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
 		}
 	}
-	
+	i = 0;
+	if (TRIGGER_MEM_SIZE < CaptureSize){
+		CaptureSize = TRIGGER_MEM_SIZE;
+	}
 	/* Wait until the trigger buffer is full */
 	WaitUntilMaskedAndZero(&TriggerR->TriggerStatusRegister, (1 << TRIGGERRECORDINGBIT));
-	i = 8;
 	while ((i < CaptureSize)){
-		if  (Addr == StopAddr) {
-			return i;
-		}
 		RawData[i] = *Addr;
 		i++;
 		Addr++;
@@ -334,30 +437,47 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
 		}
 	}
+	/* The Trigger has a feature that the last 8 DWORDS! overwrites up 
+	 * to the fist 8 DWORDS!*/
+	for (i = 0; i < StartSize; ++i){
+		temp = loadmem((unsigned int)&TriggerR->TriggerStorageModeAddr);
+	       switch (temp) {
+			case TRIGGERSTORAGEMODE4CH:
+				RawData[i]   = StartData[i];
+				break;
+			case TRIGGERSTORAGEMODE2CH:
+				RawData[i]   &= 0x0000ffff;
+				StartData[i] &= 0xffff0000;
+				RawData[i]   |= StartData[i];
+				break;
+			case TRIGGERSTORAGEMODE1CH:
+				RawData[i]   &= 0x00ffffff;
+				StartData[i] &= 0xff000000;
+				RawData[i]   |= StartData[i];
+				break;
+	       }
+	}
 	return i;
 }
 
 /* returns read DWORDS*/
 unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
 			 bool Start,
+			 bool ForceFastMode,
 			 unsigned int CaptureSize,    /* size in DWORDs*/
-			 unsigned int * RawData,
-			 unsigned int FrameSize,
-		         const unsigned int SamplingFrequency,
-			 const unsigned int CPUFrequency) 
+			 unsigned int * RawData) 
 {
 	/* TODO Idle wait*/
-	const int FMode = FastMode(SamplingFrequency,CPUFrequency);
+/*	const int FMode = FastMode(SamplingFrequency,CPUFrequency);*/
 	unsigned int i = 0;
 	unsigned int StopAddr = 0;
-	volatile unsigned int * Addr = 0;
+	static volatile unsigned int * Addr = 0;
 	unsigned int Frame = 0;
-	unsigned int ForwardStopAddr = 0;
-	/* The compiler has bugs in the loop optimisation with the keyword volatile 
-	 * even with function call to get the data from an hw address + masking in a condition */
+	/* The compiler has bugs in the loop optimisation with the keyword volatile even 
+	 * with function call to get the data from an hw address + masking in a condition */
 	volatile int temp = 0; 
 	
-	if (FMode != 0) {
+	if ((FMode != 0) || ForceFastMode == true) {
 		return FastCapture(WaitTime,CaptureSize, RawData);
 	} 
 	if (Start != false) {
@@ -367,11 +487,12 @@ unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
 					(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
 			return 0;
 		}
+		Addr = (int *)TRIGGER_MEM_BASE_ADDR + StopAddr;
 	}
 	i = 0;
 	StopAddr = (TriggerR->TriggerReadOffSetAddr) +1;
-	Addr = (int *)TRIGGER_MEM_BASE_ADDR + StopAddr;
-	/* abort if the trigger */
+	
+	printf("Record Normal\n");
 	while (1) {
 		temp = loadmem((int)&TriggerR->TriggerStatusRegister);
 		if (((1 << TRIGGERRECORDINGBIT) & temp) == 0) {
@@ -380,30 +501,27 @@ unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
 		if ((i == CaptureSize)){
 			return i;
 		}
-		ForwardStopAddr = (int)TriggerR->TriggerCurrentAddr;
-		ForwardStopAddr = ForwardStopAddr - (int)Addr - FrameSize;
-        	ForwardStopAddr &= (TRIGGER_MEM_SIZE-1);
-	/*	if (ForwardStopAddr > (TRIGGER_MEM_SIZE/2)) {*/
-		if (ForwardStopAddr > 0) {
-			StopAddr = StopAddr + FrameSize;
-			TriggerR->TriggerReadOffSetAddr = StopAddr;
-		} else {
-			/* here the race condition gets active if the ratio of */
-			/* FastMode is wrong!*/
-			continue;
-		}
-		Frame = Frame + FrameSize; 
+		Frame = loadmem((int)&TriggerR->TriggerCurrentAddr); /* stoppoint of readable DWORDS */
+		Frame = Frame - (unsigned int)Addr;
+        	Frame &= (TRIGGER_MEM_SIZE-1);                       /* number of readable DWORDS */
+		Frame = i + Frame; 
 		if (Frame > CaptureSize) {
 			Frame = CaptureSize;
 		}
+		/* measured 19 clocks per iteration with an sdram and compiler flags -g -O2
+		 * measured  8 clocks per iteration with an sdram and compiler flags -O2 */
 		while (i < Frame) {
 			RawData[i] = *Addr;
 			i++;
 			Addr++;
-			if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-				Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
+			if ((unsigned int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+				Addr =  (unsigned int *) TRIGGER_MEM_BASE_ADDR;
 			}
 		}
+		TriggerR->TriggerCurrentAddr = (unsigned int)Addr-1; 
+		/* & (TRIGGER_MEM_SIZE-1); hw SFR mod 2^bits */
+		puts(".");
+
 	}
 	return i;
 }

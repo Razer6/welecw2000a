@@ -1,5 +1,37 @@
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : PCUart.c
+* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
 
+*  Copyright (c) 2009, Alexander Lindert
 
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
 
 #include "PCUart.h"
 
@@ -60,11 +92,11 @@ bool UartInit(	char * UartAddr,
     }
     m_bPortReady = GetCommTimeouts (*uart, &m_CommTimeouts);
     
-    m_CommTimeouts.ReadIntervalTimeout = 500;
-    m_CommTimeouts.ReadTotalTimeoutConstant = 500;
-    m_CommTimeouts.ReadTotalTimeoutMultiplier = 100;
-    m_CommTimeouts.WriteTotalTimeoutConstant = 500;
-    m_CommTimeouts.WriteTotalTimeoutMultiplier = 100;
+    m_CommTimeouts.ReadIntervalTimeout = 1;
+    m_CommTimeouts.ReadTotalTimeoutConstant = 10;
+    m_CommTimeouts.ReadTotalTimeoutMultiplier = 1;
+    m_CommTimeouts.WriteTotalTimeoutConstant = 10;
+    m_CommTimeouts.WriteTotalTimeoutMultiplier = 1;
     m_bPortReady = SetCommTimeouts (*uart, &m_CommTimeouts);
     if (GetLastError() != ERROR_SUCCESS) {
        printf("SetCommTimeouts(): %lu\n", GetLastError());              
@@ -148,60 +180,99 @@ char ReceiveCharBlock(uart_regs * uart){
 #ifdef WINNT
    do {
       ReadFile(*uart,&ch,1,&ret,NULL);
+	  if (ret == 0){
+		  Sleep(1);
+	  }
    } while (ret == 0);
 #else
-	while(read(uart,&ch,1));
+	while(read(uart,&ch,1) == 0) {
+		usleep(1000);
+	}
 #endif
 	return ch;
-}	
+}
+
+char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
+	char ch = 0;
+	unsigned int ret = 0;
+	unsigned int cnt = 0;
+	*error = 0;
+#ifdef WINNT
+	do {
+		ReadFile(*uart,&ch,1,&ret,NULL);
+		cnt++;
+		if (ret == 0){
+			Sleep(1);
+		}
+		if (cnt == TimeoutMs){
+			*error = 1;
+			return 0;
+		}
+   } while (ret == 0);
+#else
+	while(read(uart,&ch,1) == 0) {
+		usleep(1000);
+	}
+#endif
+	return ch;
+}
 
 void SendCharBlock(uart_regs * uart, char c){
 #ifdef WINNT
-   unsigned int ret = 0;
-   do {
-     WriteFile(*uart,&c,1,&ret,NULL);
-   } while (ret == 0);
+	unsigned int ret = 0;
+	do {
+		WriteFile(*uart,&c,1,&ret,NULL);
+		if (ret == 0){
+			Sleep(5);
+		}
+	} while (ret == 0);
 #else
 	write(uart,c,1);
 #endif
 }
 
 
-void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size){
+void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int *size){
 #ifdef WINNT
-     DWORD ret = 0;
-     LPDWORD lpret = &ret;
-     DWORD  r = 0;
+	DWORD ret = 0;
+	LPDWORD lpret = &ret;
+	DWORD  r = 0;
 #else
-     unsigned int ret = 0;
-     unsigned int r = 0;
+	unsigned int ret = 0;
+	unsigned int r = 0;
 #endif
-/*     printf("Receive %d chars with HANDLE %d \n", *size, *uart);*/
-      while (r != *size) {
+	while (r != *size) {
 #ifdef WINNT
-        ReadFile(*uart,&c[r],*size-r,lpret,NULL);
+		ReadFile(*uart,&c[r],*size-r,lpret,NULL);
+		if (ret == 0){
+			Sleep(5);
+		}
 #else     
         ret = read(uart,&c[r], *size-r);
 #endif  
         r = r + ret;
-      }    
+	}    
 }
 
-void SendStringBlock (uart_regs * uart, char * c, unsigned int * size){
+void SendStringBlock (uart_regs * uart, char * c){
 #ifdef WINNT
-     DWORD ret = 0;
-     LPDWORD lpret = &ret;
-     DWORD written = 0;
+	DWORD ret = 0;
+	LPDWORD lpret = &ret;
+	DWORD written = 0;
 #else
-     unsigned int ret = 0;
-     unsigned int written = 0;
+	unsigned int ret = 0;
+	unsigned int written = 0;
 #endif
-     while (written != *size) {
+	unsigned int size = strlen(c);
+	while (written != size) {
 #ifdef WINNT
-       WriteFile(*uart,&c[written],*size-written,lpret,NULL);
+		WriteFile(*uart,&c[written],size-written,lpret,NULL);
+		if (ret == 0){
+			Sleep(5);
+		}
 #else 
-	   ret = write(uart,&c[written], *size-written);	
+		ret = write(uart,&c[written], *size-written);	
 #endif 	
-        written = written + ret;
-     } 
+		written = written + ret;
+	} 
 }
