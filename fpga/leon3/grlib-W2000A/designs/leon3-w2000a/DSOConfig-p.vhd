@@ -4,7 +4,7 @@
 -- File       : DSOConfig-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-04-05
+-- Last update: 2009-05-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -62,7 +62,7 @@ package pDSOConfig is
   constant cResetActive      : std_ulogic := '0';
   constant cADCBitWidth      : natural    := 8;
   constant cBitWidth         : natural    := 9;
-  constant cDelayMemWidth    : natural    := 8;  -- address bits of the slow FIR memory
+  constant cDelayMemWidth    : natural    := 7;  -- address bits of the slow FIR memory
   constant cExtTriggers      : natural    := 1;
   constant cSRAMAddrWidth    : natural    := 19;   -- DwordAddr
   constant cFLASHAddrWidth   : natural    := 23;   -- byte address

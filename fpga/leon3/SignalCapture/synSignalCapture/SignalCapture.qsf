@@ -28,7 +28,7 @@ set_global_assignment -name DEVICE EP2C70F896C7
 set_global_assignment -name TOP_LEVEL_ENTITY SignalCapture
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "8.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:12:27  AUGUST 28, 2008"
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 9.0
 
 
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
@@ -46,6 +46,7 @@ set_global_assignment -name VHDL_FILE ../../Altera/src/PLL0.vhd
 set_global_assignment -name VHDL_FILE ../../Altera/src/PLL1.vhd
 set_global_assignment -name VHDL_FILE ../../Altera/src/PLL2.vhd
 set_global_assignment -name VHDL_FILE ../../Altera/src/PLL3.vhd
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd"
 set_global_assignment -name VHDL_FILE "../../Scope/src/Global-p.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FastFirCoeff-p.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FirCoeff-p.vhd"
@@ -54,7 +55,6 @@ set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastAverage-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE ../../Altera/src/DelayMemory.vhd
-set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/DownSampler-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopDownSampler-ea.vhd"
@@ -64,6 +64,9 @@ set_global_assignment -name VHDL_FILE "../../Trigger/src/Trigger-p.vhd"
 set_global_assignment -name VHDL_FILE "../../Trigger/src/NormalTrigger-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../Trigger/src/ExternalTrigger-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../Trigger/src/TopTrigger-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../LedsKeys/src/LedsKeys-p.vhd"
+set_global_assignment -name VHDL_FILE "../../LedsKeys/src/PWM-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../Trigger/src/ExtTriggerInput-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalSelector-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../SignalCapture/src/ADC-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalCapture-ea.vhd"

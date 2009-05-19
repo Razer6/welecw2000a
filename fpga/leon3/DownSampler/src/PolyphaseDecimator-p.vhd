@@ -4,7 +4,7 @@
 -- File       : PolyphaseDecimator-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-07
--- Last update: 2009-04-17
+-- Last update: 2009-05-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -119,6 +119,19 @@ package pPolyphaseDecimator is
       iWriteAddr    : in  unsigned(cDelayMemWidth-1 downto 0);
       iCoeff        : in  aLongValue;
       oData         : out aLongValue);  
+  end component;
+
+  component DelayMemory is
+    port
+      (
+        --    aclr      : in  std_logic := '0';
+        clock     : in  std_logic;
+        data      : in  std_logic_vector (cBitWidth*2-1 downto 0);
+        rdaddress : in  std_logic_vector (cDelayMemWidth-1 downto 0);
+        wraddress : in  std_logic_vector (cDelayMemWidth-1 downto 0);
+        wren      : in  std_logic := '1';
+        q         : out std_logic_vector (cBitWidth*2-1 downto 0)
+        );
   end component;
 
   component DownSampler is

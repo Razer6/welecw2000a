@@ -2,7 +2,6 @@ PolyphaseDecimator-p.vhd
 FastAverage-ea.vhd
 FastPolyPhaseDecimator-ea.vhd
 TopFastPolyPhaseDecimator-ea.vhd
-PolyPhaseDecimator-ea.vhd
 TopPolyPhaseDecimator-ea.vhd
 DownSampler-ea.vhd
 TopDownSampler-ea.vhd

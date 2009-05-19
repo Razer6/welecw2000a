@@ -10,7 +10,6 @@ vcom -quiet -work DSO {../../DownSampler/src/FastAverage-ea.vhd}
 vcom -quiet -work DSO {../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -work DSO {../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -work DSO {../../DownSampler/src/DelayMemory.vhd}
-vcom -quiet -work DSO {../../DownSampler/src/PolyPhaseDecimator-ea.vhd}
 vcom -quiet -work DSO {../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd}
 vcom -quiet -work DSO {../../DownSampler/src/DownSampler-ea.vhd}
 vcom -quiet -work DSO {../../DownSampler/src/TopDownSampler-ea.vhd}

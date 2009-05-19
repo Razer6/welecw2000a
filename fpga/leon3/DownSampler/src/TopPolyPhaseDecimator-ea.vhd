@@ -1,15 +1,15 @@
 -------------------------------------------------------------------------------
--- Project    : Welec W2000A 
+-- Project    : Welec W2000A
 -------------------------------------------------------------------------------
 -- File       : TopPolyPhaseDecimator-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-04-02
+-- Last update: 2009-05-19
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
 -------------------------------------------------------------------------------
---  Copyright (c) 2008, Alexander Lindert
+--  Copyright (c) 2009, Alexander Lindert
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-02-14  1.0      
+-- 2009-05-19  1.0
 -------------------------------------------------------------------------------
 
 library ieee;
@@ -56,21 +56,35 @@ entity TopPolyPhaseDecimator is
 end entity;
 
 architecture RTL of TopPolyPhaseDecimator is
-  constant cValidDelay : integer := 3;
+  constant cValidDelay : integer := 5;
   signal   Coeff       : aLongValue;
+  type     aState is (NewConv, Calc, CalcLast, NewPhase);
 
-  type     aR is record
-                   ShiftEnable  : std_ulogic;
-                   ReadAddr     : unsigned(cDelayMemWidth-1 downto 0);
-                   WriteAddr    : unsigned(cDelayMemWidth-1 downto 0);
-                   Delay        : unsigned(cDelayMemWidth-1 downto 0);
-                   Valid        : std_ulogic_vector(1 to cValidDelay-1);
-                   ResultValid  : std_ulogic_vector(1 to cValidDelay);
-                   FirIdx       : aFirAddr;
-                   PhaseCounter : natural range 0 to 10-1;
-                   FirCounter   : natural range 0 to cCoefficients-1;
-                 end record;
-  signal R : aR;
+  type aR is record
+               State       : aState;
+               PhaseAddr   : unsigned(3 downto 0);  -- 10 polyphases;
+               ReadAddr    : unsigned(2 downto 0);  -- 8 coefficients per phase
+               WriteAddr   : unsigned(2 downto 0);
+               WriteEn     : std_ulogic;
+               FirAddr     : aFirAddr;
+               Valid       : std_ulogic_vector(1 to cValidDelay);
+               ResultValid : std_ulogic_vector(1 to cValidDelay);
+               FirCounter  : natural range 0 to 7;
+             end record;
+  signal R                   : aR;
+  signal ReadAddr, WriteAddr : unsigned(cDelayMemWidth-1 downto 0);
+  signal WriteEn             : std_ulogic;
+
+  type aDR is record
+                ReadData   : aLongValue;
+                MultValue  : aLongValue;
+                MultResult : aLongValue;
+                Sum        : aLongValue;
+              end record;
+  
+  type   aChData is array (0 to cChannels-1) of aDR;
+  signal Channel : aChData;
+  
 begin
   
   Reg : process(iClk, iResetAsync)
@@ -78,110 +92,126 @@ begin
     if iResetAsync = cResetActive then
       Coeff <= (others => '0');
     elsif rising_edge(iClk) then
-      Coeff <= to_signed(cFirCoeff(R.FirIdx), aLongValue'length);
+      Coeff <= to_signed(cFirCoeff(R.FirAddr), aLongValue'length);
     end if;
   end process;
 
   Control : process (iClk, iResetAsync)
-    constant cInit : aR := (
-      Delay        => (others => '0'),
-      ReadAddr     => (others => '0'),
-      WriteAddr    => (others => '0'),
-      ShiftEnable  => '0',
-      Valid        => (others => '0'),
-      PhaseCounter => 0,
-      FirCounter   => 0,
-      FirIdx       => 0,
-      ResultValid  => (others => '0'));
+    constant cPhaseReadAddr : unsigned(3 downto 0) := to_unsigned(2-1, 4);
   begin
     if iResetAsync = cResetActive then
-      R <= cInit;
+      R <= (
+        State       => NewConv,
+        PhaseAddr   => (others => '0'),
+        ReadAddr    => (others => '0'),
+        WriteAddr   => (others => '0'),
+        WriteEn     => '0',
+        FirAddr     => 0,
+        Valid       => (others => '0'),
+        ResultValid => (others => '0'),
+        FirCounter  => 6);
     elsif rising_edge(iClk) then
- --     if iValid = '1' then
- --       assert(R.FirCounter = 0)
- --         report "This Polyphase FIR filter requires FirCounter+1 clock cycles between" &
- --         " each input sample!" severity failure;
- --     end if;
-      R.ShiftEnable <= '0';
-      if R.ShiftEnable = '1' then
-        R.WriteAddr <= R.ReadAddr + R.Delay;
+      R.Valid(R.Valid'low)                              <= '0';
+      R.Valid(R.Valid'low+1 to R.Valid'high)            <= R.Valid(R.Valid'low to R.Valid'high-1);
+      R.ResultValid(R.ResultValid'low+1 to cValidDelay) <= R.ResultValid(1 to cValidDelay-1);
+      R.ResultValid(R.ResultValid'low)                  <= '0';
+      R.WriteEn                                         <= '0';
+
+      if R.Valid(1) = '1' then
+        R.ReadAddr <= R.ReadAddr -1;
       end if;
-      R.ResultValid(R.ResultValid'low)                         <= '0';
-      R.ResultValid(R.ResultValid'low+1 to R.ResultValid'high) <=
-        R.ResultValid(R.ResultValid'low to R.ResultValid'high-1);
-
-      R.Valid(R.Valid'low)                   <= iValid;
-      R.Valid(R.Valid'low+1 to R.Valid'high) <= R.Valid(R.Valid'low to R.Valid'high-1);
-
-      if iValid = '1' then              -- Valid(0)
-        R.ShiftEnable <= '1';
-        R.ReadAddr    <= R.ReadAddr + to_unsigned(1, R.ReadAddr'length);
-        R.FirCounter  <= 7;
-        R.FirIdx      <= (R.FirIdx + 1) mod (cFirCoeff'length);
-        if R.PhaseCounter = 0 and R.FirCounter = 0 then
-          case iDecimator is
-            when M1 =>
-              R.PhaseCounter <= 2-1;
-              R.FirIdx       <= 0;
-              R.Delay        <= to_unsigned(16-1, R.Delay'length);
-            when M2 =>
-              R.PhaseCounter <= 2-1;
-              R.FirIdx       <= 0;
-              R.Delay        <= to_unsigned(16-1, R.Delay'length);
-            when M4 =>
-              R.PhaseCounter <= 4-1;
-              R.FirIdx       <= 16;
-              R.Delay        <= to_unsigned(32+1, R.Delay'length);
-            when M10 =>
-              R.PhaseCounter <= 10-1;
-              R.FirIdx       <= 48;
-              R.Delay        <= to_unsigned(64+23, R.Delay'length);
-            when others =>
-              null;
-          end case;
-          R.ResultValid(R.ResultValid'low) <= '1';
-        else
-          R.Valid(R.Valid'low)             <= '1';
-          R.PhaseCounter                   <= R.PhaseCounter - 1;
-          R.ResultValid(R.ResultValid'low) <= '0';
-        end if;
-
-      elsif R.FirCounter /= 0 then
-        R.Valid(R.Valid'low) <= '1';
-        R.FirIdx             <= (R.FirIdx + 1);  -- mod (cFirCoeff'length);
-        R.FirCounter         <= R.FirCounter - 1;
-        R.ShiftEnable        <= '1';
-        R.ReadAddr           <= R.ReadAddr + to_unsigned(1, R.ReadAddr'length);
-      else
-        if R.Valid(R.Valid'low) = '1' then
-          R.ShiftEnable <= '1';
-          R.ReadAddr    <= R.ReadAddr + to_unsigned(1, R.ReadAddr'length);
-        else
-          R.ShiftEnable <= '0';
-        end if;
+      if R.Valid(3) = '1' then
+        R.FirAddr <= (R.FirAddr +1) mod 2 ** cDelayMemWidth;
       end if;
+
+      case R.State is
+        when NewConv =>
+          R.ReadAddr <= R.ReadAddr;
+          if iValid = '1' then
+            case iDecimator is
+              when M1 | M2 =>
+                R.PhaseAddr <= to_unsigned(2-1, 4);
+                R.FirAddr   <= (0) mod 2**cDelayMemWidth;
+              when M4 =>
+                R.PhaseAddr <= to_unsigned(4-1, 4);
+                R.FirAddr   <= 16;
+              when M10 =>
+                R.PhaseAddr <= to_unsigned(10-1, 4);
+                R.FirAddr   <= 48;
+            end case;
+            R.Valid(R.Valid'low) <= '1';
+            R.WriteAddr          <= R.WriteAddr +1;
+            R.ReadAddr           <= R.ReadAddr +1;
+            R.FirCounter         <= 6;
+            R.State              <= Calc;
+          end if;
+          
+        when Calc =>
+          R.FirCounter         <= (R.FirCounter -1) mod 8;
+          R.Valid(R.Valid'low) <= '1';
+          if R.FirCounter = 0 then
+            R.State <= CalcLast;
+          end if;
+          
+        when CalcLast =>
+          if to_integer(R.PhaseAddr) = 0 then
+            R.State                          <= NewConv;
+            R.ResultValid(R.ResultValid'low) <= '1';
+          else
+            R.State <= NewPhase;
+          end if;
+          
+        when NewPhase =>
+          R.FirCounter <= 6;
+          if iValid = '1' then
+            R.State              <= Calc;
+            R.Valid(R.Valid'low) <= '1';
+            R.PhaseAddr          <= R.PhaseAddr -1;
+          end if;
+      end case;
+
     end if;
   end process;
   oValid <= R.ResultValid(cValidDelay);
 
-  FIR : for i in 0 to cChannels-1 generate
-    Data : PolyPhaseDecimator
-      port map (
-        iClk          => iClk,
-        iResetAsync   => iResetAsync,
-        iDecimator    => iDecimator,
-        iData         => iData(i),
-        iInputValid   => iValid,
-        iValidDelayed => R.Valid(R.Valid'low),
-        iSumValid     => R.Valid(cValidDelay-1),
-        iResultValid  => R.ResultValid(cValidDelay),
-        iShiftEnable  => R.ShiftEnable,
-        iFirCounter   => R.FirCounter,
-        iReadAddr     => R.ReadAddr,
-        iWriteAddr    => R.WriteAddr,
-        iCoeff        => Coeff,
-        oData         => oData(i));
+  ReadAddr  <= R.PhaseAddr & R.ReadAddr;
+  WriteAddr <= R.PhaseAddr & R.WriteAddr;
+  WriteEn   <= R.WriteEn or iValid;
+
+  CH : for i in 0 to cChannels-1 generate
+    Data : DelayMemory
+      port map(
+        --    aclr          => aclr,
+        clock         => iClk,
+        data          => std_logic_vector(iData(i)),
+        rdaddress     => std_logic_vector(ReadAddr),
+        wraddress     => std_logic_vector(WriteAddr),
+        wren          => WriteEn,
+        aLongValue(q) => Channel(i).ReadData);
+
+    Calc : process (iClk, iResetAsync)
+      variable vRes : signed(2*aLongValue'length-1 downto 0);
+    begin
+      if iResetAsync = cResetActive then
+        Channel(i).MultValue  <= (others => '0');
+        Channel(i).MultResult <= (others => '0');
+        Channel(i).Sum        <= (others => '0');
+      elsif rising_edge(iClk) then
+        Channel(i).MultValue  <= Channel(i).ReadData;  -- Ram Reg + Mul in Reg
+        vRes                  := Channel(i).MultValue * Coeff;
+        Channel(i).MultResult <= vRes(vRes'high downto vRes'high-Channel(0).MultResult'length+1);
+
+        if R.Valid(R.Valid'high) = '1' then
+          Channel(i).Sum <= Channel(i).Sum + Channel(i).MultResult;
+        end if;
+
+        if R.ResultValid(R.ResultValid'high) = '1' then
+          Channel(i).Sum <= (others => '0');
+        end if;
+      end if;
+    end process;
+
+    oData(i) <= Channel(i).Sum;
   end generate;
 
 end architecture;
-

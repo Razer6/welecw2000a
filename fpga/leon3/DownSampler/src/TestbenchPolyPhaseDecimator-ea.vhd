@@ -4,7 +4,7 @@
 -- File       : TestbenchPolyPhaseDecimator-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-04
+-- Last update: 2009-05-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -96,7 +96,7 @@ begin
 
     for d in M'range loop
       Decimator <= M(d);
-
+      
       for i in 0 to to_int(M(d))*10 loop
         for j in 0 to 10 loop
           if j = 0 then
@@ -109,7 +109,7 @@ begin
         end loop;
       end loop;
       InputValid             <= '1';
-      Input(0)               <= to_signed(-1*2**17, Input(0)'length);
+      Input(0)               <= to_signed(-1*2**(cBitwidth*2-1), Input(0)'length);
       Input(1 to Input'high) <= (others => (others => '0'));
       wait until Clk125 = '1';
       for i in 0 to  to_int(M(d))*50 loop
@@ -124,13 +124,13 @@ begin
         end loop;
       end loop;
       InputValid <= '0';
-      for i in 0 to  10 loop
+      for i in 0 to  20 loop
         wait until Clk125 = '1';
       end loop;
     end loop;
 
     InputValid <= '0';
-    for i in 0 to 10 loop
+    for i in 0 to 20 loop
       wait until Clk125 = '1';
     end loop;
 
@@ -154,7 +154,7 @@ begin
           else
             InputValid <= '0';
           end if;
-          Input <= (others => to_signed(-1*2**17, Input(0)'length));
+          Input <= (others => to_signed(-1*2**(cBitwidth*2-1), Input(0)'length));
           wait until Clk125 = '1';
         end loop;
       end loop;

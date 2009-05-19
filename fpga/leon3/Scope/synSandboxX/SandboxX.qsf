@@ -428,7 +428,6 @@ set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyphaseDecimator-
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastAverage-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd"
-set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/DownSampler-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopDownSampler-ea.vhd"

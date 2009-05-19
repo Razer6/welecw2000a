@@ -11,7 +11,6 @@ vcom -quiet -93 -work DSO {../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/SbxXDelayMemory.vhd}
 #vcom -quiet -93 -work DSO {../../DownSampler/src/DelayMemory.vhd}
-vcom -quiet -93 -work DSO {../../DownSampler/src/PolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/DownSampler-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/TopDownSampler-ea.vhd}

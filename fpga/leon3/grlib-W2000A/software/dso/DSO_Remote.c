@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_Remote.c
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author	 : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 
@@ -173,14 +173,14 @@ int ReceiveData(uart_regs * uart, int buffersize, int * FastMode, int * data) {
 	char DataH[] = DSO_DATA_RESP;
 
 	if (!ReceiveHeader(uart, DSO_REC_HEADER,1000)){
-        printf("Receive Header error\n");
+        	printf("Receive Header error\n");
 		return 0;
 	}
 	size = strlen(DataH);
 	for (i = 0; i < size; ++i){
 		if (DataH[i] != ReceiveCharBlock(uart)){
-           		printf("Receive Data Responce error\n");
-		       return 0;
+			printf("Receive Data Responce error\n");
+			return 0;
 		}
 	}
 	*FastMode = GetInt(uart);
@@ -191,10 +191,10 @@ int ReceiveData(uart_regs * uart, int buffersize, int * FastMode, int * data) {
 	printf("Receiving %d DWORDS FastMode=%d\n",size,*FastMode);
 	for (i = 0; i < size; ++i){
 		if (i < buffersize){
-				  data[i] = GetInt(uart);
-			} else {
-				  dummy = GetInt(uart);
-			}     
+			data[i] = GetInt(uart);
+		} else {
+			dummy = GetInt(uart);
+		}
 	}
 	return size;
 }
@@ -205,7 +205,7 @@ bool ReceiveACK(uart_regs * uart){
 	char DataH[] = DSO_ACK_RESP;
 	size = strlen(DataH);
 	if (!ReceiveHeader(uart, DSO_REC_HEADER, 300)){
-        printf("Receive Header error\n");
+		printf("Receive Header error\n");
 		return false;
 	}
 	for (i = 0; i < size; ++i){

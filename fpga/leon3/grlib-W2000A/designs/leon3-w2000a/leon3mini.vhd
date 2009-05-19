@@ -261,7 +261,7 @@ begin
 ---------------------------------------------------------------------------------------
 -- DSO: Scope Components without direct AHB or APB access
 ---------------------------------------------------------------------------------------
-  oA_FLASH  <= (others => '1');
+ -- oA_FLASH  <= (others => '1');
   bD_FLASH  <= (others => '1');
   --   iRB_FLASH : in    std_ulogic;
   oOE_FLASH <= '1';
@@ -583,10 +583,11 @@ begin
   bD_SRAM <= memo.data after 1 ns when
              (memo.writen = '0' and memo.ramsn(0) = '0')
              else (others => 'Z');      --  when others;
-  memi.data <= bD_SRAM after 1 ns when
-               (memo.writen = '1' and memo.ramsn(0) = '0')
-               else (others => 'Z');    -- when others;
+  memi.data <= bD_SRAM after 1 ns; -- when
+             --  (memo.writen = '1' and memo.ramsn(0) = '0')
+             --  else (others => 'Z');    -- when others;
   oA_SRAM   <= std_ulogic_vector(memo.address(oA_SRAM'length+1 downto 2));
+  oA_FLASH  <= std_ulogic_vector(memo.address(oA_FLASH'length+1 downto 2));
   oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
   oOE_SRAM  <= memo.ramoen(0);
   oWE_SRAM  <= memo.writen;

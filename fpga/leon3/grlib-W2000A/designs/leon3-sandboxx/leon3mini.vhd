@@ -501,7 +501,7 @@ begin
         hindex => CFG_NCPU+3,
         haddr  => 16#A00#,
         hmask  => 16#FFF#,
-        kbytes => 16
+        kbytes => 32
         )
       port map (
         rst_in      => rstn,

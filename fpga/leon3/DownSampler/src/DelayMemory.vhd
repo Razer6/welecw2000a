@@ -4,7 +4,7 @@
 -- File       : DelayMemory.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-15
--- Last update: 2009-03-04
+-- Last update: 2009-05-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -45,30 +45,30 @@ use DSO.pDSOConfig.all;
 entity DelayMemory is
   port
     (
-  --    aclr      : in  std_logic := '0';
+      --    aclr      : in  std_logic := '0';
       clock     : in  std_logic;
       data      : in  std_logic_vector (cBitWidth*2-1 downto 0);
-      rdaddress : in  std_logic_vector (7 downto 0);
-      wraddress : in  std_logic_vector (7 downto 0);
+      rdaddress : in  std_logic_vector (cDelayMemWidth-1 downto 0);
+      wraddress : in  std_logic_vector (cDelayMemWidth-1 downto 0);
       wren      : in  std_logic := '1';
       q         : out std_logic_vector (cBitWidth*2-1 downto 0)
       );
 end DelayMemory;
 
 architecture RTL of DelayMemory is
-  type   aRam is array (2**8-1 downto 0) of std_ulogic_vector (cBitWidth*2-1 downto 0);
-  signal Ram : aRam := (others => (others =>  '0'));
+  type   aRam is array (0 to 2**cDelayMemWidth-1) of std_ulogic_vector (cBitWidth*2-1 downto 0);
+  signal Ram : aRam := (others => (others => '0'));
 begin
   
   process (clock)
   begin
-  --  if aclr = '1' then
-   --   q <= (others => '0');
+    --  if aclr = '1' then
+    --   q <= (others => '0');
     if rising_edge(clock) then
       if wren = '1' then
         Ram(to_integer(unsigned(wraddress))) <= std_ulogic_vector(Data);
-        end if;
-      q                          <= std_logic_vector(Ram(to_integer(unsigned(rdaddress))));
+      end if;
+      q <= std_logic_vector(Ram(to_integer(unsigned(rdaddress))));
     end if;
   end process;
 end architecture;
