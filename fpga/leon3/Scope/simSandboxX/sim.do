@@ -18,6 +18,7 @@ vcom -quiet -93 -work DSO {../../Trigger/src/Trigger-p.vhd}
 #vcom -quiet -93 -work DSO {../../Trigger/src/TriggerMemory-ea.vhd} #out of date
 vcom -quiet -93 -work DSO {../../Trigger/src/NormalTrigger-ea.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/ExternalTrigger-ea.vhd}
+vcom -quiet -93 -work DSO {../../Trigger/src/DigitalTrigger-ea.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/TopTrigger-ea.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/LedsKeys-p.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/ExtTriggerInput-ea.vhd}

@@ -43,9 +43,18 @@ wavwrite(wobble,fs,16,'Wobble.wav');
 L = -ones(1,100).*.7;
 H = ones(1,100).*.7;
 Z = [ L H L H H H L L H H H H H L H L L L L L L L L L L L L H L H L H ];
+% Adding glitches
+framelen = length(Z);
+offset1 = 1100;
+offset2 = 2000;
+Z(offset1) = -Z(offset1);
+Z(offset2) = -Z(offset2);
+plot(Z);
+
 Z = [ Z Z Z Z Z Z Z Z Z Z Z ];
-Z = [ Z Z Z Z Z Z Z Z Z Z Z ];
+Z = [ Z Z Z Z Z Z Z Z Z Z Z ]; % repeating 121 times see glitch report!
 len = length(Z);
+
 data = [Z' Z' + rand(len,1)*0.001 Z' + rand(len,1)*0.05 ...
  Z' + rand(len,1)*0.2];
 wavwrite(data,fs,16,'data.wav');

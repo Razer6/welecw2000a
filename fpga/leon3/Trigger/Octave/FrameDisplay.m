@@ -8,10 +8,11 @@ FileExsists = 1;
 i = 1;
 figure
 hold on
-for i = 1:36
-    FileName = sprintf('out%d.wav',i);
+for i = 1:42
+    FileName = sprintf('../simTopTrigger/out%d.wav',i);
     Y = wavread(FileName);
-    if mod(i,7) == 0
+    disp(sprintf('Samples per Channel: %d', length(Y)));
+    if mod(i,3) == 0
       figure
       hold on
     end

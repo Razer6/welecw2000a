@@ -4,7 +4,7 @@
 -- File       : ADC-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-30
+-- Last update: 2009-05-24
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -86,7 +86,7 @@ begin
   -- areset <= iResetAsync when cResetActive = '1' else
   --           not iResetAsync;
 
-  PLL0 : entity work.PLL0
+  PLL0 : entity DSO.PLL0
     port map (
 --      areset => areset,
       pllena => '1',
@@ -94,7 +94,7 @@ begin
       c0     => ClkADC250(0),
       locked => Locked(0));
 
-  PLL1 : entity work.PLL1
+  PLL1 : entity DSO.PLL1
     port map (
       --    areset => areset,
       inclk0 => iClkADC(1),
@@ -102,7 +102,7 @@ begin
       c0     => ClkADC250(1),
       locked => Locked(1));
 
-  PLL2 : entity work.PLL2
+  PLL2 : entity DSO.PLL2
     port map (
       --    areset => areset,
       inclk0 => iClkADC(2),
@@ -111,7 +111,7 @@ begin
       locked => Locked(2));
 
   -- The pll clk signals are stable for 10000 cycles before Locked(3) is asserted!
-  PLL3 : entity work.PLL3
+  PLL3 : entity DSO.PLL3
     port map (
       --  areset => areset,
       inclk0 => iClkADC(3),

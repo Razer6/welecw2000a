@@ -4,7 +4,7 @@
 -- File       : NormalTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-28
--- Last update: 2009-03-04
+-- Last update: 2009-06-05
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -55,7 +55,8 @@ entity NormalTrigger is
     iHighTime   : in  aWord;
     oLHStrobe   : out aTrigger1D;
     oHLStrobe   : out aTrigger1D;
-    oHigh       : out aTrigger1D);
+    oLHGlitch   : out aTrigger1D;
+    oHLGlitch   : out aTrigger1D);
 end entity;
 
 
@@ -63,14 +64,18 @@ architecture RTL of NormalTrigger is
   signal High    : std_ulogic_vector(0 to cCoefficients-1);
   signal Prev    : std_ulogic_vector(0 to cCoefficients-1);
   signal Counter : aWord;
+  
 begin
   
   process (iClk, iResetAsync)
-
+    variable vHigh                : std_ulogic_vector(0 to 8);
+    variable vLH, vHL, vGLH, vGHL : aTrigger1D;
   begin
     if iResetAsync = cResetActive then
       oLHStrobe <= (others => '0');
       oHLStrobe <= (others => '0');
+      oLHGlitch <= (others => '0');
+      oHLGlitch <= (others => '0');
       High      <= (others => '0');
       Prev      <= (others => '0');
       Counter   <= (others => '0');
@@ -88,28 +93,55 @@ begin
             end if;
           end if;
         end loop;
-      end if;
-      if (Prev = X"00" or Prev = X"FF") and to_integer(unsigned(Counter)) /= 0 then
-        Counter <= std_ulogic_vector(unsigned(Counter) - to_unsigned(1, Counter'length));
-      end if;
-      if to_integer(unsigned(Counter)) = 0 then
-        oLHStrobe(0) <= (not Prev(cCoefficients-1)) and High(0);
-        oHLStrobe(0) <= Prev(cCoefficients-1) and (not High(0));
-        for i in 1 to cCoefficients-1 loop
-          -- oHLStrobe(i) <= (not High(i)) and Prev(i);
-          -- oLHStrobe(i) <= High(i) and (not Prev(i));
-          oLHStrobe(i) <= (not High(i-1)) and High(i);
-          oHLStrobe(i) <= High(i-1) and (not High(i));
-        end loop;
+        if (High = X"00" or High = X"FF") and to_integer(unsigned(Counter)) /= 0 then
+          Counter <= std_ulogic_vector(unsigned(Counter) - 1);
+        end if;
+
         if Prev = X"00" and High /= X"00" then
           Counter <= iHighTime;
         elsif Prev = X"FF" and High /= X"FF" then
           Counter <= iLowTime;
         end if;
+
+        if to_integer(unsigned(Counter)) = 0 then
+          --  DetectStrobe(Prev(cCoefficients-1), High, oLHStrobe, oHLStrobe);
+          --  DetectStrobe(Prev(cCoefficients-1), High, oLHGlitch, oHLGlitch);
+          vHigh := Prev(cCoefficients-1) & High;
+
+          for i in High'range loop
+            vLH(i) := (not vHigh(i)) and vHigh(i+1);
+            vHL(i) := vHigh(i) and (not vHigh(i+1));
+          end loop;
+          vGLH := vLH;
+          vGHL := vHL;
+          
+          for i in High'low to High'high-1 loop
+            if vLH(i) = '1' or vHL(i) = '1' then
+              vLH(i+1 to vLH'high) := (others => '0');
+              vHL(i+1 to vHL'high) := (others => '0');
+            end if;
+          end loop;
+          
+          for i in High'range loop
+            if vLH(i) = '1' then
+              vGLH(i) := '0';
+            end if;
+            if vHL(i) = '1' then
+              vGHL(i) := '0';
+            end if;
+          end loop;
+          oLHStrobe <= vLH;
+          oHLStrobe <= vHL;
+          oLHGlitch <= vGLH;
+          oHLGlitch <= vGHL;
+          
+        else
+          oLHStrobe <= (others => '0');
+          oHLStrobe <= (others => '0');
+          DetectStrobe(Prev(cCoefficients-1), High, oLHGlitch, oHLGlitch);
+        end if;
       end if;
     end if;
   end process;
-
-  oHigh <= High;
   
 end architecture;

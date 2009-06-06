@@ -1,5 +1,6 @@
 Trigger-p.vhd
 ExternalTrigger-ea.vhd
 NormalTrigger-ea.vhd
+DigitalTrigger-ea.vhd
 TopTrigger-ea.vhd
 ExtTriggerInput-ea.vhd

@@ -4,7 +4,7 @@
 -- File       : Trigger-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-03-21
+-- Last update: 2009-06-05
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -53,16 +53,16 @@ package pTrigger is
     std_ulogic_vector(to_unsigned(3, cStorageModeLength));
   constant cTriggerAddrLength : natural := 13;
   constant cTriggerAlign      : natural := 3;
-  subtype  aTriggerAddr is unsigned(cStorageModeLength+cTriggerAddrLength-1 downto 0);
-  subtype  aTriggerReadAddr is std_ulogic_vector(cTriggerAddrLength-1 downto 0);
-  constant cDiffTriggers      : natural := 4;
+  subtype  aTriggerAddr is unsigned(cTriggerAddrLength-1 downto 0);
+  subtype  aTriggerReadAddr is unsigned(cTriggerAddrLength-1 downto 0);
+  constant cDiffTriggers      : natural := 8;
 
   subtype aTrigger1D is std_ulogic_vector(0 to cCoefficients-1);
   type    aTrigger2D is array (natural range<>) of aTrigger1D;
 
   -- the trigger always has 4 channels with each 8 bit width, generated in the SignalSelector  
   type aTriggerData is array (0 to 3) of aBytes(0 to cCoefficients-1);
-  
+
   type aTriggerInput is record
                           TriggerOnce     : std_ulogic;
                           ForceIdle       : std_ulogic;
@@ -84,14 +84,14 @@ package pTrigger is
                           HighValue     : aByte;
                           HighTime      : aWord;
                           SetReadOffset : std_ulogic;
-                          ReadOffset    : aTriggerAddr;
+                          ReadOffset    : aTriggerReadAddr;
                         end record;
   
   type aTriggerOutput is record
-                           ReadOffSet         : aTriggerAddr;
+                           ReadOffSet         : aTriggerReadAddr;
                            Busy               : std_ulogic;
                            Recording          : std_ulogic;  -- for on the fly recording with e.g. PCI (SandboxX)
-                           CurrentTriggerAddr : unsigned(cStorageModeLength+cTriggerAddrLength-cTriggerAlign-1 downto 0);
+                           CurrentTriggerAddr : aTriggerReadAddr;
                          end record;
   
   type aExtTriggerInput is record
@@ -110,5 +110,25 @@ package pTrigger is
                         end record;
   
   
+  procedure DetectStrobe(signal iPrev : in  std_ulogic;
+                         signal iHigh : in  aTrigger1D;
+                         signal oLH   : out aTrigger1D;
+                         signal oHL   : out aTrigger1D);
+end;
+
+package body pTrigger is
+  
+  procedure DetectStrobe(signal iPrev : in  std_ulogic;
+                         signal iHigh : in  aTrigger1D;
+                         signal oLH   : out aTrigger1D;
+                         signal oHL   : out aTrigger1D) is
+  begin
+    oLH(0) <= (not iPrev) and iHigh(0);
+    oHL(0) <= iPrev and (not iHigh(0));
+    for i in 1 to cCoefficients-1 loop
+      oLH(i) <= (not iHigh(i-1)) and iHigh(i);
+      oHL(i) <= iHigh(i-1) and (not iHigh(i));
+    end loop;
+  end procedure;
   
 end;

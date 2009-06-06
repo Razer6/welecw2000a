@@ -44,7 +44,15 @@
 #include "DSO_Remote_Slave.h"
 #include "DSO_Remote.h"
 
+/*#define BOARDTEST*/ 
+
+#ifdef BOARDTEST
 #define CAPTURESIZE ((RAM_SIZE-0x100000)/sizeof(int))
+#else
+#define CAPTURESIZE 100000
+#define SendStringBlock(A,B) 
+#endif
+
 #define FASTFS 500000000
 #define SLOWFS    500000
 int main () {
@@ -54,9 +62,9 @@ int main () {
 	SetAnalog Analog[2];
 	int Data[CAPTURESIZE];
 	Debugprint * Debug;
-/*	char M6[] = "loopback test send 3 characters back ";
+	char M6[] = "loopback test send 3 characters back ";
 	char ack[] = "success!\n";
-	char nak[] = "failed!\n";*/
+	char nak[] = "failed!\n";
 
 /*	Analog[0].myVperDiv = 100000;
 	Analog[0].AC = 0;
@@ -74,26 +82,26 @@ int main () {
 /*	SendCharBlock(uart,255);*/
 	SendStringBlock(uart,"DSO Test programm: \nstart testing SetTriggerInput \n");
 	if (SetTriggerInput(2,8,FASTFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3) == true){
-/*		SendStringBlock(uart,ack);
+		SendStringBlock(uart,ack);
 	} else {
-		SendStringBlock(uart,nak);*/
+		SendStringBlock(uart,nak);
 	}
 	SendStringBlock(uart,"testing SetTrigger\n");
 	if (SetTrigger(0,0,64,3,3,30,3) == true){
-/*		SendStringBlock(uart,ack);
+		SendStringBlock(uart,ack);
 	} else {
-		SendStringBlock(uart,nak);*/
+		SendStringBlock(uart,nak);
 	}
 	SendStringBlock(uart,"testing SetAnalogInputRange\n");
 	if (SetAnalogInputRange(2,Analog) == true){
-/*		SendStringBlock(uart,ack);
+		SendStringBlock(uart,ack);
 	} else {
-		SendStringBlock(uart,nak);*/
+		SendStringBlock(uart,nak);
 	}
-/*	SendStringBlock(uart,"testing FastCapture\n"); */
+	SendStringBlock(uart,"testing FastCapture\n"); 
 	ReadData = CaptureData(1000000, true, false, CAPTURESIZE, Data);
 	SetTriggerInput(2,16,SLOWFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3);
-/*	SendStringBlock(uart,"testing NormalCapture\n");*/
+	SendStringBlock(uart,"testing NormalCapture\n");
 	ReadData = CaptureData(1000000, true, false, CAPTURESIZE, Data);
 /*
 	ReadData = 3;

@@ -68,7 +68,7 @@ entity leon3mini is
     disas   : integer := CFG_DISAS;     -- Enable disassembly to console
     dbguart : integer := CFG_DUART;     -- Print UART on console
     pclow   : integer := CFG_PCLOW;
-    freq    : integer := 25000       -- frequency of main clock (used for PLLs)
+    freq    : integer := 25000          -- frequency of main clock (used for PLLs)
     );
   port (
     --RS232
@@ -132,14 +132,14 @@ entity leon3mini is
     iFPGA2_T7   : in std_ulogic;
 
     --CONTROL of inputs
-    iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
+    iUx6        : in  std_ulogic;       -- not soldering register channels 1,2 è 3,4
     iUx11       : in  std_ulogic;       -- not soldering register channels 1,2
     iAAQpin5    : in  std_ulogic;       -- ? does not fit to analog_inputs.png
     oCalibrator : out std_ulogic;
 
     -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-    oPWMout  : out std_ulogic;          --Level Of External Syncro
-    iSinhcro : in  std_ulogic;          --Comparator external syncro.
+    oPWMout  : out std_ulogic;                     --Level Of External Syncro
+    iSinhcro : in  std_ulogic;                     --Comparator external syncro.
     oDesh    : out std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
     oDeshENA : out std_ulogic;
     oRegCLK  : out std_ulogic;
@@ -261,7 +261,7 @@ begin
 ---------------------------------------------------------------------------------------
 -- DSO: Scope Components without direct AHB or APB access
 ---------------------------------------------------------------------------------------
- -- oA_FLASH  <= (others => '1');
+  -- oA_FLASH  <= (others => '1');
   bD_FLASH  <= (others => '1');
   --   iRB_FLASH : in    std_ulogic;
   oOE_FLASH <= '1';
@@ -305,6 +305,40 @@ begin
     3   => (
       0 => iCh1ADC4,
       1 => iCh2ADC4));
+
+--  PLL0 : entity DSO.PLL0
+--    port map (
+----      areset => areset,
+--      pllena => '1',
+--      inclk0 => ClkADC25(0),
+--      c0     => ClkADC250(0),
+--      locked => open);
+
+--  PLL1 : entity DSO.PLL1
+--    port map (
+--      --    areset => areset,
+--      inclk0 => ClkADC25(1),
+--      pllena => '1',
+--      c0     => ClkADC250(1),
+--      locked => open);
+
+--  PLL2 : entity DSO.PLL2
+--    port map (
+--      --    areset => areset,
+--      inclk0 => ClkADC25(2),
+--      pllena => '1',
+--      c0     => ClkADC250(2),
+--      locked => open);
+
+--  PLL3 : entity DSO.PLL3
+--    port map (
+--      --  areset => areset,
+--      inclk0 => ClkADC25(3),
+--      pllena => '1',
+--      c0     => ClkADC250(3),
+--      c1     => ClkDesign,
+--      c2     => ClkCPU,
+--      locked => ResetAsync);
 
   CaptureSignals : entity DSO.SignalCapture
     port map (
@@ -552,7 +586,7 @@ begin
 
   mg2 : if CFG_SRCTRL = 1 generate
     srctrl0 : srctrl
-      generic map  -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
+      generic map                  -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
       (hindex  => 0,
        romaddr => 0,
        rommask => 16#ff8#,
@@ -583,18 +617,23 @@ begin
   bD_SRAM <= memo.data after 1 ns when
              (memo.writen = '0' and memo.ramsn(0) = '0')
              else (others => 'Z');      --  when others;
-  memi.data <= bD_SRAM after 1 ns; -- when
-             --  (memo.writen = '1' and memo.ramsn(0) = '0')
-             --  else (others => 'Z');    -- when others;
+  memi.data <= bD_SRAM after 1 ns;      -- when
+  --  (memo.writen = '1' and memo.ramsn(0) = '0')
+  --  else (others => 'Z');    -- when others;
   oA_SRAM   <= std_ulogic_vector(memo.address(oA_SRAM'length+1 downto 2));
   oA_FLASH  <= std_ulogic_vector(memo.address(oA_FLASH'length+1 downto 2));
-  oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
+  -- oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
   oOE_SRAM  <= memo.ramoen(0);
   oWE_SRAM  <= memo.writen;
-  oLB1_SRAM <= memo.wrn(0);
-  oUB1_SRAM <= memo.wrn(1);
-  oLB2_SRAM <= memo.wrn(2);
-  oUB2_SRAM <= memo.wrn(3);
+--  oLB1_SRAM <= memo.wrn(0);
+--  oUB1_SRAM <= memo.wrn(1);
+--  oLB2_SRAM <= memo.wrn(2);
+--  oUB2_SRAM <= memo.wrn(3);
+  oCE_SRAM  <= cLowActive;
+  oLB1_SRAM <= cLowActive;
+  oUB1_SRAM <= cLowActive;
+  oLB2_SRAM <= cLowActive;
+  oUB2_SRAM <= cLowActive;
 
   memi.brdyn  <= '1'; memi.bexcn <= '1';
   memi.writen <= '1'; memi.wrn <= "1111"; memi.bwidth <= "10";
@@ -737,13 +776,13 @@ begin
 --    port map (vga_bl, vgao.video_out_b(7 downto 6));
 
 
---  oVD    <= vgao.vsync;
---  oHD    <= vgao.hsync;
---  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
---  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
---  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
---  oDCLK  <= iclk25_2;
-  oDENA <= '0';
+  oVD    <= vgao.vsync;
+  oHD    <= vgao.hsync;
+  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
+  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
+  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
+  oDCLK  <= iclk25_2;
+  oDENA <= '1';
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,

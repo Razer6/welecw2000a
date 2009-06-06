@@ -68,7 +68,7 @@ bool InitSignalCapture(Debugprint * Init, Target T, Language L){
 	UartInit(FIXED_CPU_FREQUENCY, DSO_CHCFG_BAUDRATE, 
 			ENABLE_RX | ENABLE_TX, adc_uart);
 	Init = &Print;
-	return InitDebugprint(Init,T,L);
+	return InitDebugprint(&Print,T,L);
 }
 
 bool SetTriggerInput (	const unsigned int noChannels, 

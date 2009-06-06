@@ -4,7 +4,7 @@
 -- File       : TriggerMemory-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-02-14
+-- Last update: 2009-06-04
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -42,11 +42,12 @@ use ieee.numeric_std.all;
 entity TriggerMemory is
   port
     (
-      aclr      : in  std_logic := '0';
-      clock     : in  std_logic;
       data      : in  std_logic_vector (63 downto 0);
+      rd_aclr   : in  std_logic := '0';
       rdaddress : in  std_logic_vector (9 downto 0);
+      rdclock   : in  std_logic;
       wraddress : in  std_logic_vector (9 downto 0);
+      wrclock   : in  std_logic;
       wren      : in  std_logic := '1';
       q         : out std_logic_vector (63 downto 0)
       );
@@ -54,18 +55,25 @@ end TriggerMemory;
 
 architecture RTL of TriggerMemory is
   type   aRam is array (2**10-1 downto 0) of std_ulogic_vector (63 downto 0);
-  signal Ram : aRam := (others => (others =>  '0'));
+  signal Ram : aRam := (others => (others => '0'));
 begin
   
-  process (clock, aclr)
+  process (wrclock)
   begin
-    if aclr = '1' then
-      q <= (others => '0');
-    elsif rising_edge(clock) then
+    if rising_edge(wrclock) then
       if wren = '1' then
         Ram(to_integer(unsigned(wraddress))) <= std_ulogic_vector(Data);
-        end if;
-      q                          <= std_logic_vector(Ram(to_integer(unsigned(rdaddress))));
+      end if;
     end if;
   end process;
+
+  process (wrclock, rd_aclr)
+  begin
+    if rd_aclr = '1' then
+      q <= (others => '0');
+    elsif rising_edge(rdclock) then
+      q <= std_logic_vector(Ram(to_integer(unsigned(rdaddress))));
+    end if;
+  end process;
+  
 end architecture;
