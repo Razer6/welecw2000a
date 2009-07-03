@@ -166,9 +166,9 @@ bool SendData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned in
 	return true;
 }
 
-int ReceiveData(uart_regs * uart, int buffersize, int * FastMode, int * data) {
-	int size = 0;
-	int i = 0;
+int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data) {
+	uint32_t size = 0;
+	uint32_t i = 0;
 	int dummy = 0;
 	char DataH[] = DSO_DATA_RESP;
 

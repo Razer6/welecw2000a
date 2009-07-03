@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : WaveFilePackage.h
+* File           : Request.h
 * Author		 : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 20.04.2009
+* Date           : 28.06.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,63 +32,60 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef WAVEFILEPACKAGE_H
-#define WAVEFILEPACKAGE_H
+#ifndef REQUEST_H
+#define REQUEST_H
 
-#include "stdio.h"
-#include "types.h"
+#include "DSO_SFR.h"
+#include "Object.h"
+#include "Communication.h"
+#include "DSO_SignalCapture.h"
 
-typedef struct { 
-	short DataTyp;
-	int Channels;
-	int DataSize;
-	unsigned int SamplingRate;
-} aWaveFileInfo;
+class Request : public Object {
+public:
+	Request(Communication * Comm);
+	~Request();
+	virtual uint32_t InitComm(
+		char * Device, 
+		const uint32_t TimeoutMS = 5000, 
+		const uint32_t Baudrate  = 115200,
+		char * IPAddr = "192.168.0.51");
 
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
+	virtual uint32_t SendTriggerInput (	
+		const uint32_t noChannels, 
+		const uint32_t SampleSize, 
+		const uint32_t SamplingFrequency,
+		const uint32_t CPUFrequency, // here unused!
+		const uint32_t AACFilterStart,
+		const uint32_t AACFilterStop,
+		const uint32_t Ch0 = 0, 
+		const uint32_t Ch1 = 1, 
+		const uint32_t Ch2 = 2, 
+		const uint32_t Ch3 = 3);
 
+	virtual uint32_t SendTrigger(
+		const uint32_t Trigger, 
+		const uint32_t TriggerChannel,
+		const uint32_t TriggerPrefetchSamples,
+		const int  LowReference,
+		const uint32_t  LowReferenceTime,
+		const int HighReference,
+		const uint32_t HighReferenceTime);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+	virtual uint32_t SendAnalogInput(
+		const uint32_t NoCh, 
+		const SetAnalog * Settings);
 
-bool OpenWaveFileRead(	const char * 		FileName,
-			FILE ** 			WaveFileHandle,
- 			aWaveFileInfo		FileInfo);
+	virtual uint32_t ReceiveSamples(
+		const uint32_t WaitTime, /* just a integer */
+		const uint32_t Start,
+		uint32_t CaptureSize,    /* size in DWORDs*/
+		uint32_t * FastMode,
+		uint32_t * RawData);
 
-
-bool ReadSample(	FILE * 			WaveFileHandle,
-			int * 			Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool ReadSamples(	FILE * 			WaveFileHandle,
-			int * 			Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE **	 		WaveFileHandle,
- 			aWaveFileInfo 		WaveFile);
-
-bool WriteSample(	FILE * 			WaveFileHandle,
-			int const 		Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool WriteSamples(	FILE * 			WaveFileHandle,
-			const int * 		Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-#ifdef __cplusplus
-}
-#endif
+	virtual void PrintSFR();
+protected:
+	Communication *mComm;
+	void PrintDesc(uint32_t *Data, uint32_t Length);
+};
 
 #endif

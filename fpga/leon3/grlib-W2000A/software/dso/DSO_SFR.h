@@ -73,7 +73,7 @@
 #define ANALOGSETTINGSBANK6      (DSO_SFR_BASE_ADDR+ 4*30) 
 #define ANALOGSETTINGSBANK5      (DSO_SFR_BASE_ADDR+ 4*31) 
 #define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*32)
-#define DSO_REG_SIZE             4*32
+#define DSO_REG_SIZE             (4*32)
 
 /* DEVICEADDR*/
 #define WELEC2012   (2012)

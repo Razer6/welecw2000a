@@ -1,4 +1,5 @@
 clear s;
+s.protocol = 'Debugger'
 s.uart = 'com7';
 s.baudrate = 115200;
 s.channels = 2;

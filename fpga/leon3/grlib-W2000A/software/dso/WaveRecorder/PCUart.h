@@ -75,6 +75,10 @@
 
 #include "types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void UartClose (uart_regs * uart);
 
 bool UartInit(	char * UartAddr,
@@ -95,5 +99,9 @@ void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size);
 void SendString (uart_regs * uart, char * c, unsigned int * size);
 
 void SendStringBlock (uart_regs * uart, char * c);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

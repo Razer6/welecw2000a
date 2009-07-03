@@ -76,7 +76,8 @@ int main () {
 	Analog[1].Mode = normal;
 	Analog[1].DA_Offset = 0xf1;
 	Analog[1].PWM_Offset = 0xf1;*/
-	
+	InitDisplay();
+	DrawTest();
 	InitSignalCapture(Debug,PrintF,English);
 	UartInit(FIXED_CPU_FREQUENCY,115200, ENABLE_RX | ENABLE_TX, uart);
 /*	SendCharBlock(uart,255);*/

@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : WaveFilePackage.h
+* File           : NormalUART.h
 * Author		 : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 20.04.2009
+* Date           : 28.06.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,63 +32,30 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef WAVEFILEPACKAGE_H
-#define WAVEFILEPACKAGE_H
+#ifndef NORMALUART_H
+#define NORMALUART_H
 
-#include "stdio.h"
 #include "types.h"
+#include "Communication.h"
 
-typedef struct { 
-	short DataTyp;
-	int Channels;
-	int DataSize;
-	unsigned int SamplingRate;
-} aWaveFileInfo;
-
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool OpenWaveFileRead(	const char * 		FileName,
-			FILE ** 			WaveFileHandle,
- 			aWaveFileInfo		FileInfo);
-
-
-bool ReadSample(	FILE * 			WaveFileHandle,
-			int * 			Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool ReadSamples(	FILE * 			WaveFileHandle,
-			int * 			Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE **	 		WaveFileHandle,
- 			aWaveFileInfo 		WaveFile);
-
-bool WriteSample(	FILE * 			WaveFileHandle,
-			int const 		Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool WriteSamples(	FILE * 			WaveFileHandle,
-			const int * 		Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-#ifdef __cplusplus
-}
-#endif
-
+class NormalUart : public Communication {
+public:
+	NormalUart(){}
+	virtual uint32_t Init (
+		char * Device, 
+		const uint32_t TimeoutMS = 5000, 
+		const uint32_t Baudrate  = 115200,
+		char * IPAddr = "192.168.0.51");
+	virtual ~NormalUart();
+	virtual uint32_t Send(
+		uint32_t * Data, 
+		uint32_t Length);
+	virtual uint32_t Receive(
+		uint32_t * Data, 
+		uint32_t Length, 
+		uint32_t * FastMode);
+	virtual uint32_t GetACK();
+private:
+};
+    
 #endif

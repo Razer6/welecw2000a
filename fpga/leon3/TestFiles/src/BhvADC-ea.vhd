@@ -9,7 +9,9 @@ use work.Wavefiles.all;
 
 entity BhvADC is
   generic (
-    gFilename    : string := "";
+    gFilename    : string  := "";
+    gStartValue  : integer := 0;
+    gCountValue  : integer := 1;
     gBitWidth    : natural;
     -- This generic is for netlist simulations with timing information! 
     gOutputDelay : time);
@@ -27,20 +29,23 @@ begin
     variable vFileInfo : aWaveFileInfo;
     variable vIntVal   : integer;
     variable vShift    : integer;
-    variable vData  : std_ulogic_vector(gBitWidth-1 downto 0);
+    variable vData     : signed(gBitWidth-1 downto 0);
   begin
-    
-    oData <= (others => '0');
+
+    --oData <= (others => '0');
     if gFileName = "" then
-        vData := (others => '0');
+      vData := to_signed(gStartValue, gBitWidth);
+      oData <= std_ulogic_vector(vData);
       loop
         wait until iClk = '1';
         wait for gOutputDelay;
-        vData := not vData;
-        oData <= vData;
+        if iResetAsync /= cResetActive then
+          vData := vData +gCountValue;
+          oData <= std_ulogic_vector(vData);
+        end if;
       end loop;
     end if;
-
+    oData <= (others => '0');
     loop
       OpenWaveFileRead(gFileName, Handle, vFileInfo);
       case vFileInfo.DataTyp is
@@ -66,5 +71,5 @@ begin
       file_close(Handle);
     end loop;
   end process;
-  
+
 end architecture;

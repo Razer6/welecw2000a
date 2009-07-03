@@ -59,6 +59,7 @@ entity SFR is
     rst_in      : in  std_ulogic;        -- Global reset, active low
     iResetAsync : in  std_ulogic;        -- Global reset
     clk_i       : in  std_ulogic;        -- Global clock
+    clk_design_i : in std_ulogic;
     apb_i       : in  apb_slv_in_type;   -- APB input
     apb_o       : out apb_slv_out_type;  -- APB output
     iSFRControl : in  aSFR_in;
@@ -84,7 +85,8 @@ begin  -- rtl
 
   SFR : entity DSO.SpecialFunctionRegister
     port map (
-      iClk                    => clk_i,
+      iClkCPU                    => clk_i,
+      iClkDesign              => clk_design_i,
       iResetAsync             => iResetAsync,
       iAddr                   => aDword(apb_i.paddr),
       iWr                     => Wr,

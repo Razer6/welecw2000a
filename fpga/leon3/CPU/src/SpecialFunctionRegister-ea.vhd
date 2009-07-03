@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-06-06
+-- Last update: 2009-07-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -49,7 +49,8 @@ use DSO.pLedsKeysAnalogSettings.all;
 
 entity SpecialFunctionRegister is
   port (
-    iClk          : in  std_ulogic;
+    iClkCPU       : in  std_ulogic;
+    iClkDesign    : in  std_ulogic;
     iResetAsync   : in  std_ulogic;
     iAddr         : in  aDword;
     iWr           : in  std_ulogic;
@@ -63,6 +64,7 @@ entity SpecialFunctionRegister is
 end entity;
 
 architecture RTL of SpecialFunctionRegister is
+  signal SFRIn                     : aSFR_in;
   signal InterruptMask             : aDword;
   signal InterruptVector           : aDword;
   signal Decimator                 : aDownSampler;
@@ -77,35 +79,26 @@ architecture RTL of SpecialFunctionRegister is
   signal Addr                      : natural;
 begin
   
-  oSFRControl.Decimator      <= Decimator;
-  oSFRControl.SignalSelector <= SignalSelector;
-  oSFRControl.ExtTriggerSrc  <= ExtTriggerSrc;
-  oSFRControl.Trigger        <= Trigger;
-  oSFRControl.nConfigADC     <= nConfigADC;
-  oSFRControl.Leds           <= Leds;
-  oSFRControl.AnalogSettings <= AnalogSettings;
-  Addr                       <= to_integer(unsigned(iAddr(7 downto 2)));
 
-
-  pInterrupt : process (iClk, iResetAsync)
+  pInterrupt : process (iClkCPU, iResetAsync)
   begin
     if iResetAsync = cResetActive then
       oCPUInterrupt             <= '0';
       InterruptVector           <= (others => '0');
       PrevTriggerBusy           <= '0';
       PrevTriggerStartRecording <= '0';
-    elsif rising_edge(iCLK) then
-      PrevTriggerBusy <= iSFRControl.Trigger.Busy;
-      if PrevTriggerBusy = '1' and iSFRControl.Trigger.Busy = '0' then
+    elsif rising_edge(iCLKCPU) then
+      PrevTriggerBusy <= SFRIn.Trigger.Busy;
+      if PrevTriggerBusy = '1' and SFRIn.Trigger.Busy = '0' then
         InterruptVector(0) <= '1';
       end if;
-      PrevTriggerStartRecording <= iSFRControl.Trigger.Recording;
-      if PrevTriggerStartRecording = '1' and iSFRControl.Trigger.Recording = '0' then
+      PrevTriggerStartRecording <= SFRIn.Trigger.Recording;
+      if PrevTriggerStartRecording = '1' and SFRIn.Trigger.Recording = '0' then
         InterruptVector(1) <= '1';
       end if;
---      InterruptVector(2) <= iSFRControl.KeyInterruptLH;
---      InterruptVector(3) <= iSFRControl.KeyInterruptHL;
-      --  InterruptVector(4) <= iSFRControl.Uart.Interrupt;
+--      InterruptVector(2) <= SFRIn.KeyInterruptLH;
+--      InterruptVector(3) <= SFRIn.KeyInterruptHL;
+      --  InterruptVector(4) <= SFRIn.Uart.Interrupt;
 
       if Addr = cInterruptAddr then
         if iWr = '1' then
@@ -121,7 +114,21 @@ begin
     end if;
   end process;
 
-  pWrite : process (iClk, iResetAsync)
+--  pPipelineRegsOut : process (iClkDesign, iResetAsync)
+--  begin
+--    if rising_edge(iCLKDesign) then
+      oSFRControl.Decimator      <= Decimator;
+      oSFRControl.SignalSelector <= SignalSelector;
+      oSFRControl.ExtTriggerSrc  <= ExtTriggerSrc;
+      oSFRControl.Trigger        <= Trigger;
+      oSFRControl.nConfigADC     <= nConfigADC;
+      oSFRControl.Leds           <= Leds;
+      oSFRControl.AnalogSettings <= AnalogSettings;
+      Addr                       <= to_integer(unsigned(iAddr(6 downto 2)));
+--    end if;
+--  end process;
+
+  pWrite : process (iClkCPU, iResetAsync)
     variable vData : aDword;
   begin
     if iResetAsync = cResetActive then
@@ -201,7 +208,7 @@ begin
         others        => '0');
 
 
-    elsif rising_edge(iClk) then
+    elsif rising_edge(iClkCPU) then
       Trigger.TriggerOnce   <= '0';
       Trigger.ForceIdle     <= '0';
       Trigger.SetReadOffset <= '0';
@@ -330,14 +337,22 @@ begin
             AnalogSettings.DAC_Offset <= iData(15 downto 0);
             AnalogSettings.DAC_Ch     <= iData(16);
             
-          when others         =>
+          when others =>
             null;
         end case;
       end if;
     end if;
   end process;
 
-  pRead : process (Addr, iSFRControl, InterruptVector,
+
+--  pPipelineRegsIn : process (iClkCPU, iResetAsync)
+--  begin
+--    if rising_edge(iCLKCPU) then
+      SFRIn <= iSFRControl;
+--    end if;
+--  end process;
+  
+  pRead : process (Addr, SFRIn, InterruptVector,
                    InterruptMask, Decimator, nConfigADC,
                    SignalSelector, Trigger, Leds, ExtTriggerSrc, AnalogSettings)
   begin
@@ -356,7 +371,7 @@ begin
           oData(i) <= Decimator.EnableFilter(i);
         end loop;
       when cExtTriggerSrcAddr =>
-        oData <= std_ulogic_vector(to_unsigned(ExtTriggerSrc.Addr,32));
+        oData <= std_ulogic_vector(to_unsigned(ExtTriggerSrc.Addr, 32));
       when cExtTriggerPWMAddr =>
         for i in 1 to cExtTriggers loop
           oData(i*8-1 downto (i-1)*8) <= ExtTriggerSrc.PWM(i);
@@ -376,7 +391,7 @@ begin
       when cTriggerStorageModeAddr =>
         oData(Trigger.StorageMode'range) <= Trigger.StorageMode;
       when cTriggerReadOffSetAddr =>
-        oData(iSFRControl.Trigger.ReadOffSet'high downto 0) <= std_ulogic_vector(iSFRControl.Trigger.ReadOffSet);
+        oData(SFRIn.Trigger.ReadOffSet'high downto 0) <= std_ulogic_vector(SFRIn.Trigger.ReadOffSet);
       when cTriggerTypeAddr =>
         oData <= std_ulogic_vector(to_unsigned(Trigger.Trigger, oData'length));
       when cTriggerLowValueAddr =>
@@ -394,11 +409,11 @@ begin
       when cTriggerHighTimeAddr =>
         oData(Trigger.HighTime'range) <= Trigger.HighTime;
       when cTriggerStatusRegister =>
-        oData(0) <= iSFRControl.Trigger.Busy;
-        oData(1) <= iSFRControl.Trigger.Recording;
+        oData(0) <= SFRIn.Trigger.Busy;
+        oData(1) <= SFRIn.Trigger.Recording;
       when cTriggerCurrentAddr =>
-        oData(iSFRControl.Trigger.CurrentTriggerAddr'high downto 0) <=
-          std_ulogic_vector(iSFRControl.Trigger.CurrentTriggerAddr);
+        oData(SFRIn.Trigger.CurrentTriggerAddr'high downto 0) <=
+          std_ulogic_vector(SFRIn.Trigger.CurrentTriggerAddr);
       when cConfigADCEnable =>
         oData(nConfigADC'range) <= nConfigADC;
       when cLedAddr =>
@@ -417,58 +432,58 @@ begin
         oData(12) <= Leds.BTN_F3;
         oData(13) <= Leds.SINGLE;
       when cKeyAddr0 =>
-        oData(0)  <= iSFRControl.Keys.BTN_F1;
-        oData(1)  <= iSFRControl.Keys.BTN_F2;
-        oData(2)  <= iSFRControl.Keys.BTN_F3;
-        oData(3)  <= iSFRControl.Keys.BTN_F4;
-        oData(4)  <= iSFRControl.Keys.BTN_F5;
-        oData(5)  <= iSFRControl.Keys.BTN_F6;
-        oData(6)  <= iSFRControl.Keys.BTN_MATH;
-        oData(7)  <= iSFRControl.Keys.BTN_CH0;
-        oData(8)  <= iSFRControl.Keys.BTN_CH1;
-        oData(9)  <= iSFRControl.Keys.BTN_CH2;
-        oData(10) <= iSFRControl.Keys.BTN_CH3;
-        oData(11) <= iSFRControl.Keys.BTN_MAINDEL;
-        oData(12) <= iSFRControl.Keys.BTN_RUNSTOP;
-        oData(13) <= iSFRControl.Keys.BTN_SINGLE;
-        oData(14) <= iSFRControl.Keys.BTN_CURSORS;
-        oData(15) <= iSFRControl.Keys.BTN_QUICKMEAS;
-        oData(16) <= iSFRControl.Keys.BTN_ACQUIRE;
-        oData(17) <= iSFRControl.Keys.BTN_DISPLAY;
-        oData(18) <= iSFRControl.Keys.BTN_EDGE;
-        oData(19) <= iSFRControl.Keys.BTN_MODECOUPLING;
-        oData(20) <= iSFRControl.Keys.BTN_AUTOSCALE;
-        oData(21) <= iSFRControl.Keys.BTN_SAVERECALL;
-        oData(22) <= iSFRControl.Keys.BTN_QUICKPRINT;
-        oData(23) <= iSFRControl.Keys.BTN_UTILITY;
-        oData(24) <= iSFRControl.Keys.BTN_PULSEWIDTH;
-        oData(26) <= iSFRControl.Keys.BTN_X1;
-        oData(27) <= iSFRControl.Keys.BTN_X2;
-        oData(28) <= iSFRControl.Keys.ENX_TIME_DIV;
-        oData(29) <= iSFRControl.Keys.ENY_TIME_DIV;
-        oData(30) <= iSFRControl.Keys.ENX_F;
-        oData(31) <= iSFRControl.Keys.ENY_F;
+        oData(0)  <= SFRIn.Keys.BTN_F1;
+        oData(1)  <= SFRIn.Keys.BTN_F2;
+        oData(2)  <= SFRIn.Keys.BTN_F3;
+        oData(3)  <= SFRIn.Keys.BTN_F4;
+        oData(4)  <= SFRIn.Keys.BTN_F5;
+        oData(5)  <= SFRIn.Keys.BTN_F6;
+        oData(6)  <= SFRIn.Keys.BTN_MATH;
+        oData(7)  <= SFRIn.Keys.BTN_CH0;
+        oData(8)  <= SFRIn.Keys.BTN_CH1;
+        oData(9)  <= SFRIn.Keys.BTN_CH2;
+        oData(10) <= SFRIn.Keys.BTN_CH3;
+        oData(11) <= SFRIn.Keys.BTN_MAINDEL;
+        oData(12) <= SFRIn.Keys.BTN_RUNSTOP;
+        oData(13) <= SFRIn.Keys.BTN_SINGLE;
+        oData(14) <= SFRIn.Keys.BTN_CURSORS;
+        oData(15) <= SFRIn.Keys.BTN_QUICKMEAS;
+        oData(16) <= SFRIn.Keys.BTN_ACQUIRE;
+        oData(17) <= SFRIn.Keys.BTN_DISPLAY;
+        oData(18) <= SFRIn.Keys.BTN_EDGE;
+        oData(19) <= SFRIn.Keys.BTN_MODECOUPLING;
+        oData(20) <= SFRIn.Keys.BTN_AUTOSCALE;
+        oData(21) <= SFRIn.Keys.BTN_SAVERECALL;
+        oData(22) <= SFRIn.Keys.BTN_QUICKPRINT;
+        oData(23) <= SFRIn.Keys.BTN_UTILITY;
+        oData(24) <= SFRIn.Keys.BTN_PULSEWIDTH;
+        oData(26) <= SFRIn.Keys.BTN_X1;
+        oData(27) <= SFRIn.Keys.BTN_X2;
+        oData(28) <= SFRIn.Keys.ENX_TIME_DIV;
+        oData(29) <= SFRIn.Keys.ENY_TIME_DIV;
+        oData(30) <= SFRIn.Keys.ENX_F;
+        oData(31) <= SFRIn.Keys.ENY_F;
       when cKeyAddr1 =>
-        oData(0)  <= iSFRControl.Keys.ENX_LEFT_RIGHT;
-        oData(1)  <= iSFRControl.Keys.ENY_LEFT_RIGHT;
-        oData(2)  <= iSFRControl.Keys.ENX_LEVEL;
-        oData(3)  <= iSFRControl.Keys.ENY_LEVEL;
-        oData(4)  <= iSFRControl.Keys.ENX_CH0_UPDN;
-        oData(5)  <= iSFRControl.Keys.ENY_CH0_UPDN;
-        oData(6)  <= iSFRControl.Keys.ENX_CH1_UPDN;
-        oData(7)  <= iSFRControl.Keys.ENY_CH1_UPDN;
-        oData(8)  <= iSFRControl.Keys.ENX_CH2_UPDN;
-        oData(9)  <= iSFRControl.Keys.ENY_CH2_UPDN;
-        oData(10) <= iSFRControl.Keys.ENX_CH3_UPDN;
-        oData(11) <= iSFRControl.Keys.ENY_CH3_UPDN;
-        oData(12) <= iSFRControl.Keys.ENX_CH0_VDIV;
-        oData(13) <= iSFRControl.Keys.ENY_CH0_VDIV;
-        oData(14) <= iSFRControl.Keys.ENX_CH1_VDIV;
-        oData(15) <= iSFRControl.Keys.ENY_CH1_VDIV;
-        oData(16) <= iSFRControl.Keys.ENX_CH2_VDIV;
-        oData(17) <= iSFRControl.Keys.ENY_CH2_VDIV;
-        oData(18) <= iSFRControl.Keys.ENX_CH3_VDIV;
-        oData(19) <= iSFRControl.Keys.ENY_CH3_VDIV;
+        oData(0)  <= SFRIn.Keys.ENX_LEFT_RIGHT;
+        oData(1)  <= SFRIn.Keys.ENY_LEFT_RIGHT;
+        oData(2)  <= SFRIn.Keys.ENX_LEVEL;
+        oData(3)  <= SFRIn.Keys.ENY_LEVEL;
+        oData(4)  <= SFRIn.Keys.ENX_CH0_UPDN;
+        oData(5)  <= SFRIn.Keys.ENY_CH0_UPDN;
+        oData(6)  <= SFRIn.Keys.ENX_CH1_UPDN;
+        oData(7)  <= SFRIn.Keys.ENY_CH1_UPDN;
+        oData(8)  <= SFRIn.Keys.ENX_CH2_UPDN;
+        oData(9)  <= SFRIn.Keys.ENY_CH2_UPDN;
+        oData(10) <= SFRIn.Keys.ENX_CH3_UPDN;
+        oData(11) <= SFRIn.Keys.ENY_CH3_UPDN;
+        oData(12) <= SFRIn.Keys.ENX_CH0_VDIV;
+        oData(13) <= SFRIn.Keys.ENY_CH0_VDIV;
+        oData(14) <= SFRIn.Keys.ENX_CH1_VDIV;
+        oData(15) <= SFRIn.Keys.ENY_CH1_VDIV;
+        oData(16) <= SFRIn.Keys.ENX_CH2_VDIV;
+        oData(17) <= SFRIn.Keys.ENY_CH2_VDIV;
+        oData(18) <= SFRIn.Keys.ENX_CH3_VDIV;
+        oData(19) <= SFRIn.Keys.ENY_CH3_VDIV;
 
       when cAnalogSettingsPWMAddr =>
         oData(AnalogSettings.PWM_Offset'range) <= AnalogSettings.PWM_Offset;
@@ -486,7 +501,7 @@ begin
         oData(9)  <= AnalogSettings.CH1_DC;
         oData(10) <= AnalogSettings.CH2_DC;
         oData(11) <= AnalogSettings.CH3_DC;
-        oData(31) <= iSFRControl.AnalogBusy;
+        oData(31) <= SFRIn.AnalogBusy;
       when cAnalogSettingsBank5 =>
         oData(0)            <= AnalogSettings.CH1_K1_ON;
         oData(1)            <= AnalogSettings.CH1_K1_OFF;
@@ -500,11 +515,11 @@ begin
         oData(11 downto 10) <= AnalogSettings.CH1_src2_addr;
         oData(13 downto 12) <= AnalogSettings.CH2_src2_addr;
         oData(15 downto 14) <= AnalogSettings.CH3_src2_addr;
-        oData(31)           <= iSFRControl.AnalogBusy;
+        oData(31)           <= SFRIn.AnalogBusy;
       when cAnalogSettingsBank6 =>
         oData(15 downto 0) <= AnalogSettings.DAC_Offset;
         oData(16)          <= AnalogSettings.DAC_Ch;
-        oData(31)          <= iSFRControl.AnalogBusy;
+        oData(31)          <= SFRIn.AnalogBusy;
       when others =>
         if Addr >= cLastAddr then
           oData <= (others => '-');

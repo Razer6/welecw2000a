@@ -225,14 +225,16 @@ architecture behav of testbench is
 
   component BhvADC is
     generic (
-      gFilename : string := "";
-      gBitWidth : natural;
+    gFilename    : string  := "";
+    gStartValue  : integer := 0;
+    gCountValue  : integer := 1;
+    gBitWidth    : natural;
     -- This generic is for netlist simulations with timing information! 
     gOutputDelay : time);
-    port (
-      iClk        : in  std_ulogic;
-      iResetAsync : in  std_ulogic;
-      oData       : out std_ulogic_vector(gBitWidth-1 downto 0));
+  port (
+    iClk        : in  std_ulogic;
+    iResetAsync : in  std_ulogic;
+    oData       : out std_ulogic_vector(gBitWidth-1 downto 0));
   end component;
 
   component StoP_hc595 is
@@ -326,7 +328,7 @@ architecture behav of testbench is
 
       --USB
       iUSBRX : in  std_ulogic;          -- Receive from USB
-      oUSBTX : out std_ulogic;          -- Tratsmit to USB
+      oUSBTX : out std_ulogic;          -- Transmit to USB
 
       --SWITCH on board
       iSW1 : in std_ulogic;             --switch 1
@@ -383,7 +385,7 @@ architecture behav of testbench is
       --CONTROL of inputs
       iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
       iUx11       : in  std_ulogic;     -- not soldering register channels 1,2
-      iAAQpin5    : in std_ulogic;
+      iAAQpin5    : in  std_ulogic;
       oCalibrator : out std_ulogic;
 
       -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
@@ -429,15 +431,17 @@ architecture behav of testbench is
 --    use entity work.NetlistWrapper;
 
 begin
-  
-  
+
+  -- if the wave file was not found these adc act as an ascending counter
   CH : for i in 0 to cChannels-1 generate
     ADC : for j in 0 to cADCsperChannel-1 generate
       BHV : BhvADC
         generic map (
-  --        gFileName    => cWaveFileNames(i)(j),
+          --        gFileName    => cWaveFileNames(i)(j),
+          gStartValue  => j,
+          gCountValue => cADCsperChannel,
           gBitWidth    => cADCBitWidth,
-          gOutputDelay => 1800 ps)
+          gOutputDelay => 1900 ps)
         port map (
           iClk        => ADCClk(j),
           iResetAsync => resoutn,

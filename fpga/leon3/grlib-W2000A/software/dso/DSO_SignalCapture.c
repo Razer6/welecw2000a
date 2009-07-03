@@ -107,6 +107,7 @@ bool SetTriggerInput (	const unsigned int noChannels,
 		default:	Decimaton = WELECMAXFS/SamplingFrequency; break;
 	}
 	Stage = 0;
+	M = 0;
 	do {
 		if (Decimaton >= 10) {
 			M |= (10<<Stage);

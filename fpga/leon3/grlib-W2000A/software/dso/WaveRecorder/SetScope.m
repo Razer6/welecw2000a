@@ -7,7 +7,7 @@ function [ success ] = SetScope(s)
 %               100MS/s => 10 MS/s
 % aacend    ... filterstages enable start
 % ch        ... vector of channels for the trigger 
-all = sprintf('WaveRecorder -u %s -b %d -n %d', s.uart,s.baudrate,s.channels);
+all = sprintf('WaveRecorder -p %s -u %s -b %d -n %d',s.protocol, s.uart,s.baudrate,s.channels);
 cmd = sprintf('%s -c TriggerInput --SampleSize=%d --Fs=%d --AACStart=%d --AACEnd=%d --CH1=%d --CH2=%d --CH3=%d --CH4=%d', ...
     all, s.bits, s.fs, s.aacstart, s.aacend, s.ch(1), s.ch(2), s.ch(3), s.ch(4));               
 disp(cmd); 

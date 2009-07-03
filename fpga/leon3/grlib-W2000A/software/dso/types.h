@@ -41,8 +41,11 @@
 #define true    1
 #define false   0
 
+#define STDCALL
+
 #else /* __cplusplus */
 
+#define STDCALL __stdcall
 #endif
 
 typedef unsigned char  uint8_t;

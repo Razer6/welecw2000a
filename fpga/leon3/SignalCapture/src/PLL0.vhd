@@ -4,7 +4,7 @@
 -- File       : PLL0.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-24
--- Last update: 2009-03-24
+-- Last update: 2009-06-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -47,7 +47,7 @@ entity PLL0 is
 end PLL0;
 
 architecture bhv of pll0 is
-  signal   Clk      : std_ulogic := '1';
+  signal   Clk      : std_ulogic := '0';
   constant cClkTime : time       := 1 sec /(2*250E6);
 begin
   

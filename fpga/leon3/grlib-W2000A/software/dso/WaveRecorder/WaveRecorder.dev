@@ -1,7 +1,7 @@
 [Project]
 FileName=WaveRecorder.dev
 Name=WaveRecorder
-UnitCount=15
+UnitCount=26
 Type=1
 Ver=1
 ObjFiles=
@@ -11,7 +11,7 @@ PrivateResource=WaveRecorder_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=-DWINNT -DLITTLE_ENDIAN_@@_
-CppCompiler=
+CppCompiler=-DWINNT -DLITTLE_ENDIAN_@@_
 Linker=libargtable2.a_@@_
 IsCpp=0
 Icon=WaveRecorder.ico
@@ -27,17 +27,17 @@ CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=1000000010000000000000
+CompilerSettings=1000000010000001000000
 
 [Unit1]
 FileName=WaveRecorder.c
-CompileCpp=0
+CompileCpp=1
 Folder=WaveRecorder
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
-BuildCmd=
+BuildCmd=$(CPP) -c WaveRecorder.c -o WaveRecorder.o $(CXXFLAGS)
 
 [Unit2]
 FileName=argtable2.h
@@ -175,7 +175,7 @@ Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
-BuildCmd=
+BuildCmd=$(CC) -c DSO_Remote.c -o DSO_Remote.o $(CFLAGS)
 
 [Unit14]
 FileName=..\crc.c
@@ -196,4 +196,114 @@ Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+
+[Unit16]
+FileName=Request.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit17]
+FileName=Communication.cpp
+CompileCpp=1
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=$(CPP) -c Communication.cpp -o Communication.o $(CXXFLAGS)
+
+[Unit18]
+FileName=Communication.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit19]
+FileName=DebugUart.cpp
+CompileCpp=1
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=$(CPP) -c DebugUart.cpp -o DebugUart.o $(CXXFLAGS)
+
+[Unit20]
+FileName=DebugUart.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit21]
+FileName=NormalUART.cpp
+CompileCpp=1
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=$(CPP) -c NormalUART.cpp -o NormalUART.o $(CXXFLAGS)
+
+[Unit22]
+FileName=NormalUART.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit23]
+FileName=Object.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit24]
+FileName=RemoteSignalCapture.cpp
+CompileCpp=1
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=$(CPP) -c RemoteSignalCapture.cpp -o RemoteSignalCapture.o $(CXXFLAGS)
+
+[Unit25]
+FileName=RemoteSignalCapture.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit26]
+FileName=Request.cpp
+CompileCpp=1
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=$(CPP) -c Request.cpp -o Request.o $(CXXFLAGS)
 

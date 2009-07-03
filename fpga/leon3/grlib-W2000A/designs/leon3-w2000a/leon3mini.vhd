@@ -320,6 +320,8 @@ begin
 --      inclk0 => ClkADC25(1),
 --      pllena => '1',
 --      c0     => ClkADC250(1),
+--      c1     => ClkDesign,
+--      c2     => ClkCPU,
 --      locked => open);
 
 --  PLL2 : entity DSO.PLL2
@@ -336,8 +338,6 @@ begin
 --      inclk0 => ClkADC25(3),
 --      pllena => '1',
 --      c0     => ClkADC250(3),
---      c1     => ClkDesign,
---      c2     => ClkCPU,
 --      locked => ResetAsync);
 
   CaptureSignals : entity DSO.SignalCapture
@@ -750,13 +750,14 @@ begin
                   paddr  => 5,
                   pmask  => 16#FFF#,
                   pirq   => 5)
-      port map(rst_in      => rstn,
-               iResetAsync => ResetAsync,
-               clk_i       => clkm,
-               apb_i       => apbi,
-               apb_o       => apbo(5),
-               iSFRControl => SFRControltoCPU,
-               oSFRControl => SFRControlfromCPU);
+      port map(rst_in       => rstn,
+               iResetAsync  => ResetAsync,
+               clk_i        => clkm,
+               clk_design_i => ClkDesign,
+               apb_i        => apbi,
+               apb_o        => apbo(5),
+               iSFRControl  => SFRControltoCPU,
+               oSFRControl  => SFRControlfromCPU);
   end generate;
 
   vga : if CFG_VGA_ENABLE /= 0 generate
@@ -782,7 +783,7 @@ begin
   oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
   oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
   oDCLK  <= iclk25_2;
-  oDENA <= '1';
+  oDENA  <= '1';
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,

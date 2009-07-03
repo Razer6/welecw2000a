@@ -52,11 +52,13 @@ add wave -noupdate -format Literal /testbench/d3/odesh
 add wave -noupdate -format Logic /testbench/d3/odeshena
 add wave -noupdate -format Logic /testbench/d3/oregclk
 add wave -noupdate -format Logic /testbench/d3/oregdata
+add wave -noupdate -format Logic /testbench/d3/iclk25_15
 add wave -noupdate -format Logic /testbench/d3/oadc1clk
 add wave -noupdate -format Logic /testbench/d3/oadc2clk
 add wave -noupdate -format Logic /testbench/d3/oadc3clk
 add wave -noupdate -format Logic /testbench/d3/oadc4clk
-add wave -noupdate -format Logic /testbench/d3/iclk25_15
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
+add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclkcpu
 add wave -noupdate -format Logic /testbench/d3/iclk13inp
 add wave -noupdate -format Logic /testbench/d3/oclk13out
 add wave -noupdate -format Logic /testbench/d3/iclk12_5
@@ -147,12 +149,15 @@ add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
 add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/idata
 add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/odata
 add wave -noupdate -divider {Capture Signals}
-add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/adcs/iadc
-add wave -noupdate -format Literal /testbench/d3/capturesignals/adcs/phase0
-add wave -noupdate -format Literal /testbench/d3/capturesignals/adcs/phase1
-add wave -noupdate -format Literal /testbench/d3/capturesignals/adcs/phase2
-add wave -noupdate -format Literal /testbench/d3/capturesignals/adcs/phase3
-add wave -noupdate -format Literal /testbench/d3/capturesignals/decimatorin
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/iadc
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/adc
+add wave -noupdate -format Literal -radix ascii /testbench/d3/capturesignals/adcs/invphase
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase0
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase1
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase2
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase3
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/odata
+add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/decimatorin
 add wave -noupdate -divider Trigger
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclkcpu
@@ -240,7 +245,7 @@ add wave -noupdate -format Literal /testbench/ch1_regh/oq
 add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {454684083 ps} 0} {{Cursor 2} {135878306 ps} 0} {{Cursor 3} {5243000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {499813841 ps} 0} {{Cursor 2} {99773000 ps} 0} {{Cursor 3} {23000 ps} 0}
 configure wave -namecolwidth 375
 configure wave -valuecolwidth 180
 configure wave -justifyvalue left
@@ -254,4 +259,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {135872035 ps} {135913051 ps}
+WaveRestoreZoom {499795102 ps} {499959166 ps}

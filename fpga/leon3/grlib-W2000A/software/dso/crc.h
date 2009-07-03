@@ -68,10 +68,16 @@ typedef unsigned int crc;
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void  crcInit(void);
 crc   crcSlow(unsigned char const message[], int nBytes);
 crc   crcFast(unsigned char const message[], int nBytes);
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* _crc_h */

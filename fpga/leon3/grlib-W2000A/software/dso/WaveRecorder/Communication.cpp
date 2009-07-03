@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : WaveFilePackage.h
+* File           : Communication.cpp
 * Author		 : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 20.04.2009
+* Date           : 28.06.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,63 +32,3 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef WAVEFILEPACKAGE_H
-#define WAVEFILEPACKAGE_H
-
-#include "stdio.h"
-#include "types.h"
-
-typedef struct { 
-	short DataTyp;
-	int Channels;
-	int DataSize;
-	unsigned int SamplingRate;
-} aWaveFileInfo;
-
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool OpenWaveFileRead(	const char * 		FileName,
-			FILE ** 			WaveFileHandle,
- 			aWaveFileInfo		FileInfo);
-
-
-bool ReadSample(	FILE * 			WaveFileHandle,
-			int * 			Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool ReadSamples(	FILE * 			WaveFileHandle,
-			int * 			Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE **	 		WaveFileHandle,
- 			aWaveFileInfo 		WaveFile);
-
-bool WriteSample(	FILE * 			WaveFileHandle,
-			int const 		Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool WriteSamples(	FILE * 			WaveFileHandle,
-			const int * 		Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif

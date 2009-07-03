@@ -40,15 +40,20 @@
 #include "DSO_Remote_Master.h"
 #include "argtable2.h"
 #include "crc.h"
+#include "Request.h"
+#include "RemoteSignalCapture.h"
+#include "NormalUart.h"
+#include "DebugUart.h"
 
 #define DSO_NAK_MESSAGE "At least one argument was not accepted from the target!\n"
 
-bool CheckArgCount (	struct arg_lit * 	IsX[], 
+bool CheckArgCount (	void * 	IsCount, 
                   const struct arg_str * Command,
 			const int		count,
 			const int		size){ 
 	int i = 0;
 	int nerrors = 0;
+	arg_lit ** IsX = (arg_lit **)IsCount;
 	for(i = 0; i < size; ++i){
 		if (IsX[i]->count != count){
 			printf("With --Command=%s also %d --%s= argument is/are needed!\n", Command->sval[0], count, IsX[i]->hdr.longopts);
@@ -61,8 +66,21 @@ bool CheckArgCount (	struct arg_lit * 	IsX[],
 	return true;
 }	
 
+void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Request * R){
+	delete R;
+	R = 0;
+	arg_freetable(argtable, TableItems);
+	if (Ret != 0){
+		exit(0);
+	 } else {
+		printf(DSO_NAK_MESSAGE); 
+		exit(3);
+	 }			
+}
+
 int main(int argc, char * argv[]) {
-	struct arg_str * UartAddr	= arg_str1("u", "UART", NULL, "Path of serial device");
+	struct arg_str * UartAddr	= arg_str0("u", "UART", NULL, "Path of serial device");
+	struct arg_str * Protocol   = arg_str1("p", "protocol", "CPU,Debugger", "Debugger is for devices without a CPU");
 	struct arg_str * Command	= arg_str1("c", "Command",
 			"TriggerInput,Trigger,AnalogSettings,Capture,ForceRegs,ReadRegs", 
 			"DSO call type");
@@ -114,7 +132,7 @@ int main(int argc, char * argv[]) {
 	struct arg_lit * help		= arg_lit0("hH","help",			"Displays this help information");
 	struct arg_end * end = arg_end(20);
 	void * argtable[] = {
-	Command,Channels,SampleSize,SampleFS,AACFilterStart,
+	Command,Protocol,Channels,SampleSize,SampleFS,AACFilterStart,
 	AACFilterEnd,Ch0Src,Ch1Src,Ch2Src,Ch3Src,
 	Trigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
 	TriggerLowTime,TriggerHighTime,AnGainCh0,AnGainCh1,AnGainCh2,
@@ -124,12 +142,7 @@ int main(int argc, char * argv[]) {
 	ForceSize,ForceFile,CapWTime,CapSize,WavForceFS,
 	WaveFile,UartAddr,BaudRate,help,end};
 	int Retry = 0;
-#ifdef WINNT
-    HANDLE hUart = 0;
-#else	
-    uart_regs hUart = 0;
-#endif      
-    uart_regs * huart = &hUart; /* uart handle */
+    
 	int nerrors = arg_parse(argc,argv,argtable);
 
 	if (nerrors != 0) {
@@ -143,18 +156,29 @@ int main(int argc, char * argv[]) {
 		arg_print_syntax(stdout,argtable,"");
 		printf("\n");
 	}
-	if (!UartInit(UartAddr->sval[0],BaudRate->ival[0],huart)){
-		return 5;
+
+	Request * DSOInterface = 0;
+	if ((strcmp("Debugger",Protocol->sval[0]) == 0) && (UartAddr->count == 1)) {
+		DSOInterface = new RemoteSignalCapture(new DebugUart);
+	} else {
+		DSOInterface = new Request(new NormalUart);
+	}
+	if (DSOInterface == 0) {
+		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+		return 2;
+	}
+
+	if (!DSOInterface->InitComm((char*)UartAddr->sval[0],5000,BaudRate->ival[0])){
+	//if (!UartInit(UartAddr->sval[0],BaudRate->ival[0],huart)){
+		ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
 	if (strcmp("TriggerInput",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,AACFilterStart,AACFilterEnd,
 			Ch0Src,Ch1Src,Ch2Src,Ch3Src};
-		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		bool Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
-			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-			UartClose(huart);
-			return 2;
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 /*		printf("C %d SS %d fs %d st %d, stp %d, ch0 %d ch1 %d ch2 %d ch3 %d\n", 
                 Channels->ival[0],
@@ -166,42 +190,28 @@ int main(int argc, char * argv[]) {
 				Ch1Src->ival[0],
 				Ch2Src->ival[0],
 				Ch3Src->ival[0]); */
-		Retry = 0;
-		Ret = 0;
-		while ((Retry != 2) &&  (Ret == 0)){
-			Ret = SendTriggerInput(huart,
-				Channels->ival[0],
-				SampleSize->ival[0],
-				SampleFS->ival[0],
-				AACFilterStart->ival[0],
-				AACFilterEnd->ival[0],
-				Ch0Src->ival[0],
-				Ch1Src->ival[0],
-				Ch2Src->ival[0],
-				Ch3Src->ival[0]);
-			Retry++;
-		}
-		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-		if (Ret == true){
-            UartClose(huart);
-			return 0;
-		 } else {
-            UartClose(huart);
-			printf(DSO_NAK_MESSAGE); 
-			return 3;
-		 }			
+		Ret = DSOInterface->SendTriggerInput(
+			Channels->ival[0],
+			SampleSize->ival[0],
+			SampleFS->ival[0],
+			AACFilterStart->ival[0],
+			AACFilterEnd->ival[0],
+			Ch0Src->ival[0],
+			Ch1Src->ival[0],
+			Ch2Src->ival[0],
+			Ch3Src->ival[0]);
+
+        ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);	
 	}
 
 	if (strcmp("Trigger",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
-			Trigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
+			(arg_int*)Trigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
 			TriggerLowTime,TriggerHighTime};
 		int TriggerNo = 2;
 		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
-			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-			UartClose(huart);
-			return 2;
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 		if (strcmp("ExtLH",Trigger->sval[0]) == 0){
 			TriggerNo = 0;
@@ -215,34 +225,22 @@ int main(int argc, char * argv[]) {
 		if (strcmp("SchmittHL",Trigger->sval[0]) == 0){
 			TriggerNo = 3;
 		}
-		Retry = 0;
-		Ret = 0;
-		while ((Retry != 2) &&  (Ret == 0)){
-			Ret = SendTrigger(huart,
-				TriggerNo,
-				TrPrefetch->ival[0],
-				TriggerChannel->ival[0],
-				TriggerLowRef->ival[0],
-				TriggerHighRef->ival[0],
-				TriggerLowTime->ival[0],
-				TriggerHighTime->ival[0]);
-			Retry++;
-		}
-		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-		if (Ret == true){
-            UartClose(huart);
-			return 0;
-		} else {
-            UartClose(huart);
-			printf(DSO_NAK_MESSAGE); 
-			return 3;
-		}			
+
+		Ret = DSOInterface->SendTrigger(
+			TriggerNo,
+			TrPrefetch->ival[0],
+			TriggerChannel->ival[0],
+			TriggerLowRef->ival[0],
+			TriggerHighRef->ival[0],
+			TriggerLowTime->ival[0],
+			TriggerHighTime->ival[0]);
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);	
 	}
 	if (strcmp("AnalogSettings",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
 			AnGainCh0,AnGainCh1,AnGainCh2,AnGainCh3,AnDA_OffsetCh0,
-			AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,AnPWM,AnSrc2Ch0,
-			AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3};
+			AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,AnPWM,(arg_int*)AnSrc2Ch0,
+			(arg_int*)AnSrc2Ch1,(arg_int*)AnSrc2Ch2,(arg_int*)AnSrc2Ch3};
 		int i = 0;
 		SetAnalog Settings[4];
 		struct arg_int * Gain[4] = {AnGainCh0,AnGainCh1,AnGainCh2,AnGainCh3};
@@ -251,65 +249,46 @@ int main(int argc, char * argv[]) {
 		struct arg_str * Src2[4] = {AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3}; 
 		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
-			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-            UartClose(huart);
-			return 2;
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
 		for (i = 0; i < Channels->ival[0]; ++i) {
 			Settings[i].myVperDiv 	= Gain[i]->ival[0];
 			Settings[i].AC 		= AC[i]->count;
 			Settings[i].DA_Offset	= DAoff[i]->ival[0];
 			Settings[i].Specific	= AnPWM->ival[0];
-			Settings[i].Mode = 0;
+			Settings[i].Mode = normal;
 			if (strcmp("pwm",Src2[i]->sval[0]) == 0){
-					Settings[i].Mode = 1;
+					Settings[i].Mode = pwm_offset;
 			}
 			if (strcmp("gnd",Src2[i]->sval[0]) == 0){
-					Settings[i].Mode = 2;
+					Settings[i].Mode = gnd;
 			}
 			if (strcmp("lowpass",Src2[i]->sval[0]) == 0){
-					Settings[i].Mode = 3;
+					Settings[i].Mode = lowpass;
 			}
 		}	
-		Retry = 0;
-		Ret = 0;
-		while ((Retry != 2) &&  (Ret == 0)){
-			Ret = SendAnalogInput(huart,Channels->ival[0], Settings);
-			Retry++;
-		}
-		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-		UartClose(huart);
-		if (Ret == true){
-			return 0;
-		} else {
-			printf(DSO_NAK_MESSAGE); 
-			return 3;
-		}			
+
+		Ret = DSOInterface->SendAnalogInput(Channels->ival[0], Settings);
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);		
 	}
 	if (strcmp("Capture",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,CapWTime,CapSize,
-			WavForceFS,WaveFile};
+			WavForceFS,(arg_int*)WaveFile};
 		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		uSample * buffer = (unsigned int*)malloc(CapSize->ival[0]*sizeof(int));
-		int FastMode = 0;
+		uSample * buffer = (uSample *)malloc(CapSize->ival[0]*sizeof(int));
+		uint32_t FastMode = 0;
+ 
 		if (buffer == 0){
 			printf("Not enough memory aviable!\n");
-			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-			UartClose(huart);
-			return 4;
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
-		Retry = 0;
-		Ret = 0;
-		while ((Retry != 2) &&  (Ret == 0)){
-			Ret = ReceiveSamples(huart, 
-				CapWTime->ival[0],
-				1,
-				CapSize->ival[0],
-				&FastMode,
-				(unsigned int *)buffer);
-			Retry++;
-		}
+		Ret = DSOInterface->ReceiveSamples(
+			CapWTime->ival[0],
+			1,
+			CapSize->ival[0],
+			&FastMode,
+			(uint32_t *)buffer);
 /*		{
 		int i = 0;
 		int j = 0;
@@ -344,24 +323,18 @@ int main(int argc, char * argv[]) {
 		}
 */		
         if (Ret != 0){
-			RecordWave(buffer,WaveFile->filename[0],
+			RecordWave(buffer,(char*)WaveFile->filename[0],
 				Ret,SampleFS->ival[0],Channels->ival[0],
 				SampleSize->ival[0],FastMode);
 			free(buffer);
 			buffer = 0;
-			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-			UartClose(huart);
-			return 0;
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		 } else {
-			printf(DSO_NAK_MESSAGE); 
-			arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-			UartClose(huart);
-			return 3;
+			ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		 }		
 	/*	}}}} */
 	}
 
-	arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
-	UartClose(huart);
+	ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	return 0;
 }

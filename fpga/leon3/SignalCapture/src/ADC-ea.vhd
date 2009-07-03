@@ -4,7 +4,7 @@
 -- File       : ADC-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-05-24
+-- Last update: 2009-06-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -70,8 +70,8 @@ architecture RTL of ADC is
   -- signal   areset        : std_ulogic;
   signal   ADC           : aADCIn;
   signal   InvPhase      : aADCInPhase(0 to 0);
-  signal   Phase0        : aADCInPhase(1 downto 0);
-  signal   Phase1        : aADCInPhase(1 downto 0);
+  signal   Phase0        : aADCInPhase(0 downto 0);
+  signal   Phase1        : aADCInPhase(0 downto 0);
   signal   Phase2        : aADCInPhase(0 downto 0);
 --  signal   Phase3        : aADCInPhase(2 downto 0);
   signal   Phase3        : aADCInPhase(0 downto 0);
@@ -100,6 +100,8 @@ begin
       inclk0 => iClkADC(1),
       pllena => '1',
       c0     => ClkADC250(1),
+      c1     => Clk125,
+      c2     => oClk625,
       locked => Locked(1));
 
   PLL2 : entity DSO.PLL2
@@ -117,8 +119,6 @@ begin
       inclk0 => iClkADC(3),
       pllena => '1',
       c0     => ClkADC250(3),
-      c1     => Clk125,
-      c2     => oClk625,
       locked => Locked(3));
 
   pInput : for i in 0 to cADCsperChannel-1 generate
@@ -149,13 +149,15 @@ begin
       Phase2 <= (others => (others => (others => '0')));
       Phase3 <= (others => (others => (others => '0')));
     elsif falling_edge(ClkADC250(3)) then
-      Phase0(0) <= Phase0(1);
-      Phase1(0) <= Phase1(1);
+   --   Phase0(0) <= Phase0(1);
+   --   Phase1(0) <= Phase1(1);
+   --   Phase2(0) <= Phase2(1);
+   --   Phase3(0) <= Phase3(1);
       for i in 0 to cChannels-1 loop
-        Phase0(1)(i) <= not InvPhase(0)(i); -- not's solve hold time violations
-        Phase1(1)(i) <= not ADC(1)(i);
-        Phase2(0)(i) <= not ADC(2)(i); 
-        Phase3(0)(i) <= not ADC(3)(i); -- not's are only workarounds to avoid a slow block ram!
+        Phase0(0)(i) <= InvPhase(0)(i); -- not's solve hold time violations
+        Phase1(0)(i) <= ADC(1)(i);
+        Phase2(0)(i) <= ADC(2)(i); 
+        Phase3(0)(i) <= ADC(3)(i); -- not's are only workarounds to avoid a slow block ram!
       end loop;
     end if;
   end process;
@@ -166,17 +168,17 @@ begin
       oData <= (others => (others => (others => '0')));
     elsif rising_edge(Clk125) then
       for i in 0 to cChannels-1 loop
-        oData(i)(0) <= not Phase0(0)(i);
-        oData(i)(2) <= not Phase1(0)(i);
-        oData(i)(4) <= not Phase2(0)(i);
-        oData(i)(6) <= not Phase3(0)(i);
+        oData(i)(4) <= Phase0(0)(i);
+        oData(i)(5) <= Phase1(0)(i);
+        oData(i)(6) <= Phase2(0)(i);
+        oData(i)(7) <= Phase3(0)(i);
       end loop;
     elsif falling_edge(Clk125) then
       for i in 0 to cChannels-1 loop
-        oData(i)(1) <= not Phase0(0)(i);
-        oData(i)(3) <= not Phase1(0)(i);
-        oData(i)(5) <= not Phase2(0)(i);
-        oData(i)(7) <= not Phase3(0)(i);
+        oData(i)(0) <= Phase0(0)(i);
+        oData(i)(1) <= Phase1(0)(i);
+        oData(i)(2) <= Phase2(0)(i);
+        oData(i)(3) <= Phase3(0)(i);
       end loop;
     end if;
   end process;

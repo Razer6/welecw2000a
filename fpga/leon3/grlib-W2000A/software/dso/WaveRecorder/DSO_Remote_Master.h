@@ -44,6 +44,10 @@
 
 #define DSO_NAK_MESSAGE "At least one argument was not accepted from the target!\n"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool SendTriggerInput (	uart_regs * uart,
 			const unsigned int noChannels, 
 			const unsigned int SampleSize, 
@@ -82,6 +86,10 @@ bool RecordWave (uSample * buffer,
 				 unsigned int Channels,
 				 unsigned int SampleSize,
 				 unsigned int FastMode);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

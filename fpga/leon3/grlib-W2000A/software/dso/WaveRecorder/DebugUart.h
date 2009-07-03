@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : WaveFilePackage.h
+* File           : DebugUart.h
 * Author		 : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 20.04.2009
+* Date           : 29.06.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,63 +32,28 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef WAVEFILEPACKAGE_H
-#define WAVEFILEPACKAGE_H
+#ifndef DEBUGUART_H
+#define DEBUGUART_H
+#include "Communication.h"
 
-#include "stdio.h"
-#include "types.h"
-
-typedef struct { 
-	short DataTyp;
-	int Channels;
-	int DataSize;
-	unsigned int SamplingRate;
-} aWaveFileInfo;
-
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool OpenWaveFileRead(	const char * 		FileName,
-			FILE ** 			WaveFileHandle,
- 			aWaveFileInfo		FileInfo);
-
-
-bool ReadSample(	FILE * 			WaveFileHandle,
-			int * 			Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool ReadSamples(	FILE * 			WaveFileHandle,
-			int * 			Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE **	 		WaveFileHandle,
- 			aWaveFileInfo 		WaveFile);
-
-bool WriteSample(	FILE * 			WaveFileHandle,
-			int const 		Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool WriteSamples(	FILE * 			WaveFileHandle,
-			const int * 		Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-#ifdef __cplusplus
-}
-#endif
-
+class DebugUart : public Communication {
+public:
+	DebugUart(){}
+	virtual uint32_t Init (
+		char * Device, 
+		const uint32_t TimeoutMS, 
+		const uint32_t Baudrate,
+		char * IPAddr);
+	virtual ~DebugUart();
+	virtual uint32_t Send(
+		uint32_t * Data, 
+		uint32_t Length);
+	virtual uint32_t Receive(
+		uint32_t * Data, 
+		uint32_t Length, 
+		uint32_t * FastMode);
+	virtual uint32_t GetACK();
+private:
+	static const int32_t cFrameLength = 64/sizeof(uint32_t); // read from VHDL Source
+};
 #endif

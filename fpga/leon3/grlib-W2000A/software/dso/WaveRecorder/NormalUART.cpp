@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : WaveFilePackage.h
+* File           : NormalUART.cpp
 * Author		 : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 20.04.2009
+* Date           : 28.06.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,63 +32,47 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef WAVEFILEPACKAGE_H
-#define WAVEFILEPACKAGE_H
 
-#include "stdio.h"
-#include "types.h"
+#include "NormalUart.h"
+#include "DSO_Remote.h"
+#include "PCUart.h"
 
-typedef struct { 
-	short DataTyp;
-	int Channels;
-	int DataSize;
-	unsigned int SamplingRate;
-} aWaveFileInfo;
-
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
-
-
-#ifdef __cplusplus
-extern "C" {
+NormalUart::~NormalUart(){
+#ifdef WINNT
+	CloseHandle(mH);
+#else
+	close(mH);
 #endif
-
-bool OpenWaveFileRead(	const char * 		FileName,
-			FILE ** 			WaveFileHandle,
- 			aWaveFileInfo		FileInfo);
-
-
-bool ReadSample(	FILE * 			WaveFileHandle,
-			int * 			Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool ReadSamples(	FILE * 			WaveFileHandle,
-			int * 			Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE **	 		WaveFileHandle,
- 			aWaveFileInfo 		WaveFile);
-
-bool WriteSample(	FILE * 			WaveFileHandle,
-			int const 		Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool WriteSamples(	FILE * 			WaveFileHandle,
-			const int * 		Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-#ifdef __cplusplus
 }
-#endif
 
-#endif
+uint32_t NormalUart::Init(
+				char * Device, 
+				const uint32_t TimeoutMS, 
+				const uint32_t Baudrate,
+				char * IPAddr)
+{
+	return UartInit(Device,Baudrate,&mH);
+}
+
+uint32_t NormalUart::Send(uint32_t *Data, uint32_t Length)
+{
+	SendHeader(&mH);
+	for (uint32_t i = 0; i < Length; ++i){
+		SendInt(&mH,Data[i]);
+	}
+	crcInit();
+	ChangeEndian(Data,Length);
+	SendInt(&mH,crcFast((unsigned char*)Data,Length));
+	return GetACK();
+}
+
+uint32_t NormalUart::Receive(uint32_t *Data, 
+							 uint32_t Length, 
+							 uint32_t * FastMode)
+{
+	return ReceiveData(&mH,Length,FastMode,Data);
+}
+
+uint32_t NormalUart::GetACK(){
+	return ReceiveACK(&mH);
+}

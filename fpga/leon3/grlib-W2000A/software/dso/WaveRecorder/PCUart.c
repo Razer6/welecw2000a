@@ -46,7 +46,7 @@
 struct termios tio;
 #endif
 
-void UartClose (uart_regs * uart){
+void STDCALL UartClose (uart_regs * uart){
 #ifdef WINNT 
        CloseHandle(*uart);
 #else 
@@ -55,7 +55,8 @@ void UartClose (uart_regs * uart){
 }
 
 
-bool UartInit(	char * UartAddr,
+bool UartInit(	
+		char * UartAddr,
 		const int BaudRate,
 		uart_regs * uart){
 #ifdef WINNT
@@ -82,8 +83,13 @@ bool UartInit(	char * UartAddr,
     m_dcb.ByteSize = 8;
     m_dcb.Parity = NOPARITY;
     m_dcb.StopBits = ONESTOPBIT;
-    m_dcb.fAbortOnError = TRUE;
+    m_dcb.fAbortOnError = FALSE;
     m_dcb.fRtsControl = RTS_CONTROL_DISABLE;
+	m_dcb.fOutxCtsFlow = FALSE;
+    m_dcb.fOutxDsrFlow = false;
+    m_dcb.fDtrControl = DTR_CONTROL_DISABLE;
+    m_dcb.fDsrSensitivity = false;
+
     
     m_bPortReady = SetCommState(*uart, &m_dcb);
     if (GetLastError() != ERROR_SUCCESS) {
@@ -176,15 +182,21 @@ bool UartInit(	char * UartAddr,
 
 char ReceiveCharBlock(uart_regs * uart){
 	char ch;
-	unsigned int ret = 0;
+
 #ifdef WINNT
+	LPDWORD ret = 0;
+	int32_t x = 0;
+
    do {
-      ReadFile(*uart,&ch,1,&ret,NULL);
+      ReadFile(*uart, &ch, 1, (LPDWORD)&ret, NULL);
 	  if (ret == 0){
 		  Sleep(1);
 	  }
    } while (ret == 0);
+   x = (int32_t)(unsigned char)ch;
+   printf("%02x ",x);
 #else
+	unsigned int ret = 0;
 	while(read(uart,&ch,1) == 0) {
 		usleep(1000);
 	}
@@ -199,7 +211,7 @@ char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
 	*error = 0;
 #ifdef WINNT
 	do {
-		ReadFile(*uart,&ch,1,&ret,NULL);
+		ReadFile(*uart,&ch,1,(LPDWORD)&ret,NULL);
 		cnt++;
 		if (ret == 0){
 			Sleep(1);
@@ -220,8 +232,10 @@ char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
 void SendCharBlock(uart_regs * uart, char c){
 #ifdef WINNT
 	unsigned int ret = 0;
+	int32_t x = (int32_t)(unsigned char)c;
+	printf("%02x ",x);
 	do {
-		WriteFile(*uart,&c,1,&ret,NULL);
+		WriteFile(*uart,&c,1,(LPDWORD)&ret,NULL);
 		if (ret == 0){
 			Sleep(5);
 		}

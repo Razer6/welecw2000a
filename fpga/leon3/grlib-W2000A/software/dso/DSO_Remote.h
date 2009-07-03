@@ -68,6 +68,10 @@
 #endif
 #include "crc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void SendNAK(uart_regs * uart);
 void SendACK(uart_regs * uart);
 void SendCRCError(uart_regs * uart);
@@ -75,10 +79,15 @@ void ChangeEndian(unsigned int message[], int nBytes);
 bool CheckCRC(crc crcSent, unsigned int message[], int nBytes);
 void SendHeader(uart_regs * uart);
 bool SendData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned int * data);
-int ReceiveData(uart_regs * uart, int buffersize, int * FastMode, int * data);
+int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data);
 bool ReceiveACK(uart_regs * uart);
 bool ReceiveHeader(uart_regs * uart, const char * RefHeader, unsigned int TimeoutMs);
 unsigned int  GetInt(uart_regs * uart);
 void SendInt(uart_regs * uart, unsigned int data);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif

@@ -149,8 +149,8 @@ package config is
   constant CFG_ETH_ENL : integer := 16#CC0001#;
 -- PROM/SRAM controller
   constant CFG_SRCTRL : integer := 1;
-  constant CFG_SRCTRL_PROMWS : integer := (10);
-  constant CFG_SRCTRL_RAMWS : integer := (10);
+  constant CFG_SRCTRL_PROMWS : integer := (4);
+  constant CFG_SRCTRL_RAMWS : integer := (2);
   constant CFG_SRCTRL_IOWS : integer := (2);
   constant CFG_SRCTRL_RMW : integer := 0;
   constant CFG_SRCTRL_8BIT : integer := 0;

@@ -10,6 +10,6 @@
 #include <avr/signal.h>
 
 int main () {
-	*MCUCR = (1 << SM1);
+	MCUCR = (1 << SM1);
 	return 0;
 }

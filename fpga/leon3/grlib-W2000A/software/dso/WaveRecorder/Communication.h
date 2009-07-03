@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : WaveFilePackage.h
+* File           : Communication.h
 * Author		 : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 20.04.2009
+* Date           : 28.06.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,63 +32,50 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef WAVEFILEPACKAGE_H
-#define WAVEFILEPACKAGE_H
+#ifndef COMMUNICATION_H
+#define COMMUNICATION_H
 
-#include "stdio.h"
-#include "types.h"
+#include "DSO_SFR.h"
+#include "string.h"
+#include "Object.h"
 
-typedef struct { 
-	short DataTyp;
-	int Channels;
-	int DataSize;
-	unsigned int SamplingRate;
-} aWaveFileInfo;
-
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
-
-
-#ifdef __cplusplus
-extern "C" {
+#ifdef WINNT
+#include "Windows.h"
+#else
+#inlcude <unistd.h>
 #endif
 
-bool OpenWaveFileRead(	const char * 		FileName,
-			FILE ** 			WaveFileHandle,
- 			aWaveFileInfo		FileInfo);
+class Communication : public Object {
+public:
+	Communication(){}
+	virtual uint32_t Init (
+		char * Device, 
+		const uint32_t TimeoutMS = 5000, 
+		const uint32_t Baudrate  = 115200,
+		char * IPAddr = "192.168.0.51"){ 
+			mH = 0;
+			return 0;
+	}
+//	virtual ~Communication();
+	virtual uint32_t Send(uint32_t * Data, uint32_t Length){
+		return 0;
+	}
+	virtual uint32_t Receive(uint32_t * Data, uint32_t Length, uint32_t * FastMode){
+		return 0;
+	}
+	virtual uint32_t GetACK(){
+		return 0;
+	}
 
-
-bool ReadSample(	FILE * 			WaveFileHandle,
-			int * 			Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool ReadSamples(	FILE * 			WaveFileHandle,
-			int * 			Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-bool OpenWaveFileWrite(	const char * 		FileName,
-			FILE **	 		WaveFileHandle,
- 			aWaveFileInfo 		WaveFile);
-
-bool WriteSample(	FILE * 			WaveFileHandle,
-			int const 		Sample,
-			int * 			RemainingData,
-			const short 	DataTyp);
-
-bool WriteSamples(	FILE * 			WaveFileHandle,
-			const int * 		Samples,
-			int * 			RemainingData,
-			const int 		Channels,
-			const short 	DataTyp);
-
-#ifdef __cplusplus
-}
+protected:
+	char * mDevice;
+#ifdef WINNT
+	HANDLE mH;
+#else
+	int mH;
 #endif
+	uint32_t mTimeout;
+
+};
 
 #endif

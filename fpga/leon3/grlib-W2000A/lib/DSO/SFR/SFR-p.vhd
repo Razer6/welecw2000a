@@ -4,7 +4,7 @@
 -- File       : SFR-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-02-14
+-- Last update: 2009-07-01
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -42,24 +42,25 @@ use grlib.amba.all;
 use grlib.stdlib.all;
 use grlib.devices.all;
 library DSO;
-use DSO.pSpecialFunctionRegister.all;   
+use DSO.pSpecialFunctionRegister.all;
 
 package pSFR is
   component SFR is
-  generic (
-    pindex : integer := 0;               -- Leon3 index
-    paddr  : integer := 0;               -- Leon3 address
-    pmask  : integer := 16#FFF#;         -- Leon3 mask
-    pirq   : integer := 0                -- Leon3 IRQ
-    );
-  port (
-    rst_in      : in  std_ulogic;        -- Global reset, active low
-    clk_i       : in  std_ulogic;        -- Global clock
-    iResetAsync : in  std_ulogic;        -- Global reset
-    apb_i       : in  apb_slv_in_type;   -- APB input
-    apb_o       : out apb_slv_out_type;  -- APB output
-    iSFRControl : in  aSFR_in;
-    oSFRControl : out aSFR_out
-    );
-end component;
+    generic (
+      pindex : integer := 0;                -- Leon3 index
+      paddr  : integer := 0;                -- Leon3 address
+      pmask  : integer := 16#FFF#;          -- Leon3 mask
+      pirq   : integer := 0                 -- Leon3 IRQ
+      );
+    port (
+      rst_in       : in  std_ulogic;        -- Global reset, active low
+      clk_i        : in  std_ulogic;        -- Global clock
+      clk_design_i : in  std_ulogic;
+      iResetAsync  : in  std_ulogic;        -- Global reset
+      apb_i        : in  apb_slv_in_type;   -- APB input
+      apb_o        : out apb_slv_out_type;  -- APB output
+      iSFRControl  : in  aSFR_in;
+      oSFRControl  : out aSFR_out
+      );
+  end component;
 end;
