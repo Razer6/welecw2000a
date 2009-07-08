@@ -58,19 +58,28 @@
 #define RX_DATAREADY 0x1
 #define OVERRUN      0x10 
 #define TX_FULL      (1 << 9)
+#define TX_EMPTY     (1 << 2)
 
 bool UartInit(	const unsigned int CPUFreq,
 		const unsigned int BaudRate,
 		const unsigned int Control,
 		uart_regs * uart) {
 	int scaler = CPUFreq/(8*BaudRate);
+	/* most times the baudrate cannot be reached exactly!
+	 * For this the PCs set the baudrate slightly higher
+	 * and here this is done, too */
+	if (scaler*8*BaudRate != CPUFreq){
+		scaler--;
+	}
 /*	if you do this outside, more uarts can be used with this file*/
 /*	uart = (uart_regs *)GENERIC_UART_BASE_ADDR;*/
 	if ((BaudRate < 10) || (CPUFreq < 1000000) || (BaudRate > CPUFreq/8)) {
 		return false;
 	}
 	uart->scaler = scaler;
+	printf("Scaler = %d  Control = %d\n",scaler,Control);
 	uart->control = Control;
+	uart->status = 0;
 	return true;
 }
 
@@ -78,7 +87,7 @@ char ReceiveCharBlock(uart_regs * uart) {
 	volatile int temp = 0;
 	while (1){
 		temp = loadmem((int)&uart->status);
-		if ((temp & RX_DATAREADY) == 1){
+		if ((temp & RX_DATAREADY) != 0){
 			break;
      		}
 	}
@@ -92,8 +101,11 @@ void SendCharBlock(uart_regs * uart, char c) {
 	volatile int temp = 0;
 	while (1) {
 		temp = loadmem((int)&uart->status);
-		if ((temp & TX_FULL) == 0){
+		if ((temp & TX_EMPTY) != 0){
 			break;
+		}
+		if ((uint32_t)uart == DEBUG_UART_BASE_ADDR){
+			printf("%d ",temp & TX_EMPTY);
 		}
 	}
 	uart->data = c;
@@ -140,7 +152,7 @@ void SendString (uart_regs * uart, char * c, unsigned int *size) {
 	*size = strlen(c);
 	while (i < (*size)){
 		temp = loadmem((int)&uart->status);
-		if ((temp & TX_FULL) != 0){
+		if ((temp & TX_EMPTY) == 0){
 			break;
 		}
 		uart->data = c[i];

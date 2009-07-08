@@ -148,7 +148,7 @@ unsigned int ReceiveSamples(uart_regs * uart,
 	crcInit();
 	crcSend = crcFast((unsigned char*)data,sizeof(data));
 	SendInt(uart,crcSend);
-	return ReceiveData(uart,CaptureSize,FastMode,RawData);
+	return ReceiveData(uart,CaptureSize,RawData);
 }
 
 

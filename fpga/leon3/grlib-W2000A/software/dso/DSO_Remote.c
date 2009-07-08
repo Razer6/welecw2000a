@@ -92,7 +92,7 @@ void SendInt(uart_regs * uart, unsigned int data) {
 	int i = 0;
 	uEndian d;
 	d.i=data;
-/*	printf("\nSendInt %d ",data);*/
+/*	printf("\nSendInt %d ",data); */
 	for (i = 0; i < 4; ++i){
 #ifdef LITTLE_ENDIAN
 		SendCharBlock(uart,d.c[3-i]);
@@ -107,7 +107,7 @@ bool CheckCRC(crc crcSent, unsigned int message[], int nBytes){
 	ChangeEndian(message,nBytes);
 	crcInit();	
 	crcRec = crcFast((unsigned char*)message,nBytes);
-/*	printf("CRC Check with %d bytes: crcSent=%d crcRec=%d!\n",nBytes,crcSent,crcRec);*/
+	printf("CRC Check with %d bytes: crcSent=%d crcRec=%d!\n",nBytes,crcSent,crcRec);
 	if (crcSent == crcRec){
 		return true;
 	} else {
@@ -153,11 +153,13 @@ bool ReceiveHeader(uart_regs * uart,
 	return true;
 }
 
-bool SendData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned int * data) {
+bool SendCaptureData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned int * data) {
 	char DataH[] = DSO_DATA_RESP;
 	int i = 0;
 	SendHeader(uart);
+	printf(DSO_SEND_HEADER);
 	SendStringBlock(uart,DataH);
+	printf("%s\n",DataH);
 	SendInt(uart, FastMode);
 	SendInt(uart, datasize);
 	for (i = 0; i < datasize; ++i) {
@@ -166,22 +168,29 @@ bool SendData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned in
 	return true;
 }
 
-int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data) {
+bool SendData(uart_regs * uart,  int datasize, unsigned int * data) {
+	int i = 0;
+	SendHeader(uart);
+	SendStringBlock(uart,DSO_DATA_RESP);
+	SendInt(uart, datasize);
+	for (i = 0; i < datasize; ++i) {
+		SendInt(uart, data[i]);
+	}
+	return true;
+}
+
+
+int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data) {
 	uint32_t size = 0;
 	uint32_t i = 0;
 	int dummy = 0;
-	char DataH[] = DSO_DATA_RESP;
-
 	if (!ReceiveHeader(uart, DSO_REC_HEADER,1000)){
         	printf("Receive Header error\n");
 		return 0;
 	}
-	size = strlen(DataH);
-	for (i = 0; i < size; ++i){
-		if (DataH[i] != ReceiveCharBlock(uart)){
-			printf("Receive Data Responce error\n");
-			return 0;
-		}
+	if (!ReceiveHeader(uart, DSO_DATA_RESP,1000)){
+        	printf("Receive Data Responce error\n");
+		return 0;
 	}
 	*FastMode = GetInt(uart);
 	size = GetInt(uart);
@@ -189,6 +198,30 @@ int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint
 		*FastMode = 0;
 	}
 	printf("Receiving %d DWORDS FastMode=%d\n",size,*FastMode);
+	for (i = 0; i < size; ++i){
+		if (i < buffersize){
+			data[i] = GetInt(uart);
+		} else {
+			dummy = GetInt(uart);
+		}
+	}
+	return size;
+}
+
+int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data) {
+	uint32_t size = 0;
+	uint32_t i = 0;
+	int dummy = 0;
+	if (!ReceiveHeader(uart, DSO_REC_HEADER,1000)){
+        	printf("Receive Header error\n");
+		return 0;
+	}
+	if (!ReceiveHeader(uart, DSO_DATA_RESP,1000)){
+        	printf("Receive Header error\n");
+		return 0;
+	}
+	size = GetInt(uart);
+	printf("Receiving %d DWORDS \n",size);
 	for (i = 0; i < size; ++i){
 		if (i < buffersize){
 			data[i] = GetInt(uart);

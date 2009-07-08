@@ -77,7 +77,7 @@ bool UartInit(
     m_bPortReady = GetCommState(*uart, &m_dcb);
     if (GetLastError() != ERROR_SUCCESS) {
        printf("GetCommState(): %lu\n", GetLastError());              
-       return false;
+       return false;				
     }
     m_dcb.BaudRate = BaudRate;
     m_dcb.ByteSize = 8;

@@ -74,7 +74,7 @@ uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
 		}
 		/* b(7) = '1' request 
 		 * b(6) = '1' write */
-		SendCharBlock(&mH, 0xC0 | (FrameLength*sizeof(uint32_t)));
+		SendCharBlock(&mH, 0xC0 | (FrameLength*sizeof(uint32_t)-1));
 		SendInt(&mH,Data[0]+FramePos-1); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			SendInt(&mH,Data[i]);
@@ -86,8 +86,7 @@ uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
 }
 
 uint32_t DebugUart::Receive(uint32_t *Data, 
-							 uint32_t Length, 
-							 uint32_t * FastMode)
+							 uint32_t Length)
 {
 	int32_t Len = (int32_t)(Length-1); /* address is not counted */
 	int32_t FrameLength = cFrameLength;
@@ -101,7 +100,7 @@ uint32_t DebugUart::Receive(uint32_t *Data,
 		}
 		/* b(7) = '1' request 
 		 * b(6) = '1' write */
-		SendCharBlock(&mH, 0x80 | (FrameLength*sizeof(uint32_t)));
+		SendCharBlock(&mH, 0x80 | (FrameLength*sizeof(uint32_t)-1));
 		SendInt(&mH,Data[0]); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			Data[i] = GetInt(&mH);

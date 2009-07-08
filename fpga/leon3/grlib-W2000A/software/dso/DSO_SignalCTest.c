@@ -44,10 +44,11 @@
 #include "DSO_Remote_Slave.h"
 #include "DSO_Remote.h"
 
-/*#define BOARDTEST*/ 
+#define BOARDTEST 
 
 #ifdef BOARDTEST
-#define CAPTURESIZE ((RAM_SIZE-0x100000)/sizeof(int))
+#define CAPTURESIZE 8000
+/*#define CAPTURESIZE ((RAM_SIZE-0x100000)/sizeof(int))*/
 #else
 #define CAPTURESIZE 100000
 #define SendStringBlock(A,B) 
@@ -76,11 +77,11 @@ int main () {
 	Analog[1].Mode = normal;
 	Analog[1].DA_Offset = 0xf1;
 	Analog[1].PWM_Offset = 0xf1;*/
-	InitDisplay();
-	DrawTest();
+/*	InitDisplay();
+	DrawTest();*/
 	InitSignalCapture(Debug,PrintF,English);
-	UartInit(FIXED_CPU_FREQUENCY,115200, ENABLE_RX | ENABLE_TX, uart);
-/*	SendCharBlock(uart,255);*/
+	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, FIFO_EN | ENABLE_RX | ENABLE_TX, uart);
+
 	SendStringBlock(uart,"DSO Test programm: \nstart testing SetTriggerInput \n");
 	if (SetTriggerInput(2,8,FASTFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3) == true){
 		SendStringBlock(uart,ack);
@@ -88,7 +89,7 @@ int main () {
 		SendStringBlock(uart,nak);
 	}
 	SendStringBlock(uart,"testing SetTrigger\n");
-	if (SetTrigger(0,0,64,3,3,30,3) == true){
+	if (SetTrigger(0,0,0,64,3,0,30,1) == true){
 		SendStringBlock(uart,ack);
 	} else {
 		SendStringBlock(uart,nak);
@@ -101,7 +102,7 @@ int main () {
 	}
 	SendStringBlock(uart,"testing FastCapture\n"); 
 	ReadData = CaptureData(1000000, true, false, CAPTURESIZE, Data);
-	SetTriggerInput(2,16,SLOWFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3);
+	SetTriggerInput(1,16,SLOWFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3);
 	SendStringBlock(uart,"testing NormalCapture\n");
 	ReadData = CaptureData(1000000, true, false, CAPTURESIZE, Data);
 /*
@@ -112,7 +113,12 @@ int main () {
 	SendStringBlock(uart,M6);
 	SendCharBlock(uart,'\n');
 */	
-	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, ENABLE_RX | ENABLE_TX, uart2);
+	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, FIFO_EN | ENABLE_RX | ENABLE_TX, uart2);
+		/* UART baudrate test */
+/*	while(1){
+		SendCharBlock(uart,255); 
+		SendCharBlock(uart2,255); 
+	}*/
 /*	SendCharBlock(uart2,M6);*/
 	RemoteSlave(uart2,CAPTURESIZE,Data);	
 /*	printf("End SFR Test\n");*/

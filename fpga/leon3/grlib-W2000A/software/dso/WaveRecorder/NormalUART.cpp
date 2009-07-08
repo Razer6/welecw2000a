@@ -60,17 +60,18 @@ uint32_t NormalUart::Send(uint32_t *Data, uint32_t Length)
 	for (uint32_t i = 0; i < Length; ++i){
 		SendInt(&mH,Data[i]);
 	}
+	ChangeEndian(Data,Length*sizeof(uint32_t));
 	crcInit();
-	ChangeEndian(Data,Length);
-	SendInt(&mH,crcFast((unsigned char*)Data,Length));
-	return GetACK();
+	crc checksum = crcFast((unsigned char*)Data,Length*sizeof(uint32_t));
+	//ChangeEndian(&checksum,1);
+	SendInt(&mH,checksum);
+	return Length;
 }
 
 uint32_t NormalUart::Receive(uint32_t *Data, 
-							 uint32_t Length, 
-							 uint32_t * FastMode)
+							 uint32_t Length)
 {
-	return ReceiveData(&mH,Length,FastMode,Data);
+	return ReceiveData(&mH,Length,Data);
 }
 
 uint32_t NormalUart::GetACK(){

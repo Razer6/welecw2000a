@@ -42,8 +42,9 @@
 #endif
 
 /* main loop for the remote controlled DSO*/
-void RemoteSlave(	uart_regs * comm_uart,
-			const unsigned int DataSize,
+void RemoteSlave(	
+			uart_regs * comm_uart,
+			const uint32_t DataSize,
 			int *Data);
 
 

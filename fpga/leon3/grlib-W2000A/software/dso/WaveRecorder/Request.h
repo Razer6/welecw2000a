@@ -54,7 +54,6 @@ public:
 		const uint32_t noChannels, 
 		const uint32_t SampleSize, 
 		const uint32_t SamplingFrequency,
-		const uint32_t CPUFrequency, // here unused!
 		const uint32_t AACFilterStart,
 		const uint32_t AACFilterStop,
 		const uint32_t Ch0 = 0, 
@@ -64,6 +63,7 @@ public:
 
 	virtual uint32_t SendTrigger(
 		const uint32_t Trigger, 
+		const uint32_t ExtTrigger,
 		const uint32_t TriggerChannel,
 		const uint32_t TriggerPrefetchSamples,
 		const int  LowReference,

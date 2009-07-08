@@ -50,10 +50,9 @@ public:
 		uint32_t Length);
 	virtual uint32_t Receive(
 		uint32_t * Data, 
-		uint32_t Length, 
-		uint32_t * FastMode);
+		uint32_t Length);
 	virtual uint32_t GetACK();
 private:
-	static const int32_t cFrameLength = 64/sizeof(uint32_t); // read from VHDL Source
+	static const int32_t cFrameLength = 32/sizeof(uint32_t); // read from VHDL Source
 };
 #endif

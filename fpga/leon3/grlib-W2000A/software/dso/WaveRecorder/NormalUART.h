@@ -32,6 +32,7 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
+
 #ifndef NORMALUART_H
 #define NORMALUART_H
 
@@ -52,8 +53,7 @@ public:
 		uint32_t Length);
 	virtual uint32_t Receive(
 		uint32_t * Data, 
-		uint32_t Length, 
-		uint32_t * FastMode);
+		uint32_t Length);
 	virtual uint32_t GetACK();
 private:
 };

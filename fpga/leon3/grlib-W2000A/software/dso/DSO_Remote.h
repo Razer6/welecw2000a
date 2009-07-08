@@ -37,7 +37,14 @@
 
 #include "types.h"
 
+#ifdef W2000A
 #define DSO_REMOTE_UART_BAUDRATE 115200
+#elif SBX
+#define DSO_REMOTE_UART_BAUDRATE 115200
+#else
+#define DSO_REMOTE_UART_BAUDRATE 128000
+#endif
+
 #define DSO_MASTER_HEADER "Digital Storage Scope Master "
 #define DSO_SLAVE_HEADER  "Digital Storage Scope Slave  "
 #define DSO_NAK_RESP      "NAK"
@@ -78,8 +85,10 @@ void SendCRCError(uart_regs * uart);
 void ChangeEndian(unsigned int message[], int nBytes);
 bool CheckCRC(crc crcSent, unsigned int message[], int nBytes);
 void SendHeader(uart_regs * uart);
-bool SendData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned int * data);
-int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data);
+bool SendCaptureData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned int * data);
+bool SendData(uart_regs * uart,  int datasize, unsigned int * data);
+int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data);
+int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data);
 bool ReceiveACK(uart_regs * uart);
 bool ReceiveHeader(uart_regs * uart, const char * RefHeader, unsigned int TimeoutMs);
 unsigned int  GetInt(uart_regs * uart);

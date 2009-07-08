@@ -55,7 +55,6 @@ uint32_t Request::SendTriggerInput (
 			const uint32_t noChannels, 
 			const uint32_t SampleSize, 
 			const uint32_t SamplingFrequency,
-			const uint32_t CPUFrequency, // here unused!
 			const uint32_t AACFilterStart,
 			const uint32_t AACFilterStop,
 			const uint32_t Ch0, 
@@ -65,11 +64,13 @@ uint32_t Request::SendTriggerInput (
 	uint32_t data[] = {		
 		SET_TRIGGER_INPUT, noChannels, SampleSize, SamplingFrequency, 
 		AACFilterStart,AACFilterStop, Ch0, Ch1, Ch2, Ch3};
-	return mComm->Send(data,sizeof(data)/sizeof(uint32_t));
+	mComm->Send(data,sizeof(data)/sizeof(uint32_t));
+	return mComm->GetACK();
 }
 
 uint32_t Request::SendTrigger(
 		const uint32_t Trigger, 
+		const uint32_t ExtTrigger,
 		const uint32_t TriggerChannel,
 		const uint32_t TriggerPrefetchSamples,
 		const int  LowReference,
@@ -77,9 +78,10 @@ uint32_t Request::SendTrigger(
 		const int HighReference,
 		const uint32_t HighReferenceTime){
 	uint32_t data[] = {
-		SET_TRIGGER, Trigger, TriggerChannel, TriggerPrefetchSamples,
+		SET_TRIGGER, Trigger, ExtTrigger, TriggerChannel, TriggerPrefetchSamples,
 		LowReference, LowReferenceTime, HighReference, HighReferenceTime};
-	return mComm->Send(data,sizeof(data)/sizeof(uint32_t));
+	mComm->Send(data,sizeof(data)/sizeof(uint32_t));
+	return mComm->GetACK(); 
 }
 
 
@@ -99,7 +101,8 @@ uint32_t Request::SendAnalogInput(
 	}
 	crcA.cmd = SET_ANALOG_INPUT;
 	crcA.NoCh = NoCh;
-	return mComm->Send((uint32_t*)&crcA, sizeof(crcA)/sizeof(uint32_t));
+	mComm->Send((uint32_t*)&crcA, 2+(NoCh*sizeof(SetAnalog)/sizeof(uint32_t)));
+	return mComm->GetACK();
 }
 
 uint32_t Request::ReceiveSamples(
@@ -109,8 +112,19 @@ uint32_t Request::ReceiveSamples(
 			uint32_t * FastMode,
 			uint32_t * RawData){
 	uint32_t data[] ={CAPTURE_DATA, WaitTime, Start, *FastMode, CaptureSize};
+	PrintSFR();
 	if (mComm->Send(data,sizeof(data)/sizeof(uint32_t))){
-		return mComm->Receive(RawData,CaptureSize,FastMode);
+		uint32_t * SendData = new uint32_t[CaptureSize+2];
+		
+		uint32_t Length = mComm->Receive(SendData,CaptureSize+2);
+		if (Length < 2){
+			return 0;
+		}
+		memcpy(RawData,&SendData[2],Length-2);
+		uint32_t Ret = SendData[1];
+		*FastMode = SendData[0];
+		delete SendData;
+		return Ret;
 	} else {
 		return 0;
 	}
@@ -118,13 +132,17 @@ uint32_t Request::ReceiveSamples(
 }
 
 void Request::PrintSFR(){
-	uint32_t data[DSO_REG_SIZE/sizeof(uint32_t)] = {LOAD_DWORDS,DSO_REG_SIZE/sizeof(uint32_t)};
-	uint32_t Length = 2;
+	uint32_t data[DSO_REG_SIZE/sizeof(uint32_t)+2] = 
+		{LOAD_DWORDS, DSO_SFR_BASE_ADDR, DSO_REG_SIZE/sizeof(uint32_t)};
+	uint32_t Length = 3;
 	uint32_t Dummy = 0;
 	mComm->Send(data,Length);
-	Length = DSO_REG_SIZE/sizeof(uint32_t);
-	mComm->Receive(data,Length,&Dummy);
-	PrintDesc(data, Length);
+	
+	data[0] = DSO_REG_SIZE/sizeof(uint32_t)+1;/* length */
+	Length = mComm->Receive(data,data[0]);
+	if (Length > 1){
+		PrintDesc(&data[1], data[0]);
+	}
 }
 
 void Request::PrintDesc(uint32_t *Data, uint32_t Length){

@@ -60,7 +60,7 @@ public:
 	virtual uint32_t Send(uint32_t * Data, uint32_t Length){
 		return 0;
 	}
-	virtual uint32_t Receive(uint32_t * Data, uint32_t Length, uint32_t * FastMode){
+	virtual uint32_t Receive(uint32_t * Data, uint32_t Length){
 		return 0;
 	}
 	virtual uint32_t GetACK(){

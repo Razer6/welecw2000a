@@ -50,13 +50,13 @@ volatile TriggerRegs    * volatile TriggerR;
 volatile AnalogSettings * volatile AnalogR;
 volatile uart_regs      * volatile adc_uart;
 
-static unsigned int FMode;
+static uint32_t FMode;
 
-unsigned int FastMode(	const unsigned int SamplingFrequency, 
-			const unsigned int CPUFrequency){
+uint32_t FastMode(	const uint32_t SamplingFrequency, 
+			const uint32_t CPUFrequency){
 	return SamplingFrequency > (CPUFrequency*FASTMODEFACTOR);
 }
-unsigned int IsFastMode() {
+uint32_t IsFastMode() {
 	return FMode;
 }
 
@@ -71,21 +71,21 @@ bool InitSignalCapture(Debugprint * Init, Target T, Language L){
 	return InitDebugprint(&Print,T,L);
 }
 
-bool SetTriggerInput (	const unsigned int noChannels, 
-			const unsigned int SampleSize, 
-			const unsigned int SamplingFrequency,
-			const unsigned int CPUFrequency,
-			const unsigned int AACFilterStart,
-			const unsigned int AACFilterStop,
-			const unsigned int Ch0, 
-			const unsigned int Ch1, 
-			const unsigned int Ch2, 
-			const unsigned int Ch3)
+bool SetTriggerInput (	const uint32_t noChannels, 
+			const uint32_t SampleSize, 
+			const uint32_t SamplingFrequency,
+			const uint32_t CPUFrequency,
+			const uint32_t AACFilterStart,
+			const uint32_t AACFilterStop,
+			const uint32_t Ch0, 
+			const uint32_t Ch1, 
+			const uint32_t Ch2, 
+			const uint32_t Ch3)
 {
 	FMode = FastMode(SamplingFrequency,CPUFrequency);
-	unsigned int Decimaton = 0;
-	unsigned int Stage = 0;
-	unsigned int M = 0;
+	uint32_t Decimaton = 0;
+	uint32_t Stage = 0;
+	uint32_t M = 0;
 
 	if ((Ch0 > 3) || (Ch1 > 3) || (Ch2 > 3) || (Ch3 > 3)) {
 /*		Print.ChannelsNotSupported();*/
@@ -188,13 +188,15 @@ bool SetTriggerInput (	const unsigned int noChannels,
 }
 
 /* reference time in samples*/
-bool SetTrigger(const unsigned int Trigger, 
-		const unsigned int TriggerChannel,
-		const unsigned int TriggerPrefetchSamples,
+bool SetTrigger(
+		const uint32_t Trigger, 
+		const uint32_t ExtTrigger,
+		const uint32_t TriggerChannel,
+		const uint32_t TriggerPrefetchSamples,
 		const int  LowReference,
-		const unsigned int  LowReferenceTime,
+		const uint32_t  LowReferenceTime,
 		const int HighReference,
-		const unsigned int HighReferenceTime) 
+		const uint32_t HighReferenceTime) 
 {
 	if (TriggerChannel > 3) {
 	/*	Print.ChannelsNotSupported();*/
@@ -204,6 +206,14 @@ bool SetTrigger(const unsigned int Trigger,
 	/*	Print.ToMuchPrefetchSamples();*/
 		return false;
 	}
+	if (Trigger >= MAX_TRIGGER_TYPES){
+		return false;
+	}
+	if (ExtTrigger > MAX_EXT_TRIGGER) {
+		return false;
+	}
+	TriggerR->TriggerTypeAddr = Trigger;
+	CaptureR->ExtTriggerSrcAddr = ExtTrigger;
 	TriggerR->TriggerLowValueAddr  = LowReference;
 	TriggerR->TriggerLowTimeAddr   = LowReferenceTime;
 	TriggerR->TriggerHighValueAddr = HighReference;
@@ -222,12 +232,12 @@ bool SetTrigger(const unsigned int Trigger,
 }
 
 
-bool SetAnalogInputRange(const unsigned int NoCh, 
+bool SetAnalogInputRange(const uint32_t NoCh, 
 			 const SetAnalog * Settings) 
 {
-	unsigned int i = 0;
-	unsigned int temp = 0;
-	unsigned int j = 0;
+	uint32_t i = 0;
+	uint32_t temp = 0;
+	uint32_t j = 0;
 	short dac = 0;
 	for(i = 0; i < NoCh; ++i){
 		switch (CaptureR->DeviceAddr) {
@@ -322,10 +332,10 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 							   |    (5 << ADC_PIN_FALL0)},
 					      {ADC_ADDR_FORMAT, (2 << ADC_PIN_FORMAT0)},
 					      {ADC_ADDR_OFFSETE,(1 << ADC_PIN_OFFSETE)}};
-					unsigned int cmd = Settings[i].Specific;
+					uint32_t cmd = Settings[i].Specific;
 					uint8_t temp = 0;
 				        bool ret = true;	
-					int * ADCConfig = (unsigned int *)CONFIGADCENABLE; 
+					int * ADCConfig = (uint32_t *)CONFIGADCENABLE; 
 					*ADCConfig = ~1;/* low active, one ADC */
 					WaitMs(2); /* Wait until the AVR is ready */
 
@@ -377,15 +387,15 @@ bool SetAnalogInputRange(const unsigned int NoCh,
 	return true;
 }
 
-int FastCapture(const unsigned int WaitTime, /* just a integer */
-		unsigned int CaptureSize,    /* size in DWORDs*/
-		unsigned int * RawData) 
+int FastCapture(const uint32_t WaitTime, /* just a integer */
+		uint32_t CaptureSize,    /* size in DWORDs*/
+		uint32_t * RawData) 
 {
-	unsigned int i = 0;
-	unsigned int * StopAddr = 0;
-	volatile unsigned int * Addr = 0;
-	unsigned int StartSize = 0;
-	unsigned int StartData[8] = {};
+	uint32_t i = 0;
+	uint32_t * StopAddr = 0;
+	volatile uint32_t * Addr = 0;
+	uint32_t StartSize = 0;
+	uint32_t StartData[8] = {};
 	/* The compiler has bugs in the loop optimisation with the keyword volatile 
 	 * even with function call to get the data from an hw address + masking in a condition */
 	volatile int temp = 0; 
@@ -398,7 +408,7 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 		return 0;
 	}
 	temp = loadmem((unsigned int)&TriggerR->TriggerReadOffSetAddr);
-	StopAddr = (unsigned int *)(TRIGGER_MEM_BASE_ADDR + temp);
+	StopAddr = (uint32_t *)(TRIGGER_MEM_BASE_ADDR + temp);
 
 	StopAddr++; /* matching 0 to end-1 */
 	Addr = StopAddr;
@@ -462,18 +472,18 @@ int FastCapture(const unsigned int WaitTime, /* just a integer */
 }
 
 /* returns read DWORDS*/
-unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
+uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
 			 bool Start,
 			 bool ForceFastMode,
-			 unsigned int CaptureSize,    /* size in DWORDs*/
-			 unsigned int * RawData) 
+			 uint32_t CaptureSize,    /* size in DWORDs*/
+			 uint32_t * RawData) 
 {
 	/* TODO Idle wait*/
 /*	const int FMode = FastMode(SamplingFrequency,CPUFrequency);*/
-	unsigned int i = 0;
-	unsigned int StopAddr = 0;
-	static volatile unsigned int * Addr = 0;
-	unsigned int Frame = 0;
+	uint32_t i = 0;
+	uint32_t StopAddr = 0;
+	static volatile uint32_t * Addr = 0;
+	uint32_t Frame = 0;
 	/* The compiler has bugs in the loop optimisation with the keyword volatile even 
 	 * with function call to get the data from an hw address + masking in a condition */
 	volatile int temp = 0; 
@@ -516,7 +526,7 @@ unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
 			i++;
 			Addr++;
 			if ((unsigned int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-				Addr =  (unsigned int *) TRIGGER_MEM_BASE_ADDR;
+				Addr =  (uint32_t *) TRIGGER_MEM_BASE_ADDR;
 			}
 		}
 		TriggerR->TriggerCurrentAddr = (unsigned int)Addr-1; 

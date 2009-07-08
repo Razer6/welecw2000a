@@ -49,6 +49,7 @@
 #define FLOW_CONTROL 0x40
 #define FIFO_TX_INT 0x200
 #define FIFO_RX_INT 0x400
+#define FIFO_EN     (1 << 31)
 
 
 typedef struct  

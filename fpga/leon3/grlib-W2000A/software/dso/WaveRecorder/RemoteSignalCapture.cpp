@@ -63,7 +63,7 @@ uint32_t RemoteSignalCapture::Send(uint32_t Addr, uint32_t *Data, uint32_t & Len
 }
 
 uint32_t RemoteSignalCapture::Receive(uint32_t Addr){
-	AddrData[0] = mComm->Receive(&Addr,2,AddrData);
+	AddrData[0] = mComm->Receive(&Addr,2);
 	return AddrData[1];
 }
 uint32_t RemoteSignalCapture::Receive(uint32_t Addr, uint32_t *Data, uint32_t & Length){
@@ -74,7 +74,7 @@ uint32_t RemoteSignalCapture::Receive(uint32_t Addr, uint32_t *Data, uint32_t & 
 	SendData[0] = Addr;
 	SendData[1] = Length;
 
-	Length = mComm->Receive(SendData,Length+1,AddrData);
+	Length = mComm->Receive(SendData,Length+1);
 	for (uint32_t i = 0; i < Length; ++i){
 		Data[i] = SendData[i+1];
 	}
@@ -98,7 +98,6 @@ uint32_t RemoteSignalCapture::SendTriggerInput (
 			const uint32_t noChannels, 
 			const uint32_t SampleSize, 
 			const uint32_t SamplingFrequency,
-			const uint32_t CPUFrequency,
 			const uint32_t AACFilterStart,
 			const uint32_t AACFilterStop,
 			const uint32_t Ch0, 
@@ -205,7 +204,9 @@ uint32_t RemoteSignalCapture::SendTriggerInput (
 }
 
 /* reference time in samples*/
-uint32_t RemoteSignalCapture::SendTrigger(const uint32_t Trigger, 
+uint32_t RemoteSignalCapture::SendTrigger(
+		const uint32_t Trigger, 
+		const uint32_t ExtTrigger,
 		const uint32_t TriggerChannel,
 		const uint32_t TriggerPrefetchSamples,
 		const int  LowReference,
@@ -219,6 +220,14 @@ uint32_t RemoteSignalCapture::SendTrigger(const uint32_t Trigger,
 	if (TriggerPrefetchSamples >= (TRIGGER_MEM_SIZE-16)){
 		return false;
 	}
+	if (Trigger >= MAX_TRIGGER_TYPES){
+		return false;
+	}
+	if (ExtTrigger > MAX_EXT_TRIGGER) {
+		return false;
+	}
+	Send(TRIGGERTYPEADDR, Trigger);
+	Send(EXTTRIGGERSRCADDR, ExtTrigger);
 	Send(TRIGGERLOWVALUEADDR, LowReference);
 	Send(TRIGGERLOWTIMEADDR, LowReferenceTime);
 	Send(TRIGGERHIGHVALUEADDR, HighReference);

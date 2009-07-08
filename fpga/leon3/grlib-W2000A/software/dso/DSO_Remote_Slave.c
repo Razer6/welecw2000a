@@ -10,12 +10,12 @@
 #include "stdio.h"
 
 int * buffer;
-unsigned int buffer_size;
+uint32_t buffer_size;
 uart_regs * uart;
 bool GetTask();
 
 void RemoteSlave(	uart_regs * comm_uart,
-			const unsigned int DataSize,
+			const uint32_t DataSize,
 			int *Data) {
 	buffer = Data;
 	buffer_size = DataSize;
@@ -28,34 +28,36 @@ void RemoteSlave(	uart_regs * comm_uart,
 }
 
 typedef struct {
-	unsigned int cmd;
-	unsigned int NoCh;
+	uint32_t cmd;
+	uint32_t NoCh;
 	SetAnalog data[4];
 } xAnalog;
 
 bool GetTask() {
-	unsigned int i = 0;
-	unsigned int s = GetInt(uart);
-	unsigned int * addr;
-	unsigned int size;
+	uint32_t i = 0;
+	uint32_t s = GetInt(uart);
+	uint32_t * addr;
+	uint32_t size;
 	switch (s) {
 		case SET_TRIGGER_INPUT:
-			printf("SET_TRIGGER_INPUT ");
+		/*	printf("SET_TRIGGER_INPUT ");*/
 			{
-				unsigned int noCh = 		GetInt(uart);
-				unsigned int SamplingSize = 	GetInt(uart);
-				unsigned int SamplingFrequency= GetInt(uart);
-				unsigned int AACFilterStart = 	GetInt(uart);
-			 	unsigned int AACFilterStop = 	GetInt(uart);
-				unsigned int Ch0 = GetInt(uart);
-				unsigned int Ch1 = GetInt(uart);
-				unsigned int Ch2 = GetInt(uart);
-				unsigned int Ch3 = GetInt(uart);
+				uint32_t noCh = 		GetInt(uart);
+				uint32_t SamplingSize = 	GetInt(uart);
+				uint32_t SamplingFrequency= GetInt(uart);
+				uint32_t AACFilterStart = 	GetInt(uart);
+			 	uint32_t AACFilterStop = 	GetInt(uart);
+				uint32_t Ch0 = GetInt(uart);
+				uint32_t Ch1 = GetInt(uart);
+				uint32_t Ch2 = GetInt(uart);
+				uint32_t Ch3 = GetInt(uart);
+				uint32_t CrC = GetInt(uart);
 				printf("Channels = %d \n",noCh);
-				unsigned int data[] ={
+				printf("%d\n %d\n %d\n %d\n %d\n %d\n %d\n %d\n", SamplingSize, SamplingFrequency, AACFilterStart, AACFilterStop, Ch0, Ch1, Ch2, Ch3);
+				uint32_t data[] ={
 					s, noCh, SamplingSize, SamplingFrequency,
 					AACFilterStart,AACFilterStop,Ch0,Ch1,Ch2,Ch3};
-			        if (CheckCRC(GetInt(uart), data, sizeof(data))!= true){
+			        if (CheckCRC(CrC, data, sizeof(data))!= true){
 					SendCRCError(uart);
 					return false;
 				}
@@ -93,7 +95,7 @@ bool GetTask() {
 					Analog.data[i].Mode       = GetInt(uart);
 				}
 				if (CheckCRC(GetInt(uart),(unsigned int*)&Analog,
-					sizeof(int)+((Analog.NoCh)*sizeof(SetAnalog)))!= true){
+					2*sizeof(int)+((Analog.NoCh)*sizeof(SetAnalog)))!= true){
 					SendCRCError(uart);
 					return false;
 				}
@@ -110,21 +112,22 @@ bool GetTask() {
 		case SET_TRIGGER:
 			printf("SET_TRIGGER\n");
 			{
-				const unsigned int Trigger 		= GetInt(uart);
-				const unsigned int TriggerChannel 	= GetInt(uart);
-				const unsigned int TriggerPrefetchSamples=GetInt(uart);
+				const uint32_t Trigger 		= GetInt(uart);
+				const uint32_t ExtTrigger	= GetInt(uart);
+				const uint32_t TriggerChannel 	= GetInt(uart);
+				const uint32_t TriggerPrefetchSamples=GetInt(uart);
 				const int  LowReference 		= GetInt(uart);
-				const unsigned int  LowReferenceTime 	= GetInt(uart);
+				const uint32_t  LowReferenceTime 	= GetInt(uart);
 				const int HighReference 		= GetInt(uart);
-				const unsigned int HighReferenceTime 	= GetInt(uart);
-				unsigned int data[] = {
-					s,Trigger, TriggerChannel, TriggerPrefetchSamples,
+				const uint32_t HighReferenceTime 	= GetInt(uart);
+				uint32_t data[] = {
+					s,Trigger, ExtTrigger, TriggerChannel, TriggerPrefetchSamples,
 					LowReference, LowReferenceTime, HighReference, HighReferenceTime};
 				if (CheckCRC(GetInt(uart), data, sizeof(data)) != true){
 					SendCRCError(uart);
 					return false;
 				}
-				if (SetTrigger(	Trigger, TriggerChannel, TriggerPrefetchSamples,
+				if (SetTrigger(	Trigger, ExtTrigger, TriggerChannel, TriggerPrefetchSamples,
 					LowReference, LowReferenceTime, HighReference, HighReferenceTime)) {
 					SendACK(uart);
 					return true;
@@ -138,12 +141,12 @@ bool GetTask() {
 		case CAPTURE_DATA:
 			printf("CAPTURE_DATA ");
 			{
-				unsigned int WaitTime =		GetInt(uart);
-				unsigned int Start = 		GetInt(uart);
-				unsigned int ForceFastMode = 	GetInt(uart);
-				unsigned int Csize = 		GetInt(uart);
-				unsigned int crc = 		GetInt(uart);
-				unsigned int data[] = {s,WaitTime,Start,ForceFastMode,Csize};
+				uint32_t WaitTime =		GetInt(uart);
+				uint32_t Start = 		GetInt(uart);
+				uint32_t ForceFastMode = 	GetInt(uart);
+				uint32_t Csize = 		GetInt(uart);
+				uint32_t crc = 		GetInt(uart);
+				uint32_t data[] = {s,WaitTime,Start,ForceFastMode,Csize};
 				if (CheckCRC(crc, data, sizeof(data)) != true){
 					SendCRCError(uart);
 					return false;
@@ -153,11 +156,12 @@ bool GetTask() {
 				}
 				printf("WaitTime=%d Start=%d size=%d\n",WaitTime, Start, Csize);
 				s = CaptureData(WaitTime,Start,ForceFastMode,Csize,buffer);
+				printf("Captured %d DWORDs with FastMode = %d",s,ForceFastMode);
 				if (s != 0) {
 					if (IsFastMode() != 0){
 						ForceFastMode = 1;
 					}
-					return SendData(uart, ForceFastMode, s, buffer);
+					return SendCaptureData(uart, ForceFastMode, s, buffer);
 				} else {
 					SendNAK(uart);
 					return false;
@@ -191,22 +195,27 @@ bool GetTask() {
 		case LOAD_DWORDS:
 			addr = (int *)GetInt(uart);
 			size = GetInt(uart);
-			buffer[0] = (int)addr;
-			buffer[1] = size;
-			if (CheckCRC(GetInt(uart), buffer, 2*sizeof(int)) != true){
+			buffer[0] = LOAD_DWORDS;
+			buffer[1] = (int)addr;
+			buffer[2] = size;
+			if (CheckCRC(GetInt(uart), buffer, 3*sizeof(int)) != true){
 				SendCRCError(uart);
 				return false;
 			}
-			if (size+1 > buffer_size){
+			if (size+2 > buffer_size){
 				SendNAK(uart);
 				return false;
 			}
-			for (i = 0; i < size; ++i){
+			buffer[0] = size;
+			printf("load %d words\n", size);
+			addr--;
+			for (i = 1; i <= size; ++i){
 				buffer[i] = addr[i];
 			}
 			crcInit();
-			s = crcFast((unsigned char*)buffer,size*sizeof(int));
-			SendData(uart, 0, size+1, buffer);
+			s = crcFast((unsigned char*)buffer,(size+1)*sizeof(int));
+			buffer[size+1] = s;
+			SendData(uart, size+2, buffer);
 			return true;
 			break;
 				

@@ -109,9 +109,11 @@
 /* Note that most devices have none only one Exttrigger input!*/
 /* Welec W20xx devices have 1*/
 /* SandboxX has also only 1*/
+#define MAX_EXT_TRIGGER 1
 #define EXTTRIGGER2 2
 #define EXTTRIGGER3 3
 #define EXTTRIGGER4 4
+
 /* ...*/
 
 /* EXTTRIGGERPWMADDR*/
@@ -175,6 +177,11 @@
 #define EXTTRIGGER_HL    1
 #define NORMALTRIGGER_LH 2 
 #define NORMALTRIGGER_HL 3 
+#define GLITCHTRIGGER_LH 4 
+#define GLITCHTRIGGER_HL 5 
+#define DIGITALTRIGGER_ARRIVE 6 
+#define DIGITALTRIGGER_LEAVE 7 
+#define MAX_TRIGGER_TYPES 8
 /* TODO add more trigger types*/
 
 

@@ -49,52 +49,57 @@ enum eSrc2 {
 typedef enum eSrc2 Src2;
 
 typedef struct {
-	unsigned int myVperDiv;
-	unsigned int AC;
+	uint32_t myVperDiv;
+	uint32_t AC;
 	int DA_Offset;
-	unsigned int Specific;
+	uint32_t Specific;
 	Src2 Mode;
 } SetAnalog;
 
 bool InitSignalCapture(Debugprint * Init, Target T, Language L);
 
-unsigned int FastMode(	const unsigned int SamplingFrequncy, 
-			const unsigned int CPUFrequency);
-unsigned int IsFastMode();
+uint32_t FastMode(	
+			const uint32_t SamplingFrequncy, 
+			const uint32_t CPUFrequency);
+uint32_t IsFastMode();
 
-bool SetTriggerInput (	const unsigned int noChannels, 
-			const unsigned int SampleSize, 
-			const unsigned int SamplingFrequency,
-			const unsigned int CPUFrequency,
-			const unsigned int AACFilterStart,
-			const unsigned int AACFilterStop,
-			const unsigned int Ch0, 
-			const unsigned int Ch1, 
-			const unsigned int Ch2, 
-			const unsigned int Ch3);
+bool SetTriggerInput (	const uint32_t noChannels, 
+			const uint32_t SampleSize, 
+			const uint32_t SamplingFrequency,
+			const uint32_t CPUFrequency,
+			const uint32_t AACFilterStart,
+			const uint32_t AACFilterStop,
+			const uint32_t Ch0, 
+			const uint32_t Ch1, 
+			const uint32_t Ch2, 
+			const uint32_t Ch3);
 
 
 
 
 /* reference time in samples*/
-bool SetTrigger(const unsigned int Trigger, 
-		const unsigned int TriggerChannel,
-		const unsigned int TriggerPrefetchSamples,
+bool SetTrigger(
+		const uint32_t Trigger,
+		const uint32_t ExtTrigger,
+		const uint32_t TriggerChannel,
+		const uint32_t TriggerPrefetchSamples,
 		const int  LowReference,
-		const unsigned int  LowReferenceTime,
+		const uint32_t  LowReferenceTime,
 		const int HighReference,
-		const unsigned int HighReferenceTime);
+		const uint32_t HighReferenceTime);
 
 
-bool SetAnalogInputRange(const unsigned int NoCh, 
-			 const SetAnalog * Settings);
+bool SetAnalogInputRange(
+			const uint32_t NoCh, 
+			const SetAnalog * Settings);
 
 /* returns read DWORDS*/
-unsigned int CaptureData(const unsigned int WaitTime, /* just a integer */
-			 bool Start,
-			 bool ForceFastMode,
-			 unsigned int CaptureSize,    /* size in DWORDs*/
-			 unsigned int * RawData); 
+uint32_t CaptureData(
+			const uint32_t WaitTime, /* just a integer */
+			bool Start,
+			bool ForceFastMode,
+			uint32_t CaptureSize,    /* size in DWORDs*/
+			uint32_t * RawData); 
 
 
 

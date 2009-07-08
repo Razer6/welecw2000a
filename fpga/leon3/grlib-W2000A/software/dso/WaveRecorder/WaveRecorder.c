@@ -79,20 +79,21 @@ void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Req
 }
 
 int main(int argc, char * argv[]) {
-	struct arg_str * UartAddr	= arg_str0("u", "UART", NULL, "Path of serial device");
-	struct arg_str * Protocol   = arg_str1("p", "protocol", "CPU,Debugger", "Debugger is for devices without a CPU");
+	struct arg_str * UartAddr	= arg_str0("u", "UART", NULL, "Path of serial device, always necessary!");
+	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
-			"TriggerInput,Trigger,AnalogSettings,Capture,ForceRegs,ReadRegs", 
-			"DSO call type");
-	struct arg_str * Trigger	= arg_str0(NULL,"TrType","ExtLH,ExtHL,SchmittLH,SchmittHL","Trigger type");
-	struct arg_str * AnSrc2Ch0		= arg_str0(NULL,"AnSrc2Ch1","none,pwm,gnd,lowpass", 
-					"none, PWM offset, GND, lowpass");
-	struct arg_str * AnSrc2Ch1		= arg_str0(NULL,"AnSrc2Ch2","none,pwm,gnd,lowpass", 
-					"none, PWM offset, GND, lowpass");
-	struct arg_str * AnSrc2Ch2		= arg_str0(NULL,"AnSrc2Ch3","none,pwm,gnd,lowpass", 
-					"none, PWM offset, GND, lowpass");
-	struct arg_str * AnSrc2Ch3		= arg_str0(NULL,"AnSrc2Ch4","none,pwm,gnd,lowpass", 
-					"none, PWM offset, GND, lowpass");
+			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs]", 
+			"DSO call type, always necessary!");
+	struct arg_str * Trigger	= arg_str0(NULL,"TrType","[ExtLH | ExtHL | SchmittLH | SchmittHL | GlitchLH | GlitchHL]","Trigger type");
+	struct arg_int * ExtTrigger = arg_int0(NULL,"ExtTrigger","<n>", "External trigger, #0 = always, #1 = external trigger 1, #n = external trigger n");
+	struct arg_str * AnSrc2Ch0		= arg_str0(NULL,"AnSrc2Ch1","[none | pwm | gnd | lowpass]", 
+					"Normal operating mode, PWM offset, GND, lowpass");
+	struct arg_str * AnSrc2Ch1		= arg_str0(NULL,"AnSrc2Ch2","[none | pwm | gnd | lowpass]", 
+					"Normal operating mode, PWM offset, GND, lowpass");
+	struct arg_str * AnSrc2Ch2		= arg_str0(NULL,"AnSrc2Ch3","[none | pwm | gnd | lowpass]", 
+					"Normal operating mode, PWM offset, GND, lowpass");
+	struct arg_str * AnSrc2Ch3		= arg_str0(NULL,"AnSrc2Ch4","[none | pwm | gnd | lowpass]", 
+					"Normal operating mode, PWM offset, GND, lowpass");
 	struct arg_int * Channels	= arg_int1("n","Channels",	"<n>",	"Number of channels");
 	struct arg_int * SampleSize	= arg_int0(NULL,"SampleSize",	"<n>",	"Bits per sample"); 
 	struct arg_int * SampleFS	= arg_int0(NULL,"Fs",		"<n>",	"Sampling frequency"); 
@@ -128,23 +129,34 @@ int main(int argc, char * argv[]) {
 	struct arg_lit * AnAC_Ch3	= arg_lit0(NULL,"ACModeCh4",		"AC Mode, if not set AC=off");
 	struct arg_file * ForceFile	= arg_file0(NULL,"Ffile","<file>",	"Binary file for the direct DSO CPU access");
 	struct arg_file * WaveFile	= arg_file0("o","WFile","<file>",	"Record data to this file");
-	struct arg_int * BaudRate	= arg_int1("b", "BAUD",		"<n>",	"serial device baudrate");
+	struct arg_int * BaudRate	= arg_int1("b", "BAUD",		"<n>",	"serial device baudrate, always necessary!");
 	struct arg_lit * help		= arg_lit0("hH","help",			"Displays this help information");
+	struct arg_lit * version    = arg_lit0("vV","version",		"Version");
 	struct arg_end * end = arg_end(20);
 	void * argtable[] = {
 	Command,Protocol,Channels,SampleSize,SampleFS,AACFilterStart,
 	AACFilterEnd,Ch0Src,Ch1Src,Ch2Src,Ch3Src,
-	Trigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
+	Trigger,ExtTrigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
 	TriggerLowTime,TriggerHighTime,AnGainCh0,AnGainCh1,AnGainCh2,
 	AnGainCh3,AnAC_Ch0,AnAC_Ch1,AnAC_Ch2,AnAC_Ch3,
 	AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,
 	AnPWM,AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3,ForceAddr,
 	ForceSize,ForceFile,CapWTime,CapSize,WavForceFS,
-	WaveFile,UartAddr,BaudRate,help,end};
+	WaveFile,UartAddr,BaudRate,help,version,end};
 	int Retry = 0;
     
 	int nerrors = arg_parse(argc,argv,argtable);
 
+	if (help->count != 0){
+		arg_print_glossary(stdout,argtable,0);
+		printf("\n");
+		return 0;
+	}
+	if (version->count != 0){
+		printf("Version 0.0.2 (development stage)\n Author: Alexander Lindert\n"
+			"Remote Control for Open Source Digital Storage Scopes\n");
+		return 0;
+	}
 	if (nerrors != 0) {
 		arg_print_errors(stdout,end,argv[0]);
 		arg_print_syntax(stdout,argtable,"");
@@ -152,10 +164,7 @@ int main(int argc, char * argv[]) {
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 1;
 	}	
-	if (help->count != 0){
-		arg_print_syntax(stdout,argtable,"");
-		printf("\n");
-	}
+
 
 	Request * DSOInterface = 0;
 	if ((strcmp("Debugger",Protocol->sval[0]) == 0) && (UartAddr->count == 1)) {
@@ -176,7 +185,7 @@ int main(int argc, char * argv[]) {
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,AACFilterStart,AACFilterEnd,
 			Ch0Src,Ch1Src,Ch2Src,Ch3Src};
-		bool Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
@@ -206,28 +215,45 @@ int main(int argc, char * argv[]) {
 
 	if (strcmp("Trigger",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
-			(arg_int*)Trigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
+			(arg_int*)Trigger, ExtTrigger, TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
 			TriggerLowTime,TriggerHighTime};
 		int TriggerNo = 2;
-		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 		if (strcmp("ExtLH",Trigger->sval[0]) == 0){
 			TriggerNo = 0;
-		}
+		} else 
 		if (strcmp("ExtHL",Trigger->sval[0]) == 0){
 			TriggerNo = 1;
-		}
+		} else 
 		if (strcmp("SchmittLH",Trigger->sval[0]) == 0){
 			TriggerNo = 2;
-		}
+		} else 
 		if (strcmp("SchmittHL",Trigger->sval[0]) == 0){
 			TriggerNo = 3;
+		} else 
+		if (strcmp("GlitchLH",Trigger->sval[0]) == 0){
+			TriggerNo = 4;
+		} else 
+		if (strcmp("GlitchHL",Trigger->sval[0]) == 0){
+			TriggerNo = 5;
+		} else 
+		if (strcmp("DigitalArrive",Trigger->sval[0]) == 0){
+			TriggerNo = 6;
+		} else
+		if (strcmp("DigitalLeave",Trigger->sval[0]) == 0){
+			TriggerNo = 7;
+		} else
+		{	
+			TriggerNo = 0;
 		}
 
+		
 		Ret = DSOInterface->SendTrigger(
 			TriggerNo,
+			ExtTrigger->ival[0],
 			TrPrefetch->ival[0],
 			TriggerChannel->ival[0],
 			TriggerLowRef->ival[0],
@@ -247,7 +273,7 @@ int main(int argc, char * argv[]) {
 		struct arg_lit * AC[4]   = {AnAC_Ch0,AnAC_Ch1,AnAC_Ch2,AnAC_Ch3};
 		struct arg_int * DAoff[4]= {AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3};	
 		struct arg_str * Src2[4] = {AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3}; 
-		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret == false) {
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
@@ -275,7 +301,7 @@ int main(int argc, char * argv[]) {
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,CapWTime,CapSize,
 			WavForceFS,(arg_int*)WaveFile};
-		bool Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		uSample * buffer = (uSample *)malloc(CapSize->ival[0]*sizeof(int));
 		uint32_t FastMode = 0;
  
