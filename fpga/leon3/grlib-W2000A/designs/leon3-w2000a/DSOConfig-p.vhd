@@ -4,7 +4,7 @@
 -- File       : DSOConfig-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-05-18
+-- Last update: 2009-07-05
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -61,7 +61,7 @@ package pDSOConfig is
   constant cAnSettStrobeRate : natural    := 2E3;  -- 1 kHz calibrator freq.
   constant cResetActive      : std_ulogic := '0';
   constant cADCBitWidth      : natural    := 8;
-  constant cBitWidth         : natural    := 9;
+  constant cBitWidth         : natural    := 8;
   constant cDelayMemWidth    : natural    := 7;  -- address bits of the slow FIR memory
   constant cExtTriggers      : natural    := 1;
   constant cSRAMAddrWidth    : natural    := 19;   -- DwordAddr

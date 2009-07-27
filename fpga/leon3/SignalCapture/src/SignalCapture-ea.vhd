@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-29
+-- Last update: 2009-07-26
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -82,7 +82,7 @@ architecture RTL of SignalCapture is
   signal ClkCPU            : std_ulogic;
   signal ADCout            : aADCout;
   signal DecimatorIn       : aAllData;
-  signal DecimatorOut      : aDownSampled;
+  signal DecimatorOut      : aLongAllData;
   signal DecimatorOutValid : std_ulogic;
   signal SelectorOut       : aTriggerData;
   signal SelectorOutValid  : std_ulogic;
@@ -115,7 +115,8 @@ begin
     elsif rising_edge(ClkDesign) then
       for i in 0 to cChannels-1 loop
         for j in 0 to cCoefficients-1 loop
-          DecimatorIn(i)(j) <= signed(ADCout(i)(j)(7) & ADCout(i)(j));
+--          DecimatorIn(i)(j) <= signed(ADCout(i)(j)(7) & ADCout(i)(j))
+			DecimatorIn(i)(j) <= signed(ADCout(i)(j));
         end loop;
       end loop;
     end if;
@@ -140,7 +141,7 @@ begin
       iClk            => ClkDesign,
       iResetAsync     => ResetAsync,
       iSignalSelector => iSignalSelector,
-      iData           => DecimatorOut,  -- 18 bit values
+      iData           => DecimatorOut,  
       iValid          => DecimatorOutValid,
       oData           => SelectorOut,   -- 8 bit values
       oValid          => SelectorOutValid);

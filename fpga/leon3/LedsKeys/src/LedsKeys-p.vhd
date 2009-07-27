@@ -4,7 +4,7 @@
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-23
+-- Last update: 2009-07-26
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -118,7 +118,7 @@ package pLedsKeysAnalogSettings is
   type aLeds is record
                   BTN_CH3        : std_ulogic;  -- Button [Channel 4]
                   Beam1On        : std_ulogic;  -- Button [Channel 1]
-                  BTN_MATH       : std_ulogic;  -- Button [Math]         (not work?)
+                  BTN_MATH       : std_ulogic;  -- Button [Math]       
                   Beam2On        : std_ulogic;  -- Button [Channel 2]
                   BTN_QUICKMEAS  : std_ulogic;  -- Button [Quick Meass]
                   CURSORS        : std_ulogic;  -- Button [Cursors]

@@ -4,7 +4,7 @@
 -- File       : PolyphaseDecimator-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-07
--- Last update: 2009-05-18
+-- Last update: 2009-07-07
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -46,6 +46,16 @@ use DSO.pFirCoeff.all;
 
 package pPolyphaseDecimator is
   
+  subtype aValue is signed (cBitWidth-1 downto 0);
+  type    aValues is array (natural range<>) of aValue;
+  subtype aFastData is aValues(0 to cCoefficients-1);
+  type    aAllData is array (0 to cChannels-1) of aFastData;
+  subtype aLongValue is signed(cBitWidth*2-1 downto 0);
+  type    aLongValues is array (natural range<>) of aLongValue;
+  subtype aLongFastData is aLongValues(0 to cCoefficients-1);
+  type    aLongAllData is array (0 to cChannels-1) of aLongFastData;
+ -- type   aDownSampled is array (0 to cChannels-1) of aLongValues(0 to cCoefficients-1);
+  
   type     aDecimator is (M1, M2, M4, M10);
   type     aM is array (natural range<>) of aDecimator;
   constant cM1        : aM(1 to cDecimationStages-1) := (others => M1);
@@ -53,9 +63,11 @@ package pPolyphaseDecimator is
   subtype  aFastFirAddr is natural range 0 to cFastFirCoeff'length/cCoefficients-1;
   constant cDecAvgMax : natural                      := 10;
 
-  type aDownSampler is record
+  subtype aFilterDepth is integer range 0 to 3;
+  type    aDownSampler is record
                          Stages       : std_ulogic_vector((cDecimationStages*4)-1 downto 0);
                          EnableFilter : std_ulogic_vector(0 to cDecimationStages-1);
+                         FilterDepth  : aFilterDepth;
                        end record;
   type aStage is record
                    Counter : integer range 0 to 9;
@@ -72,11 +84,24 @@ package pPolyphaseDecimator is
   type aStageOutputs is array (0 to cDecimationStages-2) of aStageInput;
   type aStagesInCh is array (0 to cChannels-1) of aStageInputs;
   type aStagesOutCh is array (0 to cChannels-1) of aStageOutputs;
-  type aDownSampled is array (0 to cChannels-1) of aLongValues(0 to cCoefficients-1);
-  function Avg9Bit (A, B : aValue) return aValue;
-  function toValues(A    : aInputValues) return aValues;
+
+  function AddAndExtend(A , B : signed; InLength : natural) return signed;
+  function Avg9Bit (A, B      : aValue) return aValue;
+  function toValues(A         : aInputValues) return aValues;
 
 
+  component AdderTreeFilter is
+    port (
+      iClk         : in  std_ulogic;
+      iResetAsync  : in  std_ulogic;
+      iDecimator   : in  std_ulogic_vector(3 downto 0);
+      iFilterDepth : in  aFilterDepth;
+      iData        : in  aFastData;
+      oData        : out aLongFastData;
+      oValid       : out std_ulogic;
+      oStageData   : out aLongValue;
+      oStageValid  : out std_ulogic);
+  end component;
 
   component FastAverage is
     port (
@@ -141,7 +166,7 @@ package pPolyphaseDecimator is
       iEnableFilter : in  std_ulogic_vector(0 to cDecimationStages-1);
       iDecimation   : in  aM(0 to cDecimationStages-1);
       iStageValid0  : in  std_ulogic;
-      iStageData0   : in  aFastData;
+      iStageData0   : in  aLongFastData;
       iStage        : in  aStageInputs;
       oStage        : out aStageOutputs;
       oData         : out aLongValues(0 to cCoefficients-1);
@@ -152,6 +177,14 @@ end;
 
 package body pPolyphaseDecimator is
   
+  function AddAndExtend(A , B : signed; InLength : natural) return signed is
+    variable vRes : signed(InLength downto 0);
+  begin
+    --    vRes := A + B;
+    vRes := (A(A'high) & A) + (B(B'high) & B);
+    return vRes;
+  end;
+
   function Avg9Bit (A, B : aValue) return aValue is
     variable vRes : aValue;
   begin

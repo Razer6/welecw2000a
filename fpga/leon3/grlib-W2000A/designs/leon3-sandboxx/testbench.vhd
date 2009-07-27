@@ -91,7 +91,7 @@ architecture behav of testbench is
 
   constant promfile  : string := "prom.srec";   -- rom contents
   constant sramfile  : string := "sram.srec";   -- ram contents
-  constant sdramfile : string := "sdram.srec";  -- sdram contents
+  constant sdramfile : string := "sram.srec";  -- sdram contents
 
 
   signal   clk : std_logic := '0';

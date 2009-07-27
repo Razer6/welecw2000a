@@ -7,8 +7,11 @@ vcom -quiet -93 -work DSO {../../DownSampler/Octave/FastFirCoeff-p.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/Octave/FirCoeff-p.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/PolyphaseDecimator-p.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/FastAverage-ea.vhd}
+vcom -quiet -93 -work DSO {../../DownSampler/src/AdderTreeFilter-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd}
+vcom -quiet -93 -work DSO {../../DownSampler/src/LongFastPolyPhaseDecimator-ea.vhd}
+vcom -quiet -93 -work DSO {../../DownSampler/src/TopLongFastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../Altera/src/SbxXDelayMemory.vhd}
 #vcom -quiet -93 -work DSO {../../DownSampler/src/DelayMemory.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd}

@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-07-02
+-- Last update: 2009-07-26
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -117,14 +117,14 @@ begin
 --  pPipelineRegsOut : process (iClkDesign, iResetAsync)
 --  begin
 --    if rising_edge(iCLKDesign) then
-      oSFRControl.Decimator      <= Decimator;
-      oSFRControl.SignalSelector <= SignalSelector;
-      oSFRControl.ExtTriggerSrc  <= ExtTriggerSrc;
-      oSFRControl.Trigger        <= Trigger;
-      oSFRControl.nConfigADC     <= nConfigADC;
-      oSFRControl.Leds           <= Leds;
-      oSFRControl.AnalogSettings <= AnalogSettings;
-      Addr                       <= to_integer(unsigned(iAddr(6 downto 2)));
+  oSFRControl.Decimator      <= Decimator;
+  oSFRControl.SignalSelector <= SignalSelector;
+  oSFRControl.ExtTriggerSrc  <= ExtTriggerSrc;
+  oSFRControl.Trigger        <= Trigger;
+  oSFRControl.nConfigADC     <= nConfigADC;
+  oSFRControl.Leds           <= Leds;
+  oSFRControl.AnalogSettings <= AnalogSettings;
+  Addr                       <= to_integer(unsigned(iAddr(6 downto 2)));
 --    end if;
 --  end process;
 
@@ -135,7 +135,8 @@ begin
       InterruptMask <= (others => '0');
       Decimator <= (
         Stages       => (others => '0'),
-        EnableFilter => (others => '0'));
+        EnableFilter => (others => '0'),
+        FilterDepth  => 0);
       case cCurrentDevice is
         when cWelec2012 | cWelec2022 =>
           SignalSelector <= (
@@ -229,6 +230,8 @@ begin
             for i in Decimator.EnableFilter'range loop
               Decimator.EnableFilter(i) <= iData(i);
             end loop;
+            Decimator.FilterDepth <= to_integer(unsigned(iData(31 downto 30)));
+            
           when cExtTriggerSrcAddr =>
             -- a software bug can here cause a simulation failure! :-)
             ExtTriggerSrc.Addr <= to_integer(unsigned(iData));
@@ -348,7 +351,7 @@ begin
 --  pPipelineRegsIn : process (iClkCPU, iResetAsync)
 --  begin
 --    if rising_edge(iCLKCPU) then
-      SFRIn <= iSFRControl;
+  SFRIn <= iSFRControl;
 --    end if;
 --  end process;
   
@@ -370,6 +373,7 @@ begin
         for i in Decimator.EnableFilter'range loop
           oData(i) <= Decimator.EnableFilter(i);
         end loop;
+        oData(31 downto 30) <= std_ulogic_vector(to_unsigned(Decimator.FilterDepth, 2));
       when cExtTriggerSrcAddr =>
         oData <= std_ulogic_vector(to_unsigned(ExtTriggerSrc.Addr, 32));
       when cExtTriggerPWMAddr =>

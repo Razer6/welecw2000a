@@ -66,15 +66,18 @@
 /* 2 MB */
 #define RAM_SIZE             0x00200000
 #define FIXED_CPU_FREQUENCY  31250000
+#define SVGA_BUFFER_BASE     (RAM_BASE_ADDR+0x00100000)
 #else
 #ifdef SBX
 /* 16 MB */
 #define RAM_SIZE             0x01000000
-#define FIXED_CPU_FREQUENCY  12500000
+#define FIXED_CPU_FREQUENCY  50000000
+#define SVGA_BUFFER_BASE     (RAM_BASE_ADDR+0x00100000)
 #else
 /* 16 MB */
 #define RAM_SIZE             0x01000000
 #define FIXED_CPU_FREQUENCY  12500000
+#define SVGA_BUFFER_BASE     (RAM_BASE_ADDR+0x00100000)
 #endif
 #endif
 

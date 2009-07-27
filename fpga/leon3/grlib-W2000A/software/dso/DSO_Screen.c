@@ -91,17 +91,17 @@
 #define VLEN 480
 
 typedef struct {
-	uint32_t status;
-	uint32_t video_length;
-	uint32_t front_porch;
-	uint32_t sync_length;
-	uint32_t line_length;
-	uint32_t * framebuffer_pointer;
-	uint32_t clock0;
-	uint32_t clock1;
-	uint32_t clock2;
-	uint32_t clock3;
-	uint32_t glut;
+	volatile uint32_t status;
+	volatile uint32_t video_length;
+	volatile uint32_t front_porch;
+	volatile uint32_t sync_length;
+	volatile uint32_t line_length;
+	volatile uint32_t * framebuffer_pointer;
+	volatile uint32_t clock0;
+	volatile uint32_t clock1;
+	volatile uint32_t clock2;
+	volatile uint32_t clock3;
+	volatile uint32_t glut;
 } volatile aVGA_Config;
 
 static volatile aVGA_Config VGA_Config;
@@ -109,26 +109,29 @@ static volatile aVGA_Config VGA_Config;
 /* The frame buffer has a 1024 byte alignment */
 /* Until it is not known how to set the alignment with the compiler
  * we wast here 1024 bytes */
-unsigned char Framebuffer[HLEN*VLEN+1024];
+/*unsigned char Framebuffer[HLEN*VLEN+1024];*/
 unsigned char * FramePointer;
 
 uint32_t * InitDisplay (uint32_t Target){
-	aVGA_Config * VGA_Config = 0;
+/*	printf("InitDisplay\n");*/
+	aVGA_Config * volatile VGA_Config = (aVGA_Config *)VGA_CONFIG_BASE_ADDR;
 	uint32_t temp = 0;
 	switch(Target){
 		case WELEC2012: 
 		case WELEC2014:
 		case WELEC2022:
 		case WELEC2024:
-			temp = (uint32_t)Framebuffer;
-			temp &= 0x3ff;
+		/*	temp = (uint32_t)Framebuffer;
+			temp &= ~0x3ff;
 			temp += 1024;
-			FramePointer = (unsigned char * )temp;
+			FramePointer = (unsigned char * )temp;*/
+			FramePointer = SVGA_BUFFER_BASE;
+/*			printf("FramePointer %d %x ",FramePointer,FramePointer); */ 
 			VGA_Config = (aVGA_Config*)VGA_CONFIG_BASE_ADDR;
-			VGA_Config->status = 
+/*			VGA_Config->status = 
 				( (1 << VGA_ENABLE_BIT)     | (1 << VGA_RUN_BIT)
 				| (1 << VGA_PIXELSIZE0_BIT) | (0 << VGA_CLOCKSEL0_BIT)
-				| (1 << VGA_H_POL_BIT)      | (1 << VGA_V_POL_BIT));
+				| (1 << VGA_H_POL_BIT)      | (1 << VGA_V_POL_BIT));*/
 			VGA_Config->video_length = 
 				((HLEN-1) << H_OFFSET) | ((VLEN-1) << V_OFFSET);
 			VGA_Config->front_porch =
@@ -146,7 +149,6 @@ uint32_t * InitDisplay (uint32_t Target){
 				( (1 << VGA_ENABLE_BIT)     | (1 << VGA_RUN_BIT)
 				| (1 << VGA_PIXELSIZE0_BIT) | (0 << VGA_CLOCKSEL0_BIT)
 				| (1 << VGA_H_POL_BIT)      | (1 << VGA_V_POL_BIT));
-		/*	DrawTest(); */
 			return 0;
 			break;
 		default:
@@ -181,12 +183,13 @@ void DrawBox(char Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
 		DrawHLine(Color,i,H1,H2);
 	}
 }
+
 void DrawTest(void){
 	DrawBox(-1,0,0,HLEN-1,VLEN-1);
 	DrawBox(0xAA,100,100,300,300);
-	DrawHLine(0x55,0,0,HLEN-1);
-	DrawHLine(0x55,VLEN-1,0,HLEN-1);
-	DrawVLine(0x55,0,0,VLEN-1);
-	DrawVLine(0x55,HLEN-1,0,VLEN-1);
+	DrawHLine(0x55,1,1,HLEN-2);
+	DrawHLine(0x55,VLEN-2,1,HLEN-2);
+	DrawVLine(0x55,1,1,VLEN-2);
+	DrawVLine(0x55,HLEN-2,1,VLEN-2);
 }
 

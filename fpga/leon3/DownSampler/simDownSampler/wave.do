@@ -59,38 +59,7 @@ add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/al
 add wave -noupdate -format Literal /testbench/dut/control__0/c/dataoutcounter
 add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/dataout
 add wave -noupdate -divider FastAvg
-add wave -noupdate -format Logic /testbench/dut/stage0__1/fastavg/iclk
-add wave -noupdate -format Logic /testbench/dut/stage0__1/fastavg/iresetasync
-add wave -noupdate -format Literal /testbench/dut/stage0__1/fastavg/idecimator
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/idata
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/odata
-add wave -noupdate -format Logic /testbench/dut/stage0__1/fastavg/ovalid
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/ostagedata
-add wave -noupdate -format Logic /testbench/dut/stage0__1/fastavg/ostagevalid
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/shiftreg
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/line1
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/line2
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/line3
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/line4
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/delayer
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/l10
-add wave -noupdate -format Literal /testbench/dut/stage0__1/fastavg/l10regcounter
-add wave -noupdate -format Literal /testbench/dut/stage0__1/fastavg/m10state
-add wave -noupdate -format Logic /testbench/dut/stage0__1/fastavg/m10valid
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/m10muxline1
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/m10line
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage0__1/fastavg/m10muxline4
 add wave -noupdate -divider FastPolyPhaseDecimator
-add wave -noupdate -format Logic /testbench/dut/stage1/fir__0/slave/iclk
-add wave -noupdate -format Logic /testbench/dut/stage1/fir__0/slave/iresetasync
-add wave -noupdate -format Literal /testbench/dut/stage1/fir__0/slave/idecimator
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage1/fir__0/slave/idata
-add wave -noupdate -format Logic /testbench/dut/stage1/fir__0/slave/iinputvalid
-add wave -noupdate -format Logic /testbench/dut/stage1/fir__0/slave/isumvalid
-add wave -noupdate -format Logic /testbench/dut/stage1/fir__0/slave/iresultvalid
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage1/fir__0/slave/icoeff
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage1/fir__0/slave/odata
-add wave -noupdate -format Literal -radix decimal /testbench/dut/stage1/fir__0/slave/r
 add wave -noupdate -divider PolyPhaseDecimator2
 add wave -noupdate -format Logic /testbench/dut/slow__2/stage/iclk
 add wave -noupdate -format Logic /testbench/dut/slow__2/stage/iresetasync
@@ -104,7 +73,7 @@ add wave -noupdate -format Literal -radix decimal /testbench/dut/slow__2/stage/r
 add wave -noupdate -divider {New Divider}
 add wave -noupdate -divider -height 40 {New Divider}
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {10470605979 ns} 0} {{Cursor 2} {4439997 ns} 0} {{Cursor 3} {366997114 ns} 0}
+WaveRestoreCursors {{Cursor 1} {19897712000 ns} 0} {{Cursor 2} {4439997 ns} 0} {{Cursor 3} {12991939256 ns} 0}
 configure wave -namecolwidth 224
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -118,4 +87,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ns} {10996650 us}
+WaveRestoreZoom {11923035261 ns} {25546273934 ns}

@@ -4,7 +4,7 @@
 -- File       : Global-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-14
--- Last update: 2009-03-22
+-- Last update: 2009-07-06
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -62,13 +62,6 @@ package Global is
   type    aADCIn is array (0 to cADCsperChannel-1) of aADCData(0 to cChannels-1);
   type    aADCOut is array (0 to cChannels-1) of aADCData(0 to cCoefficients-1);
 
-  -- typedefs for the DownSampler 
-  subtype aValue is signed (cBitWidth-1 downto 0);
-  type    aValues is array (natural range<>) of aValue;
-  subtype aFastData is aValues(0 to cCoefficients-1);
-  type    aAllData is array (0 to cChannels-1) of aFastData;
-  subtype aLongValue is signed(cBitWidth*2-1 downto 0);
-  type    aLongValues is array (natural range<>) of aLongValue;
   type    aInputValues is array (natural range<>) of integer;
   subtype aiValues is aInputValues(0 to 127);
 

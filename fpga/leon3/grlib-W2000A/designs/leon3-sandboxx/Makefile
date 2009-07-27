@@ -35,6 +35,8 @@ FILESKIP = ../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd \
 
 include $(GRLIB)/bin/Makefile
 include $(GRLIB)/software/leon3/Makefile
+
+DSO_TARGET=SBX
 include $(GRLIB)/software/dso/Makefile
 
 
@@ -45,4 +47,7 @@ quartus-pgm:
 
 hello.exe: hello.c
 	$(XCC) $(CFLAGS) $< -o hello.exe
+
+W2000SREC:
+	cp sram.srec ../../../Scope/simSandboxX/sram.srec
 

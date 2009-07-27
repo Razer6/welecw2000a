@@ -69,7 +69,7 @@ bool UartInit(	const unsigned int CPUFreq,
 	 * For this the PCs set the baudrate slightly higher
 	 * and here this is done, too */
 	if (scaler*8*BaudRate != CPUFreq){
-		scaler--;
+/*		scaler--;*/
 	}
 /*	if you do this outside, more uarts can be used with this file*/
 /*	uart = (uart_regs *)GENERIC_UART_BASE_ADDR;*/

@@ -50,7 +50,7 @@ entity SignalSelector is
     iClk                 : in  std_ulogic;
     iResetAsync          : in  std_ulogic;
     iSignalSelector      : in  aSignalSelector;
-    iData                : in  aDownSampled;  -- 9 bit values
+    iData                : in  aLongAllData;  
     iValid               : in  std_ulogic;
     oData                : out aTriggerData;  -- 8 bit values
     oValid               : out std_ulogic);

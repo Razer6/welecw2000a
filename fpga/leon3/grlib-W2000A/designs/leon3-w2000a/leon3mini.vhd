@@ -243,11 +243,12 @@ architecture rtl of leon3mini is
   signal rx : std_logic;
   signal tx : std_logic;
 
-  signal rxd1   : std_logic;
-  signal txd1   : std_logic;
-  signal dsutx  : std_ulogic;           -- DSU tx data
-  signal dsurx  : std_ulogic;           -- DSU rx data
-  signal dsubre : std_ulogic;
+  signal UartSel : std_ulogic;
+  signal rxd1    : std_logic;
+  signal txd1    : std_logic;
+  signal dsutx   : std_ulogic;          -- DSU tx data
+  signal dsurx   : std_ulogic;          -- DSU rx data
+  signal dsubre  : std_ulogic;
 
   signal vgao      : apbvga_out_type;
   signal video_clk : std_logic;
@@ -273,9 +274,37 @@ begin
   -- dsurx   <= iUSBRX;                    -- Receive from USB
   -- oUSBTX  <= dsutx;                     -- Transmit to USB
 
-  oTXD  <= dsutx;
-  dsurx <= iRXD;
-  rxd1  <= iSinhcro;
+--  oTXD  <= dsutx;
+--  dsurx <= iRXD;
+--  rxd1  <= iSinhcro;
+
+  UARTSELECT : process (ClkCPU, ResetAsync)
+  begin
+    if ResetAsync = cResetActive then
+      oTXD    <= '1';
+      dsurx   <= '1';
+      rxd1    <= '1';
+      UartSel <= '0';
+    elsif rising_edge(ClkCPU) then
+  --    if SFRControltoCPU.Keys.BTN_F1 = '1' then
+  --      UartSel <= '0';
+  --    end if;
+  --    if SFRControlFromCPU.nConfigADC(0) = '1' or
+  --      SFRControltoCPU.Keys.BTN_F2 = '1' then
+  --      UartSel <= '1';
+  --    end if;
+      oTXD  <= '1';
+      dsurx <= '1';
+      rxd1  <= '1';
+      if SFRControlFromCPU.nConfigADC(0) = '1' then
+        rxd1 <= iRXD;
+        oTXD <= txd1;
+      else
+        dsurx <= iRXD;
+        oTXD  <= dsutx;
+      end if;
+    end if;
+  end process;
 
   dsubre      <= '0';
   -- dsuactn <= not dsuact;
@@ -777,8 +806,8 @@ begin
 --    port map (vga_bl, vgao.video_out_b(7 downto 6));
 
 
-  oVD    <= vgao.vsync;
-  oHD    <= vgao.hsync;
+  oVD    <= not vgao.vsync;
+  oHD    <= not vgao.hsync;
   oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
   oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
   oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));

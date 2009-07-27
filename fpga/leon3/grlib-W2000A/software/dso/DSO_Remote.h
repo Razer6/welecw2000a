@@ -38,11 +38,11 @@
 #include "types.h"
 
 #ifdef W2000A
-#define DSO_REMOTE_UART_BAUDRATE 115200
+#define DSO_REMOTE_UART_BAUDRATE 9600
 #elif SBX
-#define DSO_REMOTE_UART_BAUDRATE 115200
+#define DSO_REMOTE_UART_BAUDRATE 9600
 #else
-#define DSO_REMOTE_UART_BAUDRATE 128000
+#define DSO_REMOTE_UART_BAUDRATE 9600
 #endif
 
 #define DSO_MASTER_HEADER "Digital Storage Scope Master "

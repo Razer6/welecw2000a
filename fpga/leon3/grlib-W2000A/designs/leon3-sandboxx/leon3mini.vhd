@@ -581,6 +581,7 @@ begin
       port map(rst_in      => rstn,
                iResetAsync => ResetAsync,
                clk_i       => clkm,
+               clk_design_i => clkm,
                apb_i       => apbi,
                apb_o       => apbo(5),
                iSFRControl => SFRControltoCPU,

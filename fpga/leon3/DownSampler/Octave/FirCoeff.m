@@ -56,7 +56,7 @@ M10 = M10(:)';
 %M10 = M10(:)';
 
 R = [R2 R4 R10];
-RNormal = R.*2^(18-1);
+RNormal = R.*2^(16-1);
 CreatePackage('aInputValues','FirCoeff',RNormal);
 system('del RampCoeff-p.vhd');
 system('ren FirCoeff-p.vhd RampCoeff-p.vhd');
@@ -66,7 +66,7 @@ system('del FastRampCoeff-p.vhd');
 system('ren FastFirCoeff-p.vhd FastRampCoeff-p.vhd');
 
 Firs = [M2 M4 M10];
-NormalFirs = Firs.*2^(18-1);
+NormalFirs = Firs.*2^(16-1);
 CreatePackage('aInputValues','FirCoeff',NormalFirs);
 FastFirs = Firs.*2^(10-1);
 plot(FastFirs);

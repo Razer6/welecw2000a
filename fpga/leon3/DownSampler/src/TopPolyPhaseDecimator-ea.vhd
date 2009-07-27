@@ -4,7 +4,7 @@
 -- File       : TopPolyPhaseDecimator-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-05-19
+-- Last update: 2009-07-07
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -92,7 +92,7 @@ begin
     if iResetAsync = cResetActive then
       Coeff <= (others => '0');
     elsif rising_edge(iClk) then
-      Coeff <= to_signed(cFirCoeff(R.FirAddr), aLongValue'length);
+      Coeff <= to_signed(cFirCoeff(R.FirAddr mod cFirCoeff'length), aLongValue'length);
     end if;
   end process;
 

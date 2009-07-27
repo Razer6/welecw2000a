@@ -43,8 +43,9 @@
 #include "Leon3Uart.h"
 #include "DSO_Remote_Slave.h"
 #include "DSO_Remote.h"
+#include "DSO_SFR.h"
 
-#define BOARDTEST 
+/*#define BOARDTEST */
 
 #ifdef BOARDTEST
 #define CAPTURESIZE 8000
@@ -56,6 +57,9 @@
 
 #define FASTFS 500000000
 #define SLOWFS    500000
+
+#define REMOTE_UART uart
+
 int main () {
 	int ReadData = 0;
 	uart_regs * uart = (uart_regs *)GENERIC_UART_BASE_ADDR;
@@ -77,10 +81,17 @@ int main () {
 	Analog[1].Mode = normal;
 	Analog[1].DA_Offset = 0xf1;
 	Analog[1].PWM_Offset = 0xf1;*/
-/*	InitDisplay();
-	DrawTest();*/
+
+	/* This is a workaround to share the serial port with the debug uart 
+	 * and the generic uart on the W2000A! */
+	int * UartSelect = (int*)CONFIGADCENABLE;
+/*	*UartSelect = 0;*/ /* selecting the generic uart for the W2000A */
+
 	InitSignalCapture(Debug,PrintF,English);
-	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, FIFO_EN | ENABLE_RX | ENABLE_TX, uart);
+	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, 
+			FIFO_EN | ENABLE_RX | ENABLE_TX, uart);
+	InitDisplay(WELEC2022);
+	DrawTest();
 
 	SendStringBlock(uart,"DSO Test programm: \nstart testing SetTriggerInput \n");
 	if (SetTriggerInput(2,8,FASTFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3) == true){
@@ -113,14 +124,14 @@ int main () {
 	SendStringBlock(uart,M6);
 	SendCharBlock(uart,'\n');
 */	
-	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, FIFO_EN | ENABLE_RX | ENABLE_TX, uart2);
+/*	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, FIFO_EN | ENABLE_RX | ENABLE_TX, uart2);*/
 		/* UART baudrate test */
-/*	while(1){
-		SendCharBlock(uart,255); 
-		SendCharBlock(uart2,255); 
-	}*/
+	while(1){
+		SendCharBlock(uart,'A'); 
+		SendCharBlock(uart2,'A'); 
+	}
 /*	SendCharBlock(uart2,M6);*/
-	RemoteSlave(uart2,CAPTURESIZE,Data);	
+	RemoteSlave(REMOTE_UART,CAPTURESIZE,Data);	
 /*	printf("End SFR Test\n");*/
 	return 0;
 }

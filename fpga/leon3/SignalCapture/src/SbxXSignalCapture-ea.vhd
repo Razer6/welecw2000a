@@ -74,7 +74,7 @@ architecture RTL of SbxXSignalCapture is
   signal ClkDesign         : std_ulogic;
   signal ClkCPU            : std_ulogic;
   signal DecimatorIn       : aAllData;
-  signal DecimatorOut      : aDownSampled;
+  signal DecimatorOut      : aLongAllData;
   signal DecimatorOutValid : std_ulogic;
   signal SelectorOut       : aTriggerData;
   signal SelectorOutValid  : std_ulogic;

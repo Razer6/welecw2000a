@@ -4,7 +4,7 @@
 -- File       : TestbenchTopDownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-17
--- Last update: 2009-03-04
+-- Last update: 2009-07-06
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -50,13 +50,16 @@ end entity;
 
 architecture bhv of Testbench is
   signal   Clk125                  : std_ulogic            := '1';
+  signal PrevValid : std_ulogic;
   signal   Clk1000                 : std_ulogic            := '1';
   signal   ResetAsync              : std_ulogic            := cResetActive;
   signal   Input                   : aAllData;
-  signal   Output                  : aDownSampled;
+  signal   Output                  : aLongAllData;
   signal   DrawInput, DrawAliasing : aValue;
   signal   DrawOutput              : aLongValue;
   signal   Valid                   : std_ulogic;
+  signal k : natural;
+  signal OutputData : aLongAllData;
   constant M                       : aInputValues(0 to 10) :=
     (0 => 1e9, 1 => 500e6, 2 => 250e6, 3 => 100e6, 4 => 50e6,
      5 => 25e6, 6 => 10e6, 7 => 5e6, 8 => 2500e3, 9 => 1e6, 10 => 500e3);
@@ -72,6 +75,38 @@ architecture bhv of Testbench is
   signal LowSpeedData      : aLongValues(0 to cChannels-1);
   signal LowSpeedDataValid : std_ulogic;
   
+
+  function to_Stages(fs : natural) return std_ulogic_vector is
+    variable vRet       : std_ulogic_vector((cDecimationStages*4)-1 downto 0);
+    variable Ret : std_ulogic_vector((cDecimationStages*4)-1 downto 0) := X"111111";
+    variable Stage      : natural := 0;
+    variable M          : std_ulogic_vector(3 downto 0);
+    variable Decimation : natural := 1e9/fs;
+  begin
+    loop
+      if (Decimation >= 10) then
+        Ret((Stage+1)*4-1 downto Stage*4) := X"A";
+      else
+        case Decimation is
+          when 2 => Ret((Stage+1)*4-1 downto Stage*4) := X"2";
+          when 4 => Ret((Stage+1)*4-1 downto Stage*4) := X"4";
+          when 8 =>
+            if Stage = 0 then
+              Ret((Stage+1)*4-1 downto Stage*4) := X"8";
+            else
+              Ret((Stage+1)*4-1 downto Stage*4) := X"A";
+            end if;
+          when others => Ret((Stage+1)*4-1 downto Stage*4) := X"A";
+        end case;
+        vRet := Ret;
+        return vRet;
+      end if;
+      Decimation := Decimation/10;
+      Stage     := Stage +1;
+    end loop;
+  end;
+
+
 begin
   
   LowSpeedData      <= (others => (others => '0'));
@@ -93,7 +128,7 @@ begin
 
   stimuli : process
   begin
-    Control.SampleTime   <= 1e9;
+    Control.Stages   <= to_stages(1e9);
     Input                <= (others => (others => (others => '0')));
     Control.EnableFilter <= (others => '0');
     wait for 8 us;
@@ -102,7 +137,7 @@ begin
     for e in 0 to 4 loop
       Control.EnableFilter <= std_ulogic_vector(to_signed(-e, Control.EnableFilter'length));
       for d in M'range loop
-        Control.Stage <= M(d);
+        Control.Stages <= to_stages(M(d));
         for i in 0 to cSimClks(d) loop
           Input(0) <= (others => to_signed(0, cBitWidth));
           wait until Clk125 = '1';
@@ -145,20 +180,49 @@ begin
     elsif rising_edge(Clk1000) then
       i         <= (i+1) mod cCoefficients;
       DrawInput <= Input(0)(i);
-      DrawValid <= '0';
+  --    case Control.Stages(3 downto 0) is
+  --      when X"8" | X"A" =>
+  --        DrawValid <= StageValid;
+  --        if StageValid = '1' then
+  --          DrawOutput <= StageData(15 downto 0);
+  --        end if;
+  --        DrawValid <= '0';
+  --      when others =>
 
-      if Valid = '1' and vValid = '0' then
-        DrawCounter <= 0;
-        j           <= 1;
-      end if;
-      vValid := Valid;
-      j      <= (j + 1);
-      if j = (1e9/Control.SampleTime) then
-        DrawCounter <= (DrawCounter +1) mod cCoefficients;
-        j           <= 1;
-        DrawValid   <= '1';
-        DrawOutput  <= Output(0)(DrawCounter);
-      end if;
+          if k /= 0 then
+            k <= k -1;
+          end if;
+          if k = 0 then
+            if j = 7 then
+              DrawValid <= '0';
+            end if;
+            case Control.Stages(3 downto 0) is
+              when X"1"     => k <= 0;
+              when X"2"     => k <= 1;
+              when others => k <= 3;
+            end case;
+            j <= (j + 1) mod 8;
+          end if;
+
+          PrevValid <= Clk125;
+          if Valid = '1' and Clk125 = '1' and PrevValid = '0' then
+            OutputData <= Output;
+            i          <= 0;
+            j          <= 0;
+            case Control.Stages(3 downto 0) is
+              when X"1"  => k <= 0;
+              when X"2"  => k <= 1;
+              when X"4"  => k <= 3;
+              when X"8"  => k <= 7;
+              when others => k <= 9;
+            end case;
+            DrawValid <= '1';
+          end if;
+
+          if DrawValid = '1' then
+            DrawOutput <= OutputData(0)(j);
+          end if;
+ --     end case;
     end if;
     
   end process;
