@@ -4,7 +4,7 @@
 -- File       : ExternalTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-28
--- Last update: 2009-03-04
+-- Last update: 2009-08-01
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -65,13 +65,24 @@ begin
       oHLStrobe <= '0';
       Prev      <= '0';
     elsif rising_edge(iClk) then
-      if iValid = '1' then
+--      if iValid = '1' then
         Prev <= iExtTrigger;
+--      end if;
+      if (Prev and (not iExtTrigger)) = '1' then
+        oHLStrobe <= '1';
+      elsif iValid = '1' then
+        oHLStrobe <= '0';
       end if;
-      oHLStrobe <= (not iExtTrigger) and Prev;
-      oLHStrobe <= iExtTrigger and (not Prev);
+      if (iExtTrigger and (not Prev)) = '1' then
+        oLHStrobe <= '1';
+      elsif iValid = '1' then
+        oLHStrobe <= '0';
+      end if;
     end if;
   end process;
+
+--  oHLStrobe <= Prev and (not iExtTrigger);
+--  oLHStrobe <= iExtTrigger and (not Prev);
 
   oHigh <= Prev;
   

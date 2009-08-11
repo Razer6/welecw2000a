@@ -35,13 +35,13 @@ set_global_assignment -name OUTPUT_PIN_LOAD 5 -section_id "3.3-V LVTTL"
 set_global_assignment -name OUTPUT_PIN_LOAD 3 -section_id "1.8 V"
 set_global_assignment -name FMAX_REQUIREMENT "100 MHz"
 
-set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[6]
-set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[5]
-set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[4]
-set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[3]
-set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[2]
-set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[1]
-set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[0]
+#set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[6]
+#set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[5]
+#set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[4]
+#set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[3]
+#set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[2]
+#set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[1]
+#set_instance_assignment -name IO_STANDARD LVDS -to iCh1ADC1[0]
 
 set_location_assignment PIN_J3 -to address[2] -comment A0
 set_location_assignment PIN_J4 -to address[3] -comment A1
@@ -89,14 +89,14 @@ set_location_assignment PIN_D3 -to data[7]
 set_location_assignment PIN_H2 -to data[8]
 set_location_assignment PIN_G1 -to data[9]
 set_location_assignment PIN_AB11 -to dsubre -comment TST_STEP
-set_location_assignment PIN_A5 -to rxd1 -comment RS_RXD_TTL
-set_location_assignment PIN_B5 -to txd1 -comment RS_TXD_TTL
-set_location_assignment PIN_A4 -to dsurx -comment RS_RXD_TTL
-set_location_assignment PIN_B4 -to dsutx -comment RS_TXD_TTL
-#set_location_assignment PIN_A5 -to dsurx -comment RS_RXD_TTL
-#set_location_assignment PIN_B5 -to dsutx -comment RS_TXD_TTL
-#set_location_assignment PIN_A4 -to rxd1 -comment RS_RXD_TTL
-#set_location_assignment PIN_B4 -to txd1 -comment RS_TXD_TTL
+#set_location_assignment PIN_A5 -to rxd1 -comment RS_RXD_TTL
+#set_location_assignment PIN_B5 -to txd1 -comment RS_TXD_TTL
+#set_location_assignment PIN_A4 -to dsurx -comment RS_RXD_TTL
+#set_location_assignment PIN_B4 -to dsutx -comment RS_TXD_TTL
+set_location_assignment PIN_A5 -to dsurx -comment RS_RXD_TTL
+set_location_assignment PIN_B5 -to dsutx -comment RS_TXD_TTL
+set_location_assignment PIN_A4 -to rxd1 -comment RS_RXD_TTL
+set_location_assignment PIN_B4 -to txd1 -comment RS_TXD_TTL
 set_location_assignment PIN_AA16 -to emdc -comment ETH_MDC
 set_location_assignment PIN_AB17 -to emdio -comment ETH_MDIO
 set_location_assignment PIN_AA14 -to erxd[0] -comment ETH_RXD0
@@ -152,20 +152,35 @@ set_location_assignment PIN_Y4 -to select_o[1]
 set_location_assignment PIN_Y3 -to select_o[2]
 
 
-set_location_assignment PIN_A20 -to iCh1ADC1[0]
-set_location_assignment PIN_B20 -to "iCh1ADC1[0](n)"
-set_location_assignment PIN_A19 -to iCh1ADC1[1]
-set_location_assignment PIN_B19 -to "iCh1ADC1[1](n)"
-set_location_assignment PIN_A18 -to iCh1ADC1[2]
-set_location_assignment PIN_B18 -to "iCh1ADC1[2](n)"
-set_location_assignment PIN_A17 -to iCh1ADC1[3]
-set_location_assignment PIN_B17 -to "iCh1ADC1[3](n)"
-set_location_assignment PIN_A15 -to iCh1ADC1[4]
-set_location_assignment PIN_B15 -to "iCh1ADC1[4](n)"
-set_location_assignment PIN_A14 -to iCh1ADC1[5]
-set_location_assignment PIN_B14 -to "iCh1ADC1[5](n)"
-set_location_assignment PIN_A13 -to iCh1ADC1[6]
-set_location_assignment PIN_B13 -to "iCh1ADC1[6](n)"
+#set_location_assignment PIN_A20 -to iCh1ADC1[0]
+#set_location_assignment PIN_B20 -to "iCh1ADC1[0](n)"
+#set_location_assignment PIN_A19 -to iCh1ADC1[1]
+#set_location_assignment PIN_B19 -to "iCh1ADC1[1](n)"
+#set_location_assignment PIN_A18 -to iCh1ADC1[2]
+#set_location_assignment PIN_B18 -to "iCh1ADC1[2](n)"
+#set_location_assignment PIN_A17 -to iCh1ADC1[3]
+#set_location_assignment PIN_B17 -to "iCh1ADC1[3](n)"
+#set_location_assignment PIN_A15 -to iCh1ADC1[4]
+#set_location_assignment PIN_B15 -to "iCh1ADC1[4](n)"
+#set_location_assignment PIN_A14 -to iCh1ADC1[5]
+#set_location_assignment PIN_B14 -to "iCh1ADC1[5](n)"
+#set_location_assignment PIN_A13 -to iCh1ADC1[6]
+#set_location_assignment PIN_B13 -to "iCh1ADC1[6](n)"
+
+set_location_assignment PIN_B20 -to iCh1ADC1[0]
+set_location_assignment PIN_A20 -to iCh1ADC1[1]
+set_location_assignment PIN_B19 -to iCh1ADC1[2]
+set_location_assignment PIN_A19 -to iCh1ADC1[3]
+set_location_assignment PIN_B18 -to iCh1ADC1[4]
+set_location_assignment PIN_A18 -to iCh1ADC1[5]
+set_location_assignment PIN_B17 -to iCh1ADC1[6]
+set_location_assignment PIN_A17 -to iCh1ADC1[7]
+set_location_assignment PIN_B15 -to iCh1ADC1[8]
+set_location_assignment PIN_A15 -to iCh1ADC1[9]
+set_location_assignment PIN_B14 -to iCh1ADC1[10]
+set_location_assignment PIN_A14 -to iCh1ADC1[11]
+set_location_assignment PIN_B13 -to iCh1ADC1[12]
+set_location_assignment PIN_A13 -to iCh1ADC1[13]
 
 
 set_global_assignment -name HDL_MESSAGE_LEVEL LEVEL3
@@ -425,6 +440,9 @@ set_global_assignment -name VHDL_FILE ../../Altera/src/TriggerMemory.vhd
 set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FastFirCoeff-p.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FirCoeff-p.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyphaseDecimator-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/AdderTreeFilter-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/LongFastPolyPhaseDecimator-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopLongFastPolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastAverage-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd"
@@ -467,8 +485,15 @@ set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS ON
 set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION ON
 set_global_assignment -name PRE_MAPPING_RESYNTHESIS ON
 set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
-set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIXII NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIXII "SPARSE AUTO"
 set_global_assignment -name AUTO_PACKED_REGISTERS_MAXII NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_CYCLONE NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
+
+set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION AUTOMATICALLY
+set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 2.0
+set_global_assignment -name STATE_MACHINE_PROCESSING "ONE-HOT"
+set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 2.0
+
+set_global_assignment -name FITTER_EARLY_TIMING_ESTIMATE_MODE PESSIMISTIC

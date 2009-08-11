@@ -34,15 +34,14 @@ set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 
-set_global_assignment -name LAST_QUARTUS_VERSION "8.0 SP1"
+set_global_assignment -name LAST_QUARTUS_VERSION 9.0
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd"
 set_global_assignment -name VHDL_FILE "../../Scope/src/Global-p.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FastFirCoeff-p.vhd"
+set_global_assignment -name VHDL_FILE "../../DownSampler/Octave/FirCoeff-p.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/PolyphaseDecimator-p.vhd"
-set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastAverage-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd"
-set_global_assignment -name VHDL_FILE "../../DownSampler/src/DownSampler-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd"
-set_global_assignment -name VHDL_FILE "../../DownSampler/src/TopDownSampler-ea.vhd"
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON

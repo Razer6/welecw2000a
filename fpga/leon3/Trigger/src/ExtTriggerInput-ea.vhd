@@ -4,7 +4,7 @@
 -- File       : ExtTriggerInput-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-11
--- Last update: 2009-03-11
+-- Last update: 2009-08-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -47,10 +47,10 @@ use DSO.pTrigger.all;
 
 entity ExtTriggerInput is
   port (
-    iClk           : in std_ulogic;
-    iResetAsync    : in std_ulogic;
-    iExtTrigger    : in std_ulogic_vector(1 to cExtTriggers);
-    iExtTriggerSrc : in aExtTriggerInput;
+    iClk           : in  std_ulogic;
+    iResetAsync    : in  std_ulogic;
+    iExtTrigger    : in  std_ulogic_vector(1 to cExtTriggers);
+    iExtTriggerSrc : in  aExtTriggerInput;
     oTrigger       : out std_ulogic;
     oPWM           : out std_ulogic_vector(1 to cExtTriggers));
 end entity;
@@ -58,6 +58,8 @@ end entity;
 architecture RTL of ExtTriggerInput is
   signal Toggle  : std_ulogic;
   signal Sources : std_ulogic_vector(0 to cExtTriggers);
+  type   aSync is array(0 to 1) of std_ulogic_vector(1 to cExtTriggers);
+  signal Sync    : aSync;
 begin
   
   Trigger : process (iClk, iResetAsync)
@@ -65,7 +67,10 @@ begin
     if iResetAsync = cResetActive then
       oTrigger <= '0';
       Toggle   <= '0';
+      Sync     <= (others => (others => '0'));
     elsif rising_edge(iClk) then
+      Sync(1)  <= Sync(0);
+      Sync(0)  <= iExtTrigger;
       Toggle   <= not Toggle;
       oTrigger <= Sources(iExtTriggerSrc.Addr);
     end if;
@@ -75,7 +80,7 @@ begin
   begin
     Sources(0) <= Toggle;
     for i in 1 to cExtTriggers loop
-      Sources(i) <= iExtTrigger(i);
+      Sources(i) <= Sync(1)(i);
     end loop;
   end process;
 

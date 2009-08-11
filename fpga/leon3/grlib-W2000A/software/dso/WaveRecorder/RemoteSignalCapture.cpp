@@ -40,6 +40,7 @@
 #include "RemoteSignalCapture.h"
 #include "DSO_ADC_Control.h"
 #include "Communication.h"
+#include "PCUart.h"
 
 RemoteSignalCapture::RemoteSignalCapture(Communication * Comm): Request(Comm){}
 
@@ -73,8 +74,9 @@ uint32_t RemoteSignalCapture::Receive(uint32_t Addr, uint32_t *Data, uint32_t & 
 	}
 	SendData[0] = Addr;
 	SendData[1] = Length;
-
+	SetTimeoutMs(20000);
 	Length = mComm->Receive(SendData,Length+1);
+	SetTimeoutMs(1000);
 	for (uint32_t i = 0; i < Length; ++i){
 		Data[i] = SendData[i+1];
 	}

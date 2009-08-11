@@ -52,9 +52,10 @@ volatile uart_regs      * volatile adc_uart;
 
 static uint32_t FMode;
 
-uint32_t FastMode(	const uint32_t SamplingFrequency, 
+uint32_t FastMode(	
+			const uint32_t SamplingFrequency, 
 			const uint32_t CPUFrequency){
-	return SamplingFrequency > (CPUFrequency*FASTMODEFACTOR);
+	return SamplingFrequency > (CPUFrequency/FASTMODEFACTOR);
 }
 uint32_t IsFastMode() {
 	return FMode;
@@ -65,13 +66,14 @@ bool InitSignalCapture(Debugprint * Init, Target T, Language L){
 	TriggerR = (TriggerRegs *)   TRIGGERONCHADDR;
 	AnalogR  = (AnalogSettings *)ANALOGSETTINGSBANK7;
 	adc_uart = (uart_regs *)     UART_CHCFG_BASE_ADDR;    
-	UartInit(FIXED_CPU_FREQUENCY, DSO_CHCFG_BAUDRATE, 
-			ENABLE_RX | ENABLE_TX, adc_uart);
+/*	UartInit(FIXED_CPU_FREQUENCY, DSO_CHCFG_BAUDRATE, 
+			ENABLE_RX | ENABLE_TX, adc_uart);*/
 	Init = &Print;
 	return InitDebugprint(&Print,T,L);
 }
 
-bool SetTriggerInput (	const uint32_t noChannels, 
+bool SetTriggerInput (	
+			const uint32_t noChannels, 
 			const uint32_t SampleSize, 
 			const uint32_t SamplingFrequency,
 			const uint32_t CPUFrequency,
@@ -324,6 +326,7 @@ bool SetAnalogInputRange(const uint32_t NoCh,
 				break;
 			case SANDBOXX:
 				{
+#if 0
 					ADCSerial cmds[]= {
 					      {ADC_ADDR_SPEED,  (1 << ADC_PIN_LSPEED)},
 					      {ADC_ADDR_POWER,  (1 << ADC_PIN_MODE0)},
@@ -376,6 +379,7 @@ bool SetAnalogInputRange(const uint32_t NoCh,
 					SendCharBlock(adc_uart,ADC_RELEASE);
 					WaitMs(2);
 					*ADCConfig = -1; /* high inactive */
+#endif
 					return true;	
 				}
 				
@@ -398,7 +402,8 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 	uint32_t StartData[8] = {};
 	/* The compiler has bugs in the loop optimisation with the keyword volatile 
 	 * even with function call to get the data from an hw address + masking in a condition */
-	volatile int temp = 0; 
+	volatile uint32_t StopOffset = 0; 
+	volatile uint32_t temp = 0; 
 
 	TriggerR->TriggerOnceAddr = 0;
 	TriggerR->TriggerOnceAddr = 1;
@@ -407,18 +412,22 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 			(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
 		return 0;
 	}
-	temp = loadmem((unsigned int)&TriggerR->TriggerReadOffSetAddr);
-	StopAddr = (uint32_t *)(TRIGGER_MEM_BASE_ADDR + temp);
+	StopOffset = loadmem((unsigned int)&TriggerR->TriggerReadOffSetAddr);
+	StopAddr = (uint32_t *)(TRIGGER_MEM_BASE_ADDR + StopOffset);
 
 	StopAddr++; /* matching 0 to end-1 */
 	Addr = StopAddr;
-
+	CaptureR->DeviceAddr = (uint32_t) Addr;
+	if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+		Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
+	}
 	/* The folowing lines solve a feature in the hardware trigger, 
 	 * which is overwriting up the first 7 samples at the end!       
 	 * It is caused, because the trigger always writes 8 Samples per Channel at once */
+	StopOffset = (StopOffset +8) & (TRIGGER_MEM_SIZE-1); /* mod 2^n */
 	while(1){
 		temp = loadmem((unsigned int)&TriggerR->TriggerCurrentAddr); 
-		if (((int)StopAddr + 8) < temp){
+		if ((StopOffset < temp) || ((StopOffset-temp) > 8)){
 			break;
 		}
 	}
@@ -428,24 +437,27 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 		StartSize = 8;
 	}
 	for (i = 0; i < StartSize; ++i){
-		StartData[i] = *Addr;
+		StartData[i] = Addr[0];
 		Addr++;
 		if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
 			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
 		}
 	}
 	i = 0;
-	if (TRIGGER_MEM_SIZE < CaptureSize){
-		CaptureSize = TRIGGER_MEM_SIZE;
+	Addr = StopAddr;
+	if ((TRIGGER_MEM_SIZE/sizeof(uint32_t)) < CaptureSize){
+		CaptureSize = TRIGGER_MEM_SIZE/sizeof(uint32_t);
 	}
 	/* Wait until the trigger buffer is full */
 	WaitUntilMaskedAndZero(&TriggerR->TriggerStatusRegister, (1 << TRIGGERRECORDINGBIT));
+/*	CaptureR->DeviceAddr = (uint32_t) CaptureSize;*/
 	while ((i < CaptureSize)){
-		RawData[i] = *Addr;
+		RawData[i] = Addr[0];
 		i++;
-		Addr++;
+		Addr++;	
 		if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
 			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
+			CaptureR->DeviceAddr = i;
 		}
 	}
 	/* The Trigger has a feature that the last 8 DWORDS! overwrites up 
@@ -468,7 +480,7 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 				break;
 	       }
 	}
-	return i;
+	return CaptureSize;
 }
 
 /* returns read DWORDS*/
@@ -491,6 +503,8 @@ uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
 	if ((FMode != 0) || ForceFastMode == true) {
 		return FastCapture(WaitTime,CaptureSize, RawData);
 	} 
+	printf("Record Normal\n");
+
 	if (Start != false) {
 		TriggerR->TriggerOnceAddr = 0;
 		TriggerR->TriggerOnceAddr = 1;
@@ -503,7 +517,6 @@ uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
 	i = 0;
 	StopAddr = (TriggerR->TriggerReadOffSetAddr) +1;
 	
-	printf("Record Normal\n");
 	while (1) {
 		temp = loadmem((int)&TriggerR->TriggerStatusRegister);
 		if (((1 << TRIGGERRECORDINGBIT) & temp) == 0) {
@@ -527,11 +540,12 @@ uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
 			Addr++;
 			if ((unsigned int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
 				Addr =  (uint32_t *) TRIGGER_MEM_BASE_ADDR;
+				CaptureR->DeviceAddr = i;
 			}
 		}
 		TriggerR->TriggerCurrentAddr = (unsigned int)Addr-1; 
 		/* & (TRIGGER_MEM_SIZE-1); hw SFR mod 2^bits */
-		puts(".");
+	/*	puts("."); */
 
 	}
 	return i;

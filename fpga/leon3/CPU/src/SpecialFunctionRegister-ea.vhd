@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-07-26
+-- Last update: 2009-08-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -76,6 +76,7 @@ architecture RTL of SpecialFunctionRegister is
   signal AnalogSettings            : aAnalogSettings;
   signal PrevTriggerBusy           : std_ulogic;
   signal PrevTriggerStartRecording : std_ulogic;
+  signal PrevAnalogBusy            : std_ulogic;
   signal Addr                      : natural;
 begin
   
@@ -93,9 +94,13 @@ begin
         InterruptVector(0) <= '1';
       end if;
       PrevTriggerStartRecording <= SFRIn.Trigger.Recording;
-      if PrevTriggerStartRecording = '1' and SFRIn.Trigger.Recording = '0' then
+      if PrevTriggerStartRecording = '0' and SFRIn.Trigger.Recording = '1' then
         InterruptVector(1) <= '1';
       end if;
+      if SFRIn.AnalogBusy = '0' and PrevAnalogBusy = '1' then
+        InterruptVector(2) <= '1';
+      end if;
+
 --      InterruptVector(2) <= SFRIn.KeyInterruptLH;
 --      InterruptVector(3) <= SFRIn.KeyInterruptHL;
       --  InterruptVector(4) <= SFRIn.Uart.Interrupt;
@@ -150,12 +155,12 @@ begin
             1 => O"1",
             2 => O"2",
             3 => O"3");
---        when cSandboxX =>
---          SignalSelector <= (
---            0                => O"0",
---            1                => O"4",
---            2                => O"0",
---            3                => O"4");
+        when cSandboxX =>
+          SignalSelector <= (
+            0 => O"0",
+            1 => O"4",
+            2 => O"0",
+            3 => O"4");
         when others =>
           SignalSelector <= (
             others => O"0");
@@ -261,7 +266,7 @@ begin
             Trigger.StorageMode <= iData(Trigger.StorageMode'range);
           when cTriggerReadOffSetAddr =>
             Trigger.SetReadOffset <= '1';
-            Trigger.ReadOffset    <= unsigned(iData(Trigger.ReadOffset'high downto 0));
+            Trigger.ReadOffset    <= unsigned(iData(Trigger.ReadOffset'high+cTriggerAlign downto cTriggerAlign));
           when cTriggerTypeAddr =>
             Trigger.Trigger <= to_integer(unsigned(iData(cDiffTriggers-1 downto 0)));
             
@@ -395,7 +400,7 @@ begin
       when cTriggerStorageModeAddr =>
         oData(Trigger.StorageMode'range) <= Trigger.StorageMode;
       when cTriggerReadOffSetAddr =>
-        oData(SFRIn.Trigger.ReadOffSet'high downto 0) <= std_ulogic_vector(SFRIn.Trigger.ReadOffSet);
+        oData(SFRIn.Trigger.ReadOffSet'high+cTriggerAlign downto cTriggerAlign) <= std_ulogic_vector(SFRIn.Trigger.ReadOffSet);
       when cTriggerTypeAddr =>
         oData <= std_ulogic_vector(to_unsigned(Trigger.Trigger, oData'length));
       when cTriggerLowValueAddr =>

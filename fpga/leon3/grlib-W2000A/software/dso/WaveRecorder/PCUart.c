@@ -46,7 +46,7 @@
 struct termios tio;
 #endif
 
-void STDCALL UartClose (uart_regs * uart){
+void UartClose (uart_regs * uart){
 #ifdef WINNT 
        CloseHandle(*uart);
 #else 
@@ -54,6 +54,11 @@ void STDCALL UartClose (uart_regs * uart){
 #endif
 }
 
+static uint32_t TimeoutMs = 0;
+
+void SetTimeoutMs(uint32_t Timeout){
+	TimeoutMs = Timeout;
+}
 
 bool UartInit(	
 		char * UartAddr,
@@ -194,9 +199,9 @@ char ReceiveCharBlock(uart_regs * uart){
 	  }
    } while (ret == 0);
    x = (int32_t)(unsigned char)ch;
-   printf("%02x ",x);
+ /*  printf("%02x ",x);*/
 #else
-	unsigned int ret = 0;
+	uint32_t ret = 0;
 	while(read(uart,&ch,1) == 0) {
 		usleep(1000);
 	}
@@ -204,10 +209,10 @@ char ReceiveCharBlock(uart_regs * uart){
 	return ch;
 }
 
-char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
+char ReceiveChar(uart_regs * uart, uint32_t *error){
 	char ch = 0;
-	unsigned int ret = 0;
-	unsigned int cnt = 0;
+	uint32_t ret = 0;
+	uint32_t cnt = 0;
 	*error = 0;
 #ifdef WINNT
 	do {
@@ -218,6 +223,7 @@ char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
 		}
 		if (cnt == TimeoutMs){
 			*error = 1;
+			printf("\nTimeout!\n");
 			return 0;
 		}
    } while (ret == 0);
@@ -231,7 +237,7 @@ char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
 
 void SendCharBlock(uart_regs * uart, char c){
 #ifdef WINNT
-	unsigned int ret = 0;
+	uint32_t ret = 0;
 	int32_t x = (int32_t)(unsigned char)c;
 	printf("%02x ",x);
 	do {
@@ -246,14 +252,14 @@ void SendCharBlock(uart_regs * uart, char c){
 }
 
 
-void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int *size){
+void ReceiveStringBlock (uart_regs * uart, char * c, uint32_t *size){
 #ifdef WINNT
 	DWORD ret = 0;
 	LPDWORD lpret = &ret;
 	DWORD  r = 0;
 #else
-	unsigned int ret = 0;
-	unsigned int r = 0;
+	uint32_t ret = 0;
+	uint32_t r = 0;
 #endif
 	while (r != *size) {
 #ifdef WINNT
@@ -274,10 +280,10 @@ void SendStringBlock (uart_regs * uart, char * c){
 	LPDWORD lpret = &ret;
 	DWORD written = 0;
 #else
-	unsigned int ret = 0;
-	unsigned int written = 0;
+	uint32_t ret = 0;
+	uint32_t written = 0;
 #endif
-	unsigned int size = strlen(c);
+	uint32_t size = strlen(c);
 	while (written != size) {
 #ifdef WINNT
 		WriteFile(*uart,&c[written],size-written,lpret,NULL);

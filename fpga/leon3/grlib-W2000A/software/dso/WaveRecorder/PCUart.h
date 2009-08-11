@@ -80,13 +80,15 @@ extern "C" {
 #endif
 
 void UartClose (uart_regs * uart);
+void SetTimeoutMs(uint32_t Timeout);
 
-bool UartInit(	char * UartAddr,
+bool UartInit(	
+		char * UartAddr,
 		const int BaudRate,
 		uart_regs * uart);
 
 char ReceiveCharBlock(uart_regs * uart);
-char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error);
+char ReceiveChar(uart_regs * uart, unsigned int *error);
 
 void SendCharBlock(uart_regs * uart, char c);
 

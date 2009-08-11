@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-06-05
+-- Last update: 2009-08-01
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 

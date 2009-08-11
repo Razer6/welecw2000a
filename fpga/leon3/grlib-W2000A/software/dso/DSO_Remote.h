@@ -39,10 +39,13 @@
 
 #ifdef W2000A
 #define DSO_REMOTE_UART_BAUDRATE 9600
+#define REMOTE_UART (uart_regs*)GENERIC_UART_BASE_ADDR
 #elif SBX
-#define DSO_REMOTE_UART_BAUDRATE 9600
+#define DSO_REMOTE_UART_BAUDRATE 28800
+#define REMOTE_UART (uart_regs*)DEBUG_UART_BASE_ADDR
 #else
 #define DSO_REMOTE_UART_BAUDRATE 9600
+#define REMOTE_UART (uart_regs*)DEBUG_UART_BASE_ADDR
 #endif
 
 #define DSO_MASTER_HEADER "Digital Storage Scope Master "
@@ -50,6 +53,7 @@
 #define DSO_NAK_RESP      "NAK"
 #define DSO_ACK_RESP      "ACK"
 #define DSO_DATA_RESP     "Data "
+#define DSO_MESSAGE_RESP  "Message "
 #define DSO_CRC_ERROR     "CRC ERROR"
 
 #ifdef LEON3
@@ -79,20 +83,25 @@
 extern "C" {
 #endif
 
+
 void SendNAK(uart_regs * uart);
 void SendACK(uart_regs * uart);
 void SendCRCError(uart_regs * uart);
-void ChangeEndian(unsigned int message[], int nBytes);
-bool CheckCRC(crc crcSent, unsigned int message[], int nBytes);
+void ChangeEndian(uint32_t message[], int nBytes);
+bool CheckCRC(crc crcSent, uint32_t message[], int nBytes);
 void SendHeader(uart_regs * uart);
-bool SendCaptureData(uart_regs * uart, unsigned int FastMode, int datasize, unsigned int * data);
-bool SendData(uart_regs * uart,  int datasize, unsigned int * data);
+bool SendCaptureData(uart_regs * uart, uint32_t FastMode, int datasize, uint32_t * data);
+bool SendData(uart_regs * uart,  int datasize, uint32_t * data);
 int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data);
 int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data);
 bool ReceiveACK(uart_regs * uart);
-bool ReceiveHeader(uart_regs * uart, const char * RefHeader, unsigned int TimeoutMs);
-unsigned int  GetInt(uart_regs * uart);
-void SendInt(uart_regs * uart, unsigned int data);
+bool ReceiveHeader(uart_regs * uart, const char * RefHeader);
+#ifdef LITTLE_ENDIAN
+uint32_t GetInt(uart_regs * uart, uint32_t *error);
+#else
+uint32_t GetInt(uart_regs * uart);
+#endif
+void SendInt(uart_regs * uart, uint32_t data);
 
 #ifdef __cplusplus
 }

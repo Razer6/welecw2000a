@@ -22,7 +22,7 @@ void RemoteSlave(	uart_regs * comm_uart,
 	uart = comm_uart;
 	printf("Starting with the remote control\n");
 	while(1){
-		ReceiveHeader(uart,DSO_REC_HEADER,0),
+		ReceiveHeader(uart,DSO_REC_HEADER),
 		GetTask();		
 	}
 }

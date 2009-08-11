@@ -8,7 +8,7 @@ MKPROMOPT= -v -freq=63  -stack 0x4001B500 -ramsize 2048 -ramcs 1 -rmw -romws 1 -
 TINYFLAGS= -msoft-float -nostdlib  -nostartfiles
 TX= -Tlinkprom -N -L./ -Ttext=0
 
-DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart $(DSOPATH)/DSO_Debugprint $(DSOPATH)/DSO_ADC_Control $(DSOPATH)/DSO_SignalCapture $(DSOPATH)/crc $(DSOPATH)/DSO_Remote $(DSOPATH)/DSO_Remote_Slave
+DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart_irq $(DSOPATH)/DSO_Debugprint $(DSOPATH)/DSO_ADC_Control $(DSOPATH)/DSO_SignalCapture $(DSOPATH)/crc $(DSOPATH)/DSO_Remote $(DSOPATH)/DSO_Remote_Slave
 W2000SRC= $(DSOPATH)/DSO_Screen $(DSOPATH)/DSO_FrontPanel $(DSOSRC) $(DSOPATH)/DSO_SignalCTest
 SBXSRC=$(DSOPATH)/SandboxXBootloader $(DSOSRC)
 
@@ -34,7 +34,7 @@ WTBRom:  $(DSOPATH)/Startup.S
 
 
 W2000: $(WCFILES) 
-	$(XCC) $(WCFILES) $(BOOTOPT) -Wall -o W2000ROM.exe
+	$(XCC) $(WCFILES) $(BOOTOPT) -O2 -Wall -o W2000ROM.exe
 	sparc-elf-objdump -S W2000ROM.exe > W.S
 	sparc-elf-objcopy -O srec   W2000ROM.exe sram.srec
 	sparc-elf-objcopy -O binary W2000ROM.exe sram.bin

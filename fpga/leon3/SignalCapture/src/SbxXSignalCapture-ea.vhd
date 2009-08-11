@@ -4,7 +4,7 @@
 -- File       : SBxXSignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-04-17
+-- Last update: 2009-08-02
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -48,13 +48,15 @@ use DSO.pTrigger.all;
 entity SbxXSignalCapture is
   port (
     oClkCPU     : out std_ulogic;
+    oClkDesign  : out std_ulogic;
     iResetAsync : in  std_ulogic;
     -- ADC
     iClkADC     : in  std_ulogic_vector (0 to cADCsperChannel-1);  -- for SbxX 100 MHz
     oResetAsync : out std_ulogic;       -- pll locked as asyncronous reset
     iADC        : in  aADCIn;
 
-    iDownSampler    :     aDownSampler;
+    iDownSampler    : in  aDownSampler;
+    iSignalSelector : in  aSignalSelector;
     -- Trigger
     iTriggerCPUPort : in  aTriggerInput;
     oTriggerCPUPort : out aTriggerOutput;
@@ -83,12 +85,12 @@ architecture RTL of SbxXSignalCapture is
   signal SlowInputValid    : std_ulogic;
   signal DownSampler       : aDownSampler;
   signal ExtTrigger        : std_ulogic;
-  signal Channels : integer range 0 to 3;
+  signal Channels          : integer range 0 to 3;
 begin
 
   -- oResetAsync <= ResetAsync;
   ResetAsync <= not iResetAsync;
-  ClkDesign  <= iCLKADC(0);
+--  ClkDesign  <= iCLKADC(0);
   oClkCPU    <= ClkCPU;
 
   DesignClk : entity DSO.SbXPLL
@@ -96,6 +98,7 @@ begin
       areset => ResetAsync,
       inclk0 => iCLKADC(0),
       c0     => ClkCPU,
+      c1     => ClkDesign,
       locked => oResetAsync);
 
   pCMOS : if cLVDSADCs = 0 generate
@@ -131,6 +134,7 @@ begin
   end generate;
 
 
+
   DecimatorIn    <= (others => (others => (others => '0')));
   SlowInputValid <= '1';
 
@@ -141,17 +145,69 @@ begin
     DownSampler.Stages(3 downto 0) <= X"A";
   end process;
 
---  Decimator : entity work.TopDownSampler
---    generic map (gUseStage0 => false)
---    port map (
---      iClk        => ClkDesign,
---      iResetAsync => iResetAsync,
---      iADC        => DecimatorIn,       -- fixpoint 1.x range -0.5 to 0.5
---      iCPU        => DownSampler,
---      iData       => SlowInputData,
---      iValid      => SlowInputValid,
---      oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
---      oValid      => DecimatorOutValid);
+  Decimator : entity work.TopDownSampler
+    generic map (gUseStage0 => false)
+    port map (
+      iClk        => ClkDesign,
+      iResetAsync => iResetAsync,
+      iADC        => DecimatorIn,       -- fixpoint 1.x range -0.5 to 0.5
+      iCPU        => DownSampler,
+      iData       => SlowInputData,
+      iValid      => SlowInputValid,
+      oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
+      oValid      => DecimatorOutValid);
+
+  pSignalSelector : process (ClkDesign, iResetAsync)
+    variable vTriggerCh : natural;
+  begin
+    if iResetAsync = cResetActive then
+      SelectorOut     <= (others => (others => (others => '0')));
+      SelectorOutValid <= '0';
+    elsif rising_edge(ClkDesign) then
+      SelectorOutValid <= DecimatorOutValid;
+      for i in 0 to 3 loop
+        vTriggerCh := to_integer(unsigned(iSignalSelector(i)(2 downto 0)));
+        for j in 0 to cCoefficients-1 loop
+          if is_x(std_ulogic_vector(DecimatorOut(0)(0))) = true then
+            SelectorOut(i)(j) <= (others => '0');
+          else
+            case i is
+              when 0 =>
+                SelectorOut(0)(j) <= std_ulogic_vector(
+                  DecimatorOut(0)(j)(DecimatorOut(0)(j)'high downto DecimatorOut(0)(j)'high-aByte'length+1));
+              when 1 =>
+                if vTriggerCh = 0 then
+                  SelectorOut(1)(j) <= std_ulogic_vector(
+                    DecimatorOut(0)(j)(DecimatorOut(0)(j)'high downto DecimatorOut(0)(j)'high-aByte'length+1));
+                else
+                  SelectorOut(1)(j) <= std_ulogic_vector(
+                    DecimatorOut(0)(j)(DecimatorOut(0)(j)'high-aByte'length downto DecimatorOut(0)(j)'high-(2*aByte'length)+1));
+                end if;
+              when 2 =>
+                if vTriggerCh = 0 then
+                  SelectorOut(2)(j) <= std_ulogic_vector(
+                    DecimatorOut(0)(j)(DecimatorOut(0)(j)'high downto DecimatorOut(0)(j)'high-aByte'length+1));
+                else
+                  SelectorOut(2)(j) <= std_ulogic_vector(
+                    DecimatorOut(0)(j) (DecimatorOut(0)(j)'high-(2*aByte'length) downto DecimatorOut(0)(j)'high-(3*aByte'length)+1));
+                end if;
+              when 3 =>
+                if vTriggerCh = 0 then
+                  SelectorOut(3)(j) <= std_ulogic_vector(
+                    DecimatorOut(0)(j)(DecimatorOut(0)(j)'high downto DecimatorOut(0)(j)'high-aByte'length+1));
+                elsif vTriggerCh = 4 then
+                  SelectorOut(3)(j) <= std_ulogic_vector(
+                    DecimatorOut(0)(j)(DecimatorOut(0)(j)'high-aByte'length downto DecimatorOut(0)(j)'high-(2*aByte'length)+1));
+                else
+                  SelectorOut(3)(j) <= std_ulogic_vector(
+                    DecimatorOut(0)(j)(DecimatorOut(0)(j)'high-(3*aByte'length) downto DecimatorOut(0)(j)'high-(4*aByte'length)+1));
+                end if;
+            end case;
+          end if;
+        end loop;
+      end loop;
+    end if;
+  end process;
 
 --  SignalSelector : process (DecimatorOut)
 --  begin
@@ -168,20 +224,20 @@ begin
 -- The pattern generator can be used instead of the DownSampler and the
 -- SignalSelector, it only for debugging on the real hardware!
 ----------------------------------------------------------------------------------------- 
-  Channels <= to_integer(unsigned(iExtTriggerSrc.PWM(1)(1 downto 0)));
-  PG : entity DSO.PatternGenerator
-    port map (
-      iClk         => ClkDesign,
-      iResetAsync  => iResetAsync,
-      iDownSampler => iDownSampler,
-      iChannels    => Channels,
-      oData        => SelectorOut,
-      oValid       => SelectorOutValid);
+--  Channels <= to_integer(unsigned(iExtTriggerSrc.PWM(1)(1 downto 0)));
+--  PG : entity DSO.PatternGenerator
+--    port map (
+--      iClk         => ClkDesign,
+--      iResetAsync  => iResetAsync,
+--      iDownSampler => iDownSampler,
+--      iChannels    => Channels,
+--      oData        => SelectorOut,
+--      oValid       => SelectorOutValid);
 
   ExtTriggerInput : entity DSO.ExtTriggerInput
     port map(
       iClk           => ClkDesign,
-      iResetAsync    => ResetAsync,
+      iResetAsync    => iResetAsync,
       iExtTrigger(1) => iExtTrigger,
       iExtTriggerSrc => iExtTriggerSrc,
       oTrigger       => ExtTrigger,

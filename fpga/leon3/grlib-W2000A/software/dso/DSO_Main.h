@@ -71,7 +71,7 @@
 #ifdef SBX
 /* 16 MB */
 #define RAM_SIZE             0x01000000
-#define FIXED_CPU_FREQUENCY  50000000
+#define FIXED_CPU_FREQUENCY  12500000
 #define SVGA_BUFFER_BASE     (RAM_BASE_ADDR+0x00100000)
 #else
 /* 16 MB */
@@ -101,5 +101,8 @@
 #define VGA_CONFIG_BASE_ADDR     0x80000600
 #define DEBUG_UART_BASE_ADDR     0x80000700 
 #define UART_CHCFG_BASE_ADDR     0x80000800
+
+#define WRITE_INT(addr,data) (*(volatile uint32_t*)addr) = (uint32_t)data
+#define  READ_INT(addr,data) data = *(volatile uint32_t*)(addr) 
 
 #endif

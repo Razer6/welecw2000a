@@ -67,7 +67,7 @@ entity leon3mini is
     dbguart : integer := CFG_DUART;     -- Print UART on console
     dbguADC : integer := 0;             -- Print ADC UART on console
     pclow   : integer := CFG_PCLOW;
-    freq    : integer := 25000       -- frequency of main clock (used for PLLs)
+    freq    : integer := 25000          -- frequency of main clock (used for PLLs)
     );
   port (
     iCh1ADC1 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
@@ -184,6 +184,7 @@ architecture rtl of leon3mini is
   
   signal ResetAsync        : std_ulogic;
   signal ClkCPU            : std_ulogic;
+  signal ClkDesign         : std_ulogic;
   signal ADCIn             : aADCIn;
   signal ExtTrigger        : std_ulogic;
   signal TriggerMemtoCPU   : aTriggerMemOut;
@@ -305,11 +306,13 @@ begin
   CaptureSignals : entity DSO.SbxXSignalCapture
     port map (
       oClkCPU         => ClkCPU,
+      oClkDesign      => ClkDesign,
       iResetAsync     => resetn,
       iClkADC(0)      => clk,
       oResetAsync     => ResetAsync,
       iADC            => ADCIn,
       iDownSampler    => SFRControlfromCPU.Decimator,
+      iSignalSelector => SFRControlfromCPU.SignalSelector,
       iTriggerCPUPort => SFRControlfromCPU.Trigger,
       oTriggerCPUPort => SFRControltoCPU.Trigger,
       iTriggerMem     => CPUtoTriggerMem,
@@ -573,19 +576,20 @@ begin
       port map (rstn, clkm, apbi, apbo(8), UartADCIn, UartADCOut);
     UartADCIn.rxd <= iRXADC; UartADCIn.ctsn <= '0'; UartADCIn.extclk <= '0';
     oTXADC        <= UartADCOut.txd;
+
     SFR0 : SFR
       generic map(pindex => 5,
                   paddr  => 5,
                   pmask  => 16#FFF#,
                   pirq   => 5)
-      port map(rst_in      => rstn,
-               iResetAsync => ResetAsync,
-               clk_i       => clkm,
-               clk_design_i => clkm,
-               apb_i       => apbi,
-               apb_o       => apbo(5),
-               iSFRControl => SFRControltoCPU,
-               oSFRControl => SFRControlfromCPU);
+      port map(rst_in       => rstn,
+               iResetAsync  => ResetAsync,
+               clk_i        => clkm,
+               clk_design_i => ClkDesign,
+               apb_i        => apbi,
+               apb_o        => apbo(5),
+               iSFRControl  => SFRControltoCPU,
+               oSFRControl  => SFRControlfromCPU);
   end generate;
 
 
@@ -690,7 +694,7 @@ begin
         PIO_mode0_T1   => 6,            -- 70ns
         PIO_mode0_T2   => 28,           -- 290ns
         PIO_mode0_T4   => 2,            -- 30ns
-        PIO_mode0_Teoc => 23   -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
+        PIO_mode0_Teoc => 23            -- 240ns ==> T0 - T1 - T2 = 600 - 70 - 290 = 240
         )
       port map(
         rst   => rstn,

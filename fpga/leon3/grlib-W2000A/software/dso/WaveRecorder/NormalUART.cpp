@@ -51,7 +51,12 @@ uint32_t NormalUart::Init(
 				const uint32_t Baudrate,
 				char * IPAddr)
 {
-	return UartInit(Device,Baudrate,&mH);
+	uint32_t succ = UartInit(Device,Baudrate,&mH);
+	SetTimeoutMs(1000);
+	if (succ != 0) {
+		SendInt(&mH,0xAAAAAAAA);
+	}
+	return succ;
 }
 
 uint32_t NormalUart::Send(uint32_t *Data, uint32_t Length)

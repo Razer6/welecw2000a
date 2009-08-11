@@ -94,7 +94,22 @@ char ReceiveCharBlock(uart_regs * uart) {
 	return loadmem((int)&uart->data);
 }
 char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
-	return 0;
+	uint32_t i = 0;
+	volatile int temp = 0;
+	while (1){
+		temp = loadmem((int)&uart->status);
+		if ((temp & RX_DATAREADY) != 0){
+			break;
+     		} else {
+			if (i == TimeoutMs){
+				*error = 1; 
+				return 0;
+			}
+			i++;
+			WaitMs(1);
+		}
+	}
+	return loadmem((int)&uart->data);
 }
 
 void SendCharBlock(uart_regs * uart, char c) {

@@ -81,5 +81,6 @@ vcom -quiet -93 -work work {../../TestFiles/src/BhvDisplay-ea.vhd}
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-sandboxx/Testbench.vhd
 
 vsim -t ps -suppress 3473 -gdisas=1 Testbench
+#vsim -t ps -suppress 3473 -gdbguart=1 Testbench
 do wave.do
 run -all

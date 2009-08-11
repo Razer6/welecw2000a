@@ -4,7 +4,7 @@ add wave -noupdate -format Literal /testbench/d3/ich1adc1
 add wave -noupdate -format Logic /testbench/d3/resoutn
 add wave -noupdate -format Logic /testbench/d3/clk
 add wave -noupdate -format Logic /testbench/d3/errorn
-add wave -noupdate -format Literal /testbench/address
+add wave -noupdate -format Literal -radix hexadecimal /testbench/address
 add wave -noupdate -format Literal /testbench/d3/address
 add wave -noupdate -format Literal /testbench/d3/data
 add wave -noupdate -format Literal /testbench/d3/ramsn
@@ -68,7 +68,7 @@ add wave -noupdate -format Literal /testbench/d3/sdo
 add wave -noupdate -format Literal /testbench/d3/sdo2
 add wave -noupdate -format Literal /testbench/d3/sdo3
 add wave -noupdate -format Literal /testbench/d3/apbi
-add wave -noupdate -format Literal /testbench/d3/apbo
+add wave -noupdate -format Literal -expand /testbench/d3/apbo
 add wave -noupdate -format Literal -expand /testbench/d3/ahbsi
 add wave -noupdate -format Literal /testbench/d3/ahbso
 add wave -noupdate -format Literal /testbench/d3/ahbmi
@@ -82,7 +82,7 @@ add wave -noupdate -format Literal /testbench/d3/u1i
 add wave -noupdate -format Literal /testbench/d3/dui
 add wave -noupdate -format Literal /testbench/d3/u1o
 add wave -noupdate -format Literal /testbench/d3/duo
-add wave -noupdate -format Literal /testbench/d3/irqi
+add wave -noupdate -format Literal -expand /testbench/d3/irqi
 add wave -noupdate -format Literal /testbench/d3/irqo
 add wave -noupdate -format Literal /testbench/d3/dbgi
 add wave -noupdate -format Literal /testbench/d3/dbgo
@@ -147,13 +147,13 @@ add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/iclkdesign
 add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/iresetasync
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/itriggermem
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/otriggermem
-add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbout
-add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/memin
+add wave -noupdate -format Literal -expand /testbench/d3/gendso/triggermem/ahbout
+add wave -noupdate -format Literal -expand /testbench/d3/gendso/triggermem/memin
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/dataout
 add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/hready
 add wave -noupdate -divider {DSO SFR}
 add wave -noupdate -format Literal -radix hexadecimal -expand /testbench/d3/gensfrdso/sfr0/apb_i
-add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/apb_o
+add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/apb_o
 add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/isfrcontrol
 add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/osfrcontrol
 add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/addr
@@ -177,30 +177,46 @@ add wave -noupdate -format Logic /testbench/d3/capturesignals/iexttrigger
 add wave -noupdate -format Logic /testbench/d3/capturesignals/resetasync
 add wave -noupdate -format Logic /testbench/d3/capturesignals/clkdesign
 add wave -noupdate -format Literal /testbench/d3/capturesignals/decimatorin
-add wave -noupdate -format Literal /testbench/d3/capturesignals/decimatorout
+add wave -noupdate -format Literal -radix hexadecimal -expand /testbench/d3/capturesignals/decimatorout
 add wave -noupdate -format Logic /testbench/d3/capturesignals/decimatoroutvalid
-add wave -noupdate -format Literal /testbench/d3/capturesignals/selectorout
+add wave -noupdate -format Literal /testbench/d3/capturesignals/isignalselector
+add wave -noupdate -format Literal -radix hexadecimal -expand /testbench/d3/capturesignals/selectorout
 add wave -noupdate -format Logic /testbench/d3/capturesignals/selectoroutvalid
 add wave -noupdate -format Literal /testbench/d3/capturesignals/slowinputdata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/slowinputvalid
 add wave -noupdate -divider Trigger
+add wave -noupdate -format Literal /testbench/d3/capturesignals/exttriggerinput/iexttrigger
+add wave -noupdate -format Literal /testbench/d3/capturesignals/exttriggerinput/iexttriggersrc
+add wave -noupdate -format Logic /testbench/d3/capturesignals/exttriggerinput/otrigger
+add wave -noupdate -format Literal /testbench/d3/capturesignals/exttriggerinput/opwm
+add wave -noupdate -format Logic /testbench/d3/capturesignals/exttriggerinput/toggle
+add wave -noupdate -format Literal /testbench/d3/capturesignals/exttriggerinput/sources
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iresetasync
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/idata
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/capturesignals/trigger/idata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/ivalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iexttrigger
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/itriggermem
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/otriggermem
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/icpuport
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/icpuport
 add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/ocpuport
 add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/r
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggerstrobes
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/triggerstrobes
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggerdata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/triggerinvalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/aclr
+add wave -noupdate -divider IRQctrl
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbi
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbo
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/irqi
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/irqo
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/r
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/rin
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/r2
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/r2in
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {13374021289 ps} 0}
-configure wave -namecolwidth 341
+WaveRestoreCursors {{Cursor 1} {351464646 ps} 0}
+configure wave -namecolwidth 396
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
@@ -213,4 +229,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {12914035450 ps} {13374021289 ps}
+WaveRestoreZoom {5 us} {2105 us}

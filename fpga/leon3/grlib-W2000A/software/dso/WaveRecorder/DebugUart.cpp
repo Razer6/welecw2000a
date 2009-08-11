@@ -55,8 +55,9 @@ uint32_t DebugUart::Init(
 	// flushing the hardware debug uart interface
 	// It is not nessesary, it just brings the debug interface to idle
 	for (int i = 0; i < 32; ++i) {
-		SendInt(&mH,0);
+		SendInt(&mH,0x44444444);
 	}
+	SetTimeoutMs(1000);
 	return Succ;
 }
 
@@ -92,6 +93,7 @@ uint32_t DebugUart::Receive(uint32_t *Data,
 	int32_t FrameLength = cFrameLength;
 	int32_t FramePos = 1;
 	int32_t i = 0;
+	uint32_t error;
 	while (Len > 0){
 		if (Len > cFrameLength) {
 			FrameLength = cFrameLength;
@@ -103,7 +105,10 @@ uint32_t DebugUart::Receive(uint32_t *Data,
 		SendCharBlock(&mH, 0x80 | (FrameLength*sizeof(uint32_t)-1));
 		SendInt(&mH,Data[0]); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
-			Data[i] = GetInt(&mH);
+			Data[i] = GetInt(&mH,&error);
+			if (error != 0){
+				return (uint32_t)i-1;
+			}
 		}
 		FramePos += cFrameLength;
 		Len -= cFrameLength;

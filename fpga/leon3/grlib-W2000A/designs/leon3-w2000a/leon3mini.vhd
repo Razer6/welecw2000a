@@ -806,13 +806,13 @@ begin
 --    port map (vga_bl, vgao.video_out_b(7 downto 6));
 
 
-  oVD    <= not vgao.vsync;
-  oHD    <= not vgao.hsync;
+  oVD    <= vgao.vsync;
+  oHD    <= vgao.hsync;
   oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
   oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
   oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
   oDCLK  <= iclk25_2;
-  oDENA  <= '1';
+  oDENA  <= vgao.blank;
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,

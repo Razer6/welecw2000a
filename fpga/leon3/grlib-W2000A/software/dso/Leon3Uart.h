@@ -43,12 +43,12 @@
 #define ENABLE_TX 0x2
 #define RX_INT 0x4
 #define TX_INT 0x8
+#define RX_FIFO_INT (1 << 10)
+#define TX_FIFO_INT (1 << 9)
 #define EVEN_PARITY 0x20
 #define ODD_PARITY 0x30
 #define LOOP_BACK 0x80
 #define FLOW_CONTROL 0x40
-#define FIFO_TX_INT 0x200
-#define FIFO_RX_INT 0x400
 #define FIFO_EN     (1 << 31)
 
 

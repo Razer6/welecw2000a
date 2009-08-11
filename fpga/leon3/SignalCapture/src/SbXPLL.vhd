@@ -4,7 +4,7 @@
 -- File       : SbXPLL.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-04-17
--- Last update: 2009-04-17
+-- Last update: 2009-07-31
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -45,6 +45,7 @@ entity SbXPLL is
       areset : in  std_logic := '0';
       inclk0 : in  std_logic := '0';
       c0     : out std_logic;
+      c1     : out std_logic;
       locked : out std_logic
       );
 end SbXPLL;
@@ -67,5 +68,6 @@ begin
     end loop;
   end process;
   c0 <= Clk0;
+  c1 <= inclk0;
   
 end bhv;

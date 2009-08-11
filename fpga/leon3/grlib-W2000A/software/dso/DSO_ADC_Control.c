@@ -47,7 +47,7 @@ bool SendADCSerial(uart_regs * adc_uart, uint8_t addr, uint8_t data) {
 	SendCharBlock(adc_uart, ADC_CMD_WRITE);
 	SendCharBlock(adc_uart, addr);
 	SendCharBlock(adc_uart, data);
-	ReceiveHeader(adc_uart,ADC_PCB_REPLAY,0);
+	ReceiveHeader(adc_uart,ADC_PCB_REPLAY);
 	/* A xor A is always 0*/
 	temp =  ADC_CMD_WRITE ^ ReceiveCharBlock(adc_uart);
 	addr ^= ReceiveCharBlock(adc_uart);

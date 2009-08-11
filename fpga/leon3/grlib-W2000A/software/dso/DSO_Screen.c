@@ -96,7 +96,7 @@ typedef struct {
 	volatile uint32_t front_porch;
 	volatile uint32_t sync_length;
 	volatile uint32_t line_length;
-	volatile uint32_t * framebuffer_pointer;
+	volatile uint32_t framebuffer_pointer;
 	volatile uint32_t clock0;
 	volatile uint32_t clock1;
 	volatile uint32_t clock2;
@@ -115,17 +115,18 @@ unsigned char * FramePointer;
 uint32_t * InitDisplay (uint32_t Target){
 /*	printf("InitDisplay\n");*/
 	aVGA_Config * volatile VGA_Config = (aVGA_Config *)VGA_CONFIG_BASE_ADDR;
-	uint32_t temp = 0;
+	uint32_t temp = 0; 
 	switch(Target){
 		case WELEC2012: 
 		case WELEC2014:
 		case WELEC2022:
 		case WELEC2024:
-		/*	temp = (uint32_t)Framebuffer;
+			FramePointer = (unsigned char *)malloc(HLEN*VLEN+1024);
+			temp = (uint32_t)FramePointer;
 			temp &= ~0x3ff;
 			temp += 1024;
-			FramePointer = (unsigned char * )temp;*/
-			FramePointer = SVGA_BUFFER_BASE;
+			FramePointer = (unsigned char * )temp;
+/*			FramePointer = (unsigned char *) SVGA_BUFFER_BASE; */
 /*			printf("FramePointer %d %x ",FramePointer,FramePointer); */ 
 			VGA_Config = (aVGA_Config*)VGA_CONFIG_BASE_ADDR;
 /*			VGA_Config->status = 
@@ -135,12 +136,12 @@ uint32_t * InitDisplay (uint32_t Target){
 			VGA_Config->video_length = 
 				((HLEN-1) << H_OFFSET) | ((VLEN-1) << V_OFFSET);
 			VGA_Config->front_porch =
-				(2 << H_OFFSET) | (2 << V_OFFSET);
+				(3 << H_OFFSET) | (3 << V_OFFSET);
 			VGA_Config->sync_length = 
 				(5 << H_OFFSET) | (3 << V_OFFSET);
 			VGA_Config->line_length =
-				((HLEN-1+2+5+8) << H_OFFSET) | ((VLEN-1+2+3+8) << V_OFFSET);
-			VGA_Config->framebuffer_pointer = FramePointer;
+				((HLEN-1+3+5+10) << H_OFFSET) | ((VLEN-1+3+3+10) << V_OFFSET);
+			VGA_Config->framebuffer_pointer = (uint32_t) FramePointer;
 			VGA_Config->clock0 = 40000;
 			VGA_Config->clock1 = 40000;
 			VGA_Config->clock2 = 40000;
@@ -148,7 +149,7 @@ uint32_t * InitDisplay (uint32_t Target){
 			VGA_Config->status = 
 				( (1 << VGA_ENABLE_BIT)     | (1 << VGA_RUN_BIT)
 				| (1 << VGA_PIXELSIZE0_BIT) | (0 << VGA_CLOCKSEL0_BIT)
-				| (1 << VGA_H_POL_BIT)      | (1 << VGA_V_POL_BIT));
+				| (0 << VGA_H_POL_BIT)      | (0 << VGA_V_POL_BIT));
 			return 0;
 			break;
 		default:
@@ -160,7 +161,7 @@ uint32_t * InitDisplay (uint32_t Target){
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
 void DrawHLine(char Color, uint32_t V, uint32_t H1, uint32_t H2){
-	uint32_t i = 0;
+	register uint32_t i = 0;
 	uint32_t End = V*HLEN + H2;
 	for (i = V*HLEN+H1; i < End; ++i){
 		FramePointer[i] = Color;
@@ -169,7 +170,7 @@ void DrawHLine(char Color, uint32_t V, uint32_t H1, uint32_t H2){
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
 void DrawVLine(char Color, uint32_t H, uint32_t V1, uint32_t V2){
-	uint32_t i = 0;
+	register uint32_t i = 0;
 	uint32_t End = V2*HLEN + H;
 	for (i = V1*HLEN+H; i < End; i+= HLEN){
 		FramePointer[i] = Color;
@@ -178,18 +179,18 @@ void DrawVLine(char Color, uint32_t H, uint32_t V1, uint32_t V2){
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
 void DrawBox(char Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
-	uint32_t i = V1;
+	register uint32_t i = V1;
 	for(i = V1; i < V2; ++i){
 		DrawHLine(Color,i,H1,H2);
 	}
 }
 
 void DrawTest(void){
-	DrawBox(-1,0,0,HLEN-1,VLEN-1);
+/*	DrawBox(-1,0,0,HLEN-1,VLEN-1);*/
 	DrawBox(0xAA,100,100,300,300);
-	DrawHLine(0x55,1,1,HLEN-2);
+/*	DrawHLine(0x55,1,1,HLEN-2);
 	DrawHLine(0x55,VLEN-2,1,HLEN-2);
 	DrawVLine(0x55,1,1,VLEN-2);
-	DrawVLine(0x55,HLEN-2,1,VLEN-2);
+	DrawVLine(0x55,HLEN-2,1,VLEN-2);*/
 }
 
