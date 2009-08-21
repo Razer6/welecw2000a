@@ -220,7 +220,7 @@ bool GetTask() {
 			break;
 				
 		default:
-			printf("Unknown task %d", s);
+			printf("Unknown task %#x", s);
 			SendNAK(uart);
 			return false;
 			break;

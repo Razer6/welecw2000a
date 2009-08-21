@@ -243,12 +243,13 @@ architecture rtl of leon3mini is
   signal rx : std_logic;
   signal tx : std_logic;
 
-  signal UartSel : std_ulogic;
-  signal rxd1    : std_logic;
-  signal txd1    : std_logic;
-  signal dsutx   : std_ulogic;          -- DSU tx data
-  signal dsurx   : std_ulogic;          -- DSU rx data
-  signal dsubre  : std_ulogic;
+  signal UartSel  : std_ulogic;
+  signal rxd1sync : std_ulogic_vector(0 to 1);
+  signal rxd1     : std_logic;
+  signal txd1     : std_logic;
+  signal dsutx    : std_ulogic;         -- DSU tx data
+  signal dsurx    : std_ulogic;         -- DSU rx data
+  signal dsubre   : std_ulogic;
 
   signal vgao      : apbvga_out_type;
   signal video_clk : std_logic;
@@ -281,26 +282,29 @@ begin
   UARTSELECT : process (ClkCPU, ResetAsync)
   begin
     if ResetAsync = cResetActive then
-      oTXD    <= '1';
-      dsurx   <= '1';
-      rxd1    <= '1';
-      UartSel <= '0';
+      oTXD     <= '1';
+      dsurx    <= '1';
+      rxd1     <= '1';
+      UartSel  <= '0';
+      rxd1sync <= (others => '1');
     elsif rising_edge(ClkCPU) then
-  --    if SFRControltoCPU.Keys.BTN_F1 = '1' then
-  --      UartSel <= '0';
-  --    end if;
-  --    if SFRControlFromCPU.nConfigADC(0) = '1' or
-  --      SFRControltoCPU.Keys.BTN_F2 = '1' then
-  --      UartSel <= '1';
-  --    end if;
-      oTXD  <= '1';
-      dsurx <= '1';
-      rxd1  <= '1';
+      rxd1sync(0) <= iRXD;
+      rxd1sync(1) <= rxd1sync(0);
+      --    if SFRControltoCPU.Keys.BTN_F1 = '1' then
+      --      UartSel <= '0';
+      --    end if;
+      --    if SFRControlFromCPU.nConfigADC(0) = '1' or
+      --      SFRControltoCPU.Keys.BTN_F2 = '1' then
+      --      UartSel <= '1';
+      --    end if;
+      oTXD        <= '1';
+      dsurx       <= '1';
+      rxd1        <= '1';
       if SFRControlFromCPU.nConfigADC(0) = '1' then
-        rxd1 <= iRXD;
+        rxd1 <= rxd1sync(1);
         oTXD <= txd1;
       else
-        dsurx <= iRXD;
+        dsurx <= rxd1sync(1);
         oTXD  <= dsutx;
       end if;
     end if;
@@ -337,7 +341,6 @@ begin
 
 --  PLL0 : entity DSO.PLL0
 --    port map (
-----      areset => areset,
 --      pllena => '1',
 --      inclk0 => ClkADC25(0),
 --      c0     => ClkADC250(0),
@@ -345,7 +348,6 @@ begin
 
 --  PLL1 : entity DSO.PLL1
 --    port map (
---      --    areset => areset,
 --      inclk0 => ClkADC25(1),
 --      pllena => '1',
 --      c0     => ClkADC250(1),
@@ -355,7 +357,6 @@ begin
 
 --  PLL2 : entity DSO.PLL2
 --    port map (
---      --    areset => areset,
 --      inclk0 => ClkADC25(2),
 --      pllena => '1',
 --      c0     => ClkADC250(2),
@@ -363,7 +364,6 @@ begin
 
 --  PLL3 : entity DSO.PLL3
 --    port map (
---      --  areset => areset,
 --      inclk0 => ClkADC25(3),
 --      pllena => '1',
 --      c0     => ClkADC250(3),
@@ -811,6 +811,10 @@ begin
   oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
   oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
   oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
+  --oRed   <= std_ulogic_vector(vgao.video_out_r(2 downto 0));
+  --oGreen(5 downto 4) <= std_ulogic_vector(vgao.video_out_g(1 downto 0));
+  --oGreen(3) <= '0';
+  --oBlue  <= std_ulogic_vector(vgao.video_out_b(2 downto 0));
   oDCLK  <= iclk25_2;
   oDENA  <= vgao.blank;
 

@@ -321,6 +321,8 @@ begin
       iExtTrigger     => '0',
       oExtTriggerPWM  => open);
 
+  SFRControltoCPU.Keys.BTN_F1 <= cHighInactive;
+  SFRControltoCPU.Keys.BTN_F2 <= cHighInactive;
 
   -- pragma translate_off
   BootRomRd <= memo.romsn(0) or memo.oen;

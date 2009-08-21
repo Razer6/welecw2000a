@@ -1,5 +1,5 @@
 The toplevel entity is TopDownSampler. 
-simulation tools: ghdl, Octave
+simulation tools: Modelsim-Altera, Octave
 synthesis tool:   Quartus
 
 TODO: Dealing with the wrong signal gain comming out of this filters.

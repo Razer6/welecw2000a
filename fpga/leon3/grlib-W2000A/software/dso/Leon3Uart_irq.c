@@ -76,14 +76,14 @@ volatile uint32_t TxIdxHead;
 volatile uint32_t TxIdxTail;
 } aUartData;
 
-static aUartData UartData[2];
+static volatile aUartData UartData[2];
 
 static volatile uart_regs * uart;
 
 void IsrUart(int irq){
-	register uint32_t tempHead;
-	register uint32_t tempData;
-	register uint32_t tempTail;
+	volatile register uint32_t tempHead;
+	volatile register uint32_t tempData;
+	volatile register uint32_t tempTail;
 	volatile uint32_t temp;
 	WRITE_INT(DSO_SFR_BASE_ADDR,16);
 	
@@ -106,10 +106,10 @@ void IsrUart(int irq){
 		tempData = uart->data;
 		/* calculate new buffer index */
 		tempHead = ((UartData[irq].RxIdxHead + 1) & (UART_RX_BUFFER_SIZE - 1));
-		if(tempHead != UartData[irq].RxIdxTail){
+		if (tempHead != UartData[irq].RxIdxTail){
 			WRITE_INT(DSO_SFR_BASE_ADDR,18);
-			UartData[irq].RxIdxHead = tempHead;
 			UartData[irq].RxBuf[tempHead] = tempData;
+			UartData[irq].RxIdxHead = tempHead;
 		}
 	} 
        	if ((temp & TX_EMPTY) != 0) {
@@ -118,9 +118,9 @@ void IsrUart(int irq){
 			WRITE_INT(DSO_SFR_BASE_ADDR,20);
 			/* calculate new buffer index */
 			tempTail = ((UartData[irq].TxIdxTail + 1) & (UART_TX_BUFFER_SIZE - 1));
-			UartData[irq].TxIdxTail = tempTail;
 			/* send new character */
 			uart->data = UartData[irq].TxBuf[tempTail];
+			UartData[irq].TxIdxTail = tempTail;
 		} else {
 			WRITE_INT(DSO_SFR_BASE_ADDR,21);
 			/* no more data to send */
@@ -215,7 +215,7 @@ char ReceiveChar(uart_regs * uart, uint32_t TimeoutMs, uint32_t *error){
 }
 
 void SendCharBlock(uart_regs * uart, char c) {
-	uint32_t tempHead;
+	volatile uint32_t tempHead;
 	uint32_t Idx = GetUartIdx(uart);
 
 	tempHead = UartData[Idx].TxIdxHead;
@@ -224,12 +224,15 @@ void SendCharBlock(uart_regs * uart, char c) {
 	tempHead = ((tempHead + 1) & (UART_TX_BUFFER_SIZE - 1));
 	while (tempHead == UartData[Idx].TxIdxTail);
 	
-	
+	DisableIRQ();
+	WRITE_INT(DSO_SFR_BASE_ADDR,50);
 	/* add new item to buffer */
 	UartData[Idx].TxBuf[tempHead] = c;
 	UartData[Idx].TxIdxHead = tempHead;
 	/* activate isr to transmit data */
 	uart->control = (uart->control) | TX_FIFO_INT;
+	WRITE_INT(DSO_SFR_BASE_ADDR,51);
+	ReleaseIRQ();
 }
 
 /* interrupts if the rx buffer is empty!*/

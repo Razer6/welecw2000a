@@ -4,7 +4,7 @@
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-07-26
+-- Last update: 2009-08-20
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -116,20 +116,20 @@ package pLedsKeysAnalogSettings is
                 end record;
   
   type aLeds is record
-                  BTN_CH3        : std_ulogic;  -- Button [Channel 4]
-                  Beam1On        : std_ulogic;  -- Button [Channel 1]
-                  BTN_MATH       : std_ulogic;  -- Button [Math]       
-                  Beam2On        : std_ulogic;  -- Button [Channel 2]
-                  BTN_QUICKMEAS  : std_ulogic;  -- Button [Quick Meass]
-                  CURSORS        : std_ulogic;  -- Button [Cursors]
-                  BTN_F1         : std_ulogic;  -- Function Knob
-                  BTN_CH2        : std_ulogic;  -- Button [Channel 3]
-                  BTN_PULSEWIDTH : std_ulogic;  -- Button [Pulse Width]
-                  EDGE           : std_ulogic;  -- Button [Edge]
-                  RUNSTOP        : std_ulogic;  -- Button [Run/Stop] Red Led
-                  BTN_F2         : std_ulogic;  -- Button [Run/Stop] Green Led
-                  BTN_F3         : std_ulogic;  -- Button [Single] Red Led
-                  SINGLE         : std_ulogic;  -- Button [Single] Green Led
+                  LED_CH0        : std_ulogic;  -- Button [Channel 1]
+                  LED_CH1        : std_ulogic;  -- Button [Channel 2]
+                  LED_CH2        : std_ulogic;  -- Button [Channel 3]
+                  LED_CH3        : std_ulogic;  -- Button [Channel 4]
+                  LED_MATH       : std_ulogic;  -- Button [Math]       
+                  LED_QUICKMEAS  : std_ulogic;  -- Button [Quick Meass]
+                  LED_CURSORS    : std_ulogic;  -- Button [Cursors]
+                  LED_WHEEL      : std_ulogic;  -- Function Knob
+                  LED_PULSEWIDTH : std_ulogic;  -- Button [Pulse Width]
+                  LED_EDGE       : std_ulogic;  -- Button [Edge]
+                  RUN_GREEN      : std_ulogic;  -- Button [Run/Stop] Red Led
+                  RUN_RED        : std_ulogic;  -- Button [Run/Stop] Green Led
+                  SINGLE_GREEN   : std_ulogic;  -- Button [Single] Green Led
+                  SINGLE_RED     : std_ulogic;  -- Button [Single] Red Led
                 end record;
   
   type aAnalogSettings is record

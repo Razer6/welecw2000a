@@ -163,10 +163,10 @@ BEGIN
 		clk1_duty_cycle => 50,
 		clk1_multiply_by => 5,
 		clk1_phase_shift => "1000",
-		clk2_divide_by => 4,
+		clk2_divide_by => 2,
 		clk2_duty_cycle => 50,
 		clk2_multiply_by => 5,
-		clk2_phase_shift => "4000",
+		clk2_phase_shift => "2000",
 		compensate_clock => "CLK0",
 		gate_lock_counter => 10000,
 		gate_lock_signal => "YES",
@@ -252,13 +252,13 @@ END SYN;
 -- Retrieval info: PRIVATE: DEVICE_SPEED_GRADE STRING "8"
 -- Retrieval info: PRIVATE: DIV_FACTOR0 NUMERIC "1"
 -- Retrieval info: PRIVATE: DIV_FACTOR1 NUMERIC "2"
--- Retrieval info: PRIVATE: DIV_FACTOR2 NUMERIC "8"
+-- Retrieval info: PRIVATE: DIV_FACTOR2 NUMERIC "4"
 -- Retrieval info: PRIVATE: DUTY_CYCLE0 STRING "50.00000000"
 -- Retrieval info: PRIVATE: DUTY_CYCLE1 STRING "50.00000000"
 -- Retrieval info: PRIVATE: DUTY_CYCLE2 STRING "50.00000000"
 -- Retrieval info: PRIVATE: EFF_OUTPUT_FREQ_VALUE0 STRING "250.000000"
 -- Retrieval info: PRIVATE: EFF_OUTPUT_FREQ_VALUE1 STRING "125.000000"
--- Retrieval info: PRIVATE: EFF_OUTPUT_FREQ_VALUE2 STRING "31.250000"
+-- Retrieval info: PRIVATE: EFF_OUTPUT_FREQ_VALUE2 STRING "62.500000"
 -- Retrieval info: PRIVATE: EXPLICIT_SWITCHOVER_COUNTER STRING "0"
 -- Retrieval info: PRIVATE: EXT_FEEDBACK_RADIO STRING "0"
 -- Retrieval info: PRIVATE: GLOCKED_COUNTER_EDIT_CHANGED STRING "1"
@@ -352,10 +352,10 @@ END SYN;
 -- Retrieval info: CONSTANT: CLK1_DUTY_CYCLE NUMERIC "50"
 -- Retrieval info: CONSTANT: CLK1_MULTIPLY_BY NUMERIC "5"
 -- Retrieval info: CONSTANT: CLK1_PHASE_SHIFT STRING "1000"
--- Retrieval info: CONSTANT: CLK2_DIVIDE_BY NUMERIC "4"
+-- Retrieval info: CONSTANT: CLK2_DIVIDE_BY NUMERIC "2"
 -- Retrieval info: CONSTANT: CLK2_DUTY_CYCLE NUMERIC "50"
 -- Retrieval info: CONSTANT: CLK2_MULTIPLY_BY NUMERIC "5"
--- Retrieval info: CONSTANT: CLK2_PHASE_SHIFT STRING "4000"
+-- Retrieval info: CONSTANT: CLK2_PHASE_SHIFT STRING "2000"
 -- Retrieval info: CONSTANT: COMPENSATE_CLOCK STRING "CLK0"
 -- Retrieval info: CONSTANT: GATE_LOCK_COUNTER NUMERIC "10000"
 -- Retrieval info: CONSTANT: GATE_LOCK_SIGNAL STRING "YES"

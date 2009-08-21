@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-02
+-- Last update: 2009-08-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -129,10 +129,10 @@ begin
   oSFRControl.nConfigADC     <= nConfigADC;
   oSFRControl.Leds           <= Leds;
   oSFRControl.AnalogSettings <= AnalogSettings;
-  Addr                       <= to_integer(unsigned(iAddr(6 downto 2)));
 --    end if;
 --  end process;
-
+  Addr                       <= to_integer(unsigned(iAddr(6 downto 2)));
+  
   pWrite : process (iClkCPU, iResetAsync)
     variable vData : aDword;
   begin
@@ -187,21 +187,7 @@ begin
 
       nConfigADC <= (others => cLowActive);
       
-      Leds <= (
-        BTN_CH3        => '0',
-        Beam1On        => '0',
-        BTN_MATH       => '0',
-        Beam2On        => '0',
-        BTN_QUICKMEAS  => '0',
-        CURSORS        => '0',
-        BTN_F1         => '0',
-        BTN_CH2        => '0',
-        BTN_PULSEWIDTH => '0',
-        EDGE           => '0',
-        RUNSTOP        => '0',
-        BTN_F2         => '0',
-        BTN_F3         => '0',
-        SINGLE         => '0');
+      Leds <= (others => '0');
 
       AnalogSettings <= (
         Addr          => (others => '0'),
@@ -219,6 +205,10 @@ begin
       Trigger.ForceIdle     <= '0';
       Trigger.SetReadOffset <= '0';
       AnalogSettings.Set    <= '0';
+      
+--      if SFRIn.Keys.BTN_F1 = cLowActive then
+--        nConfigADC(0) <= '0'; -- for W2000A switch to debug uart! 
+--      end if;
 
       if iWr = '1' then
         case Addr is
@@ -286,20 +276,20 @@ begin
             nConfigADC <= not iData(nConfigADC'range);
           when cLedAddr =>
             Leds <= (
-              BTN_CH3        => iData(0),
-              Beam1On        => iData(1),
-              BTN_MATH       => iData(2),
-              Beam2On        => iData(3),
-              BTN_QUICKMEAS  => iData(4),
-              CURSORS        => iData(5),
-              BTN_F1         => iData(6),
-              BTN_CH2        => iData(7),
-              BTN_PULSEWIDTH => iData(8),
-              EDGE           => iData(9),
-              RUNSTOP        => iData(10),
-              BTN_F2         => iData(11),
-              BTN_F3         => iData(12),
-              SINGLE         => iData(13));
+              LED_CH0        => iData(0),
+              LED_CH1        => iData(1),
+              LED_CH2        => iData(2),
+              LED_CH3        => iData(3),
+              LED_MATH       => iData(4),
+              LED_QUICKMEAS  => iData(5),
+              LED_CURSORS    => iData(6),
+              LED_WHEEL      => iData(7),
+              LED_PULSEWIDTH => iData(8),
+              LED_EDGE       => iData(9),
+              RUN_GREEN      => iData(10),
+              RUN_RED        => iData(11),
+              SINGLE_GREEN   => iData(12),
+              SINGLE_RED     => iData(13));
 
           when cAnalogSettingsPWMAddr =>
             AnalogSettings.PWM_Offset <= iData(AnalogSettings.PWM_Offset'range);
@@ -426,20 +416,21 @@ begin
       when cConfigADCEnable =>
         oData(nConfigADC'range) <= nConfigADC;
       when cLedAddr =>
-        oData(0)  <= Leds.BTN_CH3;
-        oData(1)  <= Leds.Beam1On;
-        oData(2)  <= Leds.BTN_MATH;
-        oData(3)  <= Leds.Beam2On;
-        oData(4)  <= Leds.BTN_QUICKMEAS;
-        oData(5)  <= Leds.CURSORS;
-        oData(6)  <= Leds.BTN_F1;
-        oData(7)  <= Leds.BTN_CH2;
-        oData(8)  <= Leds.BTN_PULSEWIDTH;
-        oData(9)  <= Leds.EDGE;
-        oData(10) <= Leds.RUNSTOP;
-        oData(11) <= Leds.BTN_F2;
-        oData(12) <= Leds.BTN_F3;
-        oData(13) <= Leds.SINGLE;
+        oData(0)  <= Leds.LED_CH0;
+        oData(1)  <= Leds.LED_CH1;
+        oData(2)  <= Leds.LED_CH2;
+        oData(3)  <= Leds.LED_CH3;
+        oData(4)  <= Leds.LED_MATH;
+        oData(5)  <= Leds.LED_QUICKMEAS;
+        oData(6)  <= Leds.LED_CURSORS;
+        oData(7)  <= Leds.LED_WHEEL;
+        oData(8)  <= Leds.LED_PULSEWIDTH;
+        oData(9)  <= Leds.LED_EDGE;
+        oData(10) <= Leds.RUN_GREEN;
+        oData(11) <= Leds.RUN_RED;
+        oData(12) <= Leds.SINGLE_GREEN;
+        oData(13) <= Leds.SINGLE_RED;
+        
       when cKeyAddr0 =>
         oData(0)  <= SFRIn.Keys.BTN_F1;
         oData(1)  <= SFRIn.Keys.BTN_F2;

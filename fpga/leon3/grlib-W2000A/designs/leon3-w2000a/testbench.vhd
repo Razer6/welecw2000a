@@ -562,7 +562,9 @@ begin
   clk  <= not clk after ct * 1 ns;
   rst  <= '1'     after 10 ns;
   rxd1 <= 'H';
-
+  
+  iRXD <= '1';
+  
   d3 : leon3mini
     generic map (
       fabtech => fabtech, memtech => memtech, padtech => padtech,

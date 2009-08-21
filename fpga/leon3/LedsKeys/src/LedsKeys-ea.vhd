@@ -4,7 +4,7 @@
 -- File       : LedsKeysAnalogSettings-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-29
+-- Last update: 2009-08-20
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -61,9 +61,11 @@ end entity;
 architecture RTL of LedsKeysAnalogSettings is
   signal Strobe, SerialClk : std_ulogic;
   signal LedShiftReg       : std_ulogic_vector(cLedShiftLength-1 downto 0);
-  signal LedCounter        : natural range 0 to cLedShiftLength-1;
+  signal LedCounter        : natural range 0 to cLedShiftLength;
   signal KeyShiftReg       : std_ulogic_vector(cKeyShiftLength downto 1);
-  signal KeyCounter        : natural range 0 to cKeyShiftLength-1;
+  signal KeyCounter        : natural range 0 to cKeyShiftLength;
+  signal LedStrobe         : std_ulogic;
+
 
   type aAnalogState is record
                          SetCounter : std_ulogic;
@@ -77,10 +79,10 @@ architecture RTL of LedsKeysAnalogSettings is
   
 begin
 
-  Strobe2KHz : entity work.StrobeGen
+  Strobe2KHz : entity DSO.StrobeGen
     generic map (
       gClkFrequency    => cCPUClkRate,
-      gStrobeFrequency => cAnSettStrobeRate)
+      gStrobeFrequency => cAnSettStrobeRate)  --cCPUCLKRate/4) 
     --    gStrobeFrequency => 2000)        -- 54 ms for one key reading
     -- avoids unstable key values
     -- 1 KHz probe output
@@ -91,6 +93,12 @@ begin
       oStrobe     => Strobe);
 
   oSerialClk <= SerialClk;
+  
+  oLeds <= (
+    nResetSync    => cHighInActive,
+    nOutputEnable => cLowActive,
+    Data          => LedShiftReg(LedShiftReg'high),
+    ValidStrobe   => LedStrobe);
 
   pLeds : process (iClk, iResetAsync)
   begin
@@ -98,56 +106,44 @@ begin
       SerialClk   <= '0';
       LedShiftReg <= (others => '0');
       LedCounter  <= 0;
-      oLeds <= (
-        nResetSync    => cLowActive,
-        nOutputEnable => cHighInactive,
-        others        => '0');
+      LedStrobe   <= '0';
+--      oLeds <= (
+--        nResetSync    => cLowActive,
+--        nOutputEnable => cHighInactive,
+--        others        => '0');      
     elsif rising_edge(iClk) then
-      oLeds.nOutputEnable <= cLowActive;
       if Strobe = '1' then
         SerialClk <= not SerialClk;
         if SerialClk = '0' then
-          LedCounter                                               <= (LedCounter +1) mod cLedShiftLength;  -- mod 2**n
-          LedShiftReg(LedShiftReg'left-1 downto LedShiftReg'right) <=
-            LedShiftReg(LedShiftReg'left downto LedShiftReg'right+1);
-          oLeds.Data                    <= LedShiftReg(LedShiftReg'right);
-          LedShiftReg(LedShiftReg'left) <= '-';
-          oLeds.ValidStrobe             <= '0';
+          if LedCounter = cLedShiftLength then
+            LedCounter <= 0;
+          else
+            LedCounter <= (LedCounter +1);
+          end if;
+          LedShiftReg(LedShiftReg'high downto LedShiftReg'low+1) <=
+            LedShiftReg(LedShiftReg'high-1 downto LedShiftReg'low);
+          --oLeds.Data                    <= LedShiftReg(LedShiftReg'right);
+          LedShiftReg(LedShiftReg'low) <= '-';
+          LedStrobe                    <= '0';
 
           if LedCounter = 0 then
             LedShiftReg <= (
-              0      => not iLeds.BTN_CH3,
-              1      => not iLeds.Beam1On,
-              2      => not iLeds.BTN_MATH,
-              3      => not iLeds.Beam2On,
-              4      => not iLeds.BTN_QUICKMEAS,
-              5      => not iLeds.CURSORS,
-              6      => not iLeds.BTN_F1,
-              7      => not iLeds.BTN_CH2,
-              8      => not iLeds.BTN_PULSEWIDTH,
-              9      => not iLeds.EDGE,
-              10     => not iLeds.RUNSTOP,
-              11     => not iLeds.BTN_F2,
-              12     => not iLeds.BTN_F3,
-              13     => not iLeds.SINGLE,
+              15     => not iLeds.LED_CH3,
+              14     => not iLeds.LED_CH0,
+              13     => not iLeds.LED_MATH,
+              12     => not iLeds.LED_CH1,
+              11     => not iLeds.LED_QUICKMEAS,
+              10     => not iLeds.LED_CURSORS,
+              9      => not iLeds.LED_WHEEL,
+              8      => not iLeds.LED_CH2,
+              7      => not iLeds.LED_PULSEWIDTH,
+              6      => not iLeds.LED_EDGE,
+              5      => not iLeds.RUN_GREEN,
+              4      => not iLeds.RUN_RED,
+              3      => not iLeds.SINGLE_RED,
+              2      => not iLeds.SINGLE_GREEN,
               others => '1');
---           LedShiftReg <= (
---            0      => iLeds.BTN_CH3,
---            1      => iLeds.BTN_CH0,
---            2      => iLeds.BTN_MATH,
---            3      => iLeds.BTN_CH1,
---            4      => iLeds.BTN_QUICKMEAS,
---            5      => iLeds.CURSORS,
---            6      => iLeds.BTN_F1,
---            7      => iLeds.BTN_CH2,
---            8      => iLeds.BTN_PULSEWIDTH,
---            9      => iLeds.EDGE,
---            10     => iLeds.RUNSTOP,
---            11     => iLeds.BTN_F2,
---            12     => iLeds.BTN_F3,
---            13     => iLeds.SINGLE,
---            others => '1');
-            oLeds.ValidStrobe <= '1';
+            LedStrobe <= '1';
           end if;
         end if;
       end if;
@@ -158,7 +154,7 @@ begin
   pKeys : process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
-      KeyShiftReg <= (others => '0');
+      KeyShiftReg <= (others => '1');
       KeyCounter  <= 0;
       onFetchKeys <= (
         nFetchStrobe => cHighInactive,
@@ -166,12 +162,11 @@ begin
       oKeys <= (others => '0');
       
     elsif rising_edge(iClk) then
-      onFetchKeys.nChipEnable  <= cLowActive;
-      onFetchKeys.nFetchStrobe <= cHighInactive;
+      onFetchKeys.nChipEnable <= cLowActive;
 
       if Strobe = '1' and SerialClk = '1' then
         onFetchKeys.nFetchStrobe <= cHighInactive;
-        if KeyCounter /= cKeyShiftLength-1 then
+        if KeyCounter /= cKeyShiftLength then
           KeyCounter <= KeyCounter +1;
         else
           KeyCounter <= 0;
@@ -180,8 +175,11 @@ begin
         KeyShiftReg(KeyShiftReg'left downto KeyShiftReg'right+1) <=
           KeyShiftReg(KeyShiftReg'left-1 downto KeyShiftReg'right);
         
-        if KeyCounter = 0 then
+        if KeyCounter = cKeyShiftLength then
           onFetchKeys.nFetchStrobe <= cLowActive;
+        end if;
+
+        if KeyCounter = 0 then
           oKeys <= (
             BTN_F1           => KeyShiftReg(19),
             BTN_F2           => KeyShiftReg(20),
@@ -341,7 +339,7 @@ begin
             AnalogSettings.ShiftReg(0) <= '-';
           end if;
         end if;
-        if AnalogSettings.SetCounter = '1' then  -- important to garantee the
+        if AnalogSettings.SetCounter = '1' then             -- important to garantee the
           AnalogSettings.Counter    <= cAnalogShiftLength;  -- the fist bit time
           AnalogSettings.SetCounter <= '0';
           oAnalogBusy               <= '1';

@@ -4,8 +4,8 @@
 -- File       : ADC-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-06-11
--- Platform   : 
+-- Last update: 2009-08-19
+-- Platform   : W2000A
 -------------------------------------------------------------------------------
 -- Description: 
 -------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ begin
   oClk125 <= Clk125;
   oClkADC <= ClkADC250;
   -- oLocked             <= Locked125(Locked125'high);
-  oLocked <= Locked(3);
+  oLocked <= Locked(1);
 
   -- areset <= iResetAsync when cResetActive = '1' else
   --           not iResetAsync;
@@ -122,9 +122,9 @@ begin
       locked => Locked(3));
 
   pInput : for i in 0 to cADCsperChannel-1 generate
-    process(ClkADC250(i), Locked(3))
+    process(ClkADC250(i), Locked(i))
     begin
-      if Locked(3) = '0' then
+      if Locked(i) = '0' then
         ADC(i) <= (others => (others => '0'));
       elsif rising_edge(ClkADC250(i)) then
         ADC(i) <= iADC(i);
@@ -132,9 +132,9 @@ begin
     end process;
   end generate;
 
-  pInvPhase2 : process (ClkADC250(0), Locked(3))
+  pInvPhase2 : process (ClkADC250(0), Locked(0))
   begin
-    if Locked(3) = '0' then
+    if Locked(0) = '0' then
       InvPhase(0) <= (others => (others => '0'));
     elsif falling_edge(ClkADC250(0)) then
       InvPhase(0) <= ADC(0);
@@ -149,22 +149,22 @@ begin
       Phase2 <= (others => (others => (others => '0')));
       Phase3 <= (others => (others => (others => '0')));
     elsif falling_edge(ClkADC250(3)) then
-   --   Phase0(0) <= Phase0(1);
-   --   Phase1(0) <= Phase1(1);
-   --   Phase2(0) <= Phase2(1);
-   --   Phase3(0) <= Phase3(1);
+      --   Phase0(0) <= Phase0(1);
+      --   Phase1(0) <= Phase1(1);
+      --   Phase2(0) <= Phase2(1);
+      --   Phase3(0) <= Phase3(1);
       for i in 0 to cChannels-1 loop
-        Phase0(0)(i) <= InvPhase(0)(i); -- not's solve hold time violations
+        Phase0(0)(i) <= InvPhase(0)(i);  -- not's solve hold time violations
         Phase1(0)(i) <= ADC(1)(i);
-        Phase2(0)(i) <= ADC(2)(i); 
-        Phase3(0)(i) <= ADC(3)(i); -- not's are only workarounds to avoid a slow block ram!
+        Phase2(0)(i) <= ADC(2)(i);
+        Phase3(0)(i) <= ADC(3)(i);  -- not's are only workarounds to avoid a slow block ram!
       end loop;
     end if;
   end process;
 
-  p125 : process (Locked(3), Clk125)
+  p125 : process (Locked(1), Clk125)
   begin
-    if Locked(3) = cResetActive then
+    if Locked(1) = cResetActive then
       oData <= (others => (others => (others => '0')));
     elsif rising_edge(Clk125) then
       for i in 0 to cChannels-1 loop

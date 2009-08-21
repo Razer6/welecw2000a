@@ -53,6 +53,7 @@
 #define DSO_NAK_RESP      "NAK"
 #define DSO_ACK_RESP      "ACK"
 #define DSO_DATA_RESP     "Data "
+#define DSO_SAMPLE_RESP   "Sample "
 #define DSO_MESSAGE_RESP  "Message "
 #define DSO_CRC_ERROR     "CRC ERROR"
 
@@ -92,9 +93,9 @@ bool CheckCRC(crc crcSent, uint32_t message[], int nBytes);
 void SendHeader(uart_regs * uart);
 bool SendCaptureData(uart_regs * uart, uint32_t FastMode, int datasize, uint32_t * data);
 bool SendData(uart_regs * uart,  int datasize, uint32_t * data);
-int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data);
-int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data);
-bool ReceiveACK(uart_regs * uart);
+/*int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMode, uint32_t * data);
+int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data);*/
+int ReceiveAll(uart_regs * uart, uint32_t buffersize, uint32_t * data, uint32_t * FastMode);
 bool ReceiveHeader(uart_regs * uart, const char * RefHeader);
 #ifdef LITTLE_ENDIAN
 uint32_t GetInt(uart_regs * uart, uint32_t *error);

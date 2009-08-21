@@ -210,20 +210,23 @@
 /* LEDADDR*/
 /* switch on the led by setting the corresponding bit to 1*/
 /* TODO solve many bugs and make a good read and write algorithm (hw+sw)*/
-#define LED_BTN_CH3         0
-#define LED_Beam1On         1
-#define LED_BTN_MATH        2
-#define LED_Beam2On         3
-#define LED_BTN_QUICKMEAS   4
-#define LED_CURSORS         5
-#define LED_BTN_F1          6
-#define LED_BTN_CH2         7
-#define LED_BTN_PULSEWIDTH  8
-#define LED_EDGE            9
-#define LED_RUNSTOP         10
-#define LED_BTN_F2          11
-#define LED_BTN_F3          12
-#define LED_SINGLE          13
+#define LED_CH0        0
+#define LED_CH1        1
+#define LED_CH2        2
+#define LED_CH3        3
+#define LED_MATH       4
+#define LED_QUICKMEAS  5
+#define LED_CURSORS    6
+#define LED_WHEEL      7
+#define LED_PULSEWIDTH 8
+#define LED_EDGE       9
+#define RUN_GREEN     10
+#define RUN_RED       11
+#define SINGLE_GREEN  12 
+#define SINGE_RED     13
+
+
+
 
 /* KEYADDR0 */
 /* (read only)*/

@@ -45,7 +45,7 @@
 #include "NormalUart.h"
 #include "DebugUart.h"
 
-#define DSO_NAK_MESSAGE "At least one argument was not accepted from the target!\n"
+#define DSO_NAK_MESSAGE "Error in communication!\n"
 
 bool CheckArgCount (	void * 	IsCount, 
                   const struct arg_str * Command,
@@ -178,8 +178,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!DSOInterface->InitComm((char*)UartAddr->sval[0],5000,BaudRate->ival[0])){
-	//if (!UartInit(UartAddr->sval[0],BaudRate->ival[0],huart)){
-		ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
 	if (strcmp("TriggerInput",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {

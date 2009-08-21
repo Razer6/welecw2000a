@@ -42,18 +42,24 @@
 void SendNAK(uart_regs * uart) {
 	SendHeader(uart);
 	SendStringBlock(uart,DSO_NAK_RESP);
+#ifndef W2000A
 	printf("\nNAK sent\n");
+#endif
 }
 
 void SendACK(uart_regs * uart) {
 	SendHeader(uart);
 	SendStringBlock(uart,DSO_ACK_RESP);
+#ifndef W2000A
 	printf("\nACK sent\n");
+#endif
 }
 void SendCRCError(uart_regs * uart) {
 	SendHeader(uart);
 	SendStringBlock(uart,DSO_CRC_ERROR);
+#ifndef W2000A
 	printf("\nCRC Error sent\n");
+#endif
 }
 
 typedef union {
@@ -119,7 +125,7 @@ bool CheckCRC(crc crcSent, uint32_t message[], int nBytes){
 	ChangeEndian(message,nBytes);
 	crcInit();	
 	crcRec = crcFast((unsigned char*)message,nBytes);
-/*	printf("CRC Check with %d bytes: crcSent=%d crcRec=%d!\n",nBytes,crcSent,crcRec);*/
+	printf("CRC Check with %d bytes: crcSent=%d crcRec=%d!\n",nBytes,crcSent,crcRec);
 	if (crcSent == crcRec){
 		return true;
 	} else {
@@ -154,7 +160,9 @@ bool ReceiveHeader(
 			i = 0;
 			if (rec != 0){
 				errors++;
+#ifndef W2000A
 				printf("\nerror no %d: %c \n",errors,rec);
+#endif
 			}
 #ifndef LEON3
 			if (errors == MAX_RX_ERRORS){
@@ -170,7 +178,7 @@ bool ReceiveHeader(
 }
 
 bool SendCaptureData(uart_regs * uart, uint32_t FastMode, int datasize, uint32_t * data) {
-	char DataH[] = DSO_DATA_RESP;
+	char DataH[] = DSO_SAMPLE_RESP;
 	int i = 0;
 	SendHeader(uart);
 	printf(DSO_SEND_HEADER);
@@ -200,14 +208,18 @@ int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMod
 	uint32_t i = 0;
 	uint32_t error = 0;
 	uint32_t dummy = 0;
-	if (!ReceiveHeader(uart, DSO_REC_HEADER)){
+/*	if (!ReceiveHeader(uart, DSO_REC_HEADER)){
+#ifndef W2000A
         printf("Receive Header error\n");
+#endif
 		return 0;
 	}
 	if (!ReceiveHeader(uart, DSO_DATA_RESP)){
+#ifndef W2000A
         printf("Receive Data Responce error\n");
+#endif
 		return 0;
-	}
+	}*/
 
 	*FastMode = GetInt(uart,&error);
 	if (error != 0){
@@ -220,7 +232,9 @@ int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMod
 	if (size > buffersize) {
 		*FastMode = 1;
 	}
+#ifndef W2000A
 	printf("Receiving %d DWORDS FastMode=%d\n",size,*FastMode);
+#endif
 	for (i = 0; i < size; ++i){
 		if (i < buffersize){
 			data[i] = GetInt(uart,&error);
@@ -243,14 +257,18 @@ int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data) {
 	uint32_t i = 0;
 	uint32_t error = 0;
 	uint32_t dummy = 0;
-	if (!ReceiveHeader(uart, DSO_REC_HEADER)){
+/*	if (!ReceiveHeader(uart, DSO_REC_HEADER)){
+#ifndef W2000A
         	printf("Receive Header error\n");
+#endif
 		return 0;
 	}
 	if (!ReceiveHeader(uart, DSO_DATA_RESP)){
+#ifndef W2000A
         	printf("Receive Header error\n");
+#endif
 		return 0;
-	}
+	}*/
 #ifdef LEON3
 	size = GetInt(uart);
 #else
@@ -259,7 +277,9 @@ int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data) {
 		return 0;
 	}
 #endif
+#ifndef W2000A
 	printf("Receiving %d DWORDS \n",size);
+#endif
 	for (i = 0; i < size; ++i){
 		if (i < buffersize){
 #ifdef LEON3
@@ -285,12 +305,14 @@ int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data) {
 	return size;
 }
 
-bool ReceiveACK(uart_regs * uart){
+int ReceiveAll(uart_regs * uart, uint32_t buffersize, uint32_t * data, uint32_t * FastMode){
 	uint32_t i = 0;
-	const char Ack[] = DSO_ACK_RESP;
-	const char Nak[] = DSO_NAK_RESP;
-	const char Crc[] = DSO_CRC_ERROR;
-	const char Msg[] = DSO_MESSAGE_RESP;
+	const char Ack[]     = DSO_ACK_RESP;
+	const char Nak[]     = DSO_NAK_RESP;
+	const char Data[]    = DSO_DATA_RESP;
+	const char Sample[]  = DSO_SAMPLE_RESP;
+	const char Crc[]     = DSO_CRC_ERROR;
+	const char Msg[]     = DSO_MESSAGE_RESP;
 	const char * Current = Ack;
 	uint32_t size = 0;
 	uint32_t error = 0;
@@ -298,21 +320,23 @@ bool ReceiveACK(uart_regs * uart){
 
 	do {
 		if (!ReceiveHeader(uart, DSO_REC_HEADER)){
-			return false;
+			return 0;
 		}
 #ifdef LEON3
 		c = ReceiveCharBlock(uart);
 #else
 		c = ReceiveChar(uart,&error);
 		if (error != 0){
-			return false;
+			return 0;
 		}
 #endif
 		switch (c) {
-			case 'A': break;
-			case 'N': Current = Nak; break;
-			case 'C': Current = Crc; break;
-			case 'M': Current = Msg; break;
+			case 'A': Current = Ack;     break;
+			case 'N': Current = Nak;     break;
+			case 'D': Current = Data;    break;
+			case 'S': Current = Sample;  break;
+			case 'C': Current = Crc;     break;
+			case 'M': Current = Msg;     break;
 			default: break;
 		}
 		size = strlen(Current);
@@ -322,34 +346,49 @@ bool ReceiveACK(uart_regs * uart){
 #else
 			c = ReceiveChar(uart,&error);
 			if (error != 0){
-				return false;
+				return 0;
 			}
 #endif
 			if (Current[i] != c){
+#ifndef LEON3
 				printf("Received unexpected data\n");
-				return false;
+#endif
+				return 0;
 			}
 		}
 		if (Current == Msg){
 			do {
 #ifdef LEON3
-			c = ReceiveCharBlock(uart);
+				c = ReceiveCharBlock(uart);
 #else
-			c = ReceiveChar(uart,&error);
-			if (error != 0){
-				return false;
-			}
+				c = ReceiveChar(uart,&error);
+				if (error != 0){
+					return 0;
+				}
 #endif
-			if (c != '\0'){
-				putc(c,stdout);
-			}
+				if (c != '\0'){
+					putc(c,stdout);
+				}
 			} while (c != '\0');
+#ifdef WINNT
+			Sleep(1);
+#endif
+		} else if (Current == Data) {
+			return ReceiveData(uart, buffersize, data);
 		}
+#ifndef LEON3
+		else if (Current == Sample) {
+			return ReceiveCaptureData(uart, buffersize, data, FastMode);
+		}
+#endif
 	} while (Current == Msg);
-	if (Current != Ack) {
-		printf("Received %s!",Current);
-	}
-	return true;
+	if (Current == Ack) {
+		return 1;
+	} 
+#ifndef W2000A
+	printf("\nReceived %s!\n",Current);
+#endif
+	return 0;
 }
 
 

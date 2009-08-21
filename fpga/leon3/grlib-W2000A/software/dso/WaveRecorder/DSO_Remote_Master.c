@@ -69,7 +69,7 @@ bool SendTriggerInput (	uart_regs * uart,
 	ChangeEndian(data,sizeof(data));
 	crcInit();
 	SendInt(uart,crcFast((unsigned char*)data,sizeof(data)));
-	return ReceiveACK(uart);
+	return ReceiveAll(uart,0,0,0);
 }
 
 bool SendTrigger(uart_regs * uart,
@@ -97,7 +97,7 @@ bool SendTrigger(uart_regs * uart,
 	crcInit();
 	crcSend = crcFast((unsigned char*)data,sizeof(data));
 	SendInt(uart,crcSend);
-	return ReceiveACK(uart);
+	return ReceiveAll(uart,0,0,0);
 }
 
 typedef struct {
@@ -127,7 +127,7 @@ bool SendAnalogInput(	uart_regs * uart,
 	crcA.NoCh = NoCh;
 	ChangeEndian((unsigned int *)&crcA,sizeof(crcA));
 	SendInt(uart,crcFast((unsigned char*)&crcA,sizeof(int)+(NoCh*sizeof(SetAnalog))));
-	return ReceiveACK(uart);
+	return ReceiveAll(uart,0,0,0);
 }
 
 unsigned int ReceiveSamples(uart_regs * uart,
@@ -148,7 +148,7 @@ unsigned int ReceiveSamples(uart_regs * uart,
 	crcInit();
 	crcSend = crcFast((unsigned char*)data,sizeof(data));
 	SendInt(uart,crcSend);
-	return ReceiveData(uart,CaptureSize,RawData);
+	return ReceiveAll(uart,CaptureSize,RawData,FastMode);
 }
 
 

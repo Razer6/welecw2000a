@@ -146,8 +146,15 @@ add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/addr
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rd
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/wr
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
-add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/idata
+add wave -noupdate -format Literal -radix decimal /testbench/d3/gensfrdso/sfr0/sfr/idata
 add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/odata
+add wave -noupdate -divider IRQ
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbi
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbo
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/irqi
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/irqo
+add wave -noupdate -format Literal -expand /testbench/d3/irqctrl/irqctrl0/r
+add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/r2
 add wave -noupdate -divider {Capture Signals}
 add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/iadc
 add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/adc
@@ -245,7 +252,7 @@ add wave -noupdate -format Literal /testbench/ch1_regh/oq
 add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {499813841 ps} 0} {{Cursor 2} {99773000 ps} 0} {{Cursor 3} {23000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {229786598 ps} 0} {{Cursor 2} {99773000 ps} 0} {{Cursor 3} {72267900 ps} 0}
 configure wave -namecolwidth 375
 configure wave -valuecolwidth 180
 configure wave -justifyvalue left
@@ -259,4 +266,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {499795102 ps} {499959166 ps}
+WaveRestoreZoom {0 ps} {307310850 ps}

@@ -52,7 +52,7 @@ uint32_t NormalUart::Init(
 				char * IPAddr)
 {
 	uint32_t succ = UartInit(Device,Baudrate,&mH);
-	SetTimeoutMs(1000);
+	SetTimeoutMs(300);
 	if (succ != 0) {
 		SendInt(&mH,0xAAAAAAAA);
 	}
@@ -76,9 +76,9 @@ uint32_t NormalUart::Send(uint32_t *Data, uint32_t Length)
 uint32_t NormalUart::Receive(uint32_t *Data, 
 							 uint32_t Length)
 {
-	return ReceiveData(&mH,Length,Data);
+	return ReceiveAll(&mH,Length,Data,&Data[2]);
 }
 
 uint32_t NormalUart::GetACK(){
-	return ReceiveACK(&mH);
+	return ReceiveAll(&mH,0,0,0);
 }

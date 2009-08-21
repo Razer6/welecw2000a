@@ -232,6 +232,7 @@ char ReceiveChar(uart_regs * uart, uint32_t *error){
 		usleep(1000);
 	}
 #endif
+//	printf("%c",ch);
 	return ch;
 }
 

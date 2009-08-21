@@ -58,7 +58,7 @@
 #define SendStringBlock(A,B) 
 #endif
 
-#define FASTFS 500000000
+#define FASTFS 1000000000
 #define SLOWFS    500000
 
 /* The generic uart is used normally by printf and scanf on LEON3 systems! 
@@ -71,15 +71,17 @@
 
 long _write_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
 	register uint32_t i = 0;
+	register char * buffer = (char*) buf;
 	WRITE_INT(DSO_SFR_BASE_ADDR,7);
 /*	SendStringBlock(GENERIC_UART_BASE_ADDR,buf);*/
 #ifdef W2000A
 	SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,DSO_SEND_HEADER);
-	SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,DSO_SEND_MESSAGE);
+	SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,DSO_MESSAGE_RESP);
 #endif
+/*	SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,buffer);*/
 	for (i = 0; i < cnt; ++i){
-		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,*(char*)buf);
-		buf++;
+		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,*buffer);
+		buffer++;
 	}
 #ifdef W2000A
 	SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'\0');
@@ -103,7 +105,8 @@ long _read_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
 
 static volatile uint32_t IRQMask;
 
-void InitIRQ( struct irqmp *lr){
+void InitIRQ(){
+	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
 	WRITE_INT(DSO_SFR_BASE_ADDR,15);
 	lr->irqlevel = ((1 << 2) | (1 << 7));	/* clear level reg */
 	lr->irqclear = -1;	/* clear all pending interrupts */
@@ -113,22 +116,32 @@ void InitIRQ( struct irqmp *lr){
 
 }
 
-void DisableIRQ(struct irqmp *lr){
+void DisableIRQ(){
+	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
 	IRQMask = lr->irqmask;
 	lr->irqmask = 0;
 }
 
-void ReleaseIRQ(struct irqmp *lr){
+void ReleaseIRQ(){
+	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
 	lr->irqmask = IRQMask;
 }
 
+typedef union {
+	int i;
+	short s[2];
+	char  c[4];
+} uSample;
+
 int main () {
-	int ReadData = 0;
+	uint32_t ReadData = 0;
 	uart_regs * uart = (uart_regs *)GENERIC_UART_BASE_ADDR;
 	uart_regs * uart2 = (uart_regs *)DEBUG_UART_BASE_ADDR;
 	SetAnalog Analog[2];
-	int Data[CAPTURESIZE];
-	int i = 0;
+	uSample Data[CAPTURESIZE];
+	uint32_t i = 0;
+	uint32_t ch1, ch2;
+	uint32_t Prefetch = 64;
 /*	static FILE mystdout = FDEV_SETUP_STREAM(SendDebugMessage, NULL );
 	stdout = mystdout;*/
 
@@ -147,13 +160,12 @@ int main () {
 	Analog[1].DA_Offset = 0xf1;
 	Analog[1].PWM_Offset = 0xf1;*/
 
-	/* This is a workaround to share the serial port with the debug uart 
-	 * and the generic uart on the W2000A! */
-	int * UartSelect = (int*)CONFIGADCENABLE;
-/*	*UartSelect = 0;*/ /* selecting the generic uart for the W2000A */
-
 	volatile char x = 0;
 	
+	/* This is a workaround to share the serial port with the debug uart 
+	 * and the generic uart on the W2000A! */
+	/*WRITE_INT(CONFIGADCENABLE,0);*/ /* selecting the generic uart for the W2000A */
+	/*WaitMs(1000);*/
 
 	InitSignalCapture(Debug,PrintF,English);
 	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, 
@@ -162,7 +174,8 @@ int main () {
 	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, 
 			FIFO_EN | ENABLE_RX | ENABLE_TX | RX_INT /*| LOOP_BACK*/, uart2);
 #endif
-	InitIRQ((struct irqmp*) INTERRUPT_CTL_BASE_ADDR);
+/*	InitIRQ();*/
+	
 
 /* Uart communication test */
 #ifdef SBX	
@@ -196,8 +209,8 @@ int main () {
 	while(1);*/
 
 #ifdef W2000A
-/*	InitDisplay(WELEC2022);
-	DrawTest();*/
+	InitDisplay(WELEC2022);
+	DrawTest();
 /*	while(1);*/
 #endif
 
@@ -237,14 +250,51 @@ int main () {
 	printf(M6);
 	SendCharBlock(uart,'\n');*/
 
-/*	FrontPanelTest(uart);*/
+#ifdef W2000A
+	WaitMs(100);
+	printf("\nStartFrontPanelTest\n");
+	FrontPanelTest(uart);
+	printf("\nSignalTest\n");
+
+	SetTriggerInput(2,8,10000000,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	SetTrigger(3,0,0,Prefetch,3,0,30,1);
+	while(1) {
+		ReadData = CaptureData(FASTFS, true, true, 7000, (uSample*)Data);
+		if (ReadData >= (6400+Prefetch)) {
+			for (i = 0; i < 640; ++i){
+				ch1 = ((uint32_t)Data[i+Prefetch].c[0]) + 128;
+				ch1 = ch1 & 0x000000ff;
+				/*
+				ch2 = (Data[i+Prefetch] >> 16) + 128;
+				ch2 = ch2 & 0x000000ff;
+				ch2 = ch2 + 240;
+				if (ch2 >= 480){
+					ch2 = 480;
+				}*/
+				ch2 = ((uint32_t)Data[i*10+Prefetch].c[0]) + 128;
+				ch2 = ch2 & 0x000000ff;
+				ch2 = ch2 + 240;
+				
+				DrawPoint(-1,i,ch1);
+				DrawPoint(0xAA,i,ch2);
+			}
+			WaitMs(100);
+			DrawBox(0,0,0,639,479);
+			DrawBox(x,630,470,639,479);
+			x++;
+		}
+	}	
+		
+#endif
+
 
 /* UART baudrate test */
 /*	while(1){
-		SendCharBlock(uart,'A'); 
-		SendCharBlock(uart2,'A'); 
+		SendCharBlock(REMOTE_UART,++x); 
 	}*/
 
+	
+	printf("\nStarting the remote control\n");
 	RemoteSlave(REMOTE_UART,CAPTURESIZE,Data);	
 	return 0;
 }

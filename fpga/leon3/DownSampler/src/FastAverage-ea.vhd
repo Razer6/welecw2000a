@@ -7,7 +7,7 @@
 -- Last update: 2009-03-04
 -- Platform   : 
 -------------------------------------------------------------------------------
--- Description:
+-- Description: out of date! use AdderTreeFilter-ea.vhd
 -- This Decimator is designed to sample down from 1 Gs to 500, 250
 -- and 100 Ms with only 13 dB.
 -- Multipliers are far to less to be avialable for here! A way to improve this
