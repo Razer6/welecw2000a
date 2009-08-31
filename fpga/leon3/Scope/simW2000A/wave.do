@@ -128,12 +128,18 @@ add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbsi
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbso
 add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/iclkdesign
 add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/iresetasync
-add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/itriggermem
+add wave -noupdate -format Literal -expand /testbench/d3/gendso/triggermem/itriggermem
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/otriggermem
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbout
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/memin
-add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/dataout
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gendso/triggermem/dataout
 add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/hready
+add wave -noupdate -format Analog-Step -radix decimal -scale 4.6566128741615948e-009 /testbench/d3/bd_sram
+add wave -noupdate -format Analog-Step -height 100 -offset 2000000000.0 -radix decimal -scale 2.65661e-008 /testbench/d3/gendso/triggermem/itriggermem.data
+add wave -noupdate -format Analog-Step -offset 100.0 -radix decimal -scale 0.17999999999999999 /testbench/d3/gendso/triggermem/simul/drawdata0
+add wave -noupdate -format Analog-Step -height 40 -offset 100.0 -radix decimal -scale 0.17999999999999999 /testbench/d3/gendso/triggermem/simul/drawdata1
+add wave -noupdate -format Analog-Step -height 40 -offset 100.0 -radix decimal -scale 0.40000000000000002 /testbench/d3/gendso/triggermem/simul/drawdata2
+add wave -noupdate -format Analog-Step -height 40 -offset 100.0 -radix decimal -scale 0.17999999999999999 /testbench/d3/gendso/triggermem/simul/drawdata3
 add wave -noupdate -divider {DSO SFR}
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rst_in
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/iresetasync
@@ -156,15 +162,11 @@ add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/irqo
 add wave -noupdate -format Literal -expand /testbench/d3/irqctrl/irqctrl0/r
 add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/r2
 add wave -noupdate -divider {Capture Signals}
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/iadc
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/adc
-add wave -noupdate -format Literal -radix ascii /testbench/d3/capturesignals/adcs/invphase
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase0
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase1
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase2
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/phase3
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/adcs/odata
-add wave -noupdate -format Literal -radix ascii -expand /testbench/d3/capturesignals/decimatorin
+add wave -noupdate -format Logic /testbench/resetasync
+add wave -noupdate -format Analog-Step -height 40 -offset 128.0 -radix decimal -scale 0.144314 /testbench/d3/capturesignals/adcs/iadc(0)(0)
+add wave -noupdate -format Literal -radix unsigned -expand /testbench/d3/capturesignals/adcs/iadc
+add wave -noupdate -format Analog-Step -height 40 -offset 128.0 -radix decimal -scale 0.14843100000000001 /testbench/d3/capturesignals/adcs/odata(0)(0)
+add wave -noupdate -format Literal -radix unsigned -expand /testbench/d3/capturesignals/adcs/odata
 add wave -noupdate -divider Trigger
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclkcpu
@@ -172,8 +174,8 @@ add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iresetasyn
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/idata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/ivalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iexttrigger
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/itriggermem
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/otriggermem
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/itriggermem
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/otriggermem
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/icpuport
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/ocpuport
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/r
@@ -186,6 +188,10 @@ add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/dataout
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/aligndata
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/readvalid
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/readalign
+add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/simul/drawdata0
+add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/simul/drawdata1
+add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/simul/drawdata2
+add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/simul/drawdata3
 add wave -noupdate -divider LedsKeysAnalogSettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/iclk
 add wave -noupdate -format Logic /testbench/d3/frontpanel/iresetasync
@@ -252,7 +258,7 @@ add wave -noupdate -format Literal /testbench/ch1_regh/oq
 add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {229786598 ps} 0} {{Cursor 2} {99773000 ps} 0} {{Cursor 3} {72267900 ps} 0}
+WaveRestoreCursors {{Cursor 1} {421477113 ps} 0} {{Cursor 2} {223271000 ps} 0} {{Cursor 3} {72267900 ps} 0} {{Cursor 4} {19811321 ps} 0}
 configure wave -namecolwidth 375
 configure wave -valuecolwidth 180
 configure wave -justifyvalue left
@@ -266,4 +272,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ps} {307310850 ps}
+WaveRestoreZoom {389125035 ps} {450253739 ps}

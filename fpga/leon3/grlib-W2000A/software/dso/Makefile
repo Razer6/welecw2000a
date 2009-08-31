@@ -1,7 +1,7 @@
 DSOPATH=$(GRLIB)/software/dso
 BOOTOPT= -msoft-float -lsmall 
 #BOOTOPT= -msoft-float
-XCC=sparc-elf-gcc -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3 -D$(DSO_TARGET)
+XCC=sparc-elf-gcc -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3 -D$(DSO_TARGET) -D$(DSO_BOARD) 
 XAS=sparc-elf-gcc -c -I. -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3
 MKPROMOPT= -v -freq=63  -stack 0x4001B500 -ramsize 2048 -ramcs 1 -rmw -romws 1 -romsize 8192
 
@@ -37,7 +37,7 @@ W2000: $(WCFILES)
 	$(XCC) $(WCFILES) $(BOOTOPT) -O2 -Wall -o W2000ROM.exe
 	sparc-elf-objdump -S W2000ROM.exe > W.S
 	sparc-elf-objcopy -O srec   W2000ROM.exe sram.srec
-	sparc-elf-objcopy -O binary W2000ROM.exe sram.bin
+	#sparc-elf-objcopy -O binary W2000ROM.exe sram.bin
 
 $(WOFILES): $(WCFILES) 
 	$(XCC) $(WCFILES) $(BOOTOPT) -o W2000ROM.exe

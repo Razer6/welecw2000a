@@ -4,7 +4,7 @@
 -- File       : PLL1.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-24
--- Last update: 2009-06-11
+-- Last update: 2009-08-22
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -43,7 +43,6 @@ entity PLL1 is
       pllena : in  std_logic := '1';
       c0     : out std_logic;
       c1     : out std_logic;
-      c2     : out std_logic;
       locked : out std_logic
       );
 end PLL1;
@@ -51,7 +50,6 @@ end PLL1;
 architecture bhv of PLL1 is
   signal   Clk0     : std_ulogic := '0';
   signal   Clk1     : std_ulogic := '0';
-  signal   Clk2     : std_ulogic := '0';
   constant cClkTime : time       := 1 sec /(2*250E6);
 begin
   
@@ -62,42 +60,17 @@ begin
     wait until inclk0 = '0';
     wait until inclk0 = '1';
     locked <= '1';
-    wait for 1 sec /(4*250E6);
+    wait for 1 sec /(4*250E6);          -- phase offset
     loop
+      Clk0 <= not Clk0;
+      Clk1 <= not Clk1;
+      wait for cClkTime;
       Clk0 <= not Clk0;
       wait for cClkTime;
     end loop;
   end process;
+
   c0 <= Clk0;
-
-  process
-  begin
-    locked <= '0';
---    wait until pllena = '1';
-    wait until inclk0 = '0';
-    wait until inclk0 = '1';
-    locked <= '1';
-    wait for 1 sec /(4*250E6);
-    loop
-      Clk1 <= not Clk1;
-      wait for 2*cClkTime;
-    end loop;
-  end process;
   c1 <= Clk1;
-
-  process
-  begin
-    locked <= '0';
---    wait until pllena = '1';
-    wait until inclk0 = '0';
-    wait until inclk0 = '1';
-    locked <= '1';
-    wait for 1 sec /(4*250E6);
-    loop
-      Clk2 <= not Clk2;
-      wait for 4*cClkTime;
-    end loop;
-  end process;
-  c2 <= Clk2;
   
 end architecture;

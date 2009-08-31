@@ -23,23 +23,23 @@ add wave -noupdate -format Literal /testbench/keydata
 add wave -noupdate -divider Frontpanel
 add wave -noupdate -format Logic /testbench/frontpanel/iclk
 add wave -noupdate -format Logic /testbench/frontpanel/iresetasync
-add wave -noupdate -format Literal /testbench/frontpanel/ileds
-add wave -noupdate -format Literal /testbench/frontpanel/oleds
-add wave -noupdate -format Logic /testbench/frontpanel/ikeysdata
-add wave -noupdate -format Literal /testbench/frontpanel/onfetchkeys
-add wave -noupdate -format Literal /testbench/frontpanel/okeys
-add wave -noupdate -format Literal /testbench/frontpanel/icputoanalog
-add wave -noupdate -format Logic /testbench/frontpanel/oanalogbusy
-add wave -noupdate -format Literal /testbench/frontpanel/oanalogsettings
-add wave -noupdate -format Logic /testbench/frontpanel/oserialclk
 add wave -noupdate -format Logic /testbench/frontpanel/strobe
-add wave -noupdate -format Logic /testbench/frontpanel/serialclk
-add wave -noupdate -format Literal /testbench/frontpanel/ledshiftreg
-add wave -noupdate -format Literal /testbench/frontpanel/ledcounter
+add wave -noupdate -format Logic /testbench/frontpanel/ikeysdata
+add wave -noupdate -format Literal /testbench/frontpanel/okeys
+add wave -noupdate -format Logic /testbench/frontpanel/oserialclk
+add wave -noupdate -format Literal -expand /testbench/frontpanel/onfetchkeys
 add wave -noupdate -format Literal /testbench/frontpanel/keyshiftreg
 add wave -noupdate -format Literal /testbench/frontpanel/keycounter
+add wave -noupdate -format Literal /testbench/frontpanel/icputoanalog
+add wave -noupdate -format Logic /testbench/frontpanel/serialclk
+add wave -noupdate -format Literal /testbench/frontpanel/ileds
+add wave -noupdate -format Literal /testbench/frontpanel/oleds
+add wave -noupdate -format Literal /testbench/frontpanel/ledshiftreg
+add wave -noupdate -format Literal /testbench/frontpanel/ledcounter
 add wave -noupdate -format Logic /testbench/frontpanel/ledstrobe
 add wave -noupdate -format Literal /testbench/frontpanel/analogsettings
+add wave -noupdate -format Literal /testbench/frontpanel/oanalogsettings
+add wave -noupdate -format Logic /testbench/frontpanel/oanalogbusy
 add wave -noupdate -divider Leds0
 add wave -noupdate -format Logic /testbench/pleds__0/bank/isd
 add wave -noupdate -format Logic /testbench/pleds__0/bank/isck
@@ -61,7 +61,7 @@ add wave -noupdate -format Literal /testbench/pleds__1/bank/oq
 add wave -noupdate -format Literal /testbench/pleds__1/bank/reg
 add wave -noupdate -format Literal /testbench/pleds__1/bank/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {0 ns} 0}
+WaveRestoreCursors {{Cursor 1} {196864 ns} 0}
 configure wave -namecolwidth 285
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -75,4 +75,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ns} {839 ns}
+WaveRestoreZoom {508593 ns} {541407 ns}

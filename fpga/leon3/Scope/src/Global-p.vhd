@@ -4,7 +4,7 @@
 -- File       : Global-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-14
--- Last update: 2009-07-06
+-- Last update: 2009-08-22
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -58,7 +58,6 @@ package Global is
   -- typedefs for the ADC inputs
   subtype aADCX is std_ulogic_vector(cADCBitWidth-1 downto 0);
   type    aADCData is array (natural range <>) of aADCX;
-  type    aADCInPhase is array (natural range <>) of aADCData(0 to cChannels-1);
   type    aADCIn is array (0 to cADCsperChannel-1) of aADCData(0 to cChannels-1);
   type    aADCOut is array (0 to cChannels-1) of aADCData(0 to cCoefficients-1);
 

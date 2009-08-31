@@ -220,6 +220,7 @@ bool SetTrigger(
 	TriggerR->TriggerLowTimeAddr   = LowReferenceTime;
 	TriggerR->TriggerHighValueAddr = HighReference;
 	TriggerR->TriggerHighTimeAddr  = HighReferenceTime;
+	TriggerR->TriggerPrefetchAddr = TriggerPrefetchSamples;
 #if 0
     if ((loadmem((int)&TriggerR->TriggerLowValueAddr)  != LowReference)     ||
 	(loadmem((int)&TriggerR->TriggerLowTimeAddr)   != LowReferenceTime) ||

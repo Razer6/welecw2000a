@@ -4,7 +4,7 @@
 -- File       : SignalAccess-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-03-24
+-- Last update: 2009-08-29
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -85,6 +85,7 @@ architecture rtl of SignalAccess is
   signal htrans : std_ulogic_vector(1 downto 0);
   signal hsize  : std_ulogic_vector(2 downto 0);
   signal align  : std_ulogic_vector(1 downto 0);
+  
 begin  -- rtl
   
   process (clk_i, rst_in)
@@ -95,12 +96,16 @@ begin  -- rtl
       hsize  <= "010";
       align  <= "00";
     elsif rising_edge(clk_i) then
-      if ahbsi.hready = '1' then
-        hsel   <= ahbsi.hsel(hindex);
+--      if ahbsi.hready = '1' then
+      if ahbsi.hsel(hindex) = '1' then
+        hsel   <= '1';
         htrans <= std_ulogic_vector(ahbsi.htrans);
         hsize  <= std_ulogic_vector(ahbsi.hsize);
         align  <= std_ulogic_vector(ahbsi.haddr(1 downto 0));
+      elsif iTriggerMem.ACK = '1' then
+        hsel   <= '0';
       end if;
+--      end if;
     end if;
   end process;
 
@@ -108,45 +113,45 @@ begin  -- rtl
   process (ahbsi, iTriggerMem, hsel, htrans, hsize, align)
   begin
     DataOut <= (others => '-');
-    if hsel = '1' then
-      case htrans is
-        when "01" | "10" | "11" =>
-          DataOut <= (others => '0');
-          case hsize is
-            when "000" =>
-              case to_integer(unsigned(align(1 downto 0))) is
-                when 0 =>
-                  DataOut(7 downto 0) <= iTriggerMem.Data(31 downto 24);
-                when 1 =>
-                  DataOut(7 downto 0) <= iTriggerMem.Data(23 downto 16);
-                when 2 =>
-                  DataOut(7 downto 0) <= iTriggerMem.Data(15 downto 8);
-                when 3 =>
-                  DataOut(7 downto 0) <= iTriggerMem.Data(7 downto 0);
-                when others =>
-                  null;
-              end case;
-            when "001" =>
-              case align(1) is
-                when '0' =>
-                  DataOut(15 downto 0) <= iTriggerMem.Data(31 downto 16);
-                when '1' =>
-                  DataOut(15 downto 0) <= iTriggerMem.Data(15 downto 0);
-                when others =>
-                  assert false report "Metavalue detected" severity error;
-              end case;
-            when "010" =>
-              DataOut <= iTriggerMem.data;
-            when others =>
-              assert is_x(hsize) report "Wrong transfer size" severity error;
-          end case;
-        when others =>
-          null;
-      end case;
-    end if;
+--    if hsel = '1' then
+    case htrans is
+      when "01" | "10" | "11" =>
+        DataOut <= (others => '0');
+        case hsize is
+          when "000" =>
+            case to_integer(unsigned(align(1 downto 0))) is
+              when 0 =>
+                DataOut(7 downto 0) <= iTriggerMem.Data(31 downto 24);
+              when 1 =>
+                DataOut(7 downto 0) <= iTriggerMem.Data(23 downto 16);
+              when 2 =>
+                DataOut(7 downto 0) <= iTriggerMem.Data(15 downto 8);
+              when 3 =>
+                DataOut(7 downto 0) <= iTriggerMem.Data(7 downto 0);
+              when others =>
+                null;
+            end case;
+          when "001" =>
+            case align(1) is
+              when '0' =>
+                DataOut(15 downto 0) <= iTriggerMem.Data(31 downto 16);
+              when '1' =>
+                DataOut(15 downto 0) <= iTriggerMem.Data(15 downto 0);
+              when others =>
+                assert false report "Metavalue detected" severity error;
+            end case;
+          when "010" =>
+            DataOut <= iTriggerMem.data;
+          when others =>
+            assert is_x(hsize) report "Wrong transfer size" severity error;
+        end case;
+      when others =>
+        null;
+    end case;
+--    end if;
 
 
-    MemIn.Addr <= aTriggerReadAddr(ahbsi.haddr(aTriggerReadAddr'range));
+    MemIn.Addr <= aTriggerReadAddr(ahbsi.haddr(aTriggerReadAddr'length+1 downto 2));
     MemIn.Rd   <= '0';
     if ahbsi.hsel(hindex) = '1' then
       case ahbsi.htrans is
@@ -169,7 +174,7 @@ begin  -- rtl
     hconfig => hconfig,
     hindex  => hindex);
 
-  hready      <= iTriggerMem.ACK or (not hsel);
+  hready      <= (iTriggerMem.ACK or (not hsel)) and (not ahbsi.hsel(hindex));
   ahbso       <= AHBout;
   oTriggerMem <= MemIn;
 
@@ -197,8 +202,30 @@ begin  -- rtl
 
 
 -- pragma translate_off
-  bootmsg : report_version
-    generic map ("SignalAccess" & tost(hindex) &
-                 ": AHB DSO triggered data readonly access " & tost(kbytes) & " kbytes");
+  Simul : block
+    signal DrawData0 : aByte;
+    signal DrawData1 : aByte;
+    signal DrawData2 : aByte;
+    signal DrawData3 : aByte;
+--    signal prev      : std_ulogic;
+  begin
+    
+    process (clk_i)
+    begin
+      if rising_edge(clk_i) then
+--        prev <= hready;
+        if iTriggerMem.ACK = '1' then
+          DrawData3 <= Dataout(7 downto 0);
+          DrawData2 <= Dataout(15 downto 8);
+          DrawData1 <= Dataout(23 downto 16);
+          DrawData0 <= Dataout(31 downto 24);
+        end if;
+      end if;
+    end process;
+
+    bootmsg : report_version
+      generic map ("SignalAccess" & tost(hindex) &
+                   ": AHB DSO triggered data readonly access " & tost(kbytes) & " kbytes");
+  end block;
 -- pragma translate_on
 end rtl;

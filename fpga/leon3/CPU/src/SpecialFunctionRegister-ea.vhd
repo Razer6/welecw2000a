@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-18
+-- Last update: 2009-08-22
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -343,12 +343,12 @@ begin
   end process;
 
 
---  pPipelineRegsIn : process (iClkCPU, iResetAsync)
---  begin
---    if rising_edge(iCLKCPU) then
-  SFRIn <= iSFRControl;
---    end if;
---  end process;
+  pPipelineRegsIn : process (iClkCPU, iResetAsync)
+  begin
+    if rising_edge(iCLKCPU) then
+      SFRIn <= iSFRControl;
+    end if;
+  end process;
   
   pRead : process (Addr, SFRIn, InterruptVector,
                    InterruptMask, Decimator, nConfigADC,

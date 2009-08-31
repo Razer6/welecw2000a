@@ -4,7 +4,7 @@
 -- File       : PLL2.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-24
--- Last update: 2009-06-11
+-- Last update: 2009-08-22
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -42,12 +42,14 @@ entity PLL2 is
       inclk0 : in  std_logic := '0';
       pllena : in  std_logic := '1';
       c0     : out std_logic;
+      c1     : out std_logic;
       locked : out std_logic
       );
 end PLL2;
 
 architecture bhv of PLL2 is
-  signal   Clk      : std_ulogic := '0';
+  signal   Clk0     : std_ulogic := '0';
+  signal   Clk1     : std_ulogic := '0';
   constant cClkTime : time       := 1 sec /(2*250E6);
 begin
   
@@ -60,10 +62,15 @@ begin
     locked <= '1';
     wait for 2 sec /(4*250E6);
     loop
-      Clk <= not Clk;
+      Clk0 <= not Clk0;
+      Clk1 <= not Clk1;
+      wait for cClkTime;
+      Clk0 <= not Clk0;
       wait for cClkTime;
     end loop;
   end process;
-  c0 <= Clk;
+
+  c0 <= Clk0;
+  c1 <= Clk1;
   
 end architecture;

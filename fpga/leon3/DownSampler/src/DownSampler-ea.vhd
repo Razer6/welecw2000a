@@ -4,7 +4,7 @@
 -- File       : DownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-16
--- Last update: 2009-07-07
+-- Last update: 2009-08-29
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -67,7 +67,6 @@ architecture RTL of DownSampler is
   signal StageValid0    : std_ulogic;
   signal Stage          : aStageInputs;
   signal Aliasing       : aStages;
---  signal StageInputCounter : natural range 0 to cCoefficients-1;
   signal DataOutCounter : natural range 0 to cCoefficients-1;
   signal DataOut        : aLongValues(0 to cCoefficients-1);
 begin
@@ -88,11 +87,6 @@ begin
   process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
-      --     AliasAvgCounter <= 0;
---      AliasAvg        <= (others => (others => '0'));
---      AliasAvgValid   <= '0';
-      --     StageData0      <= (others => (others => '0'));
-      --     StageValid0     <= '0';
       Aliasing <= (others => (
         Counter           => cCoefficients-1,
         Data              => (others => '0'),
@@ -100,35 +94,12 @@ begin
       Stage <= (others => (
         Data           => (others => '0'),
         Valid          => '0'));
---      StageInputCounter <= cCoefficients-1;
       DataOut <= (others => (others => '0'));
       oValid  <= '0';
       
     elsif rising_edge(iClk) then
-
---      if iEnableFilter(0) = '1' then
---        StageValid0 <= iStageValid0;
---        for i in StageData0'range loop
---          StageData0(i) <= iStageData0(i);
---        end loop;
---      else
---        StageValid0 <= AliasAvgValid;
---        for i in StageData0'range loop
---          StageData0(i) <= signed(AliasAvg(i));
---        end loop;
---      end if;
-
-
---      if iEnableFilter(0) = '1' then
---        Stage(0) <= iStage(0);
---      else
---        Stage(0).Data(cBitWidth*2-1 downto cBitWidth) <= AliasAvg(0);
---        Stage(0).Data(cBitWidth-1 downto 0)           <= (others => '0');
---        Stage(0).Valid                                <= AliasAvgValid;
---      end if;
-      
+     
       Stage(0) <= iStage(0);
---      Stage(0).Valid <= iStage(0).Valid or iStageValid0;
 
       for m in 1 to cDecimationStages-1 loop
         -- Stage output
@@ -160,12 +131,7 @@ begin
       end loop;
 
       -- downsampler output
-      --   if iDecimation(1 to cDecimationStages-1) = cM1 then
       if iDecimation(0) /= M10 then
-        --  for i in DataOut'range loop
-        --   DataOut(i)(cBitWidth*2-1 downto cBitWidth) <= iStageData0(i);
-        --   DataOut(i)(cBitWidth-1 downto 0)           <= (others => '0');
-        -- end loop;
         DataOut <= iStageData0;
         oValid  <= iStageValid0;
       else
@@ -178,53 +144,7 @@ begin
           end if;
         end if;
       end if;
-
---      AliasAvgValid <= '1';
---      AliasAvg      <= (others => (others => '0'));
---      case iDecimation(0) is
---        when M1 =>
---          AliasAvg <= iStageData0;
---        when M2 =>
---          if AliasAvgCounter = 0 then
---            AliasAvgCounter <= 1;
---          else
---            AliasAvgValid   <= '0';
---            AliasAvgCounter <= AliasAvgCounter -1;
---          end if;
---          for i in 0 to cCoefficients/2-1 loop
---            AliasAvg(i+cCoefficients/2) <= iStageData0(2*i);
---            AliasAvg(i)                 <= AliasAvg(i+cCoefficients/2);
---          end loop;
---        when M4 =>
---          if AliasAvgCounter = 0 then
---            AliasAvgCounter <= 4;
---          else
---            AliasAvgValid   <= '0';
---            AliasAvgCounter <= AliasAvgCounter -1;
---          end if;
---          for i in 0 to cCoefficients/4-1 loop
---            AliasAvg(i+cCoefficients*3/4) <= iStageData0(4*i);
---          end loop;
---          AliasAvg(0 to cCoefficients*3/4-1) <=
---            AliasAvg(cCoefficients/4 to cCoefficients-1);
---        when M10 =>
---          if AliasAvgCounter = 0 then
---            AliasAvgCounter <= 9;
---          else
---            AliasAvgCounter <= AliasAvgCounter -1;
---          end if;
---          case AliasAvgCounter is
---            when 0 | 5 => AliasAvgValid <= '0';
---            when 1 | 6 => AliasAvg(7)   <= iStageData0(1);
---            when 2 | 7 => AliasAvg(7)   <= iStageData0(3);
---            when 3 | 8 => AliasAvg(7)   <= iStageData0(5);
---            when 4 | 9 => AliasAvg(7)   <= iStageData0(7);
---          end case;
---          case AliasAvgCounter is
---            when 0 | 5  => AliasAvg         <= AliasAvg;
---            when others => AliasAvg(0 to 6) <= AliasAvg(1 to 7);
---          end case;
---      end case;
+      
     end if;
   end process;
 

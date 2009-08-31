@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-08-01
+-- Last update: 2009-08-29
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -84,8 +84,7 @@ architecture RTL of TopTrigger is
   subtype aTriggerAlign is unsigned(cTriggerAlign-1 downto 0);
   signal  DataIn, DataOut : aDataIn;
   signal  AlignData       : aAlignData;
-  signal  ReadValid       : std_ulogic_vector(0 to 1);  -- (1) bug, if you dont use it as ahb
-                                                        -- slave
+  signal  ReadValid       : std_ulogic_vector(0 to 2);
   signal  ReadAlign       : aTriggerAlign;
 
   component TriggerMemory is
@@ -102,8 +101,28 @@ architecture RTL of TopTrigger is
         );
   end component;
 begin
-  
-  
+
+  -- pragma translate_off
+  Simul : block
+    signal DrawData0 : aByte;
+    signal DrawData1 : aByte;
+    signal DrawData2 : aByte;
+    signal DrawData3 : aByte;
+  begin
+    
+    process (iClk)
+    begin
+      if rising_edge(iClk) then
+        if iValid = '1' then
+          DrawData0 <= iData(0)(0);
+          DrawData1 <= iData(1)(0);
+          DrawData2 <= iData(2)(0);
+          DrawData3 <= iData(3)(0);
+        end if;
+      end if;
+    end process;
+  end block;
+-- pragma translate_on
 
   TriggerOnCh : process (iClk, iResetAsync)
   begin
@@ -148,7 +167,7 @@ begin
         R.Addr(R.Addr'high downto R.Addr'high+1 - cStorageModeLength) <= "00";
       end if;
 
-    --  R.WrEn <= "1111";
+      --  R.WrEn <= "1111";
 
       case R.State is
         when Idle =>
@@ -171,7 +190,7 @@ begin
           end if;
           
         when Triggering =>
-          R.WrEn <= "1111";
+          R.WrEn                                           <= "1111";
           R.StopAddr(R.StopAddr'high downto cTriggerAlign) <= R.Addr(R.Addr'high downto 0) -
                                                               iCPUPort.PreambleCounter(iCPUPort.PreambleCounter'high downto cTriggerAlign);
           R.StopAddr(R.StopAddr'high downto R.StopAddr'high-1) <= unsigned(iCPUPort.StorageMode);
@@ -239,7 +258,7 @@ begin
 
   -- oCPUPort.ReadOffset(oCPUPort.ReadOffset'high downto  cTriggerAlign)  <= R.StopAddr(cTriggerAddrLength-1 downto 0);
   -- oCPUPort.ReadOffset(cTriggerAlign-1 downto 0) <= (others => '0');
-   oCPUPort.ReadOffset <= R.StopAddr(cTriggerAddrLength-1 downto 0);
+  oCPUPort.ReadOffset <= R.StopAddr(cTriggerAddrLength-1 downto 0);
 
   oCPUPort.CurrentTriggerAddr(oCPUPort.CurrentTriggerAddr'high downto cTriggerAlign) <= R.Addr;
   oCPUPort.CurrentTriggerAddr(cTriggerAlign-1 downto 0)                              <= (others => '0');
@@ -283,11 +302,12 @@ begin
     elsif rising_edge(iClkCPU) then
       ReadValid(ReadValid'low)                     <= iTriggerMem.Rd;
       ReadValid(ReadValid'low+1 to ReadValid'high) <= ReadValid(ReadValid'low to ReadValid'high-1);
-      ReadAlign <= iTriggerMem.Addr(cTriggerAlign-1 downto 0);
-      i         := to_integer(ReadAlign);
+      ReadAlign                                    <= iTriggerMem.Addr(cTriggerAlign-1 downto 0);
+      
       for j in 0 to 3 loop
         oTriggerMem.Data((8*(j+1))-1 downto 8*j) <= std_ulogic_vector(AlignData(3-j)(i));
       end loop;
+      i                                            := to_integer(ReadAlign);
     end if;
   end process;
 
@@ -316,7 +336,7 @@ begin
   -- Trigger3 AnalogTrigger H => L
   -- Trigger4 GlitchTrigger L => H
   -- Trigger5 GlitchTrigger H => L
-  
+
   Normal : entity DSO.NormalTrigger
     port map (
       iClk        => iClk,
@@ -331,10 +351,10 @@ begin
       oHLStrobe   => TriggerStrobes(3),
       oLHGlitch   => TriggerStrobes(4),
       oHLGlitch   => TriggerStrobes(5));
-  
+
   -- Trigger6 Equal No  => Yes, for at minimum HighTime 
   -- Trigger7 Equal No, => Yes, for less than HighTime 
-  
+
   Digital : entity DSO.DigitalTrigger
     port map (
       iClk          => iClk,

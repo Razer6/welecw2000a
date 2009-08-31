@@ -4,7 +4,7 @@
 -- File       : LedsKeysAnalogSettings-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-20
+-- Last update: 2009-08-28
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -59,10 +59,14 @@ entity LedsKeysAnalogSettings is
 end entity;
 
 architecture RTL of LedsKeysAnalogSettings is
+  
+  constant cKeyShiftLength : natural := 54;
+  constant cLedShiftLength : natural := 16;
+
   signal Strobe, SerialClk : std_ulogic;
   signal LedShiftReg       : std_ulogic_vector(cLedShiftLength-1 downto 0);
   signal LedCounter        : natural range 0 to cLedShiftLength;
-  signal KeyShiftReg       : std_ulogic_vector(cKeyShiftLength downto 1);
+  signal KeyShiftReg       : std_ulogic_vector(cKeyShiftLength downto 0);
   signal KeyCounter        : natural range 0 to cKeyShiftLength;
   signal LedStrobe         : std_ulogic;
 
@@ -166,10 +170,10 @@ begin
 
       if Strobe = '1' and SerialClk = '1' then
         onFetchKeys.nFetchStrobe <= cHighInactive;
-        if KeyCounter /= cKeyShiftLength then
-          KeyCounter <= KeyCounter +1;
-        else
+        if KeyCounter = cKeyShiftLength then
           KeyCounter <= 0;
+        else
+          KeyCounter <= KeyCounter +1;
         end if;
         KeyShiftReg(KeyShiftReg'right)                           <= iKeysData;
         KeyShiftReg(KeyShiftReg'left downto KeyShiftReg'right+1) <=

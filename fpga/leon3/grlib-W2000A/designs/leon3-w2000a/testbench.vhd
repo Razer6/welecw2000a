@@ -146,14 +146,14 @@ architecture behav of testbench is
   signal iFPGA2_T7   : std_ulogic;
 
   --CONTROL of inputs
-  signal iUx6        : std_ulogic;  -- not soldering register channels 1,2 è 3,4
+  signal iUx6        : std_ulogic;      -- not soldering register channels 1,2 è 3,4
   signal iUx11       : std_ulogic;      -- not soldering register channels 1,2
   signal AAQpin5     : std_ulogic;
   signal oCalibrator : std_ulogic;
 
 -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-  signal oPWMout  : std_ulogic;         --Level Of External Syncro
-  signal iSinhcro : std_ulogic;         --Comparator external syncro.
+  signal oPWMout  : std_ulogic;                     --Level Of External Syncro
+  signal iSinhcro : std_ulogic;                     --Comparator external syncro.
   signal oDesh    : std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
   signal oDeshENA : std_ulogic;
   signal oRegCLK  : std_ulogic;
@@ -172,9 +172,10 @@ architecture behav of testbench is
   constant promfile : string := "prom.srec";  -- rom contents
   constant sramfile : string := "sram.srec";  -- ram contents
 
-  signal   clk : std_logic := '0';
-  signal   Rst : std_logic := '0';      -- Reset
-  constant ct  : integer   := clkperiod/2;
+  signal   clk        : std_logic := '0';
+  signal   Rst        : std_logic := '0';  -- Reset
+  signal   ResetAsync : std_ulogic;
+  constant ct         : integer   := clkperiod/2;
 
   signal romsn  : std_logic_vector(1 downto 0);
   signal oen    : std_ulogic;
@@ -225,16 +226,16 @@ architecture behav of testbench is
 
   component BhvADC is
     generic (
-    gFilename    : string  := "";
-    gStartValue  : integer := 0;
-    gCountValue  : integer := 1;
-    gBitWidth    : natural;
-    -- This generic is for netlist simulations with timing information! 
-    gOutputDelay : time);
-  port (
-    iClk        : in  std_ulogic;
-    iResetAsync : in  std_ulogic;
-    oData       : out std_ulogic_vector(gBitWidth-1 downto 0));
+      gFilename    : string  := "";
+      gStartValue  : integer := 0;
+      gCountValue  : integer := 1;
+      gBitWidth    : natural;
+      -- This generic is for netlist simulations with timing information! 
+      gOutputDelay : time);
+    port (
+      iClk        : in  std_ulogic;
+      iResetAsync : in  std_ulogic;
+      oData       : out std_ulogic_vector(gBitWidth-1 downto 0));
   end component;
 
   component StoP_hc595 is
@@ -319,7 +320,7 @@ architecture behav of testbench is
       disas   : integer := CFG_DISAS;   -- Enable disassembly to console
       dbguart : integer := CFG_DUART;   -- Print UART on console
       pclow   : integer := CFG_PCLOW;
-      freq    : integer := 25000  -- frequency of main clock (used for PLLs)
+      freq    : integer := 25000        -- frequency of main clock (used for PLLs)
       );
     port (
       --RS232
@@ -383,14 +384,14 @@ architecture behav of testbench is
       iFPGA2_T7   : in std_ulogic;
 
       --CONTROL of inputs
-      iUx6        : in  std_ulogic;  -- not soldering register channels 1,2 è 3,4
+      iUx6        : in  std_ulogic;     -- not soldering register channels 1,2 è 3,4
       iUx11       : in  std_ulogic;     -- not soldering register channels 1,2
       iAAQpin5    : in  std_ulogic;
       oCalibrator : out std_ulogic;
 
       -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-      oPWMout  : out std_ulogic;        --Level Of External Syncro
-      iSinhcro : in  std_ulogic;        --Comparator external syncro.
+      oPWMout  : out std_ulogic;                     --Level Of External Syncro
+      iSinhcro : in  std_ulogic;                     --Comparator external syncro.
       oDesh    : out std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
       oDeshENA : out std_ulogic;
       oRegCLK  : out std_ulogic;
@@ -411,8 +412,9 @@ architecture behav of testbench is
       iCh2ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
 
 -- pragma translate_off
-      errorn  : out std_ulogic;
-      resoutn : out std_ulogic;
+      errorn      : out std_ulogic;
+      resoutn     : out std_ulogic;
+      oResetAsync : out std_ulogic;
 -- pragma translate_on
 
       --CLK
@@ -426,25 +428,29 @@ architecture behav of testbench is
       iclk12_5  : in  std_ulogic
       );
   end component;
-
+  
+  -- start the bhv adcs at the right time
+  signal ResetADC : std_ulogic;
+  
 --  for all : leon3mini
 --    use entity work.NetlistWrapper;
-
+  
 begin
-
+  
+  ResetADC <= ResetAsync after 1100 ps; 
   -- if the wave file was not found these adc act as an ascending counter
   CH : for i in 0 to cChannels-1 generate
     ADC : for j in 0 to cADCsperChannel-1 generate
       BHV : BhvADC
         generic map (
-          --        gFileName    => cWaveFileNames(i)(j),
+          gFileName    => cWaveFileNames(i)(j),
           gStartValue  => j,
-          gCountValue => cADCsperChannel,
+          gCountValue  => cADCsperChannel,
           gBitWidth    => cADCBitWidth,
           gOutputDelay => 1900 ps)
         port map (
           iClk        => ADCClk(j),
-          iResetAsync => resoutn,
+          iResetAsync => ResetADC,
           oData       => ADCData(j)(i));
     end generate;
   end generate;
@@ -562,9 +568,9 @@ begin
   clk  <= not clk after ct * 1 ns;
   rst  <= '1'     after 10 ns;
   rxd1 <= 'H';
-  
+
   iRXD <= '1';
-  
+
   d3 : leon3mini
     generic map (
       fabtech => fabtech, memtech => memtech, padtech => padtech,
@@ -633,7 +639,7 @@ begin
       iFPGA2_T7   => iFPGA2_T7,
 
       --CONTROL of inputs
-      iUx6        => iUx6,   -- not soldering register channels 1,2 è 3,4
+      iUx6        => iUx6,              -- not soldering register channels 1,2 è 3,4
       iUx11       => iUx11,             -- not soldering register channels 1,2
       iAAQpin5    => AAQpin5,
       oCalibrator => oCalibrator,
@@ -669,8 +675,9 @@ begin
       oclk13out => oclk13out,           --W12-U15
       iclk12_5  => iclk12_5,
 
-      resoutn => resoutn,
-      errorn  => error
+      oResetAsync => ResetAsync,
+      resoutn     => resoutn,
+      errorn      => error
       );
 
 --  extbprom : if CFG_BOOTOPT = 0 generate

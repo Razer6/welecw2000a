@@ -4,7 +4,7 @@
 -- File       : TopDownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-17
--- Last update: 2009-07-26
+-- Last update: 2009-08-29
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -119,8 +119,8 @@ begin
           iResetAsync  => iResetAsync,
           iDecimator   => iCPU.Stages(3 downto 0),
           iFilterDepth => iCPU.FilterDepth,
-          iData        => iADC(i),            -- fixpoint 1.x range -0.5 to 0.5
-          oData        => LongStageData0(i),  -- fixpoint 1.x range -1 to <1
+          iData        => iADC(i),            
+          oData        => LongStageData0(i),  
           oValid       => AvgValid(i),
           oStageData   => FirDataOut(0)(i),
           oStageValid  => StageValid0(i));

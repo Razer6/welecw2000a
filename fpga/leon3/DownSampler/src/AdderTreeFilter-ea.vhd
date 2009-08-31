@@ -4,7 +4,7 @@
 -- File       : AdderTreeFilter-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-07-05
--- Last update: 2009-07-26
+-- Last update: 2009-08-29
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description:
@@ -170,10 +170,8 @@ begin
       oStageData  <= Filtered(7);
 
       case iDecimator is
---        when X"1" =>
---          DataOut <= Filtered;
---          oValid  <= '1';
---          Counter <= 0;
+        when X"1" =>
+          oValid  <= '1';
         when X"2" =>
           for i in 0 to cCoefficients/2-1 loop
             DataOut(i+cCoefficients/2) <= Filtered(2*i);

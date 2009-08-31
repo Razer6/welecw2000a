@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-07-26
+-- Last update: 2009-08-27
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -89,6 +89,7 @@ architecture RTL of SignalCapture is
   signal SlowInputData     : aLongValues(0 to cChannels-1);
   signal SlowInputValid    : std_ulogic;
   signal ExtTrigger        : std_ulogic;
+  signal DownSampler       : aDownSampler;
 begin
   
   oClkCPU     <= ClkCPU;
@@ -116,7 +117,7 @@ begin
       for i in 0 to cChannels-1 loop
         for j in 0 to cCoefficients-1 loop
 --          DecimatorIn(i)(j) <= signed(ADCout(i)(j)(7) & ADCout(i)(j))
-			DecimatorIn(i)(j) <= signed(ADCout(i)(j));
+          DecimatorIn(i)(j) <= signed(ADCout(i)(j));
         end loop;
       end loop;
     end if;
@@ -125,12 +126,21 @@ begin
   SlowInputData  <= (others => (others => '0'));
   SlowInputValid <= '0';
 
+  process (iDownSampler)
+  begin
+    DownSampler                 <= iDownSampler;
+    DownSampler.EnableFilter(1) <= '0';
+    DownSampler.EnableFilter(2) <= '0';
+    DownSampler.EnableFilter(3) <= '0';
+    DownSampler.EnableFilter(4) <= '0';
+  end process;
+
   Decimator : entity DSO.TopDownSampler
     port map (
       iClk        => ClkDesign,
       iResetAsync => ResetAsync,
       iADC        => DecimatorIn,       -- fixpoint 1.x range -0.5 to 0.5
-      iCPU        => iDownSampler,
+      iCPU        => DownSampler,
       iData       => SlowInputData,
       iValid      => SlowInputValid,
       oData       => DecimatorOut,      -- fixpoint 1.x range -1 to <1
@@ -141,7 +151,7 @@ begin
       iClk            => ClkDesign,
       iResetAsync     => ResetAsync,
       iSignalSelector => iSignalSelector,
-      iData           => DecimatorOut,  
+      iData           => DecimatorOut,
       iValid          => DecimatorOutValid,
       oData           => SelectorOut,   -- 8 bit values
       oValid          => SelectorOutValid);

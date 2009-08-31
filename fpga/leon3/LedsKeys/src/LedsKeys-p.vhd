@@ -4,7 +4,7 @@
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-20
+-- Last update: 2009-08-28
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -44,8 +44,6 @@ use DSO.Global.all;
 
 package pLedsKeysAnalogSettings is
   
-  constant cKeyShiftLength    : natural := 54;
-  constant cLedShiftLength    : natural := 16;
   constant cAnalogAddrLength  : natural := 3;
   constant cAnalogShiftLength : natural := 24;
 

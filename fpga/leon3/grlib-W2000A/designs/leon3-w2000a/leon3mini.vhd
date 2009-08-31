@@ -160,8 +160,9 @@ entity leon3mini is
     iCh2ADC4 : in  std_ulogic_vector (cADCBitWidth-1 downto 0);
 
 -- pragma translate_off
-    errorn  : out std_ulogic;
-    resoutn : out std_ulogic;
+    errorn      : out std_ulogic;
+    resoutn     : out std_ulogic;
+    oResetAsync : out std_ulogic;
 -- pragma translate_on
 
     --CLK
@@ -315,6 +316,7 @@ begin
   dsuen       <= '1';
   -- pragma translate_off
   resoutn     <= rstn;
+  oResetAsync <= ResetAsync;
   -- pragma translate_on
   ClkADC25(0) <= iclk25_2;
   ClkADC25(1) <= iclk25_7;

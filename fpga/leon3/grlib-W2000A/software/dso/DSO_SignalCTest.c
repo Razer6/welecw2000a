@@ -48,14 +48,14 @@
 #include "DSO_Frontpanel.h"
 #include "irqmp.h"
 
-#define BOARDTEST 
 
-#ifdef BOARDTEST
-#define CAPTURESIZE 8000
+#ifdef BOARD_COMPILATION
+#define CAPTURESIZE 8192
 /*#define CAPTURESIZE ((RAM_SIZE-0x100000)/sizeof(int))*/
 #else
 #define CAPTURESIZE 100000
 #define SendStringBlock(A,B) 
+#define printf(...)
 #endif
 
 #define FASTFS 1000000000
@@ -70,6 +70,7 @@
  * need to be redirected */
 
 long _write_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
+#ifdef BOARD_COMPILATION
 	register uint32_t i = 0;
 	register char * buffer = (char*) buf;
 	WRITE_INT(DSO_SFR_BASE_ADDR,7);
@@ -86,11 +87,13 @@ long _write_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
 #ifdef W2000A
 	SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'\0');
 #endif 
+#endif
 	return cnt;
 }
 
 /* do not use scanf or so, if you don't now exactly what you doing! */
 long _read_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
+#ifdef BOARD_COMPILATION
 	volatile int dummy = 0;
 	register uint32_t i = 0;
 	char * buffer = (char*)buf;
@@ -99,7 +102,9 @@ long _read_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
 	for (i = 0; i < cnt; ++i){
 		buffer[i] = ReceiveCharBlock(GENERIC_UART_BASE_ADDR);
 	}
+#endif
 	return cnt;
+
 }
 
 
@@ -140,7 +145,7 @@ int main () {
 	SetAnalog Analog[2];
 	uSample Data[CAPTURESIZE];
 	uint32_t i = 0;
-	uint32_t ch1, ch2;
+	uint32_t ch1, ch2, ch3, ch4;
 	uint32_t Prefetch = 64;
 /*	static FILE mystdout = FDEV_SETUP_STREAM(SendDebugMessage, NULL );
 	stdout = mystdout;*/
@@ -209,15 +214,17 @@ int main () {
 	while(1);*/
 
 #ifdef W2000A
+#ifdef BOARD_COMPILATION
 	InitDisplay(WELEC2022);
 	DrawTest();
 /*	while(1);*/
+#endif 
 #endif
 
 /* This is a basic function test of the SignalCapture part */
-
-/*	printf("DSO Test programm: \nstart testing SetTriggerInput \n");
-	if (SetTriggerInput(2,8,FASTFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3) == true){
+#ifdef SIM_COMPILATION
+	printf("DSO Test programm: \nstart testing SetTriggerInput \n");
+	if (SetTriggerInput(2,8,FASTFS,FIXED_CPU_FREQUENCY,0,0,0,1,2,3) == true){
 		printf(ack);
 	} else {
 		printf(nak);
@@ -228,19 +235,25 @@ int main () {
 	} else {
 		printf(nak);
 	}
+/* The analog settings do not work for now!
+ * If you want to simulate this, you need to change cAnSettStrobeRate 
+ * at least to 1E6 in the target dependent DSOConfig-p.vhd 
+ * to speed up the simulation */
+	/*
 	printf("testing SetAnalogInputRange\n");
 	if (SetAnalogInputRange(2,Analog) == true){
 		printf(ack);
 	} else {
 		printf(nak);
-	}
+	}*/
+
 	printf("testing FastCapture\n"); 
 	ReadData = CaptureData(FASTFS, true, false, 100, Data);
-	SetTriggerInput(1,16,SLOWFS,FIXED_CPU_FREQUENCY,0,2,0,1,2,3);
+	SetTriggerInput(2,8,SLOWFS,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
 	printf("testing NormalCapture\n");
 	SetTrigger(0,0,0,64,3,0,30,1);
-	ReadData = CaptureData(SLOWFS, true, false, CAPTURESIZE, Data);*/
-
+	ReadData = CaptureData(SLOWFS, true, false, CAPTURESIZE, Data);
+#endif
 
 
 /*	ReadData = 3;
@@ -251,19 +264,21 @@ int main () {
 	SendCharBlock(uart,'\n');*/
 
 #ifdef W2000A
+#ifdef BOARD_COMPILATION
 	WaitMs(100);
 	printf("\nStartFrontPanelTest\n");
 	FrontPanelTest(uart);
 	printf("\nSignalTest\n");
 
-	SetTriggerInput(2,8,10000000,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	SetTrigger(3,0,0,Prefetch,3,0,30,1);
+#define PREFETCH_OFFSET 32
+	SetTriggerInput(2,8,10000000,FIXED_CPU_FREQUENCY,0,3,0,1,2,3);
+	SetTrigger(3,0,0,Prefetch,5,2,-5,2);
 	while(1) {
 		ReadData = CaptureData(FASTFS, true, true, 7000, (uSample*)Data);
 		if (ReadData >= (6400+Prefetch)) {
 			for (i = 0; i < 640; ++i){
-				ch1 = ((uint32_t)Data[i+Prefetch].c[0]) + 128;
-				ch1 = ch1 & 0x000000ff;
+				ch1 = Data[i+Prefetch+PREFETCH_OFFSET].c[0];
+				ch1 += 128;
 				/*
 				ch2 = (Data[i+Prefetch] >> 16) + 128;
 				ch2 = ch2 & 0x000000ff;
@@ -271,9 +286,8 @@ int main () {
 				if (ch2 >= 480){
 					ch2 = 480;
 				}*/
-				ch2 = ((uint32_t)Data[i*10+Prefetch].c[0]) + 128;
-				ch2 = ch2 & 0x000000ff;
-				ch2 = ch2 + 240;
+				ch2 = Data[i*10+Prefetch+PREFETCH_OFFSET].c[0];
+				ch2 = ch2 + 240 + 128;
 				
 				DrawPoint(-1,i,ch1);
 				DrawPoint(0xAA,i,ch2);
@@ -284,7 +298,7 @@ int main () {
 			x++;
 		}
 	}	
-		
+#endif	
 #endif
 
 

@@ -37,6 +37,8 @@
 #include "DSO_SFR.h"
 #include "DSO_Screen.h"
 
+#ifdef BOARD_COMPILATION
+
 #define VGA_STATUS_ADDR           (VGA_CONFIG_BASE_ADDR + 0x00)
 #define VGA_VIDEO_LENGTH_ADDR     (VGA_CONFIG_BASE_ADDR + 0x04) 
 #define VGA_FRONT_PORCH_ADDR      (VGA_CONFIG_BASE_ADDR + 0x08)
@@ -219,3 +221,4 @@ void DrawTest(void){
 	DrawVLine(0x55,HLEN-1,0,VLEN-1);
 }
 
+#endif
