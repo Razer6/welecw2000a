@@ -4,7 +4,7 @@
 -- File       : Trigger-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-06-05
+-- Last update: 2009-09-08
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -54,7 +54,7 @@ package pTrigger is
   constant cTriggerAddrLength : natural := 13;
   constant cTriggerAlign      : natural := 3;
   subtype  aTriggerAddr is unsigned(cTriggerAddrLength-1 downto 0);
-  subtype  aTriggerReadAddr is unsigned(cTriggerAddrLength-1 downto 0);
+  -- subtype  aTriggerReadAddr is unsigned(cTriggerAddrLength-1 downto 0);
   constant cDiffTriggers      : natural := 8;
 
   subtype aTrigger1D is std_ulogic_vector(0 to cCoefficients-1);
@@ -84,14 +84,14 @@ package pTrigger is
                           HighValue     : aByte;
                           HighTime      : aWord;
                           SetReadOffset : std_ulogic;
-                          ReadOffset    : aTriggerReadAddr;
+                          ReadOffset    : aTriggerAddr;
                         end record;
   
   type aTriggerOutput is record
-                           ReadOffSet         : aTriggerReadAddr;
+                           ReadOffSet         : aTriggerAddr;
                            Busy               : std_ulogic;
                            Recording          : std_ulogic;  -- for on the fly recording with e.g. PCI (SandboxX)
-                           CurrentTriggerAddr : aTriggerReadAddr;
+                           CurrentTriggerAddr : aTriggerAddr;
                          end record;
   
   type aExtTriggerInput is record
@@ -105,7 +105,7 @@ package pTrigger is
                          end record;
   
   type aTriggerMemIn is record
-                          Addr : aTriggerReadAddr;
+                          Addr : aTriggerAddr;
                           Rd   : std_ulogic;
                         end record;
   

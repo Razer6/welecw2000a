@@ -4,7 +4,7 @@
 -- File       : TopTrigger-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-27
--- Last update: 2009-08-29
+-- Last update: 2009-09-08
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -191,9 +191,10 @@ begin
           
         when Triggering =>
           R.WrEn                                           <= "1111";
-          R.StopAddr(R.StopAddr'high downto cTriggerAlign) <= R.Addr(R.Addr'high downto 0) -
-                                                              iCPUPort.PreambleCounter(iCPUPort.PreambleCounter'high downto cTriggerAlign);
-          R.StopAddr(R.StopAddr'high downto R.StopAddr'high-1) <= unsigned(iCPUPort.StorageMode);
+          R.StopAddr(R.StopAddr'high downto cTriggerAlign) <=
+            R.Addr(R.Addr'high downto 0) -
+            iCPUPort.PreambleCounter(iCPUPort.PreambleCounter'high downto cTriggerAlign);
+          --R.StopAddr(R.StopAddr'high downto R.StopAddr'high-1) <= unsigned(iCPUPort.StorageMode);
 
           if iValid = '1' then
             if TriggerStrobes(iCPUPort.Trigger) /= X"00" then
@@ -303,11 +304,11 @@ begin
       ReadValid(ReadValid'low)                     <= iTriggerMem.Rd;
       ReadValid(ReadValid'low+1 to ReadValid'high) <= ReadValid(ReadValid'low to ReadValid'high-1);
       ReadAlign                                    <= iTriggerMem.Addr(cTriggerAlign-1 downto 0);
-      
+
       for j in 0 to 3 loop
         oTriggerMem.Data((8*(j+1))-1 downto 8*j) <= std_ulogic_vector(AlignData(3-j)(i));
       end loop;
-      i                                            := to_integer(ReadAlign);
+      i := to_integer(ReadAlign);
     end if;
   end process;
 

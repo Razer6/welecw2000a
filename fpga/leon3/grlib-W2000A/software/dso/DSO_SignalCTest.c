@@ -46,6 +46,7 @@
 #include "DSO_SFR.h"
 #include "DSO_Screen.h"
 #include "DSO_Frontpanel.h"
+#include "Filter_I8.h"
 #include "irqmp.h"
 
 
@@ -132,11 +133,6 @@ void ReleaseIRQ(){
 	lr->irqmask = IRQMask;
 }
 
-typedef union {
-	int i;
-	short s[2];
-	char  c[4];
-} uSample;
 
 int main () {
 	uint32_t ReadData = 0;
@@ -144,8 +140,12 @@ int main () {
 	uart_regs * uart2 = (uart_regs *)DEBUG_UART_BASE_ADDR;
 	SetAnalog Analog[2];
 	uSample Data[CAPTURESIZE];
+	uSample Ch1[HLEN+100];
+	uSample Ch2[HLEN+100];
+
 	uint32_t i = 0;
-	uint32_t ch1, ch2, ch3, ch4;
+/*	uint32_t ch1, ch2, ch3, ch4;
+	uint32_t ch1p, ch2p, ch3p,ch4p;*/
 	uint32_t Prefetch = 64;
 /*	static FILE mystdout = FDEV_SETUP_STREAM(SendDebugMessage, NULL );
 	stdout = mystdout;*/
@@ -271,32 +271,39 @@ int main () {
 	printf("\nSignalTest\n");
 
 #define PREFETCH_OFFSET 32
-	SetTriggerInput(2,8,10000000,FIXED_CPU_FREQUENCY,0,3,0,1,2,3);
-	SetTrigger(3,0,0,Prefetch,5,2,-5,2);
+	SetTriggerInput(2,8,500000000,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	SetTrigger(3,0,0,Prefetch,5,0,-5,0);
+	ReadData = 0;
+	Prefetch = HLEN/2;
+	DrawBox(-1,0,0,HLEN-1,VLEN-1);
 	while(1) {
-		ReadData = CaptureData(FASTFS, true, true, 7000, (uSample*)Data);
-		if (ReadData >= (6400+Prefetch)) {
-			for (i = 0; i < 640; ++i){
-				ch1 = Data[i+Prefetch+PREFETCH_OFFSET].c[0];
-				ch1 += 128;
-				/*
-				ch2 = (Data[i+Prefetch] >> 16) + 128;
-				ch2 = ch2 & 0x000000ff;
-				ch2 = ch2 + 240;
-				if (ch2 >= 480){
-					ch2 = 480;
-				}*/
-				ch2 = Data[i*10+Prefetch+PREFETCH_OFFSET].c[0];
-				ch2 = ch2 + 240 + 128;
-				
-				DrawPoint(-1,i,ch1);
-				DrawPoint(0xAA,i,ch2);
-			}
-			WaitMs(100);
-			DrawBox(0,0,0,639,479);
+/*		if (ReadData >= (6400+Prefetch)) {
+			DrawSignal(0,8,128,Ch1, COLOR_R3G3B3(7,7,7));
+			DrawSignal(1,16,128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(7,7,7));
+		}*/
+
+		ReadData = CaptureData(FASTFS, true, true, 32768, (uSample*)Data);
+		memset(Ch1,640*4,0);
+		Ch1[40].i = -127;
+
+		 if (ReadData >= (6400+Prefetch)) {
+		
+			DrawSignal(128, Ch1, COLOR_R3G3B3(7,7,7));
+			DrawSignal(128+(VLEN/2),&Ch2[0], COLOR_R3G3B3(7,7,7));
+			GetCh(1,8, Ch1,&Data[0], HLEN);
+			Interpolate((HLEN/POLYPHASES)+(FILTER_COEFFS*2),Ch2, Ch1,0);
+			/*DrawBox(-1,0,0,HLEN-1,VLEN-1);*/
+			
+			DrawSignal(128, Ch1, COLOR_R3G3B3(0,7,0));
+			DrawSignal(128+(VLEN/2),&Ch2[0], COLOR_R3G3B3(0,0,7));
+
 			DrawBox(x,630,470,639,479);
+			WaitMs(100);
+			
 			x++;
+			
 		}
+		
 	}	
 #endif	
 #endif

@@ -36,12 +36,23 @@
 #define DSO_SCREEN_H
 
 uint32_t * InitDisplay (uint32_t Target);
+
+void DrawPoint(uint16_t Color, uint32_t H, uint32_t V);
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawHLine(char Color, uint32_t V, uint32_t H1, uint32_t H2);
+void DrawHLine(uint16_t Color, uint32_t V, uint32_t H1, uint32_t H2);
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawVLine(char Color, uint32_t H, uint32_t V1, uint32_t V2);
+void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2);
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawBox(char Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2);
+void DrawBox(uint16_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2);
 void DrawTest(void);
 
+/* The display can only draw the three highest bits per color */
+/* Standard color set */
+#define COLOR_R5G5B6(Red,Green,Blue) ((Red << 11) | (Green << 5) | Blue)
+/* 3 bit color set */
+#define COLOR_R3G3B3(Red,Green,Blue) ((Red << 13) | (Green << 8) | (Blue << 2))
 #endif
+
+/* VGA Resulotion */
+#define HLEN 640
+#define VLEN 480

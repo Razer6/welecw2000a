@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-22
+-- Last update: 2009-09-08
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -251,12 +251,12 @@ begin
               Trigger.ForceIdle <= '1';
             end if;
           when cTriggerPrefetchAddr =>
-            Trigger.PreambleCounter <= unsigned(iData(Trigger.PreambleCounter'range));
+            Trigger.PreambleCounter <= unsigned(iData(Trigger.PreambleCounter'high+cTriggerAlign downto cTriggerAlign));
           when cTriggerStorageModeAddr =>
             Trigger.StorageMode <= iData(Trigger.StorageMode'range);
           when cTriggerReadOffSetAddr =>
             Trigger.SetReadOffset <= '1';
-            Trigger.ReadOffset    <= unsigned(iData(Trigger.ReadOffset'high+cTriggerAlign downto cTriggerAlign));
+            Trigger.ReadOffset    <= unsigned(iData(Trigger.ReadOffset'high+2 downto 2));
           when cTriggerTypeAddr =>
             Trigger.Trigger <= to_integer(unsigned(iData(cDiffTriggers-1 downto 0)));
             
@@ -386,11 +386,11 @@ begin
       when cTriggerOnChAddr =>
         oData <= std_ulogic_vector(to_unsigned(Trigger.TriggerChannel, oData'length));
       when cTriggerPrefetchAddr =>
-        oData(Trigger.PreambleCounter'range) <= std_ulogic_vector(Trigger.PreambleCounter);
+        oData(Trigger.PreambleCounter'high+cTriggerAlign downto cTriggerAlign) <= std_ulogic_vector(Trigger.PreambleCounter);
       when cTriggerStorageModeAddr =>
         oData(Trigger.StorageMode'range) <= Trigger.StorageMode;
       when cTriggerReadOffSetAddr =>
-        oData(SFRIn.Trigger.ReadOffSet'high+cTriggerAlign downto cTriggerAlign) <= std_ulogic_vector(SFRIn.Trigger.ReadOffSet);
+        oData(SFRIn.Trigger.ReadOffSet'high+2 downto 2) <= std_ulogic_vector(SFRIn.Trigger.ReadOffSet);
       when cTriggerTypeAddr =>
         oData <= std_ulogic_vector(to_unsigned(Trigger.Trigger, oData'length));
       when cTriggerLowValueAddr =>
@@ -411,7 +411,7 @@ begin
         oData(0) <= SFRIn.Trigger.Busy;
         oData(1) <= SFRIn.Trigger.Recording;
       when cTriggerCurrentAddr =>
-        oData(SFRIn.Trigger.CurrentTriggerAddr'high downto 0) <=
+        oData(SFRIn.Trigger.CurrentTriggerAddr'high+2 downto 2) <=
           std_ulogic_vector(SFRIn.Trigger.CurrentTriggerAddr);
       when cConfigADCEnable =>
         oData(nConfigADC'range) <= nConfigADC;

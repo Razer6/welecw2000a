@@ -89,19 +89,15 @@
 
 
 /* VGA Resulotion */
-#define HLEN 640
-#define VLEN 480
 #define VFRONT 16
 #define HFRONT 16
-#define VSYNC 3
+#define VSYNC 5
 #define HSYNC 10
 #define HBACK 10
 #define VBACK 10
 
 /* VGA Resulotion from grmon 640x480 60 Hz 16 Bit */
 /*
-#define HLEN 640
-#define VLEN 480
 #define VFRONT 0xb
 #define HFRONT 0x10
 #define VSYNC 0x2
@@ -181,37 +177,60 @@ uint32_t * InitDisplay (uint32_t Target){
 
 }
 
-void DrawPoint(char Color, uint32_t H, uint32_t V){
-	FramePointer[V*HLEN+H] = Color << 8;
+void DrawPoint(uint16_t Color, uint32_t H, uint32_t V){
+	FramePointer[V*HLEN+H] = Color;
 }
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawHLine(char Color, uint32_t V, uint32_t H1, uint32_t H2){
+void DrawHLine(uint16_t Color, uint32_t V, uint32_t H1, uint32_t H2){
 	register uint32_t i = 0;
 	uint32_t End = V*HLEN + H2;
-	for (i = V*HLEN+H1; i < End; ++i){
-		FramePointer[i] = Color << 8;
+	for (i = V*HLEN+H1; i <= End; ++i){
+		FramePointer[i] = Color;
 	}
 }
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawVLine(char Color, uint32_t H, uint32_t V1, uint32_t V2){
+void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2){
 	register uint32_t i = 0;
 	uint32_t End = V2*HLEN + H;
-	for (i = V1*HLEN+H; i < End; i+= HLEN){
-		FramePointer[i] = Color << 8;
+	for (i = V1*HLEN+H; i <= End; i+= HLEN){
+		FramePointer[i] = Color;
 	}
 }
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawBox(char Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
+void DrawBox(uint16_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
 	register uint32_t i = V1;
 	for(i = V1; i < V2; ++i){
 		DrawHLine(Color,i,H1,H2);
 	}
 }
 
+void DrawCopyHLine(uint32_t Vsrc, uint32_t Vdst) {
+	register uint32_t * src32 = (uint32_t*)&FramePointer[Vsrc*HLEN];
+	register uint32_t * dst32 = (uint32_t*)&FramePointer[Vdst*HLEN];
+	register uint32_t i = 0;
+	for (i = 0; i < (HLEN/2); ++i){
+		dst32[i] = src32[i];
+	}
+}
+void DrawCopyVLine(uint32_t Hsrc, uint32_t Hdst) {
+	register uint16_t * src = FramePointer[Hsrc];
+	register uint16_t * dst = FramePointer[Hdst];
+	register uint16_t i = 0;
+	for (i = 0; i < (VLEN*HLEN); i+= HLEN){
+		dst[i] = src[i];
+	}
+}
+
+
 void DrawTest(void){
+	uint32_t h,v;
+	uint16_t dark = 0;
+	uint32_t c = 0;
+	uint16_t col = 0;
+	uint32_t pixel = 0;
 	DrawBox(0,0,0,HLEN-1,VLEN-1);
 /*	DrawHLine(-1,0,0,20);*/
 /*	DrawBox(0xAA,270,190,370,290);*/
@@ -219,6 +238,33 @@ void DrawTest(void){
 	DrawHLine(0x55,VLEN-1,0,HLEN-1);
 	DrawVLine(0x55,0,0,VLEN-1); 
 	DrawVLine(0x55,HLEN-1,0,VLEN-1);
+	WaitMs(100);
+	
+	for (h = 0; h < HLEN; ++h) {
+		pixel++;
+		if (pixel == 10){
+			pixel = 0;
+			dark++;
+		}
+		if (dark == 16) {
+			c++;
+			dark = 0;
+		}
+		if (c == 4) {
+			c = 0;
+		}
+		col = 0;
+		switch (c) {
+			case	0: col = (dark << 1); break;
+			case	1: col = (dark << 7); break;
+			case	2: col = (dark << 12); break;
+			case    3: col = (dark << 1) | (dark << 7) | (dark << 12); break;
+		}
+		DrawPoint(col,h,0);
+	}
+	for (v = 1; v < VLEN; ++v) {
+		DrawCopyHLine(v-1,v);
+	}
 }
 
 #endif

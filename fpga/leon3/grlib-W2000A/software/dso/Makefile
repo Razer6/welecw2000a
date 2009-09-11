@@ -9,7 +9,7 @@ TINYFLAGS= -msoft-float -nostdlib  -nostartfiles
 TX= -Tlinkprom -N -L./ -Ttext=0
 
 DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart $(DSOPATH)/DSO_Debugprint $(DSOPATH)/DSO_ADC_Control $(DSOPATH)/DSO_SignalCapture $(DSOPATH)/crc $(DSOPATH)/DSO_Remote $(DSOPATH)/DSO_Remote_Slave
-W2000SRC= $(DSOPATH)/DSO_Screen $(DSOPATH)/DSO_FrontPanel $(DSOSRC) $(DSOPATH)/DSO_SignalCTest
+W2000SRC= $(DSOPATH)/DSO_Screen $(DSOPATH)/DSO_FrontPanel $(DSOSRC) $(DSOPATH)/DSO_SignalCTest $(DSOPATH)/DSO_GUI $(DSOPATH)/Filter_I8 
 SBXSRC=$(DSOPATH)/SandboxXBootloader $(DSOSRC)
 
 WCFILES=$(W2000SRC:%=%.c)

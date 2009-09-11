@@ -94,10 +94,6 @@ bool SetTriggerInput (
 		return false;
 	}
 
-	for(M = AACFilterStart; M < AACFilterStop; ++M){
-	       Stage |= (1 << M);
-	}
-	CaptureR->FilterEnable = Stage;
 
 	TriggerR->TriggerStorageModeAddr = TRIGGERSTORAGEMODE4CH;
 	switch(CaptureR->DeviceAddr){
@@ -124,6 +120,16 @@ bool SetTriggerInput (
 		Stage += 4;
 	} while (Decimaton > 10); 
 	CaptureR->Decimator = M;
+
+
+	Stage = 0;
+	for(M = AACFilterStart; M < AACFilterStop; ++M){
+	       Stage |= (1 << M);  
+	}
+	if ((AACFilterStart == 0) && (AACFilterStop != 0)){
+	      Stage |= (3 << 30);
+	}	      
+	CaptureR->FilterEnable = Stage;
 
 	switch (SampleSize) {
 		case 8:
@@ -417,11 +423,12 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 	StopAddr = (uint32_t *)(TRIGGER_MEM_BASE_ADDR + StopOffset);
 
 	StopAddr++; /* matching 0 to end-1 */
+	if ((int)StopAddr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+		StopAddr =  (int *) TRIGGER_MEM_BASE_ADDR;
+	}
 	Addr = StopAddr;
 	CaptureR->DeviceAddr = (uint32_t) Addr;
-	if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-		Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
-	}
+	
 	/* The folowing lines solve a feature in the hardware trigger, 
 	 * which is overwriting up the first 7 samples at the end!       
 	 * It is caused, because the trigger always writes 8 Samples per Channel at once */

@@ -26,6 +26,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 library grlib;
 use grlib.amba.all;
 use grlib.stdlib.all;
@@ -206,6 +207,9 @@ architecture rtl of leon3mini is
   -- signal CPUIn          : aSharedRamAccess;
   -- signal CPUOut         : aSharedRamReturn;
 
+  signal VGA_PWM : unsigned(0 downto 0);
+  signal Dena : std_ulogic;
+
   signal memi : memory_in_type;
   signal memo : memory_out_type;
 
@@ -353,8 +357,6 @@ begin
 --      inclk0 => ClkADC25(1),
 --      pllena => '1',
 --      c0     => ClkADC250(1),
---      c1     => ClkDesign,
---      c2     => ClkCPU,
 --      locked => open);
 
 --  PLL2 : entity DSO.PLL2
@@ -369,6 +371,8 @@ begin
 --      inclk0 => ClkADC25(3),
 --      pllena => '1',
 --      c0     => ClkADC250(3),
+--         c1     => ClkDesign,
+--      c2     => ClkCPU,
 --      locked => ResetAsync);
 
   CaptureSignals : entity DSO.SignalCapture
@@ -808,17 +812,35 @@ begin
 --    port map (vga_bl, vgao.video_out_b(7 downto 6));
 
 
-  oVD    <= vgao.vsync;
-  oHD    <= vgao.hsync;
-  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
-  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
-  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
-  --oRed   <= std_ulogic_vector(vgao.video_out_r(2 downto 0));
-  --oGreen(5 downto 4) <= std_ulogic_vector(vgao.video_out_g(1 downto 0));
-  --oGreen(3) <= '0';
-  --oBlue  <= std_ulogic_vector(vgao.video_out_b(2 downto 0));
-  oDCLK  <= iclk25_2;
-  oDENA  <= vgao.blank;
+  oVD   <= vgao.vsync;
+  oHD   <= vgao.hsync;
+  oDCLK <= video_clk;
+  oDENA <= Dena;
+  
+  process (video_clk, ResetAsync)
+  begin
+    if ResetAsync = cResetActive then
+      oRed    <= (others => '0');
+      oGreen  <= (others => '0');
+      oBlue   <= (others => '0');
+      Dena   <= '0';
+      VGA_PWM <= (others => '0');
+    elsif rising_edge(video_clk) then
+      if Dena = '1' or vgao.vsync = '0' then
+        VGA_PWM   <= VGA_PWM + 1;
+        end if;
+      oRed(5)   <= vgao.video_out_r(7);
+      oGreen(5) <= vgao.video_out_g(7);
+      oBlue(5)  <= vgao.video_out_b(7);
+      oRed(4)   <= vgao.video_out_r(6);
+      oGreen(4) <= vgao.video_out_g(6);
+      oBlue(4)  <= vgao.video_out_b(6);
+      oRed(3)   <= (vgao.video_out_r(5) and VGA_PWM(0));
+      oGreen(3) <= (vgao.video_out_g(5) and VGA_PWM(0));
+      oBlue(3)  <= (vgao.video_out_b(5) and VGA_PWM(0)); 
+      Dena      <= vgao.blank;
+    end if;
+  end process;
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
     svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,
@@ -828,7 +850,7 @@ begin
       port map(rstn, clkm, video_clk, apbi, apbo(6), vgao, ahbmi,
                ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG), clk_sel);
     --   video_clk <= clk when clk_sel = "00"      else clkm;
-    video_clk <= iclk25_2;              -- when clk_sel = "00" else ClkCPU;
+    video_clk <= iclk25_7;              -- when clk_sel = "00" else ClkCPU;
   end generate;
 
   novga : if CFG_VGA_ENABLE+CFG_SVGA_ENABLE = 0 generate

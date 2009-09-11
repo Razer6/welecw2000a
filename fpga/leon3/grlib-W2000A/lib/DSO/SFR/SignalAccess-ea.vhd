@@ -151,7 +151,7 @@ begin  -- rtl
 --    end if;
 
 
-    MemIn.Addr <= aTriggerReadAddr(ahbsi.haddr(aTriggerReadAddr'length+1 downto 2));
+    MemIn.Addr <= aTriggerAddr(ahbsi.haddr(aTriggerAddr'length+1 downto 2));
     MemIn.Rd   <= '0';
     if ahbsi.hsel(hindex) = '1' then
       case ahbsi.htrans is

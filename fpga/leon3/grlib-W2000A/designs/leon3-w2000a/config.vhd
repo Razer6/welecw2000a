@@ -150,8 +150,8 @@ package config is
 -- PROM/SRAM controller
   constant CFG_SRCTRL : integer := 1;
   constant CFG_SRCTRL_PROMWS : integer := (4);
-  constant CFG_SRCTRL_RAMWS : integer := (2);
-  constant CFG_SRCTRL_IOWS : integer := (2);
+  constant CFG_SRCTRL_RAMWS : integer := (0);
+  constant CFG_SRCTRL_IOWS : integer := (0);
   constant CFG_SRCTRL_RMW : integer := 0;
   constant CFG_SRCTRL_8BIT : integer := 0;
   constant CFG_SRCTRL_SRBANKS : integer := 1;

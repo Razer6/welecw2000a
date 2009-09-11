@@ -4,7 +4,7 @@
 -- File       : AdderTreeFilter-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-07-05
--- Last update: 2009-08-29
+-- Last update: 2009-09-07
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description:

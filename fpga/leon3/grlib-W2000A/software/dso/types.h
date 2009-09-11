@@ -55,4 +55,10 @@ typedef char            int8_t;
 typedef short           int16_t;
 typedef int             int32_t;
 
+typedef union {
+	int32_t i;
+	int16_t s[2];
+	int8_t  c[4];
+} uSample;
+
 #endif
