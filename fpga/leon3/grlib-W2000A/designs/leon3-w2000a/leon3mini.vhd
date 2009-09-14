@@ -850,7 +850,7 @@ begin
       port map(rstn, clkm, video_clk, apbi, apbo(6), vgao, ahbmi,
                ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG), clk_sel);
     --   video_clk <= clk when clk_sel = "00"      else clkm;
-    video_clk <= iclk25_7;              -- when clk_sel = "00" else ClkCPU;
+    video_clk <= iclk25_2;              -- when clk_sel = "00" else ClkCPU;
   end generate;
 
   novga : if CFG_VGA_ENABLE+CFG_SVGA_ENABLE = 0 generate

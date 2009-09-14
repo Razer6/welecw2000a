@@ -85,7 +85,7 @@ bool SetTriggerInput (
 			const uint32_t Ch3)
 {
 	FMode = FastMode(SamplingFrequency,CPUFrequency);
-	uint32_t Decimaton = 0;
+	uint32_t Decimation = 0;
 	uint32_t Stage = 0;
 	uint32_t M = 0;
 
@@ -100,34 +100,61 @@ bool SetTriggerInput (
 		case WELEC2012:
 		case WELEC2014:
 		case WELEC2022:
-		case WELEC2024:	Decimaton = WELECMAXFS/SamplingFrequency; break;
-		case SANDBOXX:	Decimaton = SANDBOXXFS/SamplingFrequency; break;
-		default:	Decimaton = WELECMAXFS/SamplingFrequency; break;
+		case WELEC2024:	Decimation = WELECMAXFS/SamplingFrequency; break;
+		case SANDBOXX:	Decimation = SANDBOXXFS/SamplingFrequency; break;
+		default:	Decimation = WELECMAXFS/SamplingFrequency; break;
 	}
-	Stage = 0;
-	M = 0;
-	do {
-		if (Decimaton >= 10) {
+
+	if (Decimation % 8 == 0){
+		M = 8;
+		Decimation = Decimation/8;
+	} else if (Decimation >= 10) {
+		M = 10;
+		Decimation = Decimation/10;
+	} else {
+		switch(Decimation) {
+			case 1:  M = 1; break;
+			case 2:  M = 2; break;
+			case 4:  M = 4; break;
+			default: M = 8; break;
+		}
+		Decimation = 0;
+	}
+
+	Stage = 4;
+	while (Decimation > 10) {
+		if (Decimation >= 10) {
 			M |= (10<<Stage);
 		} else {
-			switch (Decimaton) {
+			switch (Decimation) {
 				case 2 : M |= (2<<Stage); break;
 				case 4 : M |= (4<<Stage); break;
 				default: M |= (1<<Stage); break;
 			}
 		}
-		Decimaton = Decimaton/10;
+		Decimation = Decimation/10;
 		Stage += 4;
-	} while (Decimaton > 10); 
+	} 
 	CaptureR->Decimator = M;
 
 
 	Stage = 0;
 	for(M = AACFilterStart; M < AACFilterStop; ++M){
-	       Stage |= (1 << M);  
+		Stage |= (1 << M);  
 	}
-	if ((AACFilterStart == 0) && (AACFilterStop != 0)){
-	      Stage |= (3 << 30);
+	if ((AACFilterStart == 0) && (AACFilterStop != 0)){	
+	/* these are the addertree filter settings */	
+		if (SamplingFrequency < 250000000) { 
+			Stage |= (3 << 30); /* bartlett window with 15 coeffs */
+		} else if (SamplingFrequency == 250000000) {
+			Stage |= (2 << 30); /* bartlett window with 7 coeffs */
+		} else if (SamplingFrequency == 500000000) {
+			Stage |= (2 << 30); /* bartlett window with 7 coeffs */
+		} else if (SamplingFrequency == 1000000000) {
+			Stage |= (1 << 30); /* bartlett window with 3 coeffs */
+		} else {
+			Stage |= (3 << 30); /* bartlett window with 15 coeffs */
+		}	
 	}	      
 	CaptureR->FilterEnable = Stage;
 

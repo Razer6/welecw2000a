@@ -246,13 +246,51 @@ int main () {
 	} else {
 		printf(nak);
 	}*/
-
+	
+	/* without filtering */
 	printf("testing FastCapture\n"); 
+	WRITE_INT(DSO_SFR_BASE_ADDR,1);
 	ReadData = CaptureData(FASTFS, true, false, 100, Data);
-	SetTriggerInput(2,8,SLOWFS,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	
+	WRITE_INT(DSO_SFR_BASE_ADDR,2);
+	SetTriggerInput(2,8,FASTFS/2,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	WRITE_INT(DSO_SFR_BASE_ADDR,4);
+	SetTriggerInput(2,8,FASTFS/4,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	WRITE_INT(DSO_SFR_BASE_ADDR,8);
+	SetTriggerInput(2,8,FASTFS/8,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	WRITE_INT(DSO_SFR_BASE_ADDR,10);
+	SetTriggerInput(2,8,FASTFS/10,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	/* with filtering */
+	SetTriggerInput(2,8,FASTFS/1,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	SetTriggerInput(2,8,FASTFS/2,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	SetTriggerInput(2,8,FASTFS/4,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	SetTriggerInput(2,8,FASTFS/8,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+
+	SetTriggerInput(2,8,FASTFS/10,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	ReadData = CaptureData(FASTFS, true, false, CAPTURESIZE, Data);
+
+	
 	printf("testing NormalCapture\n");
+	SetTriggerInput(2,8,SLOWFS,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
 	SetTrigger(0,0,0,64,3,0,30,1);
 	ReadData = CaptureData(SLOWFS, true, false, CAPTURESIZE, Data);
+
+
 #endif
 
 
@@ -271,11 +309,13 @@ int main () {
 	printf("\nSignalTest\n");
 
 #define PREFETCH_OFFSET 32
-	SetTriggerInput(2,8,500000000,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	SetTrigger(3,0,0,Prefetch,5,0,-5,0);
+#define BG_COLOR COLOR_R3G3B3(6,6,6)
+	Prefetch = HLEN;
+	SetTriggerInput(4,8,1000000000,FIXED_CPU_FREQUENCY,0,1,0,1,2,3);
+	SetTrigger(0,0,1,Prefetch,0,3,-3,3);
 	ReadData = 0;
-	Prefetch = HLEN/2;
-	DrawBox(-1,0,0,HLEN-1,VLEN-1);
+	
+	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN);
 	while(1) {
 /*		if (ReadData >= (6400+Prefetch)) {
 			DrawSignal(0,8,128,Ch1, COLOR_R3G3B3(7,7,7));
@@ -288,14 +328,17 @@ int main () {
 
 		 if (ReadData >= (6400+Prefetch)) {
 		
-			DrawSignal(128, Ch1, COLOR_R3G3B3(7,7,7));
-			DrawSignal(128+(VLEN/2),&Ch2[0], COLOR_R3G3B3(7,7,7));
-			GetCh(1,8, Ch1,&Data[0], HLEN);
-			Interpolate((HLEN/POLYPHASES)+(FILTER_COEFFS*2),Ch2, Ch1,0);
-			/*DrawBox(-1,0,0,HLEN-1,VLEN-1);*/
-			
+			DrawSignal(128, Ch1, COLOR_R3G3B3(6,6,6));
+			DrawSignal(128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(7,7,7));
+			DrawHLine(COLOR_R3G3B3(7,7,7), 128, 0, HLEN-1);
+			DrawHLine(COLOR_R3G3B3(7,7,7), 128+(VLEN/2), 0, HLEN-1);
+			GetCh(1,8, Ch1,&Data[0], HLEN+100);
 			DrawSignal(128, Ch1, COLOR_R3G3B3(0,7,0));
-			DrawSignal(128+(VLEN/2),&Ch2[0], COLOR_R3G3B3(0,0,7));
+			
+			Interpolate((HLEN/8)+(FILTER_COEFFS*2),Ch2, Ch1,0);
+			/*DrawBox(-1,0,0,HLEN-1,VLEN-1);*/
+		/*	GetCh(1,8, Ch2,&Data[0], HLEN);*/
+			DrawSignal(128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(0,0,7));
 
 			DrawBox(x,630,470,639,479);
 			WaitMs(100);

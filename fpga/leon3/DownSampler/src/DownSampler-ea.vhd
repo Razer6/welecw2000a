@@ -4,7 +4,7 @@
 -- File       : DownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-16
--- Last update: 2009-08-29
+-- Last update: 2009-09-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -59,10 +59,6 @@ end entity;
 
 architecture RTL of DownSampler is
   
-  signal AliasAvgCounter : integer range 0 to 9;
-  signal AliasAvg        : aFastData;
-  signal AliasAvgValid   : std_ulogic;
-
   signal StageData0     : aValues(0 to cCoefficients-1);
   signal StageValid0    : std_ulogic;
   signal Stage          : aStageInputs;
@@ -131,7 +127,7 @@ begin
       end loop;
 
       -- downsampler output
-      if iDecimation(0) /= M10 then
+      if iDecimation(0) = M1 or iDecimation(0) = M2 or iDecimation(0) = M4 then
         DataOut <= iStageData0;
         oValid  <= iStageValid0;
       else

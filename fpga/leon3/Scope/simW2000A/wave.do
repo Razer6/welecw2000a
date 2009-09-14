@@ -134,7 +134,7 @@ add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/ahbout
 add wave -noupdate -format Literal /testbench/d3/gendso/triggermem/memin
 add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gendso/triggermem/dataout
 add wave -noupdate -format Logic /testbench/d3/gendso/triggermem/hready
-add wave -noupdate -format Analog-Step -radix decimal -scale 4.6566128741615948e-009 /testbench/d3/bd_sram
+add wave -noupdate -format Analog-Step -radix decimal -scale 4.6566099999999997e-009 /testbench/d3/bd_sram
 add wave -noupdate -format Analog-Step -height 100 -offset 2000000000.0 -radix decimal -scale 2.65661e-008 /testbench/d3/gendso/triggermem/itriggermem.data
 add wave -noupdate -format Analog-Step -offset 100.0 -radix decimal -scale 0.17999999999999999 /testbench/d3/gendso/triggermem/simul/drawdata0
 add wave -noupdate -format Analog-Step -height 40 -offset 100.0 -radix decimal -scale 0.17999999999999999 /testbench/d3/gendso/triggermem/simul/drawdata1
@@ -171,7 +171,8 @@ add wave -noupdate -divider Trigger
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclkcpu
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iresetasync
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/idata
+add wave -noupdate -format Analog-Step -height 40 -offset 128.0 -radix decimal -scale 0.14843137254901961 /testbench/d3/capturesignals/trigger/idata(0)(0)
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/idata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/ivalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iexttrigger
 add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/itriggermem
@@ -258,7 +259,7 @@ add wave -noupdate -format Literal /testbench/ch1_regh/oq
 add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {421477113 ps} 0} {{Cursor 2} {223271000 ps} 0} {{Cursor 3} {72267900 ps} 0} {{Cursor 4} {19811321 ps} 0}
+WaveRestoreCursors {{Cursor 1} {448940232 ps} 0} {{Cursor 2} {262698113 ps} 0} {{Cursor 3} {228215000 ps} 0} {{Cursor 4} {19811321 ps} 0}
 configure wave -namecolwidth 375
 configure wave -valuecolwidth 180
 configure wave -justifyvalue left
@@ -272,4 +273,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {389125035 ps} {450253739 ps}
+WaveRestoreZoom {0 ps} {525 us}

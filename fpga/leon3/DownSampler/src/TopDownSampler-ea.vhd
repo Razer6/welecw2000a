@@ -4,7 +4,7 @@
 -- File       : TopDownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-17
--- Last update: 2009-08-29
+-- Last update: 2009-09-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -61,7 +61,7 @@ architecture RTL of TopDownSampler is
   type   aDecimatorBits is array (0 to cDecimationStages-1) of std_ulogic_vector(3 downto 0);
   signal DecimatorBits      : aDecimatorBits;
   signal Decimator          : aM(0 to cDecimationStages-1);
-  signal Stage0AvgDecimator : aDecimator;
+--  signal Stage0AvgDecimator : aDecimator;
   signal StageData0         : aAllData;
   signal LongStageData0     : aLongAllData;
   signal StageValid0        : std_ulogic_vector(0 to cChannels-1);
@@ -73,7 +73,7 @@ architecture RTL of TopDownSampler is
   type   aFirData is array (natural range <>) of aLongValues(0 to cChannels-1);
   signal FirDataIn          : aFirData(1 to cDecimationStages-2);
   signal FirDataOut         : aFirData(0 to cDecimationStages-1);
-  signal AVGValid           : std_ulogic_vector(0 to cChannels-1);
+  signal AdderTreeValid           : std_ulogic_vector(0 to cChannels-1);
   signal FirValid           : std_ulogic_vector(0 to cDecimationStages-1);
   signal DataOut            : aLongAllData;
   
@@ -121,7 +121,7 @@ begin
           iFilterDepth => iCPU.FilterDepth,
           iData        => iADC(i),            
           oData        => LongStageData0(i),  
-          oValid       => AvgValid(i),
+          oValid       => AdderTreeValid(i),
           oStageData   => FirDataOut(0)(i),
           oStageValid  => StageValid0(i));
 
@@ -203,30 +203,19 @@ begin
   begin
     if iResetAsync = cResetActive then
       Decimator          <= (others => M1);
-      Stage0AvgDecimator <= M10;
+ --     Stage0AvgDecimator <= M10;
     elsif rising_edge(iClk) then
       Decimator          <= (others => M1);
-      Stage0AvgDecimator <= M10;
+ --     Stage0AvgDecimator <= M10;
       for i in 0 to cDecimationStages-1 loop
         case DecimatorBits(i) is
           when X"1"   => Decimator(i) <= M1;
           when X"2"   => Decimator(i) <= M2;
           when X"4"   => Decimator(i) <= M4;
           when X"A"   => Decimator(i) <= M10;
-          when others => Decimator(i) <= M1;
+          when others => Decimator(i) <= M10;
         end case;
       end loop;
-      if iCPU.EnableFilter(0) = '0' then
-        Stage0AvgDecimator <= M1;
-      else
-        case DecimatorBits(0) is
-          when X"1"   => Stage0AvgDecimator <= M1;
-          when X"2"   => Stage0AvgDecimator <= M2;
-          when X"4"   => Stage0AvgDecimator <= M4;
-          when X"A"   => Stage0AvgDecimator <= M10;
-          when others => Stage0AvgDecimator <= M10;
-        end case;
-      end if;
     end if;
   end process;
 
@@ -238,7 +227,7 @@ begin
         iEnableFilter => iCPU.EnableFilter,
         iDecimation   => Decimator,
         iStageData0   => LongStageData0(i),
-        iStageValid0  => AvgValid(i),
+        iStageValid0  => AdderTreeValid(i),
         iStage        => StageOutput(i)(StageOutput(0)'range),
         oStage        => StageInput(i)(StageInput(0)'range),
         oData         => DataOut(i),

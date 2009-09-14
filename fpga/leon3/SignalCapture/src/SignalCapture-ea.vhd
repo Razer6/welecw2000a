@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-27
+-- Last update: 2009-09-12
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -100,14 +100,16 @@ begin
     port map (
 --    iClkDesign  : in std_ulogic;
 --      iResetAsync => iResetAsync,
-      iClkADC => iClkADC,
+      iClkADC      => iClkADC,
 --    iLocked : in std_ulogic;
-      iADC    => iADC,
-      oLocked => ResetAsync,
-      oClk125 => ClkDesign,
-      oClk625 => ClkCPU,
-      oClkADC => oClkADC,
-      oData   => ADCout);
+      iADC         => iADC,
+      iDecimator   => DownSampler.Stages(3 downto 0),
+      iFilterDepth => DownSampler.FilterDepth,
+      oLocked      => ResetAsync,
+      oClk125      => ClkDesign,
+      oClk625      => ClkCPU,
+      oClkADC      => oClkADC,
+      oData        => ADCout);
 
   process (ResetAsync, ClkDesign)
   begin
@@ -129,10 +131,11 @@ begin
   process (iDownSampler)
   begin
     DownSampler                 <= iDownSampler;
-    DownSampler.EnableFilter(1) <= '0';
-    DownSampler.EnableFilter(2) <= '0';
-    DownSampler.EnableFilter(3) <= '0';
+--    DownSampler.EnableFilter(1) <= '0';
+--      DownSampler.EnableFilter(2) <= '0';
+--      DownSampler.EnableFilter(3) <= '0';
     DownSampler.EnableFilter(4) <= '0';
+--    DownSampler.EnableFilter(5) <= '0';
   end process;
 
   Decimator : entity DSO.TopDownSampler

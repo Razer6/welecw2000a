@@ -9,6 +9,7 @@
 #define SIGNAL_HSTART 0
 #define SIGNAL_HSTOP  HLEN
 
+#ifdef BOARD_COMPILATION
 void DrawSignal(
 		uint32_t Voffset, 
 		uSample * Data, 
@@ -102,3 +103,4 @@ void GetCh(
 			break;
 	}
 }
+#endif

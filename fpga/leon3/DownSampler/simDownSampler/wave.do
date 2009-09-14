@@ -25,7 +25,6 @@ add wave -noupdate -format Literal -radix decimal /testbench/dut/iadc
 add wave -noupdate -format Literal -radix decimal -expand /testbench/dut/icpu
 add wave -noupdate -format Literal -radix decimal /testbench/dut/odata
 add wave -noupdate -format Logic /testbench/dut/ovalid
-add wave -noupdate -format Literal /testbench/dut/stage0avgdecimator
 add wave -noupdate -format Literal -expand /testbench/dut/decimator
 add wave -noupdate -format Literal -radix decimal /testbench/dut/stagedata0
 add wave -noupdate -format Literal /testbench/dut/stagevalid0
@@ -35,7 +34,6 @@ add wave -noupdate -format Literal /testbench/dut/validout
 add wave -noupdate -format Literal -radix decimal /testbench/dut/fastfirdata
 add wave -noupdate -format Literal -radix decimal /testbench/dut/firdatain
 add wave -noupdate -format Literal -radix decimal /testbench/dut/firdataout
-add wave -noupdate -format Literal /testbench/dut/avgvalid
 add wave -noupdate -format Literal /testbench/dut/firvalid
 add wave -noupdate -divider DownSampler
 add wave -noupdate -format Logic /testbench/dut/control__0/c/iclk
@@ -47,12 +45,8 @@ add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/is
 add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/ostage
 add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/odata
 add wave -noupdate -format Logic /testbench/dut/control__0/c/ovalid
-add wave -noupdate -format Literal /testbench/dut/control__0/c/aliasavgcounter
-add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/aliasavg
-add wave -noupdate -format Logic /testbench/dut/control__0/c/aliasavgvalid
 add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/stagedata0
 add wave -noupdate -format Logic /testbench/dut/control__0/c/stagevalid0
-add wave -noupdate -format Literal /testbench/dut/stage0avgdecimator
 add wave -noupdate -format Literal /testbench/dut/control__0/c/idecimation
 add wave -noupdate -format Literal -radix decimal -expand /testbench/dut/control__0/c/stage
 add wave -noupdate -format Literal -radix decimal /testbench/dut/control__0/c/aliasing
@@ -73,7 +67,7 @@ add wave -noupdate -format Literal -radix decimal /testbench/dut/slow__2/stage/r
 add wave -noupdate -divider {New Divider}
 add wave -noupdate -divider -height 40 {New Divider}
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {19897712000 ns} 0} {{Cursor 2} {4439997 ns} 0} {{Cursor 3} {12991939256 ns} 0}
+WaveRestoreCursors {{Cursor 1} {19897712000 ns} 0} {{Cursor 2} {1600641620 ns} 0} {{Cursor 3} {12991939256 ns} 0}
 configure wave -namecolwidth 224
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -87,4 +81,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {11923035261 ns} {25546273934 ns}
+WaveRestoreZoom {0 ns} {13623238673 ns}

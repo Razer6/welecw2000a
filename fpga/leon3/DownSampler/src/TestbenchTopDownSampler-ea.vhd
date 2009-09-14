@@ -4,7 +4,7 @@
 -- File       : TestbenchTopDownSampler-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-17
--- Last update: 2009-07-06
+-- Last update: 2009-09-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -88,6 +88,7 @@ architecture bhv of Testbench is
         Ret((Stage+1)*4-1 downto Stage*4) := X"A";
       else
         case Decimation is
+          when 1                        =>  Ret((Stage+1)*4-1 downto Stage*4) := X"1";
           when 2 => Ret((Stage+1)*4-1 downto Stage*4) := X"2";
           when 4 => Ret((Stage+1)*4-1 downto Stage*4) := X"4";
           when 8 =>

@@ -4,7 +4,7 @@
 -- File       : PLL1.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-24
--- Last update: 2009-08-22
+-- Last update: 2009-09-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -70,7 +70,12 @@ begin
     end loop;
   end process;
 
-  c0 <= Clk0;
-  c1 <= Clk1;
+  output : process (pllena, Clk0, Clk1)
+  begin
+    if pllena = '1' then
+      c0 <= Clk0;
+      c1 <= Clk1;
+    end if;
+  end process;
   
 end architecture;

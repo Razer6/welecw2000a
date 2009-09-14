@@ -4,7 +4,7 @@
 -- File       : ADC-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-26
+-- Last update: 2009-09-11
 -- Platform   : W2000A
 -------------------------------------------------------------------------------
 -- Description: 
@@ -48,14 +48,16 @@ entity ADC is
   port (
 --    iClkDesign  : in std_ulogic;
 --    iResetAsync : in  std_ulogic;
-    iClkADC : in  std_ulogic_vector (0 to cADCsperChannel-1);  -- for W2000  25 MHz
+    iClkADC      : in  std_ulogic_vector (0 to cADCsperChannel-1);  -- for W2000  25 MHz
 --    iLocked : in std_ulogic;
-    iADC    : in  aADCIn;
-    oLocked : out std_ulogic;
-    oClk125 : out std_ulogic;
-    oClk625 : out std_ulogic;
-    oClkADC : out std_ulogic_vector (0 to cADCsperChannel-1);  -- for W2000 250 MHz
-    oData   : out aADCout);
+    iADC         : in  aADCIn;
+    iDecimator   : in  std_ulogic_vector(3 downto 0);
+    iFilterDepth : in  aFilterDepth;
+    oLocked      : out std_ulogic;
+    oClk125      : out std_ulogic;
+    oClk625      : out std_ulogic;
+    oClkADC      : out std_ulogic_vector (0 to cADCsperChannel-1);  -- for W2000 250 MHz
+    oData        : out aADCout);
 end entity;
 
 architecture RTL of ADC is
@@ -84,6 +86,8 @@ architecture RTL of ADC is
   signal   P2ptoP0p      : aADCInPhase;
   signal   P2ntoP0n      : aADCInPhase;
   signal   Delay         : aADCout;
+
+  signal pllena : std_ulogic_vector(0 to 2);
 begin
 
   -- Locked(Locked'high) <= Locked(0) and Locked(1) and Locked(2) and Locked(3);
@@ -95,10 +99,32 @@ begin
   -- areset <= iResetAsync when cResetActive = '1' else
   --           not iResetAsync;
 
+  -- turns all clock domains off if they are unused!
+  -- This does reduce the electromagnetic emmision
+  PLLControl : process (Clk125(3), Locked(3))
+  begin
+    if Locked(3) = '0' then
+      pllena <= (others => '0');
+    elsif rising_edge(Clk125(3)) then
+      if iFilterDepth = 0 then
+        case iDecimator is
+          when X"1" =>
+            pllena <= "111";
+          when X"2" =>
+            pllena <= "010";
+          when others =>
+            pllena <= "000";
+        end case;
+      else
+        pllena <= "111";
+      end if;
+    end if;
+  end process;
+
   PLL0 : entity DSO.PLL0
     port map (
 --      areset => areset,
-      pllena => '1',
+      pllena => pllena(0),
       inclk0 => iClkADC(0),
       c0     => ClkADC250(0),
       c1     => Clk125(0),
@@ -108,7 +134,7 @@ begin
     port map (
       --    areset => areset,
       inclk0 => iClkADC(1),
-      pllena => '1',
+      pllena => pllena(1),
       c0     => ClkADC250(1),
       c1     => Clk125(1),
       locked => Locked(1));
@@ -117,7 +143,7 @@ begin
     port map (
       --    areset => areset,
       inclk0 => iClkADC(2),
-      pllena => '1',
+      pllena => pllena(2),
       c0     => ClkADC250(2),
       c1     => Clk125(2),
       locked => Locked(2));

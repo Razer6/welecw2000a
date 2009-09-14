@@ -4,7 +4,7 @@
 -- File       : AdderTreeFilter-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-07-05
--- Last update: 2009-09-07
+-- Last update: 2009-09-11
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description:
@@ -166,15 +166,17 @@ begin
       oValid      <= '0';
       oStageValid <= '0';
       Counter     <= (Counter -1) mod 8;
-      DataOut     <= Filtered;
+  --    DataOut     <= Filtered;
       oStageData  <= Filtered(7);
 
       case iDecimator is
         when X"1" =>
+          DataOut <= Filtered;
           oValid  <= '1';
+          Counter <= 0;
         when X"2" =>
           for i in 0 to cCoefficients/2-1 loop
-            DataOut(i+cCoefficients/2) <= Filtered(2*i);
+            DataOut(i+cCoefficients/2) <= Filtered(2*i+1);  -- +1 CLK250(0,2) are off, when Filterdepth = 0
             DataOut(i)                 <= DataOut(i+cCoefficients/2);
           end loop;
           if Counter = 0 then
@@ -183,7 +185,7 @@ begin
           end if;
         when X"4" =>                    -- non interleaved mode for W2000A :-)
           for i in 0 to cCoefficients/4-1 loop
-            DataOut(i+6) <= Filtered(4*i);
+            DataOut(i+6) <= Filtered(4*i+3);-- +3 CLK250(0,1,2) are off, when Filterdepth = 0
           end loop;
           DataOut(0 to 5) <= DataOut(2 to 7);
           if Counter = 0 then
@@ -192,7 +194,7 @@ begin
           end if;
         when X"8" =>                    -- non interleaved mode for W2000A :-)
           Counter     <= 0;
-          oStageData  <= Filtered(7);
+          oStageData  <= Filtered(7);   -- +7 CLK250(0,1,2) are off, when Filterdepth = 0
           oStageValid <= '1';
         when X"A" =>                    --10
           oStageValid <= '1';
