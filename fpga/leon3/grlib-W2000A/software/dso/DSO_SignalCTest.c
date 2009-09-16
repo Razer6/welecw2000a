@@ -44,7 +44,7 @@
 #include "DSO_Remote.h"
 #include "DSO_SFR.h"
 #include "DSO_Screen.h"
-#include "DSO_Frontpanel.h"
+#include "DSO_FrontPanel.h"
 #include "Filter_I8.h"
 #include "irqmp.h"
 #include "DSO_Misc.h"
