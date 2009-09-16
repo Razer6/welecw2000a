@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : PCUart.c
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 

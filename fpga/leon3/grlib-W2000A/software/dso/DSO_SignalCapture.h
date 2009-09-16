@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_SignalCapture.h
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 
@@ -36,8 +36,6 @@
 #define DSO_SIGNALCAPTURE_H
 
 #include "DSO_Main.h"
-#include "DSO_Debugprint.h"
-
 
 enum eSrc2 {
 	normal,
@@ -56,23 +54,24 @@ typedef struct {
 	Src2 Mode;
 } SetAnalog;
 
-bool InitSignalCapture(Debugprint * Init, Target T, Language L);
+bool InitSignalCapture();
 
 uint32_t FastMode(	
-			const uint32_t SamplingFrequncy, 
-			const uint32_t CPUFrequency);
+		const uint32_t SamplingFrequncy, 
+		const uint32_t CPUFrequency);
 uint32_t IsFastMode();
 
-bool SetTriggerInput (	const uint32_t noChannels, 
-			const uint32_t SampleSize, 
-			const uint32_t SamplingFrequency,
-			const uint32_t CPUFrequency,
-			const uint32_t AACFilterStart,
-			const uint32_t AACFilterStop,
-			const uint32_t Ch0, 
-			const uint32_t Ch1, 
-			const uint32_t Ch2, 
-			const uint32_t Ch3);
+bool SetTriggerInput (	
+		const uint32_t noChannels, 
+		const uint32_t SampleSize, 
+		const uint32_t SamplingFrequency,
+		const uint32_t CPUFrequency,
+		const uint32_t AACFilterStart,
+		const uint32_t AACFilterStop,
+		const uint32_t Ch0, 
+		const uint32_t Ch1, 
+		const uint32_t Ch2, 
+		const uint32_t Ch3);
 
 
 
@@ -90,16 +89,16 @@ bool SetTrigger(
 
 
 bool SetAnalogInputRange(
-			const uint32_t NoCh, 
-			const SetAnalog * Settings);
+		const uint32_t NoCh, 
+		const SetAnalog * Settings);
 
 /* returns read DWORDS*/
 uint32_t CaptureData(
-			const uint32_t WaitTime, /* just a integer */
-			bool Start,
-			bool ForceFastMode,
-			uint32_t CaptureSize,    /* size in DWORDs*/
-			uint32_t * RawData); 
+		const uint32_t WaitTime, /* just a integer */
+		bool Start,
+		bool ForceFastMode,
+		uint32_t CaptureSize,    /* size in DWORDs*/
+		uint32_t * RawData); 
 
 
 

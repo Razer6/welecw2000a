@@ -37,6 +37,7 @@ include $(GRLIB)/bin/Makefile
 include $(GRLIB)/software/leon3/Makefile
 
 DSO_TARGET=SBX
+DSO_BOARD=BOARD_COMPILATION
 include $(GRLIB)/software/dso/Makefile
 
 

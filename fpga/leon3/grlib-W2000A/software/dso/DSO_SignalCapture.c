@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_SignalCapture.c
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 
@@ -39,12 +39,10 @@
 #include "grcommon.h"
 #include "DSO_SFR.h"
 #include "DSO_SignalCapture.h"
-#include "DSO_Debugprint.h"
 #include "DSO_Misc.h"
 #include "DSO_ADC_Control.h"
 #include "Leon3Uart.h"
 
-Debugprint Print;
 volatile CaptureRegs    * volatile CaptureR;
 volatile TriggerRegs    * volatile TriggerR;
 volatile AnalogSettings * volatile AnalogR;
@@ -53,36 +51,35 @@ volatile uart_regs      * volatile adc_uart;
 static uint32_t FMode;
 
 uint32_t FastMode(	
-			const uint32_t SamplingFrequency, 
-			const uint32_t CPUFrequency){
+		const uint32_t SamplingFrequency, 
+		const uint32_t CPUFrequency){
 	return SamplingFrequency > (CPUFrequency/FASTMODEFACTOR);
 }
 uint32_t IsFastMode() {
 	return FMode;
 }
 
-bool InitSignalCapture(Debugprint * Init, Target T, Language L){
+bool InitSignalCapture(){
 	CaptureR = (CaptureRegs *)   DEVICEADDR;
 	TriggerR = (TriggerRegs *)   TRIGGERONCHADDR;
 	AnalogR  = (AnalogSettings *)ANALOGSETTINGSBANK7;
 	adc_uart = (uart_regs *)     UART_CHCFG_BASE_ADDR;    
 /*	UartInit(FIXED_CPU_FREQUENCY, DSO_CHCFG_BAUDRATE, 
 			ENABLE_RX | ENABLE_TX, adc_uart);*/
-	Init = &Print;
-	return InitDebugprint(&Print,T,L);
+	return true;
 }
 
 bool SetTriggerInput (	
-			const uint32_t noChannels, 
-			const uint32_t SampleSize, 
-			const uint32_t SamplingFrequency,
-			const uint32_t CPUFrequency,
-			const uint32_t AACFilterStart,
-			const uint32_t AACFilterStop,
-			const uint32_t Ch0, 
-			const uint32_t Ch1, 
-			const uint32_t Ch2, 
-			const uint32_t Ch3)
+		const uint32_t noChannels, 
+		const uint32_t SampleSize, 
+		const uint32_t SamplingFrequency,
+		const uint32_t CPUFrequency,
+		const uint32_t AACFilterStart,
+		const uint32_t AACFilterStop,
+		const uint32_t Ch0, 
+		const uint32_t Ch1, 
+		const uint32_t Ch2, 
+		const uint32_t Ch3)
 {
 	FMode = FastMode(SamplingFrequency,CPUFrequency);
 	uint32_t Decimation = 0;
@@ -268,8 +265,9 @@ bool SetTrigger(
 }
 
 
-bool SetAnalogInputRange(const uint32_t NoCh, 
-			 const SetAnalog * Settings) 
+bool SetAnalogInputRange(
+		const uint32_t NoCh, 
+		const SetAnalog * Settings) 
 {
 	uint32_t i = 0;
 	uint32_t temp = 0;
@@ -425,7 +423,8 @@ bool SetAnalogInputRange(const uint32_t NoCh,
 	return true;
 }
 
-int FastCapture(const uint32_t WaitTime, /* just a integer */
+int FastCapture(
+		const uint32_t WaitTime, /* just a integer */
 		uint32_t CaptureSize,    /* size in DWORDs*/
 		uint32_t * RawData) 
 {
@@ -446,12 +445,12 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 			(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
 		return 0;
 	}
-	StopOffset = loadmem((unsigned int)&TriggerR->TriggerReadOffSetAddr);
+	StopOffset = loadmem((uint32_t)&TriggerR->TriggerReadOffSetAddr);
 	StopAddr = (uint32_t *)(TRIGGER_MEM_BASE_ADDR + StopOffset);
 
 	StopAddr++; /* matching 0 to end-1 */
-	if ((int)StopAddr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-		StopAddr =  (int *) TRIGGER_MEM_BASE_ADDR;
+	if ((uint32_t)StopAddr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+		StopAddr =  (uint32_t *) TRIGGER_MEM_BASE_ADDR;
 	}
 	Addr = StopAddr;
 	CaptureR->DeviceAddr = (uint32_t) Addr;
@@ -461,7 +460,7 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 	 * It is caused, because the trigger always writes 8 Samples per Channel at once */
 	StopOffset = (StopOffset +8) & (TRIGGER_MEM_SIZE-1); /* mod 2^n */
 	while(1){
-		temp = loadmem((unsigned int)&TriggerR->TriggerCurrentAddr); 
+		temp = loadmem((uint32_t)&TriggerR->TriggerCurrentAddr); 
 		if ((StopOffset < temp) || ((StopOffset-temp) > 8)){
 			break;
 		}
@@ -474,8 +473,8 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 	for (i = 0; i < StartSize; ++i){
 		StartData[i] = Addr[0];
 		Addr++;
-		if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
+		if ((uint32_t)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+			Addr =  (uint32_t *) TRIGGER_MEM_BASE_ADDR;
 		}
 	}
 	i = 0;
@@ -490,15 +489,15 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 		RawData[i] = Addr[0];
 		i++;
 		Addr++;	
-		if ((int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
-			Addr =  (int *) TRIGGER_MEM_BASE_ADDR;
+		if ((uint32_t)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+			Addr =  (uint32_t *) TRIGGER_MEM_BASE_ADDR;
 			CaptureR->DeviceAddr = i;
 		}
 	}
 	/* The Trigger has a feature that the last 8 DWORDS! overwrites up 
 	 * to the fist 8 DWORDS!*/
 	for (i = 0; i < StartSize; ++i){
-		temp = loadmem((unsigned int)&TriggerR->TriggerStorageModeAddr);
+		temp = loadmem((uint32_t)&TriggerR->TriggerStorageModeAddr);
 	       switch (temp) {
 			case TRIGGERSTORAGEMODE4CH:
 				RawData[i]   = StartData[i];
@@ -519,11 +518,12 @@ int FastCapture(const uint32_t WaitTime, /* just a integer */
 }
 
 /* returns read DWORDS*/
-uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
-			 bool Start,
-			 bool ForceFastMode,
-			 uint32_t CaptureSize,    /* size in DWORDs*/
-			 uint32_t * RawData) 
+uint32_t CaptureData(
+		const uint32_t WaitTime, /* just a integer */
+		bool Start,
+		bool ForceFastMode,
+		uint32_t CaptureSize,    /* size in DWORDs*/
+		uint32_t * RawData) 
 {
 	/* TODO Idle wait*/
 /*	const int FMode = FastMode(SamplingFrequency,CPUFrequency);*/
@@ -547,21 +547,21 @@ uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
 					(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
 			return 0;
 		}
-		Addr = (int *)TRIGGER_MEM_BASE_ADDR + StopAddr;
+		Addr = (uint32_t *)TRIGGER_MEM_BASE_ADDR + StopAddr;
 	}
 	i = 0;
 	StopAddr = (TriggerR->TriggerReadOffSetAddr) +1;
 	
 	while (1) {
-		temp = loadmem((int)&TriggerR->TriggerStatusRegister);
+		temp = loadmem((uint32_t)&TriggerR->TriggerStatusRegister);
 		if (((1 << TRIGGERRECORDINGBIT) & temp) == 0) {
 			return i;
 		}
 		if ((i == CaptureSize)){
 			return i;
 		}
-		Frame = loadmem((int)&TriggerR->TriggerCurrentAddr); /* stoppoint of readable DWORDS */
-		Frame = Frame - (unsigned int)Addr;
+		Frame = loadmem((uint32_t)&TriggerR->TriggerCurrentAddr); /* stoppoint of readable DWORDS */
+		Frame = Frame - (uint32_t)Addr;
         	Frame &= (TRIGGER_MEM_SIZE-1);                       /* number of readable DWORDS */
 		Frame = i + Frame; 
 		if (Frame > CaptureSize) {
@@ -573,12 +573,12 @@ uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
 			RawData[i] = *Addr;
 			i++;
 			Addr++;
-			if ((unsigned int)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
+			if ((uint32_t)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE)) {
 				Addr =  (uint32_t *) TRIGGER_MEM_BASE_ADDR;
 				CaptureR->DeviceAddr = i;
 			}
 		}
-		TriggerR->TriggerCurrentAddr = (unsigned int)Addr-1; 
+		TriggerR->TriggerCurrentAddr = (uint32_t)Addr-1; 
 		/* & (TRIGGER_MEM_SIZE-1); hw SFR mod 2^bits */
 	/*	puts("."); */
 

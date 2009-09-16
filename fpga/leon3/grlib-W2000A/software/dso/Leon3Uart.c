@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : Leon3Uart.c
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 
@@ -38,6 +38,7 @@
 #include "Leon3Uart.h"
 #include "DSO_Misc.h"
 #include "string.h"
+#include "stdio.h"
 
 /*
 31: 26 Receiver FIFO count (RCNT) - shows the number of data frames in the receiver FIFO.

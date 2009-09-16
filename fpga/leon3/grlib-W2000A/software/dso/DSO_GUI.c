@@ -1,8 +1,39 @@
+/*****************************************************************************
+* File           : DSO_GUI.c
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 07.09.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
 
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
 
 
 #include "types.h"
-#include "DSO_MAIN.h"
+#include "DSO_Main.h"
 #include "DSO_Screen.h"
 #include "Filter_I8.h"
 
@@ -63,9 +94,8 @@ void Interpolate (
 
 	register uint32_t i = 0;
 	register uint32_t j = 0;
-	register uint32_t polyphase_idx = 0;;
 	register uint32_t dst_idx = 0;
-	register int16_t * fir;
+	register int32_t * fir;
 	
 	for (i = 0; i < srcSamples; ++i){
 		for (j = 0; j < POLYPHASES; ++j){

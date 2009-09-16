@@ -2,10 +2,10 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_Remote_Master.c
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
-* Description	 : 
+* Description	 : out of date 
 *****************************************************************************
 
 *  Copyright (c) 2009, Alexander Lindert
@@ -43,16 +43,16 @@
 
 
 bool SendTriggerInput (	uart_regs * uart,
-			const unsigned int noChannels, 
-			const unsigned int SampleSize, 
-			const unsigned int SamplingFrequency,
-			const unsigned int AACFilterStart,
-			const unsigned int AACFilterStop,
-			const unsigned int Ch0, 
-			const unsigned int Ch1, 
-			const unsigned int Ch2, 
-			const unsigned int Ch3){
-	unsigned int data[] = {
+			const uint32_t noChannels, 
+			const uint32_t SampleSize, 
+			const uint32_t SamplingFrequency,
+			const uint32_t AACFilterStart,
+			const uint32_t AACFilterStop,
+			const uint32_t Ch0, 
+			const uint32_t Ch1, 
+			const uint32_t Ch2, 
+			const uint32_t Ch3){
+	uint32_t data[] = {
 		SET_TRIGGER_INPUT, noChannels, SampleSize, SamplingFrequency, 
 		AACFilterStart,AACFilterStop, Ch0, Ch1, Ch2, Ch3};
 	SendHeader(uart);
@@ -73,14 +73,14 @@ bool SendTriggerInput (	uart_regs * uart,
 }
 
 bool SendTrigger(uart_regs * uart,
-		const unsigned int Trigger, 
-		const unsigned int TriggerChannel,
-		const unsigned int TriggerPrefetchSamples,
+		const uint32_t Trigger, 
+		const uint32_t TriggerChannel,
+		const uint32_t TriggerPrefetchSamples,
 		const int  LowReference,
-		const unsigned int  LowReferenceTime,
+		const uint32_t  LowReferenceTime,
 		const int HighReference,
-		const unsigned int HighReferenceTime){
-	unsigned int data[] = {
+		const uint32_t HighReferenceTime){
+	uint32_t data[] = {
 		SET_TRIGGER, Trigger, TriggerChannel, TriggerPrefetchSamples,
 		LowReference, LowReferenceTime, HighReference, HighReferenceTime};
 	crc crcSend = 0;
@@ -101,15 +101,15 @@ bool SendTrigger(uart_regs * uart,
 }
 
 typedef struct {
-	unsigned int cmd;
-	unsigned int NoCh;
+	uint32_t cmd;
+	uint32_t NoCh;
 	SetAnalog data[4];
 } xAnalog;
 
 bool SendAnalogInput(	uart_regs * uart,
-			const unsigned int NoCh, 
+			const uint32_t NoCh, 
 			const SetAnalog * Settings){
-	unsigned int i = 0;
+	uint32_t i = 0;
 	xAnalog crcA;
 	SendHeader(uart);
 	SendInt(uart,SET_ANALOG_INPUT);
@@ -125,18 +125,18 @@ bool SendAnalogInput(	uart_regs * uart,
 	crcInit();
 	crcA.cmd = SET_ANALOG_INPUT;
 	crcA.NoCh = NoCh;
-	ChangeEndian((unsigned int *)&crcA,sizeof(crcA));
+	ChangeEndian((uint32_t *)&crcA,sizeof(crcA));
 	SendInt(uart,crcFast((unsigned char*)&crcA,sizeof(int)+(NoCh*sizeof(SetAnalog))));
 	return ReceiveAll(uart,0,0,0);
 }
 
-unsigned int ReceiveSamples(uart_regs * uart,
-			const unsigned int WaitTime, /* just a integer */
-			const unsigned int Start,
-			unsigned int CaptureSize,    /* size in DWORDs*/
-			int * FastMode,
-			unsigned int * RawData){
-	int data[] ={CAPTURE_DATA, WaitTime, Start, *FastMode, CaptureSize};
+uint32_t ReceiveSamples(uart_regs * uart,
+			const uint32_t WaitTime, /* just a integer */
+			const uint32_t Start,
+			uint32_t CaptureSize,    /* size in DWORDs*/
+			uint32_t * FastMode,
+			uint32_t * RawData){
+	uint32_t data[] ={CAPTURE_DATA, WaitTime, Start, *FastMode, CaptureSize};
 	crc crcSend = 0;
 	SendHeader(uart);
 	SendInt(uart,CAPTURE_DATA);
@@ -154,9 +154,9 @@ unsigned int ReceiveSamples(uart_regs * uart,
 
 
 void RecordWave8Bit (	FILE * Handle, uSample * buffer,
-			unsigned int Size, unsigned int Channels){
-	unsigned int i = 0;
-	unsigned int j = 0;
+			uint32_t Size, uint32_t Channels){
+	uint32_t i = 0;
+	uint32_t j = 0;
 	int rem = Size*Channels;
 	for (i = 0; i < Size; ++i){
 		for (j = 0; j < Channels; ++j){
@@ -167,9 +167,9 @@ void RecordWave8Bit (	FILE * Handle, uSample * buffer,
 
 
 void RecordWave16Bit (	FILE * Handle, uSample * buffer,
-			unsigned int Size, unsigned int Channels){
-	unsigned int i = 0;
-	unsigned int j = 0;
+			uint32_t Size, uint32_t Channels){
+	uint32_t i = 0;
+	uint32_t j = 0;
 	int rem = Size*2*Channels;
 	for (i = 0; i < Size; ++i){
 		for (j = 0; j < Channels; ++j){
@@ -178,8 +178,8 @@ void RecordWave16Bit (	FILE * Handle, uSample * buffer,
 	}
 }
 void RecordWave32Bit (	FILE * Handle, uSample * buffer,
-			unsigned int Size){
-	unsigned int i = 0;
+			uint32_t Size){
+	uint32_t i = 0;
 	int rem = Size*4;
 	for (i = 0; i < Size; ++i){
 		WriteSample(Handle,buffer[i].i,&rem,32);
@@ -187,11 +187,11 @@ void RecordWave32Bit (	FILE * Handle, uSample * buffer,
 }
 void RecordCSV(	FILE * Handle, 
 		uSample *buffer, 
-		unsigned int RepeatSize, 
-		unsigned int Channels, 
-		unsigned int SampleSize){
-	unsigned int i = 0;
-	unsigned int j = 0;
+		uint32_t RepeatSize, 
+		uint32_t Channels, 
+		uint32_t SampleSize){
+	uint32_t i = 0;
+	uint32_t j = 0;
 	for (i = 0; i < RepeatSize; ++i){
 		for (j = 0; j < Channels; ++j){
 			switch (SampleSize) {
@@ -216,16 +216,16 @@ void RecordCSV(	FILE * Handle,
  * also take care about the capture mode (normal of fast)*/
 bool RecordWave (	uSample * buffer,
 			char * FileName, 
-			unsigned int RepeatSize,
-			unsigned int SampleFS,
-			unsigned int Channels,
-			unsigned int SampleSize,
-			unsigned int FastMode) {
+			uint32_t RepeatSize,
+			uint32_t SampleFS,
+			uint32_t Channels,
+			uint32_t SampleSize,
+			uint32_t FastMode) {
 	bool Ret = false;
 	enum {wav,csv} FileType = csv;
-	unsigned int FastModeRepeats = 1;
-	unsigned int FastModeIdx = 0;
-	unsigned int i = 0;
+	uint32_t FastModeRepeats = 1;
+	uint32_t FastModeIdx = 0;
+	uint32_t i = 0;
 	FILE * Handle = 0;
 	FILE ** pHandle = &Handle;
 	aWaveFileInfo FileInfo = {

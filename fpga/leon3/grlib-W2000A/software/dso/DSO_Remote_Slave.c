@@ -1,3 +1,38 @@
+/****************************************************************************
+* Project        : Welec W2000A
+*****************************************************************************
+* File           : DSO_Remote_Slave.c
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
+* Date           : 20.04.2009
+*****************************************************************************
+* Description	 : 
+*****************************************************************************
+
+*  Copyright (c) 2009, Alexander Lindert
+
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*  For commercial applications where source-code distribution is not
+*  desirable or possible, I offer low-cost commercial IP licenses.
+*  Please contact me per mail.
+
+*****************************************************************************
+* Remarks		: -
+* Revision		: 0
+****************************************************************************/
+
 
 #include "DSO_Main.h"
 #include "DSO_Misc.h"
@@ -9,14 +44,14 @@
 
 #include "stdio.h"
 
-int * buffer;
+uint32_t * buffer;
 uint32_t buffer_size;
 uart_regs * uart;
 bool GetTask();
 
 void RemoteSlave(	uart_regs * comm_uart,
 			const uint32_t DataSize,
-			int *Data) {
+			uint32_t *Data) {
 	buffer = Data;
 	buffer_size = DataSize;
 	uart = comm_uart;
@@ -94,8 +129,8 @@ bool GetTask() {
 					Analog.data[i].Specific   = GetInt(uart);
 					Analog.data[i].Mode       = GetInt(uart);
 				}
-				if (CheckCRC(GetInt(uart),(unsigned int*)&Analog,
-					2*sizeof(int)+((Analog.NoCh)*sizeof(SetAnalog)))!= true){
+				if (CheckCRC(GetInt(uart),(uint32_t*)&Analog,
+					2*sizeof(uint32_t)+((Analog.NoCh)*sizeof(SetAnalog)))!= true){
 					SendCRCError(uart);
 					return false;
 				}
@@ -170,9 +205,9 @@ bool GetTask() {
 			break;
 
 		case STORE_DWORDS:
-			addr = (int*)GetInt(uart);
+			addr = (uint32_t*)GetInt(uart);
 			size = GetInt(uart);
-			buffer[0] = (int)addr;
+			buffer[0] = (uint32_t)addr;
 			buffer[1] = size;
 			if (size+2 > buffer_size){
 				SendNAK(uart);
@@ -193,12 +228,12 @@ bool GetTask() {
 			break;
 
 		case LOAD_DWORDS:
-			addr = (int *)GetInt(uart);
+			addr = (uint32_t *)GetInt(uart);
 			size = GetInt(uart);
 			buffer[0] = LOAD_DWORDS;
-			buffer[1] = (int)addr;
+			buffer[1] = (uint32_t)addr;
 			buffer[2] = size;
-			if (CheckCRC(GetInt(uart), buffer, 3*sizeof(int)) != true){
+			if (CheckCRC(GetInt(uart), buffer, 3*sizeof(uint32_t)) != true){
 				SendCRCError(uart);
 				return false;
 			}
@@ -213,7 +248,7 @@ bool GetTask() {
 				buffer[i] = addr[i];
 			}
 			crcInit();
-			s = crcFast((unsigned char*)buffer,(size+1)*sizeof(int));
+			s = crcFast((unsigned char*)buffer,(size+1)*sizeof(uint32_t));
 			buffer[size+1] = s;
 			SendData(uart, size+2, buffer);
 			return true;

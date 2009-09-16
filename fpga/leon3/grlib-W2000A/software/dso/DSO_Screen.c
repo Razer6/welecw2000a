@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_Screen.c
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 02.07.2009
 *****************************************************************************
 * Description	 : 
@@ -36,6 +36,7 @@
 #include "types.h"
 #include "DSO_SFR.h"
 #include "DSO_Screen.h"
+#include "DSO_Misc.h"
 
 #ifdef BOARD_COMPILATION
 
@@ -216,8 +217,8 @@ void DrawCopyHLine(uint32_t Vsrc, uint32_t Vdst) {
 	}
 }
 void DrawCopyVLine(uint32_t Hsrc, uint32_t Hdst) {
-	register uint16_t * src = FramePointer[Hsrc];
-	register uint16_t * dst = FramePointer[Hdst];
+	register uint16_t * src = (uint16_t*)&FramePointer[Hsrc];
+	register uint16_t * dst = (uint16_t*)&FramePointer[Hdst];
 	register uint16_t i = 0;
 	for (i = 0; i < (VLEN*HLEN); i+= HLEN){
 		dst[i] = src[i];

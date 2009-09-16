@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_Remote_Slave.h
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 
@@ -45,7 +45,7 @@
 void RemoteSlave(	
 			uart_regs * comm_uart,
 			const uint32_t DataSize,
-			int *Data);
+			uint32_t *Data);
 
 
 #endif

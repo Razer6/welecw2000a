@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_FrontPanel.c
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 
@@ -32,7 +32,7 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-
+#ifdef BOARD_COMPILATION
 #include "DSO_SFR.h"
 #include "DSO_Misc.h"
 #include "Leon3Uart.h"
@@ -120,7 +120,7 @@ void FrontPanelTest(uart_regs * uart) {
 		k40, k41, k42, k43, k44, k45, k46, k47, k48, k49, k50};
 		
 
-	volatile uint32_t * addr = (int *)LEDADDR;
+	volatile uint32_t * addr = (uint32_t *)LEDADDR;
 	int i = 0;
 	int c = -1;
 	int c1 = -1;
@@ -181,3 +181,4 @@ void TestKeys(uart_regs * uart, int value, int change, char ** M, int size) {
 		}
 	}
 }
+#endif

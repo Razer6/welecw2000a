@@ -2,10 +2,10 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_Remote_Master.h
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
-* Description	 : 
+* Description	 : out of date 
 *****************************************************************************
 
 *  Copyright (c) 2009, Alexander Lindert

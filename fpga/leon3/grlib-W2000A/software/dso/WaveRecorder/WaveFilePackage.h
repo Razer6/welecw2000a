@@ -2,7 +2,7 @@
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : WaveFilePackage.h
-* Author		 : Alexander Lindert <alexander_lindert at gmx.at>
+* Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
 * Description	 : 
@@ -45,11 +45,11 @@ typedef struct {
 	unsigned int SamplingRate;
 } aWaveFileInfo;
 
-typedef union {
+/*typedef union {
 	int i;
 	short s[2];
 	char  c[4];
-} uSample;
+} uSample;*/
 
 
 #ifdef __cplusplus

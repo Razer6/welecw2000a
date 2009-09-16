@@ -39,7 +39,6 @@
 #include <string.h>
 #include "grcommon.h"
 #include "DSO_SignalCapture.h"
-#include "DSO_Debugprint.h"
 #include "Leon3Uart.h"
 #include "DSO_Remote_Slave.h"
 #include "DSO_Remote.h"
@@ -48,6 +47,9 @@
 #include "DSO_Frontpanel.h"
 #include "Filter_I8.h"
 #include "irqmp.h"
+#include "DSO_Misc.h"
+#include "DSO_FrontPanel.h"
+#include "DSO_GUI.h"
 
 
 #ifdef BOARD_COMPILATION
@@ -101,7 +103,7 @@ long _read_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
 	WRITE_INT(DSO_SFR_BASE_ADDR,dummy);
 /*	ReceiveStringBlock(GENERIC_UART_BASE_ADDR,buf,&cnt);*/
 	for (i = 0; i < cnt; ++i){
-		buffer[i] = ReceiveCharBlock(GENERIC_UART_BASE_ADDR);
+		buffer[i] = ReceiveCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR);
 	}
 #endif
 	return cnt;
@@ -150,7 +152,6 @@ int main () {
 /*	static FILE mystdout = FDEV_SETUP_STREAM(SendDebugMessage, NULL );
 	stdout = mystdout;*/
 
-	Debugprint * Debug;
 	char ack[] = "success!\n";
 	char nak[] = "failed!\n";
 
@@ -172,7 +173,7 @@ int main () {
 	/*WRITE_INT(CONFIGADCENABLE,0);*/ /* selecting the generic uart for the W2000A */
 	/*WaitMs(1000);*/
 
-	InitSignalCapture(Debug,PrintF,English);
+	InitSignalCapture();
 	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, 
 			FIFO_EN | ENABLE_RX | ENABLE_TX | RX_INT /*| LOOP_BACK*/, uart);
 #ifdef SBX
@@ -250,45 +251,45 @@ int main () {
 	/* without filtering */
 	printf("testing FastCapture\n"); 
 	WRITE_INT(DSO_SFR_BASE_ADDR,1);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 	
 	WRITE_INT(DSO_SFR_BASE_ADDR,2);
 	SetTriggerInput(2,8,FASTFS/2,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	WRITE_INT(DSO_SFR_BASE_ADDR,4);
 	SetTriggerInput(2,8,FASTFS/4,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	WRITE_INT(DSO_SFR_BASE_ADDR,8);
 	SetTriggerInput(2,8,FASTFS/8,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	WRITE_INT(DSO_SFR_BASE_ADDR,10);
 	SetTriggerInput(2,8,FASTFS/10,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	/* with filtering */
 	SetTriggerInput(2,8,FASTFS/1,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	SetTriggerInput(2,8,FASTFS/2,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	SetTriggerInput(2,8,FASTFS/4,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	SetTriggerInput(2,8,FASTFS/8,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, 100, Data);
+	ReadData = CaptureData(FASTFS, true, false, 100, (uint32_t*)Data);
 
 	SetTriggerInput(2,8,FASTFS/10,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
-	ReadData = CaptureData(FASTFS, true, false, CAPTURESIZE, Data);
+	ReadData = CaptureData(FASTFS, true, false, CAPTURESIZE, (uint32_t*)Data);
 
 	
 	printf("testing NormalCapture\n");
 	SetTriggerInput(2,8,SLOWFS,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
 	SetTrigger(0,0,0,64,3,0,30,1);
-	ReadData = CaptureData(SLOWFS, true, false, CAPTURESIZE, Data);
+	ReadData = CaptureData(SLOWFS, true, false, CAPTURESIZE, (uint32_t*)Data);
 
 
 #endif
@@ -322,7 +323,7 @@ int main () {
 			DrawSignal(1,16,128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(7,7,7));
 		}*/
 
-		ReadData = CaptureData(FASTFS, true, true, 32768, (uSample*)Data);
+		ReadData = CaptureData(FASTFS, true, true, 32768, (uint32_t*)Data);
 		memset(Ch1,640*4,0);
 		Ch1[40].i = -127;
 
@@ -359,6 +360,6 @@ int main () {
 
 	
 	printf("\nStarting the remote control\n");
-	RemoteSlave(REMOTE_UART,CAPTURESIZE,Data);	
+	RemoteSlave(REMOTE_UART,CAPTURESIZE,(uint32_t*)Data);	
 	return 0;
 }
