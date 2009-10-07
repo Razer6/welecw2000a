@@ -5,7 +5,7 @@
 * Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
-* Description	 : out of date 
+* Description	 : parts out of date 
 *****************************************************************************
 
 *  Copyright (c) 2009, Alexander Lindert
