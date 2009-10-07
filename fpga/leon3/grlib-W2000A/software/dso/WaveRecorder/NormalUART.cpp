@@ -52,12 +52,13 @@ uint32_t NormalUart::Init(
 				char * IPAddr)
 {
 	uint32_t succ = UartInit(Device,Baudrate,&mH);
-	SetTimeoutMs(300);
+	SetTimeoutMs(TimeoutMS);
 	if (succ != 0) {
 		SendInt(&mH,0xAAAAAAAA);
 	}
 	return succ;
 }
+
 
 uint32_t NormalUart::Send(uint32_t *Data, uint32_t Length)
 {

@@ -49,43 +49,43 @@ extern "C" {
 #endif
 
 bool SendTriggerInput (	uart_regs * uart,
-			const unsigned int noChannels, 
-			const unsigned int SampleSize, 
-			const unsigned int SamplingFrequency,
-			const unsigned int AACFilterStart,
-			const unsigned int AACFilterStop,
-			const unsigned int Ch0, 
-			const unsigned int Ch1, 
-			const unsigned int Ch2, 
-			const unsigned int Ch3);
+			const uint32_t noChannels, 
+			const uint32_t SampleSize, 
+			const uint32_t SamplingFrequency,
+			const uint32_t AACFilterStart,
+			const uint32_t AACFilterStop,
+			const uint32_t Ch0, 
+			const uint32_t Ch1, 
+			const uint32_t Ch2, 
+			const uint32_t Ch3);
 
 bool SendTrigger(uart_regs * uart,
-			const unsigned int Trigger, 
-			const unsigned int TriggerChannel,
-			const unsigned int TriggerPrefetchSamples,
+			const uint32_t Trigger, 
+			const uint32_t TriggerChannel,
+			const uint32_t TriggerPrefetchSamples,
 			const int  LowReference,
-			const unsigned int  LowReferenceTime,
+			const uint32_t  LowReferenceTime,
 			const int HighReference,
-			const unsigned int HighReferenceTime);
+			const uint32_t HighReferenceTime);
 
 bool SendAnalogInput(	uart_regs * uart,
-			const unsigned int NoCh, 
+			const uint32_t NoCh, 
 			const SetAnalog * Settings);
 
-unsigned int ReceiveSamples(uart_regs * uart,
-			const unsigned int WaitTime, /* just a integer */
-			const unsigned int Start,
-			unsigned int CaptureSize,    /* size in DWORDs*/
+uint32_t ReceiveSamples(uart_regs * uart,
+			const uint32_t WaitTime, /* just a integer */
+			const uint32_t Start,
+			uint32_t CaptureSize,    /* size in DWORDs*/
 			int * FastMode,
-			unsigned int * RawData);
+			uint32_t * RawData);
 
 bool RecordWave (uSample * buffer,
 				 char * FileName, 
-				 unsigned int RepeatSize,
-				 unsigned int SampleFS,
-				 unsigned int Channels,
-				 unsigned int SampleSize,
-				 unsigned int FastMode);
+				 uint32_t RepeatSize,
+				 uint32_t SampleFS,
+				 uint32_t Channels,
+				 uint32_t SampleSize,
+				 uint32_t FastMode);
 
 #ifdef __cplusplus
 }

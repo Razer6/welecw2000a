@@ -99,6 +99,7 @@ int ReceiveAll(uart_regs * uart, uint32_t buffersize, uint32_t * data, uint32_t 
 bool ReceiveHeader(uart_regs * uart, const char * RefHeader);
 #ifdef LITTLE_ENDIAN
 uint32_t GetInt(uart_regs * uart, uint32_t *error);
+uint32_t GetIntX(uart_regs * uart, uint32_t *error);
 #else
 uint32_t GetInt(uart_regs * uart);
 #endif

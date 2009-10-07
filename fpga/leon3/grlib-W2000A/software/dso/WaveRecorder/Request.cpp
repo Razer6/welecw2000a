@@ -189,3 +189,10 @@ void Request::PrintDesc(uint32_t *Data, uint32_t Length){
 	}
 	printf("\n\n");
 }
+
+uint32_t Request::LoadProgram( 
+		const char * FileName, 
+		uint32_t StartAddr,
+		uint32_t StackAddr){
+	return FALSE;
+}

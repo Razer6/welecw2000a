@@ -79,7 +79,24 @@ public:
 		uint32_t * RawData); 
 
 	virtual void PrintSFR();
+
+	virtual uint32_t LoadProgram( 
+		const char * FileName, 
+		uint32_t StartAddr,
+		uint32_t StackAddr);
+
 private:
+	/* return retrys */
+	uint32_t SendRetry(
+		uint32_t addr,
+		uint32_t data);
+
+	/* return retrys */
+	uint32_t SendRetry(
+		uint32_t addr,
+		uint32_t * data,
+		uint32_t & length);
+
 	uint32_t FastMode(	const uint32_t SamplingFrequncy, 
 			const uint32_t CPUFrequency);
 	uint32_t IsFastMode();

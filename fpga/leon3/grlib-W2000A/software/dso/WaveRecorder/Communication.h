@@ -56,7 +56,8 @@ public:
 			mH = 0;
 			return 0;
 	}
-//	virtual ~Communication();
+	virtual ~Communication(){
+	}
 	virtual uint32_t Send(uint32_t * Data, uint32_t Length){
 		return 0;
 	}
@@ -64,7 +65,13 @@ public:
 		return 0;
 	}
 	virtual uint32_t GetACK(){
-		return 0;
+		return TRUE;
+	}
+	virtual uint32_t ClearBuffer(){
+		return TRUE;
+	}
+	virtual uint32_t Resync() {
+		return TRUE;
 	}
 
 protected:

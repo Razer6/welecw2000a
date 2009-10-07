@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "DSO_SFR.h"
+#include "LEON3_DSU.h"
 #include "RemoteSignalCapture.h"
 #include "DSO_ADC_Control.h"
 #include "Communication.h"
@@ -56,7 +57,7 @@ uint32_t RemoteSignalCapture::Send(uint32_t Addr, uint32_t *Data, uint32_t & Len
 		return 0;
 	}
 	SendData[0] = Addr;
-	memcpy(&SendData[1],Data,Length);
+	memcpy(&SendData[1],Data,Length*sizeof(uint32_t));
 	Length = mComm->Send(SendData,Length+1);
 	delete SendData;
 	SendData = 0;
@@ -64,21 +65,23 @@ uint32_t RemoteSignalCapture::Send(uint32_t Addr, uint32_t *Data, uint32_t & Len
 }
 
 uint32_t RemoteSignalCapture::Receive(uint32_t Addr){
-	AddrData[0] = mComm->Receive(&Addr,2);
+	AddrData[0] = Addr;
+	AddrData[0] = mComm->Receive(AddrData,2);
 	return AddrData[1];
 }
+
 uint32_t RemoteSignalCapture::Receive(uint32_t Addr, uint32_t *Data, uint32_t & Length){
-	uint32_t * SendData = new uint32_t[Length+1];
+	uint32_t * SendData = new uint32_t[Length+2];
+	int32_t l = 0;
 	if (SendData == 0){
 		return 0;
 	}
 	SendData[0] = Addr;
 	SendData[1] = Length;
-	SetTimeoutMs(20000);
-	Length = mComm->Receive(SendData,Length+1);
-	SetTimeoutMs(1000);
-	for (uint32_t i = 0; i < Length; ++i){
-		Data[i] = SendData[i+1];
+	Length = mComm->Receive(SendData,Length);
+	l = Length -1;
+	for (int32_t i = 0; i < l; ++i){
+		Data[i] = SendData[i+2];
 	}
 	delete SendData;
 	SendData = 0;
@@ -349,66 +352,6 @@ int RemoteSignalCapture::FastCapture(
 		uint32_t CaptureSize,    /* size in DWORDs*/
 		uint32_t * RawData) 
 {
-	uint32_t i = 0;
-	uint32_t Length = 0;
-	uint32_t * StopAddr = 0;
-	volatile uint32_t * Addr = 0;
-	uint32_t SendLength = 0;
-	/* The compiler has bugs in the loop optimisation with the keyword volatile 
-	 * even with function call to get the data from an hw address + masking in a condition */
-	volatile uint32_t temp = 0; 
-
-	Send(TRIGGERONCEADDR, 0);
-	Send(TRIGGERONCEADDR, 1);
-
-	while (Receive(TRIGGERSTATUSREGISTER) & (1 << TRIGGERRECORDINGBIT) != 0)
-	{
-		i++;
-		if (i == WaitTime) {
-			return 0;
-		}
-	}
-	temp = Receive(TRIGGERREADOFFSETADDR);
-	StopAddr = (uint32_t *)(TRIGGER_MEM_BASE_ADDR + temp);
-
-	StopAddr++; /* matching 0 to end-1 */
-	Addr = StopAddr;
-	
-	/* Wait until the trigger buffer is full */
-	WaitUntilMaskedAndZero(TRIGGERSTATUSREGISTER, (1 << TRIGGERRECORDINGBIT));
-	
-	if (TRIGGER_MEM_SIZE < CaptureSize){
-		CaptureSize = TRIGGER_MEM_SIZE;
-	}
-	if (TRIGGER_MEM_SIZE + temp < CaptureSize){
-		Length = (CaptureSize-temp);
-		SendLength = Length/sizeof(uint32_t);
-		Receive((uint32_t)Addr,RawData,SendLength);
-		SendLength = (CaptureSize-Length)/sizeof(uint32_t);
-		Receive(TRIGGER_MEM_BASE_ADDR,&RawData[Length],SendLength);
-	} else {
-		SendLength = CaptureSize;
-		Receive((uint32_t)Addr,RawData,SendLength);
-	}
-
-	/* The folowing lines "solve" a feature in the hardware trigger, 
-	 * which is overwriting up the first 7 samples at the end!       
-	 * It is caused, because the trigger always writes 8 Samples per Channel at once */
-	/* Here the fist 8 samples are set to zero */
-	for (i = 0; i < 8; ++i){
-		temp = Receive(TRIGGERSTORAGEMODEADDR);
-	       switch (temp) {
-			case TRIGGERSTORAGEMODE4CH:
-				RawData[i]   = 0;
-				break;
-			case TRIGGERSTORAGEMODE2CH:
-				RawData[i]   &= 0x0000ffff;
-				break;
-			case TRIGGERSTORAGEMODE1CH:
-				RawData[i]   &= 0x00ffffff;
-				break;
-	       }
-	}
 	return TRIGGER_MEM_SIZE;
 }
 
@@ -430,3 +373,121 @@ void RemoteSignalCapture::PrintSFR(){
 	Receive(DSO_SFR_BASE_ADDR,Data,Length);
 	PrintDesc(Data,Length);
 }
+
+uint32_t RemoteSignalCapture::SendRetry(
+		uint32_t addr,
+		uint32_t data) {
+	uint32_t i = 0;
+	uint32_t read = 0;
+	for (i = 0; i < 32; ++i){
+		Send(addr,data);
+		read = Receive(addr);
+		if (data == read) break;
+		mComm->ClearBuffer();
+		mComm->Resync();
+		WaitMs(10);
+	}
+	return i;
+}
+
+uint32_t RemoteSignalCapture::SendRetry(
+		uint32_t addr,
+		uint32_t * data,
+		uint32_t & length) {
+	uint32_t i = 0;
+	uint32_t j = 0;
+	uint32_t k = 0;
+	uint32_t read = 0;
+	uint32_t * RecData = new uint32_t[length];
+	for (i = 0; i < 32; ++i){
+		k = length-j;
+		Send(addr+j*sizeof(uint32_t),&data[j],k);
+		read = Receive(addr+j*sizeof(uint32_t),&RecData[j], k);
+		if (read != k){
+			mComm->ClearBuffer();
+			mComm->Resync();
+			j = j+read-k;
+		}
+		for(; j < length; ++j){
+			if (data[j] != RecData[j]) {
+				mComm->ClearBuffer();
+				mComm->Resync();
+				break;
+			}	
+		}
+		if (j == length) break;
+	}
+	length = j;
+	delete RecData;
+	RecData = 0;
+	return i;
+}
+
+uint32_t RemoteSignalCapture::LoadProgram( 
+		const char * FileName, 
+		uint32_t StartAddr,
+		uint32_t StackAddr){
+	
+	FILE * hFile = fopen(FileName,"rb");
+	uint32_t addr = StartAddr;
+	uint32_t i = 0;
+	uint32_t read = 0;
+	uint32_t data = 0;
+	uint32_t DataArray[8];
+
+	if (hFile == NULL) {
+		printf("Binary program file not found!\n");
+		return FALSE;
+	}
+	/* Stop the CPU */
+	AddrData[0] = DSU_CTL;
+	read = mComm->Receive(AddrData,2);
+	if (read == 0){
+		printf("Target does not response!\n");
+		fclose(hFile);
+		return FALSE;
+	}
+	Send(DSU_BASE_ADDR,(AddrData[1] | DSU_HL));
+
+	/* write the binary file into the RAM */
+	while (feof(hFile) == FALSE){
+		read = fread(DataArray,4,8,hFile);
+		if (read == 0) {
+			break;
+/*			printf("Unexpected end of file!\n");
+			return FALSE;*/
+		}
+		i = SendRetry(addr,DataArray,read);
+		addr+=read*sizeof(uint32_t);
+		if (i == 32) {
+			printf("Transmission error on addr 0x%8x!\n", addr);
+			fclose(hFile);
+			return FALSE;
+		}
+		
+		if (addr % 0x100 == 0){
+			printf("\naddr 0x%x\n",addr);
+		}
+	}
+	/* Clear the REGFILE */
+	for(i = 0; i < NWINDOWS*WINDOW_SIZE/4; ++i){
+		SendRetry(DSU_REGFILE + i*4,0);
+	}
+	/* Set the StackAddr */
+	addr = DSU_REGFILE + (START_WINDOW*WINDOW_SIZE) + REG_OUT_OFF;
+	SendRetry(addr,StackAddr);
+	
+	/* Set the start register window */
+	SendRetry(DSU_REG_WIM,START_WINDOW);
+
+	/* Set the Trap Base Register */
+	SendRetry(DSU_REG_TBR,START_TBR);
+
+	/* RUN */
+	AddrData[0] = DSU_CTL;
+	AddrData[0] = mComm->Receive(AddrData,2);
+	Send(DSU_BASE_ADDR,(AddrData[1] | DSU_PE));
+	fclose(hFile);
+	return TRUE;
+}
+

@@ -35,7 +35,6 @@
 
 #include "PCUart.h"
 
-
 #ifdef WINNT 
 #include "windows.h"
 #include "conio.h"
@@ -210,7 +209,7 @@ char ReceiveCharBlock(uart_regs * uart){
 }
 
 char ReceiveChar(uart_regs * uart, uint32_t *error){
-	char ch = 0;
+	uint32_t ch = 0;
 	uint32_t ret = 0;
 	uint32_t cnt = 0;
 	*error = 0;
@@ -233,7 +232,7 @@ char ReceiveChar(uart_regs * uart, uint32_t *error){
 	}
 #endif
 //	printf("%c",ch);
-	return ch;
+	return (unsigned char)ch;
 }
 
 void SendCharBlock(uart_regs * uart, char c){
@@ -244,7 +243,7 @@ void SendCharBlock(uart_regs * uart, char c){
 	do {
 		WriteFile(*uart,&c,1,(LPDWORD)&ret,NULL);
 		if (ret == 0){
-			Sleep(5);
+			Sleep(1);
 		}
 	} while (ret == 0);
 #else
@@ -266,7 +265,7 @@ void ReceiveStringBlock (uart_regs * uart, char * c, uint32_t *size){
 #ifdef WINNT
 		ReadFile(*uart,&c[r],*size-r,lpret,NULL);
 		if (ret == 0){
-			Sleep(5);
+			Sleep(1);
 		}
 #else     
         ret = read(uart,&c[r], *size-r);
@@ -289,11 +288,76 @@ void SendStringBlock (uart_regs * uart, char * c){
 #ifdef WINNT
 		WriteFile(*uart,&c[written],size-written,lpret,NULL);
 		if (ret == 0){
-			Sleep(5);
+			Sleep(1);
 		}
 #else 
 		ret = write(uart,&c[written], *size-written);	
 #endif 	
 		written = written + ret;
 	} 
+}
+
+void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
+#ifdef WINNT
+	DWORD ret = 0;
+	LPDWORD lpret = &ret;
+	DWORD written = 0;
+#else
+	uint32_t ret = 0;
+	uint32_t written = 0;
+#endif
+	while (written < size) {
+#ifdef WINNT
+		WriteFile(*uart,&c[written],size-written,lpret,NULL);
+		if (ret == 0){
+			Sleep(1);
+		}
+#else 
+		ret = write(uart,&c[written], *size-written);	
+#endif 	
+		written = written + ret;
+
+	} 
+	for (ret = 0; ret < written; ++ret){
+		printf("%02x ",c[ret] & 0xff);
+	}
+	printf("\n");
+}
+
+/* return error */
+uint32_t ReceiveBytes(
+				  uart_regs * uart, 
+				  uint8_t * data, 
+				  uint32_t length){
+	uint32_t ret = 0;
+	uint32_t cnt = 0;
+	uint32_t written = 0;
+#ifdef WINNT
+	do {
+		ReadFile(*uart,&data[written],length-written,(LPDWORD)&ret,NULL);
+		cnt++;
+		if (ret == 0){
+			Sleep(1);
+		}
+		if (cnt == TimeoutMs){
+
+			printf("\nTimeout!\n");
+			return written;
+		}
+		written += ret;
+   } while (written < length);
+#endif
+	for (ret = 0; ret < written; ++ret){
+		printf("%02x ",data[ret] & 0xff);
+	}
+	printf("\n");
+	return written;
+}
+
+uint32_t UART_Flush(uart_regs * uart) {
+	return PurgeComm(*uart,PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_TXABORT);
+}
+
+uint32_t UART_Resync(uart_regs * uart) {
+	return ClearCommError(*uart,NULL,NULL);
 }

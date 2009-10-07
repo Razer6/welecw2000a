@@ -45,10 +45,9 @@
 #include "NormalUart.h"
 #include "DebugUart.h"
 
-#define DSO_NAK_MESSAGE "Error in communication!\n"
-
-bool CheckArgCount (	void * 	IsCount, 
-                  const struct arg_str * Command,
+bool CheckArgCount (	
+			void * 	IsCount, 
+            const struct arg_str * Command,
 			const int		count,
 			const int		size){ 
 	int i = 0;
@@ -73,7 +72,7 @@ void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Req
 	if (Ret != 0){
 		exit(0);
 	 } else {
-		printf(DSO_NAK_MESSAGE); 
+		printf("Error in communication!\n"); 
 		exit(3);
 	 }			
 }
@@ -82,7 +81,7 @@ int main(int argc, char * argv[]) {
 	struct arg_str * UartAddr	= arg_str0("u", "UART", NULL, "Path of serial device, always necessary!");
 	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
-			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs]", 
+			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs | LoadRun]", 
 			"DSO call type, always necessary!");
 	struct arg_str * Trigger	= arg_str0(NULL,"TrType","[ExtLH | ExtHL | SchmittLH | SchmittHL | GlitchLH | GlitchHL]","Trigger type");
 	struct arg_int * ExtTrigger = arg_int0(NULL,"ExtTrigger","<n>", "External trigger, #0 = always, #1 = external trigger 1, #n = external trigger n");
@@ -118,8 +117,8 @@ int main(int argc, char * argv[]) {
 	struct arg_int * AnDA_OffsetCh2	= arg_int0(NULL,"An_OffCh3", 	"<n>",	"Analog offset Ch3 (integer!)"); 
 	struct arg_int * AnDA_OffsetCh3	= arg_int0(NULL,"An_OffCh4", 	"<n>",	"Analog offset Ch4 (integer!)"); 
 	struct arg_int * AnPWM 		= arg_int0(NULL,"An_Offset2",	"<n>",	"Analog offset from PWM"); 
-	struct arg_int * ForceAddr	= arg_int0(NULL,"Faddr",	"<n>",	"DSO CPU address of data"); 
-	struct arg_int * ForceSize	= arg_int0(NULL,"Fsize",	"<n>",	"Size of direct CPU address data"); 
+	struct arg_int * ForceAddr	= arg_int0(NULL,"Faddr",	"<n>",	"DSO CPU address of data (software base address)"); 
+	struct arg_int * StackAddr	= arg_int0(NULL,"Stack",	"<n>",	"Stack address of the CPU"); 
 	struct arg_int * CapWTime	= arg_int0(NULL,"CapWaitTime",	"<n>",	"Abourt time, before recording"); 
 	struct arg_int * CapSize	= arg_int0(NULL,"CapSize",	"<n>",	"Capture data size in Dwords"); 
 	struct arg_int * WavForceFS	= arg_int0(NULL,"WavForcefs",	"<n>",	"Set sampling fs to x istead of Fs");
@@ -127,7 +126,7 @@ int main(int argc, char * argv[]) {
 	struct arg_lit * AnAC_Ch1	= arg_lit0(NULL,"ACModeCh2",		"AC Mode, if not set AC=off"); 
 	struct arg_lit * AnAC_Ch2	= arg_lit0(NULL,"ACModeCh3",		"AC Mode, if not set AC=off"); 
 	struct arg_lit * AnAC_Ch3	= arg_lit0(NULL,"ACModeCh4",		"AC Mode, if not set AC=off");
-	struct arg_file * ForceFile	= arg_file0(NULL,"Ffile","<file>",	"Binary file for the direct DSO CPU access");
+	struct arg_file * ForceFile	= arg_file0(NULL,"Ffile","<file>",	"Binary file for the direct DSO CPU access (binary software file)");
 	struct arg_file * WaveFile	= arg_file0("o","WFile","<file>",	"Record data to this file");
 	struct arg_int * BaudRate	= arg_int1("b", "BAUD",		"<n>",	"serial device baudrate, always necessary!");
 	struct arg_lit * help		= arg_lit0("hH","help",			"Displays this help information");
@@ -141,7 +140,7 @@ int main(int argc, char * argv[]) {
 	AnGainCh3,AnAC_Ch0,AnAC_Ch1,AnAC_Ch2,AnAC_Ch3,
 	AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,
 	AnPWM,AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3,ForceAddr,
-	ForceSize,ForceFile,CapWTime,CapSize,WavForceFS,
+	StackAddr,ForceFile,CapWTime,CapSize,WavForceFS,
 	WaveFile,UartAddr,BaudRate,help,version,end};
 	int Retry = 0;
     
@@ -179,6 +178,26 @@ int main(int argc, char * argv[]) {
 
 	if (!DSOInterface->InitComm((char*)UartAddr->sval[0],5000,BaudRate->ival[0])){
 		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+	}
+	if (strcmp("LoadRun",Command->sval[0]) == 0){
+		uint32_t BaseAddr = RAM_BASE_ADDR;
+		uint32_t Stack = RAM_BASE_ADDR + RAM_SIZE -16;
+		struct arg_int * IsOnce[] = {(arg_int*)ForceFile};
+		int32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		if (ForceAddr->count == 1){
+			BaseAddr = ForceAddr->ival[0];
+		}
+		if (StackAddr->count == 1){
+			Stack = StackAddr->ival[0];
+		}
+		if (Ret == false) {
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		}
+		Ret = DSOInterface->LoadProgram(
+			ForceFile->filename[0],
+			BaseAddr,
+			Stack);
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
 	if (strcmp("TriggerInput",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {

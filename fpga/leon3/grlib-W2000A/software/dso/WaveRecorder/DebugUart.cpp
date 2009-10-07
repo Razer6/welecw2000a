@@ -36,6 +36,7 @@
 #include "DebugUart.h"
 #include "DSO_Remote.h"
 #include "PCUart.h"
+#include "Windows.h"
 
 DebugUart::~DebugUart(){
 #ifdef WINNT
@@ -51,15 +52,16 @@ uint32_t DebugUart::Init(
 				const uint32_t Baudrate,
 				char * IPAddr)
 {
-	uint32_t Succ = UartInit(Device,Baudrate,&mH);
+	uint32_t succ = UartInit(Device,Baudrate,&mH);
 	// flushing the hardware debug uart interface
 	// It is not nessesary, it just brings the debug interface to idle
-	for (int i = 0; i < 32; ++i) {
-		SendInt(&mH,0x44444444);
+	if (succ != 0) {
+		Resync();
 	}
-	SetTimeoutMs(1000);
-	return Succ;
+	SetTimeoutMs(10);
+	return succ;
 }
+
 
 uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
 {
@@ -75,7 +77,8 @@ uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
 		}
 		/* b(7) = '1' request 
 		 * b(6) = '1' write */
-		SendCharBlock(&mH, 0xC0 | (FrameLength*sizeof(uint32_t)-1));
+/*		SendCharBlock(&mH, 0xC0 | (FrameLength*sizeof(uint32_t)-1));*/
+		SendCharBlock(&mH, 0xC0 | (FrameLength-1));
 		SendInt(&mH,Data[0]+FramePos-1); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			SendInt(&mH,Data[i]);
@@ -89,9 +92,9 @@ uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
 uint32_t DebugUart::Receive(uint32_t *Data, 
 							 uint32_t Length)
 {
-	int32_t Len = (int32_t)(Length-1); /* address is not counted */
+	int32_t Len = (int32_t)(Length-1); /* address and data[0] are not counted */
 	int32_t FrameLength = cFrameLength;
-	int32_t FramePos = 1;
+	int32_t FramePos = 2;
 	int32_t i = 0;
 	uint32_t error;
 	while (Len > 0){
@@ -102,12 +105,13 @@ uint32_t DebugUart::Receive(uint32_t *Data,
 		}
 		/* b(7) = '1' request 
 		 * b(6) = '1' write */
-		SendCharBlock(&mH, 0x80 | (FrameLength*sizeof(uint32_t)-1));
+/*		SendCharBlock(&mH, 0x80 | (FrameLength*sizeof(uint32_t)-1));*/
+		SendCharBlock(&mH, 0x80 | (FrameLength-1));
 		SendInt(&mH,Data[0]); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
-			Data[i] = GetInt(&mH,&error);
+			Data[i] = GetIntX(&mH,&error);
 			if (error != 0){
-				return (uint32_t)i-1;
+				return (uint32_t)i-2;
 			}
 		}
 		FramePos += cFrameLength;
@@ -118,4 +122,15 @@ uint32_t DebugUart::Receive(uint32_t *Data,
 
 uint32_t DebugUart::GetACK(){
 	return TRUE;
+}
+
+uint32_t DebugUart::ClearBuffer(){
+	  return UART_Flush(&mH);
+}
+
+uint32_t DebugUart::Resync() {
+	for(uint32_t i = 0; i < 18; ++i){
+			SendInt(&mH,0x55555555);
+	}
+	return UART_Resync(&mH);
 }

@@ -83,6 +83,12 @@ public:
 		uint32_t * RawData);
 
 	virtual void PrintSFR();
+
+	virtual uint32_t LoadProgram( 
+		const char * FileName, 
+		uint32_t StartAddr,
+		uint32_t StackAddr);
+
 protected:
 	Communication *mComm;
 	void PrintDesc(uint32_t *Data, uint32_t Length);

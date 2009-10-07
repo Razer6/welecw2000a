@@ -313,9 +313,11 @@ int main () {
 #define BG_COLOR COLOR_R3G3B3(6,6,6)
 	Prefetch = HLEN;
 	SetTriggerInput(4,8,1000000000,FIXED_CPU_FREQUENCY,0,1,0,1,2,3);
-	SetTrigger(0,0,1,Prefetch,0,3,-3,3);
+	SetTrigger(2,0,0,Prefetch,0,3,-3,3);
 	ReadData = 0;
-	
+	memset(Ch1,640*4,0);
+	memset(Ch2,640*4,0);
+
 	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN);
 	while(1) {
 /*		if (ReadData >= (6400+Prefetch)) {
@@ -324,25 +326,27 @@ int main () {
 		}*/
 
 		ReadData = CaptureData(FASTFS, true, true, 32768, (uint32_t*)Data);
-		memset(Ch1,640*4,0);
-		Ch1[40].i = -127;
 
 		 if (ReadData >= (6400+Prefetch)) {
 		
 			DrawSignal(128, Ch1, COLOR_R3G3B3(6,6,6));
-			DrawSignal(128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(7,7,7));
+			DrawSignal(128+(VLEN/2),Ch2, COLOR_R3G3B3(7,7,7));
 			DrawHLine(COLOR_R3G3B3(7,7,7), 128, 0, HLEN-1);
 			DrawHLine(COLOR_R3G3B3(7,7,7), 128+(VLEN/2), 0, HLEN-1);
-			GetCh(1,8, Ch1,&Data[0], HLEN+100);
+			GetCh(0,8, Ch1,&Data[0], HLEN+100);
 			DrawSignal(128, Ch1, COLOR_R3G3B3(0,7,0));
 			
-			Interpolate((HLEN/8)+(FILTER_COEFFS*2),Ch2, Ch1,0);
-			/*DrawBox(-1,0,0,HLEN-1,VLEN-1);*/
-		/*	GetCh(1,8, Ch2,&Data[0], HLEN);*/
-			DrawSignal(128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(0,0,7));
+		/*	Interpolate((HLEN/8)+(FILTER_COEFFS*2),Ch2, Ch1,0);*/
+		//	DrawSignal(128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(0,0,7));
+			if (x == 0) {
+				DrawBox(BG_COLOR,0,0,HLEN-1,VLEN);
+			}
+			GetCh(1,8, Ch2,&Data[0], HLEN);
+			DrawSignal(128+(VLEN/2),Ch2, COLOR_R3G3B3(0,0,7));
+			
 
-			DrawBox(x,630,470,639,479);
-			WaitMs(100);
+			DrawBox(x,630,470,639,480);
+		//	WaitMs(100);
 			
 			x++;
 			

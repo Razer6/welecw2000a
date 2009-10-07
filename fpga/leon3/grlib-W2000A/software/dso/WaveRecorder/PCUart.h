@@ -101,6 +101,14 @@ void ReceiveStringBlock (uart_regs * uart, char * c, unsigned int * size);
 void SendString (uart_regs * uart, char * c, unsigned int * size);
 
 void SendStringBlock (uart_regs * uart, char * c);
+void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size);
+uint32_t ReceiveBytes(
+				  uart_regs * uart, 
+				  uint8_t * data, 
+				  uint32_t length);
+				  
+uint32_t UART_Flush(uart_regs * uart);
+uint32_t UART_Resync(uart_regs * uart);
 
 #ifdef __cplusplus
 }

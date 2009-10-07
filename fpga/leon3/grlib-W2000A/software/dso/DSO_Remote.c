@@ -84,6 +84,28 @@ void ChangeEndian(uint32_t message[], int nBytes){
 }
 
 #ifndef LEON3
+
+uint32_t GetIntX(uart_regs * uart, uint32_t *error) {
+	uint32_t i = 0;
+	uint32_t data = 0;
+	i = ReceiveBytes(uart,(unsigned char*)&data,sizeof(uint32_t));
+	ChangeEndian(&data, sizeof(uint32_t));
+
+	if (i == sizeof(uint32_t)){
+		*error = 0;
+	} else {
+		*error = 1;
+	}
+	/*
+	for (i = 0; i < 4; ++i){
+		data.c[3-i] = ReceiveChar(uart,error);
+		if (*error != 0){
+			return data.i;
+		}
+	}*/
+	return data;
+}
+
 uint32_t GetInt(uart_regs * uart, uint32_t *error) {
  	uEndian data;
 	int i = 0;
@@ -111,13 +133,16 @@ void SendInt(uart_regs * uart, uint32_t data) {
 	uEndian d;
 	d.i=data;
 /*	printf("\nSendInt %d ",data); */
+	ChangeEndian(&d.i,sizeof(uint32_t));
+	SendBytes(uart,(uint8_t *)&d.i,sizeof(uint32_t));
+	/*
 	for (i = 0; i < 4; ++i){
 #ifdef LITTLE_ENDIAN
 		SendCharBlock(uart,d.c[3-i]);
 #else
 		SendCharBlock(uart,d.c[i]);
 #endif
-	}
+	}*/
 }
 
 bool CheckCRC(crc crcSent, uint32_t message[], int nBytes){
