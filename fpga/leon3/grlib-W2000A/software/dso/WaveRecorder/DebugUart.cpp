@@ -36,7 +36,11 @@
 #include "DebugUart.h"
 #include "DSO_Remote.h"
 #include "PCUart.h"
+#ifdef WINNT
 #include "Windows.h"
+#else
+#include "unistd.h"
+#endif
 
 DebugUart::~DebugUart(){
 #ifdef WINNT
@@ -134,3 +138,5 @@ uint32_t DebugUart::Resync() {
 	}
 	return UART_Resync(&mH);
 }
+
+DebugUart::DebugUart(){}; //http://gcc.gnu.org/faq.html#vtables

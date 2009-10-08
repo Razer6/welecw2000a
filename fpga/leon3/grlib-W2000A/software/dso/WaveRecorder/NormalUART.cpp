@@ -33,9 +33,15 @@
 * Revision		: 0
 ****************************************************************************/
 
-#include "NormalUart.h"
+#include "NormalUART.h"
 #include "DSO_Remote.h"
 #include "PCUart.h"
+#ifdef WINNT
+#include "Windows.h"
+#else
+#include "unistd.h"
+#endif
+
 
 NormalUart::~NormalUart(){
 #ifdef WINNT
@@ -83,3 +89,5 @@ uint32_t NormalUart::Receive(uint32_t *Data,
 uint32_t NormalUart::GetACK(){
 	return ReceiveAll(&mH,0,0,0);
 }
+
+NormalUart::NormalUart() {};	//http://gcc.gnu.org/faq.html#vtables

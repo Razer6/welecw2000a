@@ -36,6 +36,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef	WINNT
+#include	<unistd.h>
+#endif
 #include "DSO_SFR.h"
 #include "LEON3_DSU.h"
 #include "RemoteSignalCapture.h"
@@ -443,7 +446,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	AddrData[0] = DSU_CTL;
 	read = mComm->Receive(AddrData,2);
 	if (read == 0){
-		printf("Target does not response!\n");
+		printf("Target does not respond!\n");
 		fclose(hFile);
 		return FALSE;
 	}

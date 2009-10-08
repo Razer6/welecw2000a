@@ -41,7 +41,7 @@
 
 class NormalUart : public Communication {
 public:
-	NormalUart(){}
+	NormalUart();
 	virtual uint32_t Init (
 		char * Device, 
 		const uint32_t TimeoutMS = 5000, 

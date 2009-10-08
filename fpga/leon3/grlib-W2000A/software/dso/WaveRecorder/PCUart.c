@@ -49,7 +49,7 @@ void UartClose (uart_regs * uart){
 #ifdef WINNT 
        CloseHandle(*uart);
 #else 
-       close(huart);
+       close(*uart);
 #endif
 }
 
@@ -116,7 +116,7 @@ bool UartInit(
     /*ClearCommError(*uart, CE_FRAME | CE_BREAK | CE_OVERRUN | CE_RXOVER | CE_RXPARITY, NULL);*/
 
 #else
-	int fd = 0;
+	static int fd = 0;
   	long baud = 0;
 
   switch (BaudRate) {
@@ -127,9 +127,13 @@ bool UartInit(
     case 38400:  baud = B38400;break;
     case 57600:  baud = B57600;break;
     case 115200: baud = B115200;break;
+#ifdef B128000
     case 128000: baud = B128000;break;
+#endif
     case 230400: baud = B230400;break;
+#ifdef	B256000
     case 256000: baud = B256000;break;
+#endif
     case 460800: baud = B460800;break;
     case 500000: baud = B500000;break;
     case 576000: baud = B576000;break;
@@ -147,7 +151,7 @@ bool UartInit(
  *            process for the port. The driver will not send
  *            this process signals due to keyboard aborts, etc.
  */
-  if ((fd = open(UartAddr,O_RDWR | O_NDELAY | O_NOCTTY)) < 0)
+  if ((fd = open(UartAddr,O_RDWR | O_NOCTTY)) < 0)
   {
     printf("Couldn't open %s\n",UartAddr);
     return false;
@@ -168,7 +172,7 @@ bool UartInit(
 
   tio.c_oflag = 0;       /* set output flag noncanonical, no processing */
 
-  tio.c_cc[VTIME] = 0;   /* no time delay */
+  tio.c_cc[VTIME] = 1;   /* 100ms time delay */
   tio.c_cc[VMIN]  = 0;   /* no char delay */
   cfsetospeed(&tio,baud);
   cfsetispeed(&tio,baud);
@@ -178,6 +182,7 @@ bool UartInit(
    When we read, we'll get what's in the input buffer or nothing */
 /*  fcntl(fd, F_SETFL, FNDELAY); */
 
+	*uart=fd;
 #endif 
 
   return true;
@@ -201,8 +206,8 @@ char ReceiveCharBlock(uart_regs * uart){
  /*  printf("%02x ",x);*/
 #else
 	uint32_t ret = 0;
-	while(read(uart,&ch,1) == 0) {
-		usleep(1000);
+	while(read(*uart,&ch,1) == 0) {
+		usleep(10000);
 	}
 #endif
 	return ch;
@@ -227,8 +232,8 @@ char ReceiveChar(uart_regs * uart, uint32_t *error){
 		}
    } while (ret == 0);
 #else
-	while(read(uart,&ch,1) == 0) {
-		usleep(1000);
+	while(read(*uart,&ch,1) == 0) {
+		usleep(10000);
 	}
 #endif
 //	printf("%c",ch);
@@ -247,7 +252,8 @@ void SendCharBlock(uart_regs * uart, char c){
 		}
 	} while (ret == 0);
 #else
-	write(uart,c,1);
+	write(*uart,&c,1);
+	usleep(10000);
 #endif
 }
 
@@ -268,7 +274,7 @@ void ReceiveStringBlock (uart_regs * uart, char * c, uint32_t *size){
 			Sleep(1);
 		}
 #else     
-        ret = read(uart,&c[r], *size-r);
+        ret = read(*uart,&c[r], *size-r);
 #endif  
         r = r + ret;
 	}    
@@ -291,7 +297,8 @@ void SendStringBlock (uart_regs * uart, char * c){
 			Sleep(1);
 		}
 #else 
-		ret = write(uart,&c[written], *size-written);	
+		ret = write(*uart, &c[written], size-written);	
+	usleep(10000);
 #endif 	
 		written = written + ret;
 	} 
@@ -303,8 +310,8 @@ void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
 	LPDWORD lpret = &ret;
 	DWORD written = 0;
 #else
-	uint32_t ret = 0;
-	uint32_t written = 0;
+	int32_t ret = 0;
+	int32_t written = 0;
 #endif
 	while (written < size) {
 #ifdef WINNT
@@ -313,7 +320,8 @@ void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
 			Sleep(1);
 		}
 #else 
-		ret = write(uart,&c[written], *size-written);	
+		ret = write(*uart,&c[written], size-written);	
+	usleep(10000);
 #endif 	
 		written = written + ret;
 
@@ -346,6 +354,8 @@ uint32_t ReceiveBytes(
 		}
 		written += ret;
    } while (written < length);
+#else
+	written=read(*uart,data,length);
 #endif
 	for (ret = 0; ret < written; ++ret){
 		printf("%02x ",data[ret] & 0xff);
@@ -355,9 +365,16 @@ uint32_t ReceiveBytes(
 }
 
 uint32_t UART_Flush(uart_regs * uart) {
+#ifdef WINNT
 	return PurgeComm(*uart,PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_TXABORT);
+#else
+	char c;
+	while (read(*uart,&c,1));
+#endif
 }
 
 uint32_t UART_Resync(uart_regs * uart) {
+#ifdef WINNT
 	return ClearCommError(*uart,NULL,NULL);
+#endif
 }

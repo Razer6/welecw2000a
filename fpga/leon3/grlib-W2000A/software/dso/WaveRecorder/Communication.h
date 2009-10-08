@@ -42,7 +42,8 @@
 #ifdef WINNT
 #include "Windows.h"
 #else
-#inlcude <unistd.h>
+#define TRUE    1   //Ugly. Where is that defined in standard?
+#define FALSE    0   //Ugly. Where is that defined in standard?
 #endif
 
 class Communication : public Object {

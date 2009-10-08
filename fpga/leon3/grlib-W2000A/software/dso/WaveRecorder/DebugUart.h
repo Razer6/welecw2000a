@@ -34,11 +34,12 @@
 ****************************************************************************/
 #ifndef DEBUGUART_H
 #define DEBUGUART_H
+#include "types.h"
 #include "Communication.h"
 
 class DebugUart : public Communication {
 public:
-	DebugUart(){}
+	DebugUart();
 	virtual uint32_t Init (
 		char * Device, 
 		const uint32_t TimeoutMS, 
