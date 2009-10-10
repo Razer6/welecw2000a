@@ -37,9 +37,9 @@
 #define NORMALUART_H
 
 #include "types.h"
-#include "Communication.h"
+#include "CPUComm.h"
 
-class NormalUart : public Communication {
+class NormalUart : public CPUComm {
 public:
 	NormalUart();
 	virtual uint32_t Init (

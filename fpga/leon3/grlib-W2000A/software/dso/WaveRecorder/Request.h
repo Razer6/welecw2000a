@@ -37,12 +37,13 @@
 
 #include "DSO_SFR.h"
 #include "Object.h"
-#include "Communication.h"
+#include "CPUComm.h"
+#include "Protocoll.h"
 #include "DSO_SignalCapture.h"
 
-class Request : public Object {
+class Request : public Protocoll {
 public:
-	Request(Communication * Comm);
+	Request(CPUComm * Comm);
 	~Request();
 	virtual uint32_t InitComm(
 		char * Device, 
@@ -90,8 +91,9 @@ public:
 		uint32_t StackAddr);
 
 protected:
-	Communication *mComm;
 	void PrintDesc(uint32_t *Data, uint32_t Length);
+private:
+	CPUComm * mComm;
 };
 
 #endif

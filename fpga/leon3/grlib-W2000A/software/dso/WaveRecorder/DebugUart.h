@@ -35,9 +35,9 @@
 #ifndef DEBUGUART_H
 #define DEBUGUART_H
 #include "types.h"
-#include "Communication.h"
+#include "DebugComm.h"
 
-class DebugUart : public Communication {
+class DebugUart : public DebugComm {
 public:
 	DebugUart();
 	virtual uint32_t Init (
@@ -47,9 +47,11 @@ public:
 		char * IPAddr);
 	virtual ~DebugUart();
 	virtual uint32_t Send(
+		uint32_t Addr,
 		uint32_t * Data, 
 		uint32_t Length);
 	virtual uint32_t Receive(
+		uint32_t Addr,
 		uint32_t * Data, 
 		uint32_t Length);
 	virtual uint32_t GetACK();
@@ -57,6 +59,7 @@ public:
 	virtual uint32_t Resync();
 
 private:
+	HANDLE mH;
 	static const int32_t cFrameLength = 32/sizeof(uint32_t); // read from VHDL Source
 };
 #endif

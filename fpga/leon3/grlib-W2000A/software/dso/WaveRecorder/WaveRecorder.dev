@@ -1,7 +1,7 @@
 [Project]
 FileName=WaveRecorder.dev
 Name=WaveRecorder
-UnitCount=26
+UnitCount=30
 Type=1
 Ver=1
 ObjFiles=
@@ -178,26 +178,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit15]
-FileName=Communication.cpp
-CompileCpp=1
-Folder=WaveRecorder
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=$(CPP) -c Communication.cpp -o Communication.o $(CXXFLAGS)
-
-[Unit16]
-FileName=Communication.h
-CompileCpp=0
-Folder=WaveRecorder
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit17]
 FileName=DebugUart.cpp
 CompileCpp=1
 Folder=WaveRecorder
@@ -207,7 +187,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=$(CPP) -c DebugUart.cpp -o DebugUart.o $(CXXFLAGS)
 
-[Unit18]
+[Unit16]
 FileName=DebugUart.h
 CompileCpp=0
 Folder=WaveRecorder
@@ -217,7 +197,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit19]
+[Unit17]
 FileName=NormalUART.cpp
 CompileCpp=1
 Folder=WaveRecorder
@@ -227,7 +207,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=$(CPP) -c NormalUART.cpp -o NormalUART.o $(CXXFLAGS)
 
-[Unit20]
+[Unit18]
 FileName=NormalUART.h
 CompileCpp=0
 Folder=WaveRecorder
@@ -237,7 +217,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit21]
+[Unit19]
 FileName=Object.h
 CompileCpp=0
 Folder=WaveRecorder
@@ -247,7 +227,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit22]
+[Unit20]
 FileName=RemoteSignalCapture.cpp
 CompileCpp=1
 Folder=WaveRecorder
@@ -257,7 +237,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=$(CPP) -c RemoteSignalCapture.cpp -o RemoteSignalCapture.o $(CXXFLAGS)
 
-[Unit23]
+[Unit21]
 FileName=RemoteSignalCapture.h
 CompileCpp=0
 Folder=WaveRecorder
@@ -267,7 +247,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit24]
+[Unit22]
 FileName=Request.cpp
 CompileCpp=1
 Folder=WaveRecorder
@@ -277,7 +257,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=$(CPP) -c Request.cpp -o Request.o $(CXXFLAGS)
 
-[Unit25]
+[Unit23]
 FileName=DSO_Remote_Master.h
 CompileCpp=0
 Folder=WaveRecorder
@@ -287,8 +267,28 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit26]
+[Unit24]
 FileName=DSO_Remote_Master.c
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit25]
+FileName=Protocoll.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit26]
+FileName=CPUComm.cpp
 CompileCpp=0
 Folder=WaveRecorder
 Compile=1
@@ -299,6 +299,46 @@ BuildCmd=
 
 [Unit3]
 FileName=PCUart.c
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit27]
+FileName=CPUComm.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit28]
+FileName=DebugComm.cpp
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit29]
+FileName=DebugComm.h
+CompileCpp=0
+Folder=WaveRecorder
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit30]
+FileName=Protocoll.cpp
 CompileCpp=0
 Folder=WaveRecorder
 Compile=1

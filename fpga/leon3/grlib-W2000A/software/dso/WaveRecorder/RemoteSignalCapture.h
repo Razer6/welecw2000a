@@ -35,13 +35,14 @@
 #ifndef REMOTESIGNALCAPTURE_H
 #define REMOTESIGNALCAPTURE_H
 
-#include "Object.h"
+#include "Protocoll.h"
 #include "DSO_SignalCapture.h"
-#include "Request.h"
+#include "DebugComm.h"
 
-class RemoteSignalCapture : public Request {
+
+class RemoteSignalCapture : public Protocoll {
 public:
-    RemoteSignalCapture(Communication * Comm);
+    RemoteSignalCapture(DebugComm * Comm);
 
 	virtual uint32_t SendTriggerInput (	
 			const uint32_t noChannels, 
@@ -112,6 +113,8 @@ private:
    uint32_t Receive(uint32_t Addr, uint32_t *Data, uint32_t & Length);
    void WaitUntilMaskedAndZero(uint32_t Addr, uint32_t Ref);
    void WaitMs(uint32_t Miliseconds);
+private:
+	DebugComm * mComm;
 };
 
 #endif

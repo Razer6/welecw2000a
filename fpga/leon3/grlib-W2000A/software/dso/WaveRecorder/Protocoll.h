@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : LEON3_DSU.h
+* File           : Protocoll.h
 * Author         : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 30.09.2009
+* Date           : 10.10.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,53 +32,63 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef LEON3_DSU_H
-#define LEON3_DSU_H
+#ifndef PROTOCOLL_H
+#define PROTOCOLL_H
+#include "Object.h"
+#include "DSO_SignalCapture.h"
 
-#include "DSO_Main.h"
+class Protocoll : public Object {
+public:
+	~Protocoll();
+	virtual uint32_t InitComm(
+		char * Device, 
+		const uint32_t TimeoutMS = 5000, 
+		const uint32_t Baudrate  = 115200,
+		char * IPAddr = "192.168.0.51");
 
-#define DSUSIZE        0x1000000
-#define DSU_CTL        (DSU_BASE_ADDR+ 0x000)
-#define DSU_DBGMODE    (DSU_BASE_ADDR+ 0x040)
-#define DSU_ERRMODE    (DSU_BASE_ADDR+ 0x200)
-#define DSU_REGFILE    (DSU_BASE_ADDR+ 0x300000)
-#define DSU_REG_Y      (DSU_BASE_ADDR+ 0x400000)
-#define DSU_REG_PSR    (DSU_BASE_ADDR+ 0x400004)
-#define DSU_REG_WIM    (DSU_BASE_ADDR+ 0x400008)
-#define DSU_REG_TBR    (DSU_BASE_ADDR+ 0x40000C)
-#define DSU_REG_PC     (DSU_BASE_ADDR+ 0x400010)
-#define DSU_REG_NPC    (DSU_BASE_ADDR+ 0x400014)
-#define DSU_REG_TRAP   (DSU_BASE_ADDR+ 0x400020)
-#define DSU_REG_ASI    (DSU_BASE_ADDR+ 0x400024)
+	virtual uint32_t SendTriggerInput (	
+		const uint32_t noChannels, 
+		const uint32_t SampleSize, 
+		const uint32_t SamplingFrequency,
+		const uint32_t AACFilterStart,
+		const uint32_t AACFilterStop,
+		const uint32_t Ch0 = 0, 
+		const uint32_t Ch1 = 1, 
+		const uint32_t Ch2 = 2, 
+		const uint32_t Ch3 = 3);
 
+	virtual uint32_t SendTrigger(
+		const uint32_t Trigger, 
+		const uint32_t ExtTrigger,
+		const uint32_t TriggerChannel,
+		const uint32_t TriggerPrefetchSamples,
+		const int  LowReference,
+		const uint32_t  LowReferenceTime,
+		const int HighReference,
+		const uint32_t HighReferenceTime);
 
-/* DSU_CTL */
-#define DSU_DEBUGMODE  (1 << 6)
-#define DSU_EE         (1 << 7)
-#define DSU_EB         (1 << 8)
-#define DSU_PE         (1 << 9)
-#define DSU_HL         (1 << 10)
-#define DSU_PW         (1 << 11)
+	virtual uint32_t SendAnalogInput(
+		const uint32_t NoCh, 
+		const SetAnalog * Settings);
 
-/* DSU_PE Write 1 to it and it clears the error and starts the CPU */
-/* DSU_HL Write 1 to it and it stops the CPU */
+	virtual uint32_t ReceiveSamples(
+		const uint32_t WaitTime, /* just a integer */
+		const uint32_t Start,
+		uint32_t CaptureSize,    /* size in DWORDs*/
+		uint32_t * FastMode,
+		uint32_t * RawData);
 
-/* DSU_REGFILE */
-#define NWINDOWS       32
-#define WINDOW_SIZE    64
-#define REG_GLOBAL_OFF  0 
-#define REG_OUT_OFF    32
-#define REG_LOCAL_OFF  64
-#define REG_IN         96
+	virtual void PrintSFR();
 
-/* DSU_REG_PSR  */
-#define PSR_REG_INIT 0xF30000E0
+	virtual uint32_t LoadProgram( 
+		const char * FileName, 
+		uint32_t StartAddr,
+		uint32_t StackAddr);
 
-/* DSU_REG_WIM  */
-#define START_WINDOW 2
-
-/* DSU_REG_TBR  */
-#define START_TBR    0x40000000
-#define START_ADDR   0x40000000
-
+protected:
+	Protocoll();
+	void PrintDesc(uint32_t *Data, uint32_t Length);
+private:
+	
+};
 #endif

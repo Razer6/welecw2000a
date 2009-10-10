@@ -33,11 +33,9 @@
 * Revision		: 0
 ****************************************************************************/
 #include "Request.h"
-#include "Communication.h"
 #include "DSO_Remote.h"
 
-Request::Request(Communication * Comm)
-: mComm(Comm){}
+Request::Request(CPUComm * Comm){}
 Request::~Request(){
 	delete mComm;
 }

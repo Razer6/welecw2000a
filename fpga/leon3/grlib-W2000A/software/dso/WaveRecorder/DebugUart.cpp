@@ -67,11 +67,14 @@ uint32_t DebugUart::Init(
 }
 
 
-uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
+uint32_t DebugUart::Send(
+				uint32_t Addr,
+				uint32_t *Data, 
+				uint32_t Length)
 {
 	int32_t Len = (int32_t)(Length-1); /* address is not counted */
 	int32_t FrameLength = cFrameLength;
-	int32_t FramePos = 1;
+	int32_t FramePos = 0;
 	int32_t i = 0;
 	while (Len > 0){
 		if (Len > cFrameLength) {
@@ -81,9 +84,8 @@ uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
 		}
 		/* b(7) = '1' request 
 		 * b(6) = '1' write */
-/*		SendCharBlock(&mH, 0xC0 | (FrameLength*sizeof(uint32_t)-1));*/
 		SendCharBlock(&mH, 0xC0 | (FrameLength-1));
-		SendInt(&mH,Data[0]+FramePos-1); // start address
+		SendInt(&mH,Addr+FramePos-1); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			SendInt(&mH,Data[i]);
 		}
@@ -93,12 +95,14 @@ uint32_t DebugUart::Send(uint32_t *Data, uint32_t Length)
 	return i;
 }
 
-uint32_t DebugUart::Receive(uint32_t *Data, 
-							 uint32_t Length)
+uint32_t DebugUart::Receive(
+					uint32_t Addr,
+					uint32_t *Data, 
+					uint32_t Length)
 {
-	int32_t Len = (int32_t)(Length-1); /* address and data[0] are not counted */
+	int32_t Len = (int32_t)(Length); 
 	int32_t FrameLength = cFrameLength;
-	int32_t FramePos = 2;
+	int32_t FramePos = 0;
 	int32_t i = 0;
 	uint32_t error;
 	while (Len > 0){
@@ -107,21 +111,19 @@ uint32_t DebugUart::Receive(uint32_t *Data,
 		} else {
 			FrameLength = Len;
 		}
-		/* b(7) = '1' request 
-		 * b(6) = '1' write */
-/*		SendCharBlock(&mH, 0x80 | (FrameLength*sizeof(uint32_t)-1));*/
+	
 		SendCharBlock(&mH, 0x80 | (FrameLength-1));
-		SendInt(&mH,Data[0]); // start address
+		SendInt(&mH,Addr); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			Data[i] = GetIntX(&mH,&error);
 			if (error != 0){
-				return (uint32_t)i-2;
+				return (uint32_t)i; /* last i is not counted by for*/
 			}
 		}
 		FramePos += cFrameLength;
 		Len -= cFrameLength;
 	}
-	return (uint32_t)i-1;
+	return (uint32_t)i;
 }
 
 uint32_t DebugUart::GetACK(){

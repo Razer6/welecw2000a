@@ -1,9 +1,9 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : LEON3_DSU.h
+* File           : CPUComm.h
 * Author         : Alexander Lindert <alexander_lindert at gmx.at>
-* Date           : 30.09.2009
+* Date           : 10.10.2009
 *****************************************************************************
 * Description	 : 
 *****************************************************************************
@@ -32,53 +32,51 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
-#ifndef LEON3_DSU_H
-#define LEON3_DSU_H
+#ifndef CPUCOMM_H
+#define CPUCOMM_H
+#include "types.h"
+#include "Object.h"
+#include "PCUart.h"
 
-#include "DSO_Main.h"
+class CPUComm : public Object {
+public:
+	CPUComm(){}
+	virtual uint32_t Init (
+		char * Device, 
+		const uint32_t TimeoutMS = 5000, 
+		const uint32_t Baudrate  = 115200,
+		char * IPAddr = "192.168.0.51"){ 
+			mH = 0;
+			return 0;
+	}
+	virtual ~CPUComm(){
+	}
+	virtual uint32_t Send(uint32_t * Data, uint32_t Length){
+		return 0;
+	}
+	virtual uint32_t Receive(uint32_t * Data, uint32_t Length){
+		return 0;
+	}
+	virtual uint32_t GetACK(){
+		return TRUE;
+	}
+	virtual uint32_t ClearBuffer(){
+		return TRUE;
+	}
+	virtual uint32_t Resync() {
+		return TRUE;
+	}
 
-#define DSUSIZE        0x1000000
-#define DSU_CTL        (DSU_BASE_ADDR+ 0x000)
-#define DSU_DBGMODE    (DSU_BASE_ADDR+ 0x040)
-#define DSU_ERRMODE    (DSU_BASE_ADDR+ 0x200)
-#define DSU_REGFILE    (DSU_BASE_ADDR+ 0x300000)
-#define DSU_REG_Y      (DSU_BASE_ADDR+ 0x400000)
-#define DSU_REG_PSR    (DSU_BASE_ADDR+ 0x400004)
-#define DSU_REG_WIM    (DSU_BASE_ADDR+ 0x400008)
-#define DSU_REG_TBR    (DSU_BASE_ADDR+ 0x40000C)
-#define DSU_REG_PC     (DSU_BASE_ADDR+ 0x400010)
-#define DSU_REG_NPC    (DSU_BASE_ADDR+ 0x400014)
-#define DSU_REG_TRAP   (DSU_BASE_ADDR+ 0x400020)
-#define DSU_REG_ASI    (DSU_BASE_ADDR+ 0x400024)
+protected:
+	char * mDevice;
+#ifdef WINNT
+	HANDLE mH;
+#else
+	int mH;
+#endif
+	uint32_t mTimeout;
 
+};
 
-/* DSU_CTL */
-#define DSU_DEBUGMODE  (1 << 6)
-#define DSU_EE         (1 << 7)
-#define DSU_EB         (1 << 8)
-#define DSU_PE         (1 << 9)
-#define DSU_HL         (1 << 10)
-#define DSU_PW         (1 << 11)
-
-/* DSU_PE Write 1 to it and it clears the error and starts the CPU */
-/* DSU_HL Write 1 to it and it stops the CPU */
-
-/* DSU_REGFILE */
-#define NWINDOWS       32
-#define WINDOW_SIZE    64
-#define REG_GLOBAL_OFF  0 
-#define REG_OUT_OFF    32
-#define REG_LOCAL_OFF  64
-#define REG_IN         96
-
-/* DSU_REG_PSR  */
-#define PSR_REG_INIT 0xF30000E0
-
-/* DSU_REG_WIM  */
-#define START_WINDOW 2
-
-/* DSU_REG_TBR  */
-#define START_TBR    0x40000000
-#define START_ADDR   0x40000000
 
 #endif

@@ -40,6 +40,7 @@
 #include "DSO_Remote_Master.h"
 #include "argtable2.h"
 #include "crc.h"
+#include "Protocoll.h"
 #include "Request.h"
 #include "RemoteSignalCapture.h"
 #include "NormalUART.h"
@@ -65,7 +66,7 @@ bool CheckArgCount (
 	return true;
 }	
 
-void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Request * R){
+void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Protocoll * R){
 	delete R;
 	R = 0;
 	arg_freetable(argtable, TableItems);
@@ -165,7 +166,7 @@ int main(int argc, char * argv[]) {
 	}	
 
 
-	Request * DSOInterface = 0;
+	Protocoll * DSOInterface = 0;
 	if ((strcmp("Debugger",Protocol->sval[0]) == 0) && (UartAddr->count == 1)) {
 		DSOInterface = new RemoteSignalCapture(new DebugUart);
 	} else {
