@@ -172,7 +172,6 @@ uint32_t RemoteSignalCapture::SendRetry(
 		if (read != k){
 			mComm->ClearBuffer();
 			mComm->Resync();
-			j = j+read-k;
 		}
 		for(; j < length; ++j){
 			if (data[j] != RecData[j]) {
@@ -218,10 +217,13 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	/* write the binary file into the RAM */
 	while (feof(hFile) == FALSE){
 		read = fread(DataArray,4,8,hFile);
-		if ((read == 0) || (read > 8)) {
+		if (read == 0){
 			break;
-/*			printf("Unexpected end of file!\n");
-			return FALSE;*/
+		}
+		if ((unsigned int)read > 8) {
+			printf("Unexpected error\n");
+			read = 1;
+			//return FALSE;
 		}
 		i = SendRetry(addr,DataArray,read);
 		addr+=read*sizeof(uint32_t);
