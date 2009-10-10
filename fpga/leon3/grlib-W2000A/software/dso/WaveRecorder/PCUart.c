@@ -232,8 +232,8 @@ char ReceiveChar(uart_regs * uart, uint32_t *error){
 		}
    } while (ret == 0);
 #else
-	while(read(*uart,&ch,1) == 0) {
-		usleep(10000);
+	while((read(*uart,&ch,1) == 0) && (cnt<100)) {
+		cnt++;
 	}
 #endif
 //	printf("%c",ch);

@@ -8,7 +8,7 @@ LIBDIR = ./objs-linux/
 all:	WaveRecorder
 
 clean: 
-	rm WaveRecorder ./libs-linux/*.o *~
+	rm WaveRecorder ./objs-linux/*.o *~
 
 $(LIBDIR)/%.o : %.c $(CINCLUDES)
 	$(CC) -c $(CFLAGS) -o $@ $<

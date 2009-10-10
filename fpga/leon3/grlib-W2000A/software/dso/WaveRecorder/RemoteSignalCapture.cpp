@@ -167,7 +167,7 @@ uint32_t RemoteSignalCapture::SendRetry(
 	uint32_t * RecData = new uint32_t[length];
 	for (i = 0; i < 32; ++i){
 		k = length-j;
-		mComm->Send(addr+j*sizeof(uint32_t),&data[j],k);
+		mComm->Send(addr+j*sizeof(uint32_t),&data[j],k);	//DebugUart::Send or NormalUart::Send
 		read = mComm->Receive(addr+j*sizeof(uint32_t),&RecData[j], k);
 		if (read != k){
 			mComm->ClearBuffer();
@@ -198,6 +198,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	uint32_t i = 0;
 	uint32_t read = 0;
 	uint32_t data = 0;
+	uint32_t temp;
 	uint32_t DataArray[8];
 
 	if (hFile == NULL) {
@@ -224,6 +225,15 @@ uint32_t RemoteSignalCapture::LoadProgram(
 			printf("Unexpected error\n");
 			read = 1;
 			//return FALSE;
+		}
+//Data from binary (ELF-) files are already in correct endianess. As SendRetry will try to correct endianess again
+//change endianess to wrong order beforehand.
+		for (i=0;i<read;i++) {
+			temp=DataArray[i];
+			DataArray[i]=	((temp & 0x000000FF) <<24) +
+							((temp & 0x0000FF00)<<8) +
+							((temp & 0x00FF0000)>>8) +
+							((temp & 0xFF000000)>>24);
 		}
 		i = SendRetry(addr,DataArray,read);
 		addr+=read*sizeof(uint32_t);

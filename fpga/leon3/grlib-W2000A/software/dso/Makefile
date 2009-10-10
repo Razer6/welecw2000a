@@ -37,7 +37,7 @@ W2000: $(WCFILES)
 	$(XCC) $(WCFILES) $(BOOTOPT) -O2 -Wall -o W2000ROM.exe
 	sparc-elf-objdump -S W2000ROM.exe > W.S
 	sparc-elf-objcopy -O srec   W2000ROM.exe sram.srec
-	#sparc-elf-objcopy -O binary W2000ROM.exe sram.bin
+	sparc-elf-objcopy -O binary W2000ROM.exe sram.bin
 
 $(WOFILES): $(WCFILES) 
 	$(XCC) $(WCFILES) $(BOOTOPT) -o W2000ROM.exe

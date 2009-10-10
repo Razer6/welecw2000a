@@ -38,6 +38,11 @@
 #include "types.h"
 #include "PCUart.h"
 
+#ifndef	WINNT
+#define	TRUE	true
+#define	FALSE	false
+#endif
+
 class DebugComm : public Object {
 public:
 	DebugComm(){};

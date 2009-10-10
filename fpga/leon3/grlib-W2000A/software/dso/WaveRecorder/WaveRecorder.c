@@ -46,6 +46,11 @@
 #include "NormalUART.h"
 #include "DebugUart.h"
 
+#ifndef	WINNT
+#define	TRUE	true
+#define FALSE	false
+#endif
+
 bool CheckArgCount (	
 			void * 	IsCount, 
             const struct arg_str * Command,

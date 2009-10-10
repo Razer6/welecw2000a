@@ -38,6 +38,11 @@
 #include "Object.h"
 #include "PCUart.h"
 
+#ifndef	WINNT
+#define	TRUE	true
+#define FALSE	false
+#endif
+
 class CPUComm : public Object {
 public:
 	CPUComm(){}
