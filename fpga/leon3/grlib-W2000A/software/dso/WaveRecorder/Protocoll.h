@@ -44,9 +44,7 @@ public:
 		char * Device, 
 		const uint32_t TimeoutMS = 5000, 
 		const uint32_t Baudrate  = 115200,
-		char * IPAddr = "192.168.0.51"){
-			return 0;
-	}
+		char * IPAddr = "192.168.0.51") = 0;
 
 	virtual uint32_t SendTriggerInput (	
 		const uint32_t noChannels, 

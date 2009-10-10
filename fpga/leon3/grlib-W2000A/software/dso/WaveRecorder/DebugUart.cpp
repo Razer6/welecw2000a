@@ -72,7 +72,7 @@ uint32_t DebugUart::Send(
 				uint32_t *Data, 
 				uint32_t Length)
 {
-	int32_t Len = (int32_t)(Length-1); /* address is not counted */
+	int32_t Len = (int32_t)(Length); 
 	int32_t FrameLength = cFrameLength;
 	int32_t FramePos = 0;
 	int32_t i = 0;
@@ -85,7 +85,7 @@ uint32_t DebugUart::Send(
 		/* b(7) = '1' request 
 		 * b(6) = '1' write */
 		SendCharBlock(&mH, 0xC0 | (FrameLength-1));
-		SendInt(&mH,Addr+FramePos-1); // start address
+		SendInt(&mH,Addr+FramePos); // start address
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			SendInt(&mH,Data[i]);
 		}

@@ -46,7 +46,16 @@
 #include "DebugComm.h"
 #include "PCUart.h"
 
-RemoteSignalCapture::RemoteSignalCapture(DebugComm * Comm){}
+RemoteSignalCapture::RemoteSignalCapture(DebugComm * Comm): mComm(Comm){}
+
+uint32_t RemoteSignalCapture::InitComm(
+		char * Device, 
+		const uint32_t TimeoutMS, 
+		const uint32_t Baudrate,
+		char * IPAddr)  
+{
+	return mComm->Init(Device,TimeoutMS,Baudrate,IPAddr);
+}
 
 uint32_t RemoteSignalCapture::Send(uint32_t Addr, uint32_t Data){
 	return mComm->Send(Addr,&Data,1);
@@ -209,7 +218,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	/* write the binary file into the RAM */
 	while (feof(hFile) == FALSE){
 		read = fread(DataArray,4,8,hFile);
-		if (read == 0) {
+		if ((read == 0) || (read > 8)) {
 			break;
 /*			printf("Unexpected end of file!\n");
 			return FALSE;*/
