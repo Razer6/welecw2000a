@@ -126,7 +126,7 @@ uint32_t RemoteSignalCapture::ReceiveSamples(
 void RemoteSignalCapture::PrintSFR(){
 	uint32_t Data[DSO_REG_SIZE/sizeof(uint32_t)];
 	uint32_t Length = DSO_REG_SIZE/sizeof(uint32_t);
-	Receive(DSO_SFR_BASE_ADDR,Data,Length);
+	mComm->Receive(DSO_SFR_BASE_ADDR,Data,Length);
 //	PrintDesc(Data,Length);
 }
 

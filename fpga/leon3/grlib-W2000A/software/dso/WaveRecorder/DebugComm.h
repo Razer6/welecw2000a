@@ -52,14 +52,13 @@ public:
 	virtual uint32_t Send(
 		uint32_t Addr,
 		uint32_t * Data, 
-		uint32_t Length);
+		uint32_t Length)=0;
 	virtual uint32_t Receive(
 		uint32_t Addr,
 		uint32_t * Data, 
-		uint32_t Length);
-	virtual uint32_t GetACK();
-	virtual uint32_t ClearBuffer();
-	virtual uint32_t Resync();
+		uint32_t Length)=0;
+	virtual uint32_t ClearBuffer()=0;
+	virtual uint32_t Resync()=0;
 
 private:
 	char * mDevice;

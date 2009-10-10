@@ -39,12 +39,14 @@
 
 class Protocoll : public Object {
 public:
-	~Protocoll();
+	~Protocoll(){};
 	virtual uint32_t InitComm(
 		char * Device, 
 		const uint32_t TimeoutMS = 5000, 
 		const uint32_t Baudrate  = 115200,
-		char * IPAddr = "192.168.0.51");
+		char * IPAddr = "192.168.0.51"){
+			return 0;
+	}
 
 	virtual uint32_t SendTriggerInput (	
 		const uint32_t noChannels, 
@@ -55,7 +57,7 @@ public:
 		const uint32_t Ch0 = 0, 
 		const uint32_t Ch1 = 1, 
 		const uint32_t Ch2 = 2, 
-		const uint32_t Ch3 = 3);
+		const uint32_t Ch3 = 3) = 0;
 
 	virtual uint32_t SendTrigger(
 		const uint32_t Trigger, 
@@ -65,28 +67,28 @@ public:
 		const int  LowReference,
 		const uint32_t  LowReferenceTime,
 		const int HighReference,
-		const uint32_t HighReferenceTime);
+		const uint32_t HighReferenceTime) = 0;
 
 	virtual uint32_t SendAnalogInput(
 		const uint32_t NoCh, 
-		const SetAnalog * Settings);
+		const SetAnalog * Settings) = 0;
 
 	virtual uint32_t ReceiveSamples(
 		const uint32_t WaitTime, /* just a integer */
 		const uint32_t Start,
 		uint32_t CaptureSize,    /* size in DWORDs*/
 		uint32_t * FastMode,
-		uint32_t * RawData);
+		uint32_t * RawData) = 0;
 
-	virtual void PrintSFR();
+	virtual void PrintSFR()=0;
 
 	virtual uint32_t LoadProgram( 
 		const char * FileName, 
 		uint32_t StartAddr,
-		uint32_t StackAddr);
+		uint32_t StackAddr) = 0;
 
 protected:
-	Protocoll();
+	Protocoll(){};
 	void PrintDesc(uint32_t *Data, uint32_t Length);
 private:
 	

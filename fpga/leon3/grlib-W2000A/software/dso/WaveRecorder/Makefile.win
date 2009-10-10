@@ -62,7 +62,7 @@ CPUComm.o: CPUComm.cpp
 DebugComm.o: DebugComm.cpp 
 	$(CC) -c DebugComm.cpp -o DebugComm.o $(CFLAGS)
 
-Protocoll.o: Protocoll.cpp 
+Protocoll.o: Protocoll.cpp Protocoll.h Object.h   C:/ProjekteArbeiten/Welec/SF/fpga/leon3/grlib-W2000A/software/dso/DSO_SignalCapture.h   C:/ProjekteArbeiten/Welec/SF/fpga/leon3/grlib-W2000A/software/dso/DSO_Main.h   C:/ProjekteArbeiten/Welec/SF/fpga/leon3/grlib-W2000A/software/dso/types.h   C:/Programme/Dev-Cpp/include/stdio.h   C:/Programme/Dev-Cpp/include/_mingw.h   C:/ProjekteArbeiten/Welec/SF/fpga/leon3/grlib-W2000A/software/dso/DSO_SFR.h
 	$(CC) -c Protocoll.cpp -o Protocoll.o $(CFLAGS)
 
 WaveRecorder_private.res: WaveRecorder_private.rc 
