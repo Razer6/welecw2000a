@@ -59,6 +59,11 @@ void SetTimeoutMs(uint32_t Timeout){
 	TimeoutMs = Timeout;
 }
 
+static uint32_t DebugInfo = FALSE; 
+void SetDebugInfo(uint32_t DebugOutput) {
+	DebugInfo = DebugOutput;
+}
+
 bool UartInit(	
 		char * UartAddr,
 		const int BaudRate,
@@ -203,7 +208,9 @@ char ReceiveCharBlock(uart_regs * uart){
 	  }
    } while (ret == 0);
    x = (int32_t)(unsigned char)ch;
- /*  printf("%02x ",x);*/
+   if (DebugInfo){
+		printf("%02x ",x);
+   }
 #else
 	uint32_t ret = 0;
 	while(read(*uart,&ch,1) == 0) {
@@ -227,7 +234,9 @@ char ReceiveChar(uart_regs * uart, uint32_t *error){
 		}
 		if (cnt == TimeoutMs){
 			*error = 1;
-			printf("\nTimeout!\n");
+			if (DebugInfo){
+				printf("\nTimeout!\n");
+			}
 			return 0;
 		}
    } while (ret == 0);
@@ -244,7 +253,9 @@ void SendCharBlock(uart_regs * uart, char c){
 #ifdef WINNT
 	uint32_t ret = 0;
 	int32_t x = (int32_t)(unsigned char)c;
-	printf("%02x ",x);
+	if (DebugInfo){
+		printf("%02x ",x);
+	}
 	do {
 		WriteFile(*uart,&c,1,(LPDWORD)&ret,NULL);
 		if (ret == 0){
@@ -326,10 +337,12 @@ void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
 		written = written + ret;
 
 	} 
-	for (ret = 0; ret < written; ++ret){
-		printf("%02x ",c[ret] & 0xff);
+	if (DebugInfo){
+		for (ret = 0; ret < written; ++ret){
+			printf("%02x ",c[ret] & 0xff);
+		}
+		printf("\n");
 	}
-	printf("\n");
 }
 
 /* return error */
@@ -348,8 +361,9 @@ uint32_t ReceiveBytes(
 			Sleep(1);
 		}
 		if (cnt == TimeoutMs){
-
-			printf("\nTimeout!\n");
+			if (DebugInfo){
+				printf("\nTimeout!\n");
+			}
 			return written;
 		}
 		written += ret;
@@ -357,15 +371,19 @@ uint32_t ReceiveBytes(
 #else
 	written=read(*uart,data,length);
 #endif
-	for (ret = 0; ret < written; ++ret){
-		printf("%02x ",data[ret] & 0xff);
+	if (DebugInfo){
+		for (ret = 0; ret < written; ++ret){
+			printf("%02x ",data[ret] & 0xff);
+		}
+		printf("\n");
 	}
-	printf("\n");
 	return written;
 }
 
 uint32_t UART_Flush(uart_regs * uart) {
 #ifdef WINNT
+	DWORD txempty = EV_TXEMPTY;
+	WaitCommEvent(*uart,&txempty,0);
 	return PurgeComm(*uart,PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_TXABORT);
 #else
 	char c;

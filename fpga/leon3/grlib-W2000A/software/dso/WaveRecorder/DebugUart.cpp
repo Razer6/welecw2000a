@@ -62,7 +62,7 @@ uint32_t DebugUart::Init(
 	if (succ != 0) {
 		Resync();
 	}
-	SetTimeoutMs(10);
+	SetTimeoutMs(20);
 	return succ;
 }
 
@@ -114,6 +114,10 @@ uint32_t DebugUart::Receive(
 	
 		SendCharBlock(&mH, 0x80 | (FrameLength-1));
 		SendInt(&mH,Addr); // start address
+#ifdef WINNT
+		i = EV_TXEMPTY;
+		WaitCommEvent(mH,(LPDWORD)&i,0);
+#endif
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			Data[i] = GetIntX(&mH,&error);
 			if (error != 0){

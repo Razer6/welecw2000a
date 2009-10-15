@@ -45,6 +45,7 @@
 #include "DSO_ADC_Control.h"
 #include "DebugComm.h"
 #include "PCUart.h"
+#include "DSO_Remote.h"
 
 RemoteSignalCapture::RemoteSignalCapture(DebugComm * Comm): mComm(Comm){}
 
@@ -145,7 +146,7 @@ uint32_t RemoteSignalCapture::SendRetry(
 	uint32_t i = 0;
 	uint32_t read = 0;
 	uint32_t RecData;
-	for (i = 0; i < 32; ++i){
+	for (i = 0; i < cMaxRetrys; ++i){
 		mComm->Send(addr,&data,1);
 		read = mComm->Receive(addr,&RecData,1);
 		if ((read == 1) && (data == RecData)) break;
@@ -165,10 +166,11 @@ uint32_t RemoteSignalCapture::SendRetry(
 	uint32_t k = 0;
 	uint32_t read = 0;
 	uint32_t * RecData = new uint32_t[length];
-	for (i = 0; i < 32; ++i){
+	for (i = 0; i < cMaxRetrys; ++i){
 		k = length-j;
 		mComm->Send(addr+j*sizeof(uint32_t),&data[j],k);	//DebugUart::Send or NormalUart::Send
 		read = mComm->Receive(addr+j*sizeof(uint32_t),&RecData[j], k);
+
 		if (read != k){
 			mComm->ClearBuffer();
 			mComm->Resync();
@@ -180,6 +182,7 @@ uint32_t RemoteSignalCapture::SendRetry(
 				break;
 			}	
 		}
+		//j = length;
 		if (j == length) break;
 	}
 	length = j;
@@ -199,10 +202,10 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	uint32_t read = 0;
 	uint32_t data = 0;
 	uint32_t temp;
-	uint32_t DataArray[8];
+	uint32_t DataArray[cFrameSize];
 
 	if (hFile == NULL) {
-		printf("Binary program file not found!\n");
+		printf("Binary software file not found!\n");
 		return FALSE;
 	}
 	/* Stop the CPU */
@@ -217,59 +220,78 @@ uint32_t RemoteSignalCapture::LoadProgram(
 
 	/* write the binary file into the RAM */
 	while (feof(hFile) == FALSE){
-		read = fread(DataArray,4,8,hFile);
+		read = fread(DataArray,4,cFrameSize,hFile);
 		if (read == 0){
 			break;
 		}
-		if ((unsigned int)read > 8) {
+		if ((uint32_t)read > cFrameSize) {
 			printf("Unexpected error\n");
 			read = 1;
 			//return FALSE;
 		}
 //Data from binary (ELF-) files are already in correct endianess. As SendRetry will try to correct endianess again
 //change endianess to wrong order beforehand.
-		for (i=0;i<read;i++) {
+		data = read*sizeof(uint32_t);
+		ChangeEndian(DataArray,data);
+/*		for (i=0;i<read;i++) {
 			temp=DataArray[i];
 			DataArray[i]=	((temp & 0x000000FF) <<24) +
 							((temp & 0x0000FF00)<<8) +
 							((temp & 0x00FF0000)>>8) +
 							((temp & 0xFF000000)>>24);
-		}
+		}*/
+
 		i = SendRetry(addr,DataArray,read);
 		addr+=read*sizeof(uint32_t);
-		if (i == 32) {
-			printf("Transmission error on addr 0x%8x!\n", addr);
+		if (i == cMaxRetrys) {
+			printf("%d Transmission errors on addr 0x%8x!\n",cMaxRetrys, addr);
 			fclose(hFile);
 			return FALSE;
 		}
 		
-		if (addr % 0x100 == 0){
+		if (addr % 0x1000 == 0){
 			printf("\naddr 0x%x\n",addr);
 		}
 	}
-	/* Clear the REGFILE */
+	fclose(hFile);
+	printf("Downloading software done!\n");
+	// Clear the REGFILE 
+	/*
 	for(i = 0; i < NWINDOWS*WINDOW_SIZE/4; ++i){
 		SendRetry(DSU_REGFILE + i*4,0);
-	}
-	/* Set the StackAddr */
+	}*/
+	mComm->ClearBuffer();
+	mComm->Resync();
+	// Set the StackAddr 
 	addr = DSU_REGFILE + (START_WINDOW*WINDOW_SIZE) + REG_OUT_OFF;
 	SendRetry(addr,StackAddr);
+	printf("Stackaddr: 0x%8x\n",StackAddr);
 	
-	/* Set the start register window */
+	// Set the start register window 
 	SendRetry(DSU_REG_WIM,START_WINDOW);
+	printf("DSU_REG_WIM: 0x%8x\n",START_WINDOW);
 
-	/* Set the Trap Base Register */
+	// Set the Trap Base Register 
 	SendRetry(DSU_REG_TBR,START_TBR);
+	printf("DSU_REG_TBR: 0x%8x\n",START_TBR);
 
-	/* Set the start address */
+	// Set the start address 
 	SendRetry(DSU_REG_PC,START_TBR);
 	SendRetry(DSU_REG_PC+4,START_TBR+4);
+	printf("DSU_REG_PC: 0x%8x\n",START_TBR);
 
-	/* RUN */
+	// RUN 
 	addr = DSU_CTL;
 	read = mComm->Receive(DSU_CTL,&data,1);
-	Send(DSU_CTL,(data | DSU_PE));
-	fclose(hFile);
+	data = (data | DSU_PE) & ~DSU_HL;
+	Send(DSU_CTL, data);
+	data = mComm->Receive(DSU_CTL,&data,1);
+	printf("DSU_CTL: 0x%8x\n",data);
+	data = mComm->Receive(DSU_REG_PC,&data,1);
+	printf("DSU_REG_PC: 0x%8x\n",data);
+	data = mComm->Receive(DSU_REG_TRAP,&data,1);
+	printf("DSU_REG_TRAP: 0x%8x\n",data);
+
 	return TRUE;
 }
 
