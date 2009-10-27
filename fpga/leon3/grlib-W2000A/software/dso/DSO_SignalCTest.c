@@ -142,31 +142,29 @@ int main () {
 	uart_regs * uart2 = (uart_regs *)DEBUG_UART_BASE_ADDR;
 	SetAnalog Analog[2];
 	uSample Data[CAPTURESIZE];
-	uSample Ch1[HLEN+100];
-	uSample Ch2[HLEN+100];
+	uSample Ch1[2][HLEN+100];
+	uSample Ch2[2][HLEN+100];
+	uSample CalcBuffer[HLEN+100];
+	uint32_t PrevBuffer = 0;
+	uint32_t CurrBuffer = 1;
 
 	uint32_t i = 0;
-/*	uint32_t ch1, ch2, ch3, ch4;
-	uint32_t ch1p, ch2p, ch3p,ch4p;*/
 	uint32_t Prefetch = 64;
-/*	static FILE mystdout = FDEV_SETUP_STREAM(SendDebugMessage, NULL );
-	stdout = mystdout;*/
 
 	char ack[] = "success!\n";
 	char nak[] = "failed!\n";
+	char x = 0;
 
-/*	Analog[0].myVperDiv = 100000;
+	Analog[0].myVperDiv = 10000;
 	Analog[0].AC = 0;
 	Analog[0].Mode = normal;
 	Analog[0].DA_Offset = 0xaa;
-	Analog[0].PWM_Offset = 0xf1;
-	Analog[1].myVperDiv = 100000;
+//	Analog[0].PWM_Offset = 0xf1;
+	Analog[1].myVperDiv = 10000;
 	Analog[1].AC = 1;
 	Analog[1].Mode = normal;
 	Analog[1].DA_Offset = 0xf1;
-	Analog[1].PWM_Offset = 0xf1;*/
-
-	char x = 0;
+//	Analog[1].PWM_Offset = 0xf1;
 	
 	/* This is a workaround to share the serial port with the debug uart 
 	 * and the generic uart on the W2000A! */
@@ -217,7 +215,7 @@ int main () {
 #ifdef W2000A
 #ifdef BOARD_COMPILATION
 	InitDisplay(WELEC2022);
-	DrawTest();
+//	DrawTest();
 /*	while(1);*/
 #endif 
 #endif
@@ -305,58 +303,51 @@ int main () {
 #ifdef W2000A
 #ifdef BOARD_COMPILATION
 	WaitMs(100);
-	printf("\nStartFrontPanelTest\n");
-	FrontPanelTest(uart);
-	printf("\nSignalTest\n");
+//	printf("\nStartFrontPanelTest\n");
+//	FrontPanelTest(uart);
+//	printf("\nSignalTest\n");
 
 #define PREFETCH_OFFSET 32
 #define BG_COLOR COLOR_R3G3B3(1,1,1)
 	Prefetch = HLEN;
 	SetTriggerInput(4,8,1000000000,FIXED_CPU_FREQUENCY,0,1,0,1,2,3);
-	SetTrigger(2,0,0,Prefetch,0,3,-3,3);
+	SetTrigger(0,0,0,Prefetch,0,3,-3,3);
 	ReadData = 0;
-	memset(Ch1,640*4,0);
-	memset(Ch2,640*4,0);
-
-	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN);
+	memset(Ch1,HLEN*2*sizeof(uSample),0);
+	memset(Ch2,HLEN*2*sizeof(uSample),0);
+	SetAnalogInputRange(2,Analog);
+	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1);
 	while(1) {
-/*		if (ReadData >= (6400+Prefetch)) {
-			DrawSignal(0,8,128,Ch1, COLOR_R3G3B3(7,7,7));
-			DrawSignal(1,16,128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(7,7,7));
-		}*/
-
+		if (CurrBuffer != 0) {
+			CurrBuffer = 0;
+			PrevBuffer = 1;
+			DrawBox(x,0,470,9,479);
+		} else {
+			CurrBuffer = 1;
+			PrevBuffer = 0;
+			DrawBox(x,30,470,39,479);
+		}
+		x++;
 		ReadData = CaptureData(FASTFS, true, true, 32768, (uint32_t*)Data);
 
-		 if (ReadData >= (6400+Prefetch)) {
-/*********************************************************************
-		
-			DrawSignal(128, Ch1, COLOR_R3G3B3(0,0,0));
-			DrawSignal(128+(VLEN/2),Ch2, COLOR_R3G3B3(7,7,7));
-			DrawHLine(COLOR_R3G3B3(7,7,7), 128, 0, HLEN-1);
-*********************************************************************/
-			DrawHLine(COLOR_R3G3B3(7,7,7), 128+(VLEN/2), 0, HLEN-1);
-			GetCh(0,8, Ch1,&Data[0], HLEN+100);
-			DrawSignal(128, Ch1, COLOR_R3G3B3(0,7,0));
-			
-/*********************************************************************
-		//	Interpolate((HLEN/8)+(FILTER_COEFFS*2),Ch2, Ch1,0);
-		//	DrawSignal(128+(VLEN/2),&Ch2[FILTER_COEFFS], COLOR_R3G3B3(0,0,7));
-			if (x == 0) {
-				DrawBox(BG_COLOR,0,0,HLEN-1,VLEN);
-			}
-			GetCh(1,8, Ch2,&Data[0], HLEN);
-			DrawSignal(128+(VLEN/2),Ch2, COLOR_R3G3B3(0,0,7));
-			
+		if (ReadData >= (6400+Prefetch)) {
+			GetCh(0,8, &Ch1[CurrBuffer][0],&Data[0], HLEN+100);
+		/*	DrawSignal(128,&Ch1[PrevBuffer][0].i, &Ch1[PrevBuffer][0].i,COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,0,0));*/
+			DrawSignal(128,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,0));
 
-			DrawBox(x,630,470,639,480);
-		//	WaitMs(100);
-			
-			
-*********************************************************************/
+//			DrawHLine(COLOR_R3G3B3(7,7,7), 128+(VLEN/2), 0, HLEN-1);
+			GetCh(1,8, CalcBuffer,&Data[0], HLEN+100);
+			Interpolate(HLEN+(FILTER_COEFFS*2),&Ch2[CurrBuffer][0], CalcBuffer,0);
+			DrawSignal(VLEN-128,&Ch2[PrevBuffer][FILTER_COEFFS], &Ch2[CurrBuffer][FILTER_COEFFS],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,7));
+	
+			WaitMs(50);
+			if (x == 0) {
+				DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1);
+			}
 		}
-		DrawBox(x,0,0,x,9);
+/*		DrawBox(x,0,0,x,480);
 		x++; if (x>=640) x=0;
-		
+*/
 	}	
 #endif	
 #endif

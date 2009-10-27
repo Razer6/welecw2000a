@@ -265,7 +265,7 @@ begin
     end if;
   end process;
 
-  process (Phase1n, Phase2n, Delay)
+  process (Phase1n, Phase2n, Phase2p, Phase3n, Delay)
   begin
     for i in 0 to cChannels-1 loop
       oData(i)(0) <= Delay(i)(0);

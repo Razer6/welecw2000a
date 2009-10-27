@@ -64,7 +64,7 @@
 /* DSU_HL Write 1 to it and it stops the CPU */
 
 /* DSU_REGFILE */
-#define NWINDOWS       32
+#define NWINDOWS       24
 #define WINDOW_SIZE    64
 #define REG_GLOBAL_OFF  0 
 #define REG_OUT_OFF    32
@@ -80,5 +80,8 @@
 /* DSU_REG_TBR  */
 #define START_TBR    0x40000000
 #define START_ADDR   0x40000000
+
+/* DSU_REG_ASI */
+
 
 #endif

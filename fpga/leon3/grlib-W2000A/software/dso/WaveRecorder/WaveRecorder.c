@@ -187,11 +187,9 @@ printf("%s:%d\n",__FILE__,__LINE__);
 		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
 	if (strcmp("LoadRun",Command->sval[0]) == 0){
-printf("%s:%d\n",__FILE__,__LINE__);
 		uint32_t BaseAddr = RAM_BASE_ADDR;
 		uint32_t Stack = RAM_BASE_ADDR + RAM_SIZE -16;
 		struct arg_int * IsOnce[] = {(arg_int*)ForceFile};
-printf("%s:%d\n",__FILE__,__LINE__);
 		int32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (ForceAddr->count == 1){
 			BaseAddr = ForceAddr->ival[0];

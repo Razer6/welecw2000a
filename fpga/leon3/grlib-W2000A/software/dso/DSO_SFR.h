@@ -209,7 +209,7 @@
 
 /* LEDADDR*/
 /* switch on the led by setting the corresponding bit to 1*/
-/* TODO solve many bugs and make a good read and write algorithm (hw+sw)*/
+/* TODO interrupt */
 #define LED_CH0        0
 #define LED_CH1        1
 #define LED_CH2        2
@@ -225,10 +225,27 @@
 #define SINGLE_GREEN  12 
 #define SINGE_RED     13
 
-
+/*  (read only) */
+/* rotary nob counter (3 bit) base adresses */
+#define EN_TIME_DIV    16
+#define EN_LEFT_RIGHT  20
+#define EN_LEVEL       24
+#define EN_F           28
 
 
 /* KEYADDR0 */
+/* (read only)*/
+#define ENX_CH0_UPDN    0
+#define ENX_CH1_UPDN    4
+#define ENX_CH2_UPDN    8
+#define ENX_CH3_UPDN   12
+#define ENX_CH0_VDIV   16
+#define ENX_CH1_VDIV   20
+#define ENX_CH2_VDIV   24
+#define ENX_CH3_VDIV   28
+
+
+/* KEYADDR1 */
 /* (read only)*/
 #define BTN_F1           0
 #define BTN_F2           1
@@ -257,33 +274,11 @@
 #define BTN_PULSEWIDTH  24 
 #define BTN_X1          25
 #define BTN_X2          26
-#define ENX_TIME_DIV    27
-#define ENY_TIME_DIV    28
-#define ENX_F           29
-#define ENY_F           30
 
-/* KEYADDR1 */
-/* (read only)*/
-#define ENX_LEFT_RIGHT  0
-#define ENY_LEFT_RIGHT  1
-#define ENX_LEVEL       2
-#define ENY_LEVEL       3
-#define ENX_CH0_UPDN    4
-#define ENY_CH0_UPDN    5
-#define ENX_CH1_UPDN    6
-#define ENY_CH1_UPDN    7
-#define ENX_CH2_UPDN    8
-#define ENY_CH2_UPDN    9
-#define ENX_CH3_UPDN   10
-#define ENY_CH3_UPDN   11
-#define ENX_CH0_VDIV   12
-#define ENY_CH0_VDIV   13
-#define ENX_CH1_VDIV   14
-#define ENY_CH1_VDIV   15
-#define ENX_CH2_VDIV   16
-#define ENY_CH2_VDIV   17
-#define ENX_CH3_VDIV   18
-#define ENY_CH3_VDIV   19
+
+
+
+
 
 /* ANALOGSETTINGSBANK7 */
 #define CH0_K1_ON     0

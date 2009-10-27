@@ -265,6 +265,7 @@ bool SetTrigger(
 }
 
 
+
 bool SetAnalogInputRange(
 		const uint32_t NoCh, 
 		const SetAnalog * Settings) 
@@ -273,13 +274,14 @@ bool SetAnalogInputRange(
 	uint32_t temp = 0;
 	uint32_t j = 0;
 	short dac = 0;
+#if 0
 	for(i = 0; i < NoCh; ++i){
 		switch (CaptureR->DeviceAddr) {
 			case WELEC2012:
 			case WELEC2022:
 			case WELEC2014:
 			case WELEC2024:
-				if (NoCh < 2) {
+				if (NoCh > 2) {
 					return false;
 				}
 				if (Settings[i].myVperDiv < 1000000) {
@@ -420,6 +422,7 @@ bool SetAnalogInputRange(
 				break;
 		}
 	}
+#endif
 	return true;
 }
 

@@ -4,7 +4,7 @@
 -- File       : LedsKeysAnalogSettings-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-28
+-- Last update: 2009-10-27
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -66,9 +66,10 @@ architecture RTL of LedsKeysAnalogSettings is
   signal Strobe, SerialClk : std_ulogic;
   signal LedShiftReg       : std_ulogic_vector(cLedShiftLength-1 downto 0);
   signal LedCounter        : natural range 0 to cLedShiftLength;
+  signal LedStrobe         : std_ulogic;
   signal KeyShiftReg       : std_ulogic_vector(cKeyShiftLength downto 0);
   signal KeyCounter        : natural range 0 to cKeyShiftLength;
-  signal LedStrobe         : std_ulogic;
+  signal KeyStrobe         : std_ulogic;
 
 
   type aAnalogState is record
@@ -79,7 +80,9 @@ architecture RTL of LedsKeysAnalogSettings is
                          Enable     : std_ulogic;
                        end record;
   
+  
   signal AnalogSettings : aAnalogState;
+  
   
 begin
 
@@ -163,8 +166,22 @@ begin
       onFetchKeys <= (
         nFetchStrobe => cHighInactive,
         nChipEnable  => cHighInactive);
-      oKeys <= (others => '0');
-      
+--      oKeys <= (
+--        EN_TIME_DIV   => "00",
+--        EN_F          => "00",
+--        EN_LEFT_RIGHT => "00",
+--        EN_LEVEL      => "00",
+--        EN_CH0_UPDN   => "00",
+--        EN_CH1_UPDN   => "00",
+--        EN_CH2_UPDN   => "00",
+--        EN_CH3_UPDN   => "00",
+--        EN_CH0_VDIV   => "00",
+--        EN_CH1_VDIV   => "00",
+--        EN_CH2_VDIV   => "00",
+--        EN_CH3_VDIV   => "00",
+--        others        => '0');
+      --  KeyStable <= (others => '0');
+
     elsif rising_edge(iClk) then
       onFetchKeys.nChipEnable <= cLowActive;
 
@@ -184,62 +201,177 @@ begin
         end if;
 
         if KeyCounter = 0 then
-          oKeys <= (
-            BTN_F1           => KeyShiftReg(19),
-            BTN_F2           => KeyShiftReg(20),
-            BTN_F3           => KeyShiftReg(21),
-            BTN_F4           => KeyShiftReg(22),
-            BTN_F5           => KeyShiftReg(16),
-            BTN_F6           => KeyShiftReg(18),
-            BTN_MATH         => KeyShiftReg(1),
-            BTN_CH0          => KeyShiftReg(17),
-            BTN_CH1          => KeyShiftReg(15),
-            BTN_CH2          => KeyShiftReg(3),
-            BTN_CH3          => KeyShiftReg(2),
-            BTN_MAINDEL      => KeyShiftReg(39),
-            BTN_RUNSTOP      => KeyShiftReg(44),
-            BTN_SINGLE       => KeyShiftReg(43),
-            BTN_CURSORS      => KeyShiftReg(32),
-            BTN_QUICKMEAS    => KeyShiftReg(37),
-            BTN_ACQUIRE      => KeyShiftReg(36),
-            BTN_DISPLAY      => KeyShiftReg(34),
-            BTN_EDGE         => KeyShiftReg(42),
-            BTN_MODECOUPLING => KeyShiftReg(40),
-            BTN_AUTOSCALE    => KeyShiftReg(31),
-            BTN_SAVERECALL   => KeyShiftReg(38),
-            BTN_QUICKPRINT   => KeyShiftReg(35),
-            BTN_UTILITY      => KeyShiftReg(33),
-            BTN_PULSEWIDTH   => KeyShiftReg(46),
-            BTN_X1           => KeyShiftReg(41),
-            BTN_X2           => KeyShiftReg(45),
-            ENX_TIME_DIV     => KeyShiftReg(48),
-            ENY_TIME_DIV     => KeyShiftReg(47),
-            ENX_F            => KeyShiftReg(50),
-            ENY_F            => KeyShiftReg(49),
-            ENX_LEFT_RIGHT   => KeyShiftReg(54),
-            ENY_LEFT_RIGHT   => KeyShiftReg(53),
-            ENX_LEVEL        => KeyShiftReg(52),
-            ENY_LEVEL        => KeyShiftReg(51),
-            ENX_CH0_UPDN     => KeyShiftReg(24),
-            ENY_CH0_UPDN     => KeyShiftReg(23),
-            ENX_CH1_UPDN     => KeyShiftReg(30),
-            ENY_CH1_UPDN     => KeyShiftReg(29),
-            ENX_CH2_UPDN     => KeyShiftReg(8),
-            ENY_CH2_UPDN     => KeyShiftReg(7),
-            ENX_CH3_UPDN     => KeyShiftReg(14),
-            ENY_CH3_UPDN     => KeyShiftReg(13),
-            ENX_CH0_VDIV     => KeyShiftReg(26),
-            ENY_CH0_VDIV     => KeyShiftReg(25),
-            ENX_CH1_VDIV     => KeyShiftReg(28),
-            ENY_CH1_VDIV     => KeyShiftReg(27),
-            ENX_CH2_VDIV     => KeyShiftReg(10),
-            ENY_CH2_VDIV     => KeyShiftReg(9),
-            ENX_CH3_VDIV     => KeyShiftReg(12),
-            ENY_CH3_VDIV     => KeyShiftReg(11));
+
+          oKeys.BTN_F1           <= KeyShiftReg(19);
+          oKeys.BTN_F2           <= KeyShiftReg(20);
+          oKeys.BTN_F3           <= KeyShiftReg(21);
+          oKeys.BTN_F4           <= KeyShiftReg(22);
+          oKeys.BTN_F5           <= KeyShiftReg(16);
+          oKeys.BTN_F6           <= KeyShiftReg(18);
+          oKeys.BTN_MATH         <= KeyShiftReg(0);
+          oKeys.BTN_CH0          <= KeyShiftReg(17);
+          oKeys.BTN_CH1          <= KeyShiftReg(15);
+          oKeys.BTN_CH2          <= KeyShiftReg(4);
+          oKeys.BTN_CH3          <= KeyShiftReg(6);
+          oKeys.BTN_MAINDEL      <= KeyShiftReg(39);
+          oKeys.BTN_RUNSTOP      <= KeyShiftReg(44);
+          oKeys.BTN_SINGLE       <= KeyShiftReg(43);
+          oKeys.BTN_CURSORS      <= KeyShiftReg(32);
+          oKeys.BTN_QUICKMEAS    <= KeyShiftReg(37);
+          oKeys.BTN_ACQUIRE      <= KeyShiftReg(36);
+          oKeys.BTN_DISPLAY      <= KeyShiftReg(34);
+          oKeys.BTN_EDGE         <= KeyShiftReg(42);
+          oKeys.BTN_MODECOUPLING <= KeyShiftReg(40);
+          oKeys.BTN_AUTOSCALE    <= KeyShiftReg(31);
+          oKeys.BTN_SAVERECALL   <= KeyShiftReg(38);
+          oKeys.BTN_QUICKPRINT   <= KeyShiftReg(35);
+          oKeys.BTN_UTILITY      <= KeyShiftReg(33);
+          oKeys.BTN_PULSEWIDTH   <= KeyShiftReg(46);
+          oKeys.BTN_X1           <= KeyShiftReg(41);
+          oKeys.BTN_X2           <= KeyShiftReg(45);
+--            ENX_TIME_DIV     => KeyShiftReg(48),   -- dont care start
+--            ENY_TIME_DIV     => KeyShiftReg(47),
+--            ENX_F            => KeyShiftReg(50),
+--            ENY_F            => KeyShiftReg(49),
+--            ENX_LEFT_RIGHT   => KeyShiftReg(54),
+--            ENY_LEFT_RIGHT   => KeyShiftReg(53),
+--            ENX_LEVEL        => KeyShiftReg(52),
+--            ENY_LEVEL        => KeyShiftReg(51),
+--            ENX_CH0_UPDN     => KeyShiftReg(24),
+--            ENY_CH0_UPDN     => KeyShiftReg(23),
+--            ENX_CH1_UPDN     => KeyShiftReg(30),
+--            ENY_CH1_UPDN     => KeyShiftReg(29),
+--            ENX_CH2_UPDN     => KeyShiftReg(8),
+--            ENY_CH2_UPDN     => KeyShiftReg(7),
+--            ENX_CH3_UPDN     => KeyShiftReg(14),
+--            ENY_CH3_UPDN     => KeyShiftReg(13),
+--            ENX_CH0_VDIV     => KeyShiftReg(26),
+--            ENY_CH0_VDIV     => KeyShiftReg(25),
+--            ENX_CH1_VDIV     => KeyShiftReg(28),
+--            ENY_CH1_VDIV     => KeyShiftReg(27),
+--            ENX_CH2_VDIV     => KeyShiftReg(10),
+--            ENY_CH2_VDIV     => KeyShiftReg(9),
+--            ENX_CH3_VDIV     => KeyShiftReg(12),
+--            ENY_CH3_VDIV     => KeyShiftReg(11));  -- dont care end
+
         end if;
       end if;
     end if;
   end process;
+
+  KeyStrobe <= '1' when KeyCounter = 0 and Strobe = '1' and SerialClk = '1' else '0';
+
+  CH3_VDIV : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(12),
+      iUnstable   => KeyShiftReg(11),
+      oCounter    => oKeys.EN_CH3_VDIV);
+
+  CH2_VDIV : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(10),
+      iUnstable   => KeyShiftReg(9),
+      oCounter    => oKeys.EN_CH2_VDIV);
+
+  CH1_VDIV : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(28),
+      iUnstable   => KeyShiftReg(27),
+      oCounter    => oKeys.EN_CH1_VDIV);
+
+  CH0_VDIV : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(26),
+      iUnstable   => KeyShiftReg(25),
+      oCounter    => oKeys.EN_CH0_VDIV);
+
+  CH3_UPDN : entity DSO.NobDecoder
+    generic map (gReverseDir => 1)
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(13),
+      iUnstable   => KeyShiftReg(14),
+      oCounter    => oKeys.EN_CH3_UPDN);
+
+  CH2_UPDN : entity DSO.NobDecoder
+    generic map (gReverseDir => 1)
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(7),
+      iUnstable   => KeyShiftReg(8),
+      oCounter    => oKeys.EN_CH2_UPDN);
+
+  CH1_UPDN : entity DSO.NobDecoder
+   generic map (gReverseDir => 1) 
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(29),
+      iUnstable   => KeyShiftReg(30),
+      oCounter    => oKeys.EN_CH1_UPDN);
+
+  CH0_UPDN : entity DSO.NobDecoder
+    generic map (gReverseDir => 1)
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(23),
+      iUnstable   => KeyShiftReg(24),
+      oCounter    => oKeys.EN_CH0_UPDN);
+
+  LEVEL : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(52),
+      iUnstable   => KeyShiftReg(51),
+      oCounter    => oKeys.EN_LEVEL);
+
+  LEFT_RIGHT : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(54),
+      iUnstable   => KeyShiftReg(53),
+      oCounter    => oKeys.EN_LEFT_RIGHT);
+
+  F : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(50),
+      iUnstable   => KeyShiftReg(49),
+      oCounter    => oKeys.EN_F);
+
+  TIME_DIV : entity DSO.NobDecoder
+    port map(
+      iClk        => iClk,
+      iResetAsync => iResetAsync,
+      iStrobe     => KeyStrobe,
+      iStable     => KeyShiftReg(48),
+      iUnstable   => KeyShiftReg(47),
+      oCounter    => oKeys.EN_TIME_DIV);
 
   pAnalogSettings : process (iClk, iResetAsync)
   begin
@@ -343,7 +475,7 @@ begin
             AnalogSettings.ShiftReg(0) <= '-';
           end if;
         end if;
-        if AnalogSettings.SetCounter = '1' then             -- important to garantee the
+        if AnalogSettings.SetCounter = '1' then  -- important to garantee the
           AnalogSettings.Counter    <= cAnalogShiftLength;  -- the fist bit time
           AnalogSettings.SetCounter <= '0';
           oAnalogBusy               <= '1';

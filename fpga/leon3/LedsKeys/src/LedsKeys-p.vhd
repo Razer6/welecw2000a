@@ -4,7 +4,7 @@
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-28
+-- Last update: 2009-10-23
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -43,7 +43,7 @@ library DSO;
 use DSO.Global.all;
 
 package pLedsKeysAnalogSettings is
-  
+  constant cNobCounterSize : natural := 3;
   constant cAnalogAddrLength  : natural := 3;
   constant cAnalogShiftLength : natural := 24;
 
@@ -87,30 +87,18 @@ package pLedsKeysAnalogSettings is
                   BTN_PULSEWIDTH   : std_ulogic;
                   BTN_X1           : std_ulogic;
                   BTN_X2           : std_ulogic;
-                  ENX_TIME_DIV     : std_ulogic;
-                  ENY_TIME_DIV     : std_ulogic;
-                  ENX_F            : std_ulogic;
-                  ENY_F            : std_ulogic;
-                  ENX_LEFT_RIGHT   : std_ulogic;
-                  ENY_LEFT_RIGHT   : std_ulogic;
-                  ENX_LEVEL        : std_ulogic;
-                  ENY_LEVEL        : std_ulogic;
-                  ENX_CH0_UPDN     : std_ulogic;
-                  ENY_CH0_UPDN     : std_ulogic;
-                  ENX_CH1_UPDN     : std_ulogic;
-                  ENY_CH1_UPDN     : std_ulogic;
-                  ENX_CH2_UPDN     : std_ulogic;
-                  ENY_CH2_UPDN     : std_ulogic;
-                  ENX_CH3_UPDN     : std_ulogic;
-                  ENY_CH3_UPDN     : std_ulogic;
-                  ENX_CH0_VDIV     : std_ulogic;
-                  ENY_CH0_VDIV     : std_ulogic;
-                  ENX_CH1_VDIV     : std_ulogic;
-                  ENY_CH1_VDIV     : std_ulogic;
-                  ENX_CH2_VDIV     : std_ulogic;
-                  ENY_CH2_VDIV     : std_ulogic;
-                  ENX_CH3_VDIV     : std_ulogic;
-                  ENY_CH3_VDIV     : std_ulogic;
+                  EN_TIME_DIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_F             : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_LEFT_RIGHT    : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_LEVEL         : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH0_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH1_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH2_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH3_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH0_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH1_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH2_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
+                  EN_CH3_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
                 end record;
   
   type aLeds is record

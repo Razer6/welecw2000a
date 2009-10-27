@@ -203,7 +203,7 @@ void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2){
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
 void DrawBox(uint16_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
 	register uint32_t i = V1;
-	for(i = V1; i < V2; ++i){
+	for(i = V1; i <= V2; ++i){
 		DrawHLine(Color,i,H1,H2);
 	}
 }

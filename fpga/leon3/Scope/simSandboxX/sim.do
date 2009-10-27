@@ -28,6 +28,7 @@ vcom -quiet -93 -work DSO {../../Trigger/src/ExtTriggerInput-ea.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/PWM-ea.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/StrobeGen-e.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/StrobeGen-Rtl-a.vhd}
+vcom -quiet -93 -work DSO {../../LedsKeys/src/NobDecoder-ea.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/LedsKeys-ea.vhd}
 
 # vlog +incdir+../../uart16550/src ../../uart16550/src/uart_regs.v  ../../uart16550/src/uart_top.v ../../uart16550/src/uart_debug_if.v ../../uart16550/src/uart_rfifo.v ../../uart16550/src/uart_transmitter.v ../../uart16550/src/uart_sync_flops.v ../../uart16550/src/uart_wb.v ../../uart16550/src/raminfr.v ../../uart16550/src/uart_receiver.v ../../uart16550/src/uart_tfifo.v

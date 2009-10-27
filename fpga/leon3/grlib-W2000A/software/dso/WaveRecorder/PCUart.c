@@ -93,10 +93,10 @@ bool UartInit(
     m_dcb.Parity = NOPARITY;
     m_dcb.StopBits = ONESTOPBIT;
     m_dcb.fAbortOnError = FALSE;
-    m_dcb.fRtsControl = RTS_CONTROL_DISABLE;
+    m_dcb.fRtsControl = RTS_CONTROL_ENABLE;
 	m_dcb.fOutxCtsFlow = FALSE;
     m_dcb.fOutxDsrFlow = false;
-    m_dcb.fDtrControl = DTR_CONTROL_DISABLE;
+    m_dcb.fDtrControl = DTR_CONTROL_ENABLE;
     m_dcb.fDsrSensitivity = false;
 
     
@@ -393,6 +393,8 @@ uint32_t UART_Flush(uart_regs * uart) {
 
 uint32_t UART_Resync(uart_regs * uart) {
 #ifdef WINNT
+	DWORD txempty = EV_TXEMPTY;
+	WaitCommEvent(*uart,&txempty,0);
 	return ClearCommError(*uart,NULL,NULL);
 #endif
 }

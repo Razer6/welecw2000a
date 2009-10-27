@@ -41,33 +41,58 @@
 #define SIGNAL_HSTOP  HLEN
 
 #ifdef BOARD_COMPILATION
+
+uint32_t DrawSample(
+		uint16_t Color,
+		uint32_t y,
+		uint32_t x1, 
+		uint32_t x2);
+
 void DrawSignal(
 		uint32_t Voffset, 
-		uSample * Data, 
-		uint16_t Color){
+		uSample * PrevData,
+		uSample * CurrData,
+		uint16_t PrevColor,
+		uint16_t CurrColor){
 
 	register uint32_t i = SIGNAL_HSTART+1;
-	register uint32_t curr = 0;
-        register uint32_t prev = 0;
+	register uint32_t Prev = 0;
+	register uint32_t Curr = 0;
+	register uint32_t lastPrev = 0;
+        register uint32_t lastCurr = 0;
+	
 
-	prev = Data[SIGNAL_HSTART].i + Voffset;
-	if (prev < 0)     prev = 0;
-	if (prev >= VLEN) prev = VLEN-1;
+	lastCurr = CurrData[SIGNAL_HSTART].i + Voffset;
+	if (lastCurr < 0)     lastCurr = 0;
+	if (lastCurr >= VLEN) lastCurr = VLEN-1;
+	lastPrev = PrevData[SIGNAL_HSTART].i + Voffset;
+	if (lastPrev < 0)     lastPrev = 0;
+	if (lastPrev >= VLEN) lastPrev = VLEN-1;
 
 	for (; i < SIGNAL_HSTOP; ++i){
-		curr = Data[i].i + Voffset;
-		if (curr < 0)     curr = 0;
-		if (curr >= VLEN) curr = VLEN-1;
-		if (curr == prev) {
-			DrawPoint(Color,i,curr);
-		} else if (curr > prev) {
-			DrawVLine(Color,i,prev,curr);
-		} else {
-			DrawVLine(Color,i,curr,prev);
-		}
-		prev = curr;
+		Prev = PrevData[i].i + Voffset;
+		lastPrev = DrawSample(PrevColor,i,Prev,lastPrev);
+		Curr = CurrData[i].i + Voffset;
+		lastCurr = DrawSample(CurrColor,i,Curr,lastCurr);
 	}
 
+}
+
+uint32_t DrawSample(
+		uint16_t Color,
+		uint32_t y,
+		uint32_t x1, 
+		uint32_t x2) {
+	if (x1 < 0)     x1 = 0;
+	if (x1 >= VLEN) x1 = VLEN-1;
+	if (x1 == x2) {
+		DrawPoint(Color,y,x1);
+	} else if (x1 > x2) {
+		DrawVLine(Color,y,x2,x1);
+	} else {
+		DrawVLine(Color,y,x1,x2);
+	}
+	return x1;
 }
 
 
@@ -87,7 +112,7 @@ void ConvSample (
 
 
 void Interpolate (
-		uint32_t srcSamples, 
+		uint32_t dstSamples, 
 		uSample *Dst, 
 		uSample *Src, 
 		uint32_t type){
@@ -96,6 +121,8 @@ void Interpolate (
 	register uint32_t j = 0;
 	register uint32_t dst_idx = 0;
 	register int32_t * fir;
+
+	register uint32_t srcSamples = dstSamples/POLYPHASES;
 	
 	for (i = 0; i < srcSamples; ++i){
 		for (j = 0; j < POLYPHASES; ++j){

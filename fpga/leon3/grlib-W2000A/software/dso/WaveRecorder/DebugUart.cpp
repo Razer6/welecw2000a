@@ -139,7 +139,7 @@ uint32_t DebugUart::ClearBuffer(){
 }
 
 uint32_t DebugUart::Resync() {
-	for(uint32_t i = 0; i < 18; ++i){
+	for(uint32_t i = 0; i < 66; ++i){
 			SendInt(&mH,0x55555555);
 	}
 	return UART_Resync(&mH);

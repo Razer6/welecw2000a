@@ -4,7 +4,7 @@
 -- File       : Testbench-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-08-20
--- Last update: 2009-08-20
+-- Last update: 2009-10-25
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -134,6 +134,18 @@ begin
     Leds.SINGLE_RED     <= '0';
     wait;
   end process;
+  
+  StimuliKeys: process (FPtoKeys.nFetchStrobe)
+    variable c : unsigned(7 downto 0);
+  begin
+    if FPtoKeys.nFetchStrobe = cHighInactive then
+      for i in KeyData'range loop
+        c := unsigned(KeyData(i)(0 to 7)) +5;
+        KeyData(i)(0 to 7) <= std_ulogic_vector(c(7 downto 0));
+      end loop;
+    end if;
+  end process;
+  
   
   AnalogSettings <= (
         Addr          => (others => '0'),

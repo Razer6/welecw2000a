@@ -6,6 +6,7 @@ vcom -quiet -work DSO ../../LedsKeys/src/StrobeGen-e.vhd
 vcom -quiet -work DSO ../../LedsKeys/src/StrobeGen-Rtl-a.vhd
 vcom -quiet -work DSO ../../LedsKeys/src/PWM-ea.vhd
 vcom -quiet -work DSO ../../LedsKeys/src/LedsKeys-p.vhd
+vcom -quiet -work DSO ../../LedsKeys/src/NobDecoder-ea.vhd
 vcom -quiet -work DSO ../../LedsKeys/src/LedsKeys-ea.vhd
 
 

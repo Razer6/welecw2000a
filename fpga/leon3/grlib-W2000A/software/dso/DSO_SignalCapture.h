@@ -87,6 +87,12 @@ bool SetTrigger(
 		const int HighReference,
 		const uint32_t HighReferenceTime);
 
+/* time in ms */
+#ifdef BOARD_COMPILATION
+#define COIL_SWITCH_TIME     1000
+#else
+#define COIL_SWITCH_TIME     0
+#endif
 
 bool SetAnalogInputRange(
 		const uint32_t NoCh, 

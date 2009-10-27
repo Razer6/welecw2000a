@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-09-08
+-- Last update: 2009-10-25
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -88,6 +88,7 @@ begin
       InterruptVector           <= (others => '0');
       PrevTriggerBusy           <= '0';
       PrevTriggerStartRecording <= '0';
+      PrevAnalogBusy            <= '0';
     elsif rising_edge(iCLKCPU) then
       PrevTriggerBusy <= SFRIn.Trigger.Busy;
       if PrevTriggerBusy = '1' and SFRIn.Trigger.Busy = '0' then
@@ -132,7 +133,7 @@ begin
 --    end if;
 --  end process;
   Addr                       <= to_integer(unsigned(iAddr(6 downto 2)));
-  
+
   pWrite : process (iClkCPU, iResetAsync)
     variable vData : aDword;
   begin
@@ -186,7 +187,7 @@ begin
         ReadOffset      => (others => '0'));
 
       nConfigADC <= (others => cLowActive);
-      
+
       Leds <= (others => '0');
 
       AnalogSettings <= (
@@ -205,7 +206,7 @@ begin
       Trigger.ForceIdle     <= '0';
       Trigger.SetReadOffset <= '0';
       AnalogSettings.Set    <= '0';
-      
+
 --      if SFRIn.Keys.BTN_F1 = cLowActive then
 --        nConfigADC(0) <= '0'; -- for W2000A switch to debug uart! 
 --      end if;
@@ -274,6 +275,11 @@ begin
             null;
           when cConfigADCEnable =>
             nConfigADC <= not iData(nConfigADC'range);
+            -- manual switch to the debug uart (if software fails)
+            if SFRIn.Keys.BTN_F1 = '1' and SFRIn.Keys.BTN_F2 = '1' then
+              nConfigADC(0) <= cLowActive;
+            end if;
+            
           when cLedAddr =>
             Leds <= (
               LED_CH0        => iData(0),
@@ -415,6 +421,7 @@ begin
           std_ulogic_vector(SFRIn.Trigger.CurrentTriggerAddr);
       when cConfigADCEnable =>
         oData(nConfigADC'range) <= nConfigADC;
+        
       when cLedAddr =>
         oData(0)  <= Leds.LED_CH0;
         oData(1)  <= Leds.LED_CH1;
@@ -430,8 +437,23 @@ begin
         oData(11) <= Leds.RUN_RED;
         oData(12) <= Leds.SINGLE_GREEN;
         oData(13) <= Leds.SINGLE_RED;
+
+        oData(18 downto 16) <= SFRIn.Keys.EN_TIME_DIV;
+        oData(22 downto 20) <= SFRIn.Keys.EN_LEFT_RIGHT;
+        oData(26 downto 24) <= SFRIn.Keys.EN_LEVEL;
+        oData(30 downto 28) <= SFRIn.Keys.EN_F;
         
       when cKeyAddr0 =>
+        oData(2 downto 0)   <= SFRIn.Keys.EN_CH0_UPDN;
+        oData(6 downto 4)   <= SFRIn.Keys.EN_CH1_UPDN;
+        oData(10 downto 8)  <= SFRIn.Keys.EN_CH2_UPDN;
+        oData(14 downto 12) <= SFRIn.Keys.EN_CH3_UPDN;
+        oData(18 downto 16) <= SFRIn.Keys.EN_CH0_VDIV;
+        oData(22 downto 20) <= SFRIn.Keys.EN_CH1_VDIV;
+        oData(26 downto 24) <= SFRIn.Keys.EN_CH2_VDIV;
+        oData(30 downto 28) <= SFRIn.Keys.EN_CH3_VDIV;
+        
+      when cKeyAddr1 =>
         oData(0)  <= SFRIn.Keys.BTN_F1;
         oData(1)  <= SFRIn.Keys.BTN_F2;
         oData(2)  <= SFRIn.Keys.BTN_F3;
@@ -459,31 +481,7 @@ begin
         oData(24) <= SFRIn.Keys.BTN_PULSEWIDTH;
         oData(26) <= SFRIn.Keys.BTN_X1;
         oData(27) <= SFRIn.Keys.BTN_X2;
-        oData(28) <= SFRIn.Keys.ENX_TIME_DIV;
-        oData(29) <= SFRIn.Keys.ENY_TIME_DIV;
-        oData(30) <= SFRIn.Keys.ENX_F;
-        oData(31) <= SFRIn.Keys.ENY_F;
-      when cKeyAddr1 =>
-        oData(0)  <= SFRIn.Keys.ENX_LEFT_RIGHT;
-        oData(1)  <= SFRIn.Keys.ENY_LEFT_RIGHT;
-        oData(2)  <= SFRIn.Keys.ENX_LEVEL;
-        oData(3)  <= SFRIn.Keys.ENY_LEVEL;
-        oData(4)  <= SFRIn.Keys.ENX_CH0_UPDN;
-        oData(5)  <= SFRIn.Keys.ENY_CH0_UPDN;
-        oData(6)  <= SFRIn.Keys.ENX_CH1_UPDN;
-        oData(7)  <= SFRIn.Keys.ENY_CH1_UPDN;
-        oData(8)  <= SFRIn.Keys.ENX_CH2_UPDN;
-        oData(9)  <= SFRIn.Keys.ENY_CH2_UPDN;
-        oData(10) <= SFRIn.Keys.ENX_CH3_UPDN;
-        oData(11) <= SFRIn.Keys.ENY_CH3_UPDN;
-        oData(12) <= SFRIn.Keys.ENX_CH0_VDIV;
-        oData(13) <= SFRIn.Keys.ENY_CH0_VDIV;
-        oData(14) <= SFRIn.Keys.ENX_CH1_VDIV;
-        oData(15) <= SFRIn.Keys.ENY_CH1_VDIV;
-        oData(16) <= SFRIn.Keys.ENX_CH2_VDIV;
-        oData(17) <= SFRIn.Keys.ENY_CH2_VDIV;
-        oData(18) <= SFRIn.Keys.ENX_CH3_VDIV;
-        oData(19) <= SFRIn.Keys.ENY_CH3_VDIV;
+        
 
       when cAnalogSettingsPWMAddr =>
         oData(AnalogSettings.PWM_Offset'range) <= AnalogSettings.PWM_Offset;

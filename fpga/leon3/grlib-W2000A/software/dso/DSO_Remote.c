@@ -133,16 +133,18 @@ void SendInt(uart_regs * uart, uint32_t data) {
 	uEndian d;
 	d.i=data;
 /*	printf("\nSendInt %d ",data); */
+#ifndef LEON3
 	ChangeEndian(&d.i,sizeof(uint32_t));
 	SendBytes(uart,(uint8_t *)&d.i,sizeof(uint32_t));
-	/*
+#else
 	for (i = 0; i < 4; ++i){
 #ifdef LITTLE_ENDIAN
 		SendCharBlock(uart,d.c[3-i]);
 #else
 		SendCharBlock(uart,d.c[i]);
 #endif
-	}*/
+	}
+#endif
 }
 
 bool CheckCRC(crc crcSent, uint32_t message[], int nBytes){

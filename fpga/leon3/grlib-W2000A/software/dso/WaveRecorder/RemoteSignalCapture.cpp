@@ -169,7 +169,7 @@ uint32_t RemoteSignalCapture::SendRetry(
 	for (i = 0; i < cMaxRetrys; ++i){
 		k = length-j;
 		mComm->Send(addr+j*sizeof(uint32_t),&data[j],k);	//DebugUart::Send or NormalUart::Send
-		read = mComm->Receive(addr+j*sizeof(uint32_t),&RecData[j], k);
+/*		read = mComm->Receive(addr+j*sizeof(uint32_t),&RecData[j], k);
 
 		if (read != k){
 			mComm->ClearBuffer();
@@ -181,8 +181,8 @@ uint32_t RemoteSignalCapture::SendRetry(
 				mComm->Resync();
 				break;
 			}	
-		}
-		//j = length;
+		}*/
+		j = length;
 		if (j == length) break;
 	}
 	length = j;
@@ -201,7 +201,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	uint32_t i = 0;
 	uint32_t read = 0;
 	uint32_t data = 0;
-	uint32_t temp;
+	uint32_t CpuCtl = 0;
 	uint32_t DataArray[cFrameSize];
 
 	if (hFile == NULL) {
@@ -216,6 +216,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		fclose(hFile);
 		return FALSE;
 	}
+	CpuCtl = data;
 	Send(DSU_CTL,(data | DSU_HL));
 
 	/* write the binary file into the RAM */
@@ -244,7 +245,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		i = SendRetry(addr,DataArray,read);
 		addr+=read*sizeof(uint32_t);
 		if (i == cMaxRetrys) {
-			printf("%d Transmission errors on addr 0x%8x!\n",cMaxRetrys, addr);
+			printf("%d Transmission errors on addr 0x%08x!\n",cMaxRetrys, addr);
 			fclose(hFile);
 			return FALSE;
 		}
@@ -255,42 +256,84 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	}
 	fclose(hFile);
 	printf("Downloading software done!\n");
-	// Clear the REGFILE 
-	/*
-	for(i = 0; i < NWINDOWS*WINDOW_SIZE/4; ++i){
-		SendRetry(DSU_REGFILE + i*4,0);
-	}*/
 	mComm->ClearBuffer();
 	mComm->Resync();
+
+	
+
+	// Clear the REGFILE 
+	for(i = 0; i < NWINDOWS*WINDOW_SIZE/4; ++i){
+		Send(DSU_REGFILE + i*4,0);
+	}
+
+	// Set the asi register
+	Send(DSU_REG_ASI,2);
+
+	// Set the Y register
+	Send(DSU_REG_Y,0);
 	// Set the StackAddr 
 	addr = DSU_REGFILE + (START_WINDOW*WINDOW_SIZE) + REG_OUT_OFF;
-	SendRetry(addr,StackAddr);
-	printf("Stackaddr: 0x%8x\n",StackAddr);
+	Send(addr,StackAddr);
+	printf("Stackaddr:    0x%08x\n",StackAddr);
 	
 	// Set the start register window 
-	SendRetry(DSU_REG_WIM,START_WINDOW);
-	printf("DSU_REG_WIM: 0x%8x\n",START_WINDOW);
+	Send(DSU_REG_WIM,START_WINDOW);
+	printf("DSU_REG_WIM:  0x%08x\n",START_WINDOW);
 
 	// Set the Trap Base Register 
-	SendRetry(DSU_REG_TBR,START_TBR);
-	printf("DSU_REG_TBR: 0x%8x\n",START_TBR);
+	Send(DSU_REG_TBR,START_TBR);
+	printf("DSU_REG_TBR:  0x%08x\n",START_TBR);
 
 	// Set the start address 
-	SendRetry(DSU_REG_PC,START_TBR);
-	SendRetry(DSU_REG_PC+4,START_TBR+4);
-	printf("DSU_REG_PC: 0x%8x\n",START_TBR);
+	Send(DSU_REG_PC,START_TBR);
+	Send(DSU_REG_PC+4,START_TBR+4);
+	printf("DSU_REG_PC:   0x%08x\n",START_TBR);
 
+	mComm->ClearBuffer();
+	mComm->Resync();
+	WaitMs(100);
+	printf("Register file: global, out, local, in\n");
+	for (i = 0; i < 8; ++i){
+		for(addr = 0; addr < 4; ++addr){
+			DataArray[addr] = 0xeeeeeeee;
+		}
+		addr = DSU_REGFILE+(i*WINDOW_SIZE);
+		printf("DSU addr:    0x%08x\n",addr);
+		read = mComm->Receive(addr, DataArray,4);
+		for(addr = 0; addr < read; ++addr){
+			printf("0x%08x ",DataArray[addr]);
+		}
+		printf("\n");
+	}
 	// RUN 
-	addr = DSU_CTL;
-	read = mComm->Receive(DSU_CTL,&data,1);
-	data = (data | DSU_PE) & ~DSU_HL;
+/*	addr = DSU_CTL;
+	read = mComm->Receive(DSU_CTL,&data,1);*/
+	data = (CpuCtl | DSU_PE) & ~DSU_HL;
 	Send(DSU_CTL, data);
 	data = mComm->Receive(DSU_CTL,&data,1);
-	printf("DSU_CTL: 0x%8x\n",data);
+	printf("DSU_CTL:      0x%08x\n",data);
 	data = mComm->Receive(DSU_REG_PC,&data,1);
-	printf("DSU_REG_PC: 0x%8x\n",data);
+	printf("DSU_REG_PC:   0x%08x\n",data);
 	data = mComm->Receive(DSU_REG_TRAP,&data,1);
-	printf("DSU_REG_TRAP: 0x%8x\n",data);
+	printf("DSU_REG_TRAP: 0x%08x\n",data);
+
+	WaitMs(100);
+	mComm->ClearBuffer();
+	mComm->Resync();
+	WaitMs(100);
+	printf("Register file: global, out, local, in\n");
+	for (i = 0; i < 8; ++i){
+		for(addr = 0; addr < 4; ++addr){
+			DataArray[addr] = 0xeeeeeeee;
+		}
+		addr = DSU_REGFILE+(i*WINDOW_SIZE);
+		printf("DSU addr:    0x%08x\n",addr);
+		read = mComm->Receive(addr, DataArray,4);
+		for(addr = 0; addr < read; ++addr){
+			printf("0x%08x ",DataArray[addr]);
+		}
+		printf("\n");
+	}
 
 	return TRUE;
 }

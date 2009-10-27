@@ -6,12 +6,12 @@ vcom -quiet -93 -work DSO {../../Altera/src/TriggerMemory.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/Octave/FastFirCoeff-p.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/Octave/FirCoeff-p.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/PolyphaseDecimator-p.vhd}
-vcom -quiet -93 -work DSO {../../DownSampler/src/FastAverage-ea.vhd}
-vcom -quiet -work DSO {../../DownSampler/src/AdderTreeFilter-ea.vhd}
+#vcom -quiet -93 -work DSO {../../DownSampler/src/FastAverage-ea.vhd}
+vcom -quiet -93 -work DSO {../../DownSampler/src/AdderTreeFilter-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/FastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/TopFastPolyPhaseDecimator-ea.vhd}
-vcom -quiet -work DSO {../../DownSampler/src/LongFastPolyPhaseDecimator-ea.vhd}
-vcom -quiet -work DSO {../../DownSampler/src/TopLongFastPolyPhaseDecimator-ea.vhd}
+vcom -quiet -93 -work DSO {../../DownSampler/src/LongFastPolyPhaseDecimator-ea.vhd}
+vcom -quiet -93 -work DSO {../../DownSampler/src/TopLongFastPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/DelayMemory.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/TopPolyPhaseDecimator-ea.vhd}
 vcom -quiet -93 -work DSO {../../DownSampler/src/DownSampler-ea.vhd}
@@ -27,6 +27,7 @@ vcom -quiet -93 -work DSO {../../Trigger/src/TopTrigger-ea.vhd}
 vcom -quiet -93 -work DSO {../../Trigger/src/ExtTriggerInput-ea.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/StrobeGen-e.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/StrobeGen-Rtl-a.vhd}
+vcom -quiet -93 -work DSO {../../LedsKeys/src/NobDecoder-ea.vhd}
 vcom -quiet -93 -work DSO {../../LedsKeys/src/LedsKeys-ea.vhd}
 
 # vlog +incdir+../../uart16550/src ../../uart16550/src/uart_regs.v  ../../uart16550/src/uart_top.v ../../uart16550/src/uart_debug_if.v ../../uart16550/src/uart_rfifo.v ../../uart16550/src/uart_transmitter.v ../../uart16550/src/uart_sync_flops.v ../../uart16550/src/uart_wb.v ../../uart16550/src/raminfr.v ../../uart16550/src/uart_receiver.v ../../uart16550/src/uart_tfifo.v
