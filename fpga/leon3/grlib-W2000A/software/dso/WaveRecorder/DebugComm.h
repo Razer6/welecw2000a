@@ -62,7 +62,7 @@ public:
 		uint32_t Addr,
 		uint32_t * Data, 
 		uint32_t Length)=0;
-	virtual uint32_t ClearBuffer()=0;
+	virtual uint32_t ClearBufferRx()=0;
 	virtual uint32_t Resync()=0;
 
 private:

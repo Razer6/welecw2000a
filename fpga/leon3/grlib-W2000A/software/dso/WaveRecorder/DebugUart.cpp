@@ -76,19 +76,31 @@ uint32_t DebugUart::Send(
 	int32_t FrameLength = cFrameLength;
 	int32_t FramePos = 0;
 	int32_t i = 0;
+	uint8_t Header[5];
+	uSample a;
+
 	while (Len > 0){
 		if (Len > cFrameLength) {
 			FrameLength = cFrameLength;
 		} else {
 			FrameLength = Len;
 		}
-		/* b(7) = '1' request 
-		 * b(6) = '1' write */
-		SendCharBlock(&mH, 0xC0 | (FrameLength-1));
-		SendInt(&mH,Addr+FramePos); // start address
-		for (i = FramePos; i < (FramePos+FrameLength); ++i){
-			SendInt(&mH,Data[i]);
-		}
+		/* Request type
+		 * b(7) = '1' request 
+		 * b(6) = '1' write 
+		 * b(5:0) = (data bytes-1)*4*/
+		Header[0] = 0xC0 | (FrameLength-1);
+		/* Address in big endian */
+		a.i = Addr + (FramePos*sizeof(uint32_t));
+		Header[1] = a.c[3];
+		Header[2] = a.c[2];
+		Header[3] = a.c[1];
+		Header[4] = a.c[0];
+		SendBytes(&mH,Header,5);
+		/* RawData */
+		ChangeEndian(Data,FrameLength*sizeof(uint32_t));
+		SendBytes(&mH,(uint8_t*)&Data[i],FrameLength*sizeof(uint32_t));
+
 		FramePos += cFrameLength;
 		Len -= cFrameLength;
 	}
@@ -105,19 +117,31 @@ uint32_t DebugUart::Receive(
 	int32_t FramePos = 0;
 	int32_t i = 0;
 	uint32_t error;
+	uint8_t Header[5];
+	uSample a;
+
 	while (Len > 0){
 		if (Len > cFrameLength) {
 			FrameLength = cFrameLength;
 		} else {
 			FrameLength = Len;
 		}
-	
-		SendCharBlock(&mH, 0x80 | (FrameLength-1));
-		SendInt(&mH,Addr); // start address
-#ifdef WINNT
-		i = EV_TXEMPTY;
-		WaitCommEvent(mH,(LPDWORD)&i,0);
-#endif
+		ClearBufferRx();
+		/* Request type
+		 * b(7) = '1' request 
+		 * b(6) = '1' write, '0' for read 
+		 * b(5:0) = (data bytes-1)*4*/
+		Header[0] = 0x80 | (FrameLength-1);
+		/* Address in big endian */
+		a.i = Addr + (FramePos*sizeof(uint32_t));
+		Header[1] = a.c[3];
+		Header[2] = a.c[2];
+		Header[3] = a.c[1];
+		Header[4] = a.c[0];
+		SendBytes(&mH,Header,5);
+/*		SendCharBlock(&mH, 0x80 | (FrameLength-1));
+		SendInt(&mH,Addr); */ // start address
+
 		for (i = FramePos; i < (FramePos+FrameLength); ++i){
 			Data[i] = GetIntX(&mH,&error);
 			if (error != 0){
@@ -134,8 +158,8 @@ uint32_t DebugUart::GetACK(){
 	return TRUE;
 }
 
-uint32_t DebugUart::ClearBuffer(){
-	  return UART_Flush(&mH);
+uint32_t DebugUart::ClearBufferRx(){
+	  return UART_ClearRx(&mH);
 }
 
 uint32_t DebugUart::Resync() {

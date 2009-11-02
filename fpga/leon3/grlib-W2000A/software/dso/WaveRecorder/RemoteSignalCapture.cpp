@@ -150,7 +150,7 @@ uint32_t RemoteSignalCapture::SendRetry(
 		mComm->Send(addr,&data,1);
 		read = mComm->Receive(addr,&RecData,1);
 		if ((read == 1) && (data == RecData)) break;
-		mComm->ClearBuffer();
+		mComm->ClearBufferRx();
 		mComm->Resync();
 		WaitMs(10);
 	}
@@ -216,8 +216,21 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		fclose(hFile);
 		return FALSE;
 	}
-	CpuCtl = data;
-	Send(DSU_CTL,(data | DSU_HL));
+	CpuCtl = 0x2F; // stopable on debug mode, etc
+	Send(DSU_CTL,CpuCtl);
+	Send(DSU_SINGLESTEP,0xFFFF); // debug break for all LEON3s 
+	read = mComm->Receive(DSU_SINGLESTEP,&data,1);
+	if (data & 0x1){
+		printf("CPU0 stopped sucessfully\n");
+	}
+	if (data & 0x100){
+		printf("CPU0 is in single step mode!\n");
+	}
+	Send(DSU_CTL,CpuCtl);
+	read = mComm->Receive(DSU_CTL,&data,1);
+	printf("DSU_CTL 0x%08x\n",data);
+	printf("Starting software upload!\n");
+
 
 	/* write the binary file into the RAM */
 	while (feof(hFile) == FALSE){
@@ -234,14 +247,6 @@ uint32_t RemoteSignalCapture::LoadProgram(
 //change endianess to wrong order beforehand.
 		data = read*sizeof(uint32_t);
 		ChangeEndian(DataArray,data);
-/*		for (i=0;i<read;i++) {
-			temp=DataArray[i];
-			DataArray[i]=	((temp & 0x000000FF) <<24) +
-							((temp & 0x0000FF00)<<8) +
-							((temp & 0x00FF0000)>>8) +
-							((temp & 0xFF000000)>>24);
-		}*/
-
 		i = SendRetry(addr,DataArray,read);
 		addr+=read*sizeof(uint32_t);
 		if (i == cMaxRetrys) {
@@ -255,24 +260,23 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		}
 	}
 	fclose(hFile);
-	printf("Downloading software done!\n");
-	mComm->ClearBuffer();
+	printf("Uploading software done!\n");
 	mComm->Resync();
 
 	
-
+	
 	// Clear the REGFILE 
 	for(i = 0; i < NWINDOWS*WINDOW_SIZE/4; ++i){
 		Send(DSU_REGFILE + i*4,0);
 	}
-
+//	SetDebugInfo(1);
 	// Set the asi register
 	Send(DSU_REG_ASI,2);
 
 	// Set the Y register
 	Send(DSU_REG_Y,0);
 	// Set the StackAddr 
-	addr = DSU_REGFILE + (START_WINDOW*WINDOW_SIZE) + REG_OUT_OFF;
+	addr = DSU_REGFILE + ((NWINDOWS-START_WINDOW)*WINDOW_SIZE) + REG_OUT_OFF;
 	Send(addr,StackAddr);
 	printf("Stackaddr:    0x%08x\n",StackAddr);
 	
@@ -289,9 +293,6 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	Send(DSU_REG_PC+4,START_TBR+4);
 	printf("DSU_REG_PC:   0x%08x\n",START_TBR);
 
-	mComm->ClearBuffer();
-	mComm->Resync();
-	WaitMs(100);
 	printf("Register file: global, out, local, in\n");
 	for (i = 0; i < 8; ++i){
 		for(addr = 0; addr < 4; ++addr){
@@ -305,22 +306,20 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		}
 		printf("\n");
 	}
+	
 	// RUN 
-/*	addr = DSU_CTL;
-	read = mComm->Receive(DSU_CTL,&data,1);*/
-	data = (CpuCtl | DSU_PE) & ~DSU_HL;
-	Send(DSU_CTL, data);
-	data = mComm->Receive(DSU_CTL,&data,1);
+	
+
+	//	Send(DSU_CTL, data);
+
+	WaitMs(100);
+	read = mComm->Receive(DSU_CTL,&data,1);
 	printf("DSU_CTL:      0x%08x\n",data);
-	data = mComm->Receive(DSU_REG_PC,&data,1);
+	read = mComm->Receive(DSU_REG_PC,&data,1);
 	printf("DSU_REG_PC:   0x%08x\n",data);
-	data = mComm->Receive(DSU_REG_TRAP,&data,1);
+	read = mComm->Receive(DSU_REG_TRAP,&data,1);
 	printf("DSU_REG_TRAP: 0x%08x\n",data);
 
-	WaitMs(100);
-	mComm->ClearBuffer();
-	mComm->Resync();
-	WaitMs(100);
 	printf("Register file: global, out, local, in\n");
 	for (i = 0; i < 8; ++i){
 		for(addr = 0; addr < 4; ++addr){
@@ -334,7 +333,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		}
 		printf("\n");
 	}
-
+	mComm->Resync();
 	return TRUE;
 }
 

@@ -74,15 +74,15 @@ bool UartInit(
     COMMTIMEOUTS m_CommTimeouts;
     *uart = CreateFile(UartAddr, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
     if (GetLastError() != ERROR_SUCCESS) {
-       printf("CreateFile(): %lu\n", GetLastError());              
+       printf("CreateFile(\"%s\"): %lu\n", UartAddr, GetLastError());              
        return false;
     }
     
-   /* m_bPortReady = SetupComm(*uart, 128, 128); 
+    m_bPortReady = SetupComm(*uart, 512, 512); 
     if (GetLastError() != ERROR_SUCCESS) {
        printf("SetupComm(): %lu\n", GetLastError());              
        return false;
-    }*/
+    }
     m_bPortReady = GetCommState(*uart, &m_dcb);
     if (GetLastError() != ERROR_SUCCESS) {
        printf("GetCommState(): %lu\n", GetLastError());              
@@ -91,12 +91,12 @@ bool UartInit(
     m_dcb.BaudRate = BaudRate;
     m_dcb.ByteSize = 8;
     m_dcb.Parity = NOPARITY;
-    m_dcb.StopBits = ONESTOPBIT;
+    m_dcb.StopBits = TWOSTOPBITS;
     m_dcb.fAbortOnError = FALSE;
-    m_dcb.fRtsControl = RTS_CONTROL_ENABLE;
+    m_dcb.fRtsControl = RTS_CONTROL_DISABLE;
 	m_dcb.fOutxCtsFlow = FALSE;
     m_dcb.fOutxDsrFlow = false;
-    m_dcb.fDtrControl = DTR_CONTROL_ENABLE;
+    m_dcb.fDtrControl = DTR_CONTROL_DISABLE;
     m_dcb.fDsrSensitivity = false;
 
     
@@ -107,17 +107,18 @@ bool UartInit(
     }
     m_bPortReady = GetCommTimeouts (*uart, &m_CommTimeouts);
     
-    m_CommTimeouts.ReadIntervalTimeout = 1;
-    m_CommTimeouts.ReadTotalTimeoutConstant = 10;
-    m_CommTimeouts.ReadTotalTimeoutMultiplier = 1;
-    m_CommTimeouts.WriteTotalTimeoutConstant = 10;
-    m_CommTimeouts.WriteTotalTimeoutMultiplier = 1;
+    m_CommTimeouts.ReadIntervalTimeout = 20;
+    m_CommTimeouts.ReadTotalTimeoutConstant = 50;
+    m_CommTimeouts.ReadTotalTimeoutMultiplier = 20;
+    m_CommTimeouts.WriteTotalTimeoutConstant = 50;
+    m_CommTimeouts.WriteTotalTimeoutMultiplier = 20;
     m_bPortReady = SetCommTimeouts (*uart, &m_CommTimeouts);
     if (GetLastError() != ERROR_SUCCESS) {
        printf("SetCommTimeouts(): %lu\n", GetLastError());              
        return false;
     }
     ClearCommError(*uart, NULL, NULL);
+	SetCommMask(*uart,EV_TXEMPTY);
     /*ClearCommError(*uart, CE_FRAME | CE_BREAK | CE_OVERRUN | CE_RXOVER | CE_RXPARITY, NULL);*/
 
 #else
@@ -301,18 +302,15 @@ void SendStringBlock (uart_regs * uart, char * c){
 	uint32_t written = 0;
 #endif
 	uint32_t size = strlen(c);
-	while (written != size) {
 #ifdef WINNT
-		WriteFile(*uart,&c[written],size-written,lpret,NULL);
-		if (ret == 0){
-			Sleep(1);
-		}
+	SendBytes(uart,(uint8_t*)c,size);		
 #else 
+	while (written != size) {
 		ret = write(*uart, &c[written], size-written);	
 	usleep(10000);
-#endif 	
 		written = written + ret;
 	} 
+#endif 
 }
 
 void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
@@ -320,22 +318,30 @@ void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
 	DWORD ret = 0;
 	LPDWORD lpret = &ret;
 	DWORD written = 0;
+	DWORD error = 0;
+	DWORD txempty = 0;
 #else
 	int32_t ret = 0;
 	int32_t written = 0;
 #endif
 	while (written < size) {
 #ifdef WINNT
-		WriteFile(*uart,&c[written],size-written,lpret,NULL);
+		ret = 0;
+		if (WriteFile(*uart,&c[written],size-written,lpret,NULL) == FALSE){
+			error = GetLastError();
+			if (error != ERROR_SUCCESS) {
+				printf("WriteFile(): %lu\n", GetLastError());              
+				ret = 0;				
+			}
+		}
 		if (ret == 0){
 			Sleep(1);
 		}
 #else 
 		ret = write(*uart,&c[written], size-written);	
-	usleep(10000);
+		usleep(10000);
 #endif 	
 		written = written + ret;
-
 	} 
 	if (DebugInfo){
 		for (ret = 0; ret < written; ++ret){
@@ -343,6 +349,10 @@ void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
 		}
 		printf("\n");
 	}
+#ifdef WINNT
+	FlushFileBuffers(*uart);
+	//WaitCommEvent(*uart,&txempty,0);
+#endif
 }
 
 /* return error */
@@ -354,10 +364,12 @@ uint32_t ReceiveBytes(
 	uint32_t cnt = 0;
 	uint32_t written = 0;
 #ifdef WINNT
+	
 	do {
 		ReadFile(*uart,&data[written],length-written,(LPDWORD)&ret,NULL);
 		cnt++;
 		if (ret == 0){
+			ClearCommError(*uart, NULL, NULL);
 			Sleep(1);
 		}
 		if (cnt == TimeoutMs){
@@ -380,11 +392,13 @@ uint32_t ReceiveBytes(
 	return written;
 }
 
-uint32_t UART_Flush(uart_regs * uart) {
+uint32_t UART_ClearRx(uart_regs * uart) {
 #ifdef WINNT
-	DWORD txempty = EV_TXEMPTY;
-	WaitCommEvent(*uart,&txempty,0);
-	return PurgeComm(*uart,PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_TXABORT);
+	if (!PurgeComm(*uart,PURGE_RXABORT | PURGE_RXCLEAR)){
+		printf("IOCTL_SERIAL_PURGE error: %d\n",GetLastError());
+		return FALSE;
+	}	
+	return TRUE; 
 #else
 	char c;
 	while (read(*uart,&c,1));
@@ -393,8 +407,8 @@ uint32_t UART_Flush(uart_regs * uart) {
 
 uint32_t UART_Resync(uart_regs * uart) {
 #ifdef WINNT
-	DWORD txempty = EV_TXEMPTY;
-	WaitCommEvent(*uart,&txempty,0);
+	FlushFileBuffers(*uart);
+	UART_ClearRx(uart);
 	return ClearCommError(*uart,NULL,NULL);
 #endif
 }

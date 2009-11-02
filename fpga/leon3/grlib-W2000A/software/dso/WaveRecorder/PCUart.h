@@ -81,6 +81,7 @@ extern "C" {
 
 void UartClose (uart_regs * uart);
 void SetTimeoutMs(uint32_t Timeout);
+void SetDebugInfo(uint32_t DebugOutput);
 
 bool UartInit(	
 		char * UartAddr,
@@ -107,7 +108,7 @@ uint32_t ReceiveBytes(
 				  uint8_t * data, 
 				  uint32_t length);
 				  
-uint32_t UART_Flush(uart_regs * uart);
+uint32_t UART_ClearRx(uart_regs * uart);
 uint32_t UART_Resync(uart_regs * uart);
 
 #ifdef __cplusplus

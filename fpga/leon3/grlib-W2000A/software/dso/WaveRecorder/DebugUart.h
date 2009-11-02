@@ -55,11 +55,11 @@ public:
 		uint32_t * Data, 
 		uint32_t Length);
 	virtual uint32_t GetACK();
-	virtual uint32_t ClearBuffer();
+	virtual uint32_t ClearBufferRx();
 	virtual uint32_t Resync();
 
 private:
 	HANDLE mH;
-	static const int32_t cFrameLength = 32/sizeof(uint32_t); // read from VHDL Source
+	static const int32_t cFrameLength = 256/sizeof(uint32_t); // read from VHDL Source
 };
 #endif

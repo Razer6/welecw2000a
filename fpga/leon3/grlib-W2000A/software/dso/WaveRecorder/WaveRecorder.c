@@ -84,7 +84,7 @@ void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Pro
 }
 
 int main(int argc, char * argv[]) {
-	struct arg_str * UartAddr	= arg_str0("u", "UART", NULL, "Path of serial device, always necessary!");
+	struct arg_str * UartAddr	= arg_str1("u", "UART", NULL, "Path of serial device, always necessary!");
 	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
 			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs | LoadRun]", 

@@ -39,6 +39,7 @@
 
 #define DSUSIZE        0x1000000
 #define DSU_CTL        (DSU_BASE_ADDR+ 0x000)
+#define DSU_SINGLESTEP (DSU_BASE_ADDR+ 0x020)
 #define DSU_DBGMODE    (DSU_BASE_ADDR+ 0x040)
 #define DSU_ERRMODE    (DSU_BASE_ADDR+ 0x200)
 #define DSU_REGFILE    (DSU_BASE_ADDR+ 0x300000)
@@ -64,7 +65,7 @@
 /* DSU_HL Write 1 to it and it stops the CPU */
 
 /* DSU_REGFILE */
-#define NWINDOWS       24
+#define NWINDOWS        8
 #define WINDOW_SIZE    64
 #define REG_GLOBAL_OFF  0 
 #define REG_OUT_OFF    32

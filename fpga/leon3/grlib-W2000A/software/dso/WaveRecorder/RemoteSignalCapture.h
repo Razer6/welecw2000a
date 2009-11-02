@@ -120,7 +120,7 @@ private:
    void WaitMs(uint32_t Miliseconds);
 private:
 	DebugComm * mComm;
-	static const uint32_t cFrameSize = 8;
+	static const uint32_t cFrameSize = 64;
 	static const uint32_t cMaxRetrys = 64;
 };
 
