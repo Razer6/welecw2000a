@@ -183,12 +183,12 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!DSOInterface->InitComm((char*)UartAddr->sval[0],5000,BaudRate->ival[0])){
-printf("%s:%d\n",__FILE__,__LINE__);
+		printf("%s:%d\n",__FILE__,__LINE__);
 		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
 	if (strcmp("LoadRun",Command->sval[0]) == 0){
 		uint32_t BaseAddr = RAM_BASE_ADDR;
-		uint32_t Stack = RAM_BASE_ADDR + RAM_SIZE -16;
+		uint32_t Stack = RAM_BASE_ADDR + RAM_SIZE -0x80;
 		struct arg_int * IsOnce[] = {(arg_int*)ForceFile};
 		int32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (ForceAddr->count == 1){
@@ -198,7 +198,7 @@ printf("%s:%d\n",__FILE__,__LINE__);
 			Stack = StackAddr->ival[0];
 		}
 		if (Ret == false) {
-printf("%s:%d\n",__FILE__,__LINE__);
+			printf("%s:%d\n",__FILE__,__LINE__);
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
 		Ret = DSOInterface->LoadProgram(

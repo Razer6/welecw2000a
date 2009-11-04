@@ -276,7 +276,9 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	// Set the Y register
 	Send(DSU_REG_Y,0);
 	// Set the StackAddr 
-	addr = DSU_REGFILE + ((NWINDOWS-START_WINDOW)*WINDOW_SIZE) + REG_OUT_OFF;
+//	addr = DSU_REGFILE + ((NWINDOWS+1-START_WINDOW)*WINDOW_SIZE) + REG_OUT_OFF;
+	addr = DSU_REGFILE + 0x38;
+	printf("DSU Regadress of Stackaddr:  0x%08x\n",addr);
 	Send(addr,StackAddr);
 	printf("Stackaddr:    0x%08x\n",StackAddr);
 	
@@ -295,22 +297,51 @@ uint32_t RemoteSignalCapture::LoadProgram(
 
 	printf("Register file: global, out, local, in\n");
 	for (i = 0; i < 8; ++i){
-		for(addr = 0; addr < 4; ++addr){
+		for(addr = 0; addr < 16; ++addr){
 			DataArray[addr] = 0xeeeeeeee;
 		}
 		addr = DSU_REGFILE+(i*WINDOW_SIZE);
-		printf("DSU addr:    0x%08x\n",addr);
-		read = mComm->Receive(addr, DataArray,4);
+		printf("DSU addr:    0x%08x",addr);
+		read = mComm->Receive(addr, DataArray,16);
 		for(addr = 0; addr < read; ++addr){
-			printf("0x%08x ",DataArray[addr]);
+			if ((addr % 4) == 0){
+				printf("\n0x%08x ",DataArray[addr]);
+			} else {
+				printf("0x%08x ",DataArray[addr]);
+			}
 		}
 		printf("\n");
 	}
 	
 	// RUN 
+	/* Switching all LEON3s into debug mode */
+	//Send(DSU_CTL,);
+	data = 0x00E1000F;
+	Send(DSU_ASI_BASE,	data);
+	printf("DSU_ASI_BASE send:      0x%08x\n",data);
+	read = mComm->Receive(DSU_ASI_BASE,&data,1);
+	printf("DSU_ASI_BASE  rec:      0x%08x\n",data);
+	i = 0;
+	do {
+	Send(DSU_DBGMODE,	0xFFFFFFFF);
+	data = 0x0061800F;
+	Send(DSU_ASI_BASE,	data);
+	printf("DSU_ASI_BASE send:      0x%08x\n",data);
+	read = mComm->Receive(DSU_ASI_BASE,&data,1);
+	printf("DSU_ASI_BASE  rec:      0x%08x\n",data);
 	
-
-	//	Send(DSU_CTL, data);
+	
+	read = mComm->Receive(DSU_CTL,&data,1);
+	printf("Reading the DSU_CTL = 0x%08x for starting Leon3!\n",data);
+	data |= DSU_PE;
+	/* setting the time tag counter to zero */
+	Send(DSU_TIME_TAG,0);
+	printf("Starting Leon3 with DSU_CTL = 0x%08x!\n",data);
+	Send(DSU_CTL,data);
+	printf("Release Leon3 from single step debugging\n");
+	Send(DSU_SINGLESTEP,0);
+	i++;
+	} while (i < 1);
 
 	WaitMs(100);
 	read = mComm->Receive(DSU_CTL,&data,1);
@@ -322,14 +353,18 @@ uint32_t RemoteSignalCapture::LoadProgram(
 
 	printf("Register file: global, out, local, in\n");
 	for (i = 0; i < 8; ++i){
-		for(addr = 0; addr < 4; ++addr){
+		for(addr = 0; addr < 16; ++addr){
 			DataArray[addr] = 0xeeeeeeee;
 		}
 		addr = DSU_REGFILE+(i*WINDOW_SIZE);
-		printf("DSU addr:    0x%08x\n",addr);
-		read = mComm->Receive(addr, DataArray,4);
+		printf("DSU addr:    0x%08x",addr);
+		read = mComm->Receive(addr, DataArray,16);
 		for(addr = 0; addr < read; ++addr){
-			printf("0x%08x ",DataArray[addr]);
+			if ((addr % 4) == 0){
+				printf("\n0x%08x ",DataArray[addr]);
+			} else {
+				printf("0x%08x ",DataArray[addr]);
+			}
 		}
 		printf("\n");
 	}
