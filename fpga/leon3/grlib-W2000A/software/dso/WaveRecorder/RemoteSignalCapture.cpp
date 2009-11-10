@@ -256,11 +256,12 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		}
 		
 		if (addr % 0x1000 == 0){
-			printf("\naddr 0x%x\n",addr);
+			/*printf("addr 0x%x\n",addr);*/
+			printf("%d bytes done!\n",addr-StartAddr);
 		}
 	}
 	fclose(hFile);
-	printf("Uploading software done!\n");
+	printf("Uploading software done (%d bytes)!\n",addr-StartAddr);
 	mComm->Resync();
 
 	
@@ -270,32 +271,41 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		Send(DSU_REGFILE + i*4,0);
 	}
 //	SetDebugInfo(1);
-	// Set the asi register
-	Send(DSU_REG_ASI,2);
 
 	// Set the Y register
 	Send(DSU_REG_Y,0);
-	// Set the StackAddr 
-//	addr = DSU_REGFILE + ((NWINDOWS+1-START_WINDOW)*WINDOW_SIZE) + REG_OUT_OFF;
-	addr = DSU_REGFILE + 0x38;
-	printf("DSU Regadress of Stackaddr:  0x%08x\n",addr);
-	Send(addr,StackAddr);
-	printf("Stackaddr:    0x%08x\n",StackAddr);
-	
+
+	// Set the PSR register (flag register)
+	Send(DSU_REG_PSR,0xF30000E0);
+
 	// Set the start register window 
 	Send(DSU_REG_WIM,START_WINDOW);
-	printf("DSU_REG_WIM:  0x%08x\n",START_WINDOW);
+	//printf("DSU_REG_WIM:  0x%08x\n",START_WINDOW);
+
 
 	// Set the Trap Base Register 
 	Send(DSU_REG_TBR,START_TBR);
-	printf("DSU_REG_TBR:  0x%08x\n",START_TBR);
+	//printf("DSU_REG_TBR:  0x%08x\n",START_TBR);
 
 	// Set the start address 
 	Send(DSU_REG_PC,START_TBR);
 	Send(DSU_REG_PC+4,START_TBR+4);
 	printf("DSU_REG_PC:   0x%08x\n",START_TBR);
 
-	printf("Register file: global, out, local, in\n");
+	// Set the Trap Register
+	Send(DSU_REG_TRAP,0x10000000);
+
+	// Set the asi register
+	Send(DSU_REG_ASI,2);
+
+	// Set the StackAddr 
+	addr = DSU_REGFILE + ((NWINDOWS+1-START_WINDOW)*WINDOW_SIZE) + REG_OUT_OFF;
+	addr = DSU_REGFILE + 0x38;
+	printf("DSU Regadress of Stackaddr:  0x%08x\n",addr);
+	Send(addr,StackAddr);
+	printf("Stackaddr:    0x%08x\n",StackAddr);
+	
+/*	printf("Register file: global, out, local, in\n");
 	for (i = 0; i < 8; ++i){
 		for(addr = 0; addr < 16; ++addr){
 			DataArray[addr] = 0xeeeeeeee;
@@ -311,7 +321,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 			}
 		}
 		printf("\n");
-	}
+	}*/
 	
 	// RUN 
 	/* Switching all LEON3s into debug mode */
@@ -351,7 +361,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	read = mComm->Receive(DSU_REG_TRAP,&data,1);
 	printf("DSU_REG_TRAP: 0x%08x\n",data);
 
-	printf("Register file: global, out, local, in\n");
+/*	printf("Register file: global, out, local, in\n");
 	for (i = 0; i < 8; ++i){
 		for(addr = 0; addr < 16; ++addr){
 			DataArray[addr] = 0xeeeeeeee;
@@ -367,7 +377,8 @@ uint32_t RemoteSignalCapture::LoadProgram(
 			}
 		}
 		printf("\n");
-	}
+	}*/
+
 	mComm->Resync();
 	return TRUE;
 }
