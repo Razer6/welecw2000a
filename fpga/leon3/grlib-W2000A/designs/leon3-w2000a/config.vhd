@@ -82,7 +82,7 @@ package config is
   constant CFG_NCPU : integer := (1);
   constant CFG_NWIN : integer := (8);
   constant CFG_V8 : integer := 2;
-  constant CFG_MAC : integer := 0;
+  constant CFG_MAC : integer := 1;
   constant CFG_SVT : integer := 0;
   constant CFG_RSTADDR : integer := 16#00000#;
   constant CFG_LDDEL : integer := (1);

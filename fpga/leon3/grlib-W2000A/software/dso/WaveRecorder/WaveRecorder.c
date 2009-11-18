@@ -76,6 +76,7 @@ void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Pro
 	R = 0;
 	arg_freetable(argtable, TableItems);
 	if (Ret != 0){
+		printf("Success!\n");
 		exit(0);
 	 } else {
 		printf("Error in communication!\n"); 
@@ -87,7 +88,7 @@ int main(int argc, char * argv[]) {
 	struct arg_str * UartAddr	= arg_str1("u", "UART", NULL, "Path of serial device, always necessary!");
 	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
-			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs | LoadRun]", 
+			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs | LoadRun | Message]", 
 			"DSO call type, always necessary!");
 	struct arg_str * Trigger	= arg_str0(NULL,"TrType","[ExtLH | ExtHL | SchmittLH | SchmittHL | GlitchLH | GlitchHL]","Trigger type");
 	struct arg_int * ExtTrigger = arg_int0(NULL,"ExtTrigger","<n>", "External trigger, #0 = always, #1 = external trigger 1, #n = external trigger n");
@@ -273,15 +274,17 @@ int main(int argc, char * argv[]) {
 			TriggerNo = 7;
 		} else
 		{	
+			printf("Invalid trigger type, forced capturing set instead!\n");
 			TriggerNo = 0;
+			ExtTrigger->ival[0] = 0;
 		}
 
 		
 		Ret = DSOInterface->SendTrigger(
 			TriggerNo,
 			ExtTrigger->ival[0],
-			TrPrefetch->ival[0],
 			TriggerChannel->ival[0],
+			TrPrefetch->ival[0],
 			TriggerLowRef->ival[0],
 			TriggerHighRef->ival[0],
 			TriggerLowTime->ival[0],
@@ -323,11 +326,27 @@ int main(int argc, char * argv[]) {
 		Ret = DSOInterface->SendAnalogInput(Channels->ival[0], Settings);
 		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);		
 	}
+
+	if (strcmp("Message",Command->sval[0]) == 0){
+		uint32_t FastMode = 0;
+		uint32_t buffer = 0;
+		DSOInterface->ReceiveSamples(
+			-1,
+			1,
+			0,
+			&FastMode,
+			&buffer);
+		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+	}
+
 	if (strcmp("Capture",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,CapWTime,CapSize,
 			WavForceFS,(arg_int*)WaveFile};
 		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		if (Ret == false) {
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		}
 		uSample * buffer = (uSample *)malloc(CapSize->ival[0]*sizeof(int));
 		uint32_t FastMode = 0;
  
@@ -341,6 +360,7 @@ int main(int argc, char * argv[]) {
 			CapSize->ival[0],
 			&FastMode,
 			(uint32_t *)buffer);
+
 /*		{
 		int i = 0;
 		int j = 0;

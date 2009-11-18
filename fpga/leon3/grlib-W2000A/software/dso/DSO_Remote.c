@@ -188,7 +188,7 @@ bool ReceiveHeader(
 			if (rec != 0){
 				errors++;
 #ifndef W2000A
-				printf("\nerror no %d: %c \n",errors,rec);
+				printf("\nerror no %d: %c ",errors,rec);
 #endif
 			}
 #ifndef LEON3

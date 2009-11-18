@@ -331,7 +331,8 @@ void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
 			error = GetLastError();
 			if (error != ERROR_SUCCESS) {
 				printf("WriteFile(): %lu\n", GetLastError());              
-				ret = 0;				
+				ret = 0;	
+				exit(4);
 			}
 		}
 		if (ret == 0){

@@ -102,7 +102,21 @@
 #define DEBUG_UART_BASE_ADDR     0x80000700 
 #define UART_CHCFG_BASE_ADDR     0x80000800
 
+#ifdef LEON3
 #define WRITE_INT(addr,data) (*(volatile uint32_t*)addr) = (uint32_t)data
-#define  READ_INT(addr,data) data = *(volatile uint32_t*)(addr) 
+#define READ_INT(addr) loadmem(addr)
+/* obsolete, because it does not work */
+/*define  READ_INT(addr,data) data = *(volatile uint32_t*)(addr)*/
+#else
+#define WRITE_INT(addr,data) RemoteSend((uint32_t)addr,data)
+#define READ_INT(addr) RemoteReceive(addr)
+#endif
+
+/* INTERRUPT_CTL_BASE_ADDR */
+#define INT_GENERIC_UART  2
+#define INT_DSO           5
+#define INT_DEBUG_UART    7
+#define INT_TIMER         8
+
 
 #endif

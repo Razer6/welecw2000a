@@ -4,7 +4,7 @@
 -- File       : StoP_hc595-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-23
--- Last update: 2009-03-23
+-- Last update: 2009-11-15
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -73,7 +73,7 @@ begin
   end process;
 
   oSD <= Shift(Shift'high);
-  oQ  <= Reg when iG = '1' else (others => 'Z');
+  oQ  <= Reg when iG = '0' else (others => 'Z');
   
   
 end architecture;

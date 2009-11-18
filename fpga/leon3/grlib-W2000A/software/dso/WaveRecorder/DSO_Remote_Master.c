@@ -41,7 +41,7 @@
 
 #include "PCUart.h"
 
-
+#if 0
 bool SendTriggerInput (	uart_regs * uart,
 			const uint32_t noChannels, 
 			const uint32_t SampleSize, 
@@ -150,7 +150,7 @@ uint32_t ReceiveSamples(uart_regs * uart,
 	SendInt(uart,crcSend);
 	return ReceiveAll(uart,CaptureSize,RawData,FastMode);
 }
-
+#endif
 
 
 void RecordWave8Bit (	FILE * Handle, uSample * buffer,

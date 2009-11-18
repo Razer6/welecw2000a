@@ -65,15 +65,9 @@
 #define LEDADDR                  (DSO_SFR_BASE_ADDR+ 4*25)
 #define KEYADDR0                 (DSO_SFR_BASE_ADDR+ 4*26)
 #define KEYADDR1                 (DSO_SFR_BASE_ADDR+ 4*27)
-#define ANALOGSETTINGSPWMADDR    (DSO_SFR_BASE_ADDR+ 4*28)
-/* If you wish, the following 3 Addresses can be merged to one addr*/
-/* look for this to the analog_inputs.png and */
-/* registers_for_control_inputs.png*/
-#define ANALOGSETTINGSBANK7      (DSO_SFR_BASE_ADDR+ 4*29) 
-#define ANALOGSETTINGSBANK6      (DSO_SFR_BASE_ADDR+ 4*30) 
-#define ANALOGSETTINGSBANK5      (DSO_SFR_BASE_ADDR+ 4*31) 
-#define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*32)
-#define DSO_REG_SIZE             (4*32)
+#define ANALOGSETTINGSADDR       (DSO_SFR_BASE_ADDR+ 4*28)
+#define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*28)
+#define DSO_REG_SIZE             (4*28)
 
 /* DEVICEADDR*/
 #define WELEC2012   (2012)
@@ -87,8 +81,13 @@
 /* The first decimator is for the parallel input data (eg. 1Gs @ 125 MHz)*/
 /* If this is not used the max fs must be set 10 times higher! */
 #define SANDBOXXFS   (100000000*10)
-/*int ERRUPTADDR*/
-/* TODO*/
+
+
+/*INTERRUPTADDR*/
+#define CAPTUREDATA_FINISHED     0
+#define CAPTUREDATA_TRIGGERED    1
+#define ANALOGSETTINGS_FINISHED  2
+#define KEYCHANGE                3 
 
 
 /* SAMPLINGFREQADDR*/
@@ -223,7 +222,7 @@
 #define RUN_GREEN     10
 #define RUN_RED       11
 #define SINGLE_GREEN  12 
-#define SINGE_RED     13
+#define SINGLE_RED    13
 
 /*  (read only) */
 /* rotary nob counter (3 bit) base adresses */
@@ -235,14 +234,14 @@
 
 /* KEYADDR0 */
 /* (read only)*/
-#define ENX_CH0_UPDN    0
-#define ENX_CH1_UPDN    4
-#define ENX_CH2_UPDN    8
-#define ENX_CH3_UPDN   12
-#define ENX_CH0_VDIV   16
-#define ENX_CH1_VDIV   20
-#define ENX_CH2_VDIV   24
-#define ENX_CH3_VDIV   28
+#define EN_CH0_UPDN    0
+#define EN_CH1_UPDN    4
+#define EN_CH2_UPDN    8
+#define EN_CH3_UPDN   12
+#define EN_CH0_VDIV   16
+#define EN_CH1_VDIV   20
+#define EN_CH2_VDIV   24
+#define EN_CH3_VDIV   28
 
 
 /* KEYADDR1 */
@@ -269,7 +268,7 @@
 #define BTN_MODECOUPLING 19
 #define BTN_AUTOSCALE   20
 #define BTN_SAVERECALL  21
-#define BTN_QUICKPRint  22
+#define BTN_QUICKPRINT  22
 #define BTN_UTILITY     23
 #define BTN_PULSEWIDTH  24 
 #define BTN_X1          25
@@ -280,7 +279,21 @@
 
 
 
-/* ANALOGSETTINGSBANK7 */
+/* ANALOGSETTINGSADDR */
+#define SET_PWM_OFFSET     31
+#define PWM_OFFSET_SIZE     8
+#define ANALOGDATA_START    0
+#define ENABLEKEYCLOCK     30 
+/*#define EnableProbeClock   29  -- not implemented
+#define EnableProbeStrobe  28  -- not implemented*/
+
+
+#define	ANALOGSETTINGSBUSY 27
+#define ANC_ADDR_OFFSET    24 
+#define	SET_ANALOG(addr)   ((1 << ENABLEKEYCLOCK) | (1 << 27) | ((addr & 0x7) << ANC_ADDR_OFFSET))
+
+#define ANC_CH0       7 
+/* subset of ANC_CH0 */
 #define CH0_K1_ON     0
 #define CH0_K1_OFF    1
 #define CH0_K2_ON     2
@@ -293,14 +306,20 @@
 #define CH1_DC        9
 #define CH2_DC       10
 #define CH3_DC       11
-#define	ANALOGSETTINGSBUSY 31
 
-/* ANALOGSETTINGSBANK6*/
+
+
+#define ANC_DAC0       6 
+/* subset of ANC_DAC0 */
 #define DAC_OFFSET 0
 #define DAC_CH_OFFSET 16
-#define	ANALOGSETTINGSBUSY 31
+#define DAC_SETT_OFFSET 17
+#define SET_OFFSET_CH0(offset) (SET_ANALOG(ANC_DAC0) | (0x30 << DAC_CH_OFFSET) | (1 << DAC_CH_OFFSET) | (offset & 0xffff))
+#define SET_OFFSET_CH1(offset) (SET_ANALOG(ANC_DAC0) | (0x30 << DAC_CH_OFFSET) | (offset & 0xffff))
 
-/* ANALOGSETTINGSBANK5 */
+
+#define ANC_CH1       5 
+/* subset of ANC_CH1 */
 #define CH1_K1_ON      0
 #define CH1_K1_OFF     1
 #define CH1_K2_ON      2
@@ -313,7 +332,6 @@
 #define CH1_SRC2_ADDR 10
 #define CH2_SRC2_ADDR 12
 #define CH3_SRC2_ADDR 14
-#define	ANALOGSETTINGSBUSY 31
 
 /* CHX_SRC2_ADDR*/
 #define SRC2_NONE    0
@@ -321,49 +339,6 @@
 #define SRC2_GND     2
 #define SRC2_LOWPASS 3
 
-typedef struct { 
-	volatile int DeviceAddr;
-	volatile int InterruptAddr;
-	volatile int InterruptMaskAddr;
-	volatile int Reseverd3;
-	volatile int Decimator;
-	volatile int FilterEnable;
-	volatile int InputCh0Addr;
-	volatile int InputCh1Addr;
-	volatile int InputCh2Addr;
-	volatile int InputCh3Addr;
-	volatile int ExtTriggerSrcAddr;
-	volatile int ExtTriggerPWMAddr;
-} volatile CaptureRegs;
-
-typedef struct {
-	volatile int TriggerOnChAddr;
-	volatile int TriggerOnceAddr;
-	volatile int TriggerPrefetchAddr;
-	volatile int TriggerStorageModeAddr;
-	volatile int TriggerReadOffSetAddr;
-	volatile int TriggerTypeAddr;
-	volatile int TriggerLowValueAddr;
-	volatile int TriggerLowTimeAddr;
-	volatile int TriggerHighValueAddr;
-	volatile int TriggerHighTimeAddr;
-	volatile int TriggerStatusRegister;
-	volatile int TriggerCurrentAddr;
-	volatile int ExtTriggerSrcAddr;
-	volatile int ExtTriggerPWMAddr;
-} volatile TriggerRegs;
-
-typedef struct {	
-	volatile int cLedAddr;
-	volatile int cKeyAddr0;
-	volatile int cKeyAddr1;
-} volatile Frontpanel;
-
-typedef struct {
-	volatile int Bank7;
-        volatile int Bank6;
-	volatile int Bank5;
-} volatile AnalogSettings;
 
 /*int Uart16550Addr          40;*/
 /*int Uart16550Data          41;*/

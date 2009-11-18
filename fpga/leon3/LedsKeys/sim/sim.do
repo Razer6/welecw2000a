@@ -19,5 +19,5 @@ vcom -quiet -work work ../../LedsKeys/src/Testbench-ea.vhd
 
 vsim Testbench
 do wave.do
-run 1000 us
+run -all
 

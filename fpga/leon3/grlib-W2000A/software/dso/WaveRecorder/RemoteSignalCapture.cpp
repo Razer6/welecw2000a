@@ -46,6 +46,7 @@
 #include "DebugComm.h"
 #include "PCUart.h"
 #include "DSO_Remote.h"
+#include "DSO_Misc.h"
 
 RemoteSignalCapture::RemoteSignalCapture(DebugComm * Comm): mComm(Comm){}
 
@@ -55,6 +56,7 @@ uint32_t RemoteSignalCapture::InitComm(
 		const uint32_t Baudrate,
 		char * IPAddr)  
 {
+	InitRemoteComm(mComm);
 	return mComm->Init(Device,TimeoutMS,Baudrate,IPAddr);
 }
 
@@ -87,7 +89,17 @@ uint32_t RemoteSignalCapture::SendTriggerInput (
 			const uint32_t Ch2, 
 			const uint32_t Ch3)
 {
-	return false;
+	return SetTriggerInput (
+			noChannels, 
+			SampleSize, 
+			SamplingFrequency,
+			FIXED_CPU_FREQUENCY, // TODO
+			AACFilterStart,
+			AACFilterStop,
+			Ch0, 
+			Ch1, 
+			Ch2, 
+			Ch3);
 }
 
 /* reference time in samples*/
@@ -101,8 +113,18 @@ uint32_t RemoteSignalCapture::SendTrigger(
 		const int HighReference,
 		const uint32_t HighReferenceTime) 
 {
+	uint32_t succ = FALSE;
+	succ = SetTrigger(
+			Trigger, 
+			ExtTrigger,
+			TriggerChannel,
+			TriggerPrefetchSamples,
+			LowReference,
+			LowReferenceTime,
+			HighReference,
+			HighReferenceTime);
 	PrintSFR();
-    return true;
+    return succ;
 }
 
 
@@ -110,15 +132,20 @@ uint32_t RemoteSignalCapture::SendAnalogInput(
 		const uint32_t NoCh, 
 		const SetAnalog * Settings) 
 {
-	return true;
+	return SetAnalogInputRange(
+			NoCh, 
+			Settings);
 }
 
-int RemoteSignalCapture::FastCapture(
+int RemoteSignalCapture::Capture(
 		const uint32_t WaitTime, /* just a integer */
 		uint32_t CaptureSize,    /* size in DWORDs*/
 		uint32_t * RawData) 
 {
-	return TRIGGER_MEM_SIZE;
+	return FastCapture(
+			WaitTime, /* just a integer */
+			CaptureSize,    /* size in DWORDs*/
+			RawData);
 }
 
 /* returns read DWORDS*/
@@ -137,7 +164,7 @@ void RemoteSignalCapture::PrintSFR(){
 	uint32_t Data[DSO_REG_SIZE/sizeof(uint32_t)];
 	uint32_t Length = DSO_REG_SIZE/sizeof(uint32_t);
 	mComm->Receive(DSO_SFR_BASE_ADDR,Data,Length);
-//	PrintDesc(Data,Length);
+	PrintDesc(Data,Length);
 }
 
 uint32_t RemoteSignalCapture::SendRetry(

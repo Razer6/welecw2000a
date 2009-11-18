@@ -21,6 +21,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 library gaisler;
 use gaisler.libdcom.all;
 use gaisler.sim.all;
@@ -254,7 +255,8 @@ architecture behav of testbench is
       iSD  : in  std_ulogic;
       iCK  : in  std_ulogic;
       inCE : in  std_ulogic;
-      inPL : in  std_ulogic;
+      inMR : in  std_ulogic;
+      inPE : in  std_ulogic;
       iPD  : in  std_ulogic_vector(0 to 7);
       oQ   : out std_ulogic;
       onQ  : out std_ulogic);
@@ -428,16 +430,16 @@ architecture behav of testbench is
       iclk12_5  : in  std_ulogic
       );
   end component;
-  
+
   -- start the bhv adcs at the right time
   signal ResetADC : std_ulogic;
-  
+
 --  for all : leon3mini
 --    use entity work.NetlistWrapper;
   
 begin
   
-  ResetADC <= ResetAsync after 1100 ps; 
+  ResetADC <= ResetAsync after 1100 ps;
   -- if the wave file was not found these adc act as an ascending counter
   CH : for i in 0 to cChannels-1 generate
     ADC : for j in 0 to cADCsperChannel-1 generate
@@ -543,11 +545,50 @@ begin
         iSD  => KeySD(i),
         iCK  => oFPSW_CLK,
         inCE => '0',
-        inPL => oFPSW_PE,
+        inMR => '1',
+        inPE => oFPSW_PE,
         iPD  => KeyData(i),
         oQ   => KeySD(i+1),
         onQ  => open);
   end generate;
+
+  StimuliKeys : process
+    variable c : unsigned(7 downto 0);
+    variable x : integer := 0;
+  begin
+    KeyData                 <= (others => (others => '0'));
+    KeyData(0)(0)           <= '1';
+    KeyData(cKeyBanks-1)(7) <= '1';
+--    KeyData(2)(4) <= '1';-- BTN_F1
+--    KeyData(2)(5) <= '1';-- BTN_F2
+--    KeyData(2)(6) <= '1';-- BTN_F3
+--    KeyData(2)(7) <= '1';-- BTN_F4
+--    KeyData(2)(1) <= '1';-- BTN_F5
+--    KeyData(2)(3) <= '1';-- BTN_F6
+    KeyData(2)(0)           <= '1';     -- BTN_CH0
+    KeyData(2)(2)           <= '1';     -- BTN_CH1
+    KeyData(0)(3)           <= '1';     -- BTN_CH2
+    KeyData(0)(0)           <= '1';     -- BTN_CH3
+    wait until oFPSW_PE = '0';
+    wait until oFPSW_PE = '0';
+    wait until oFPSW_PE = '0';
+    wait until oFPSW_PE = '0';
+    KeyData(2)(0)           <= '0';     -- BTN_CH0
+    KeyData(2)(2)           <= '0';     -- BTN_CH1
+    wait until oFPSW_PE = '0';
+    wait until oFPSW_PE = '0';
+    wait until oFPSW_PE = '0';
+    loop
+      wait until oFPSW_PE = '0';
+      x := x + 1;
+      if x mod 7 > 5 then
+        for i in KeyData'range loop
+          c                  := unsigned(KeyData(i)(0 to 7)) +5;
+          KeyData(i)(0 to 7) <= std_ulogic_vector(c(7 downto 0));
+        end loop;
+      end if;
+    end loop;
+  end process;
 
   LedSD(0) <= oFPLED_DIN;
   pLeds : for i in 0 to cLedBanks-1 generate

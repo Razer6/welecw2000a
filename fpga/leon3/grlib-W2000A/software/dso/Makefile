@@ -39,6 +39,12 @@ W2000: $(WCFILES)
 	sparc-elf-objcopy -O srec   W2000ROM.exe sram.srec
 	sparc-elf-objcopy -O binary W2000ROM.exe sram.bin
 
+W2U:
+	$(DSOPATH)/WaveRecorder/WaveRecorder -u  $(UART) -b 115200 -n 2 -p Debugger -c LoadRun --Ffile=sram.bin
+
+W2M:
+	$(DSOPATH)/WaveRecorder/WaveRecorder -u  $(UART) -b 115200 -n 2 -p CPU -c Message
+
 $(WOFILES): $(WCFILES) 
 	$(XCC) $(WCFILES) $(BOOTOPT) -o W2000ROM.exe
 

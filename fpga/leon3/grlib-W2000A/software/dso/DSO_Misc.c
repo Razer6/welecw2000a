@@ -35,25 +35,63 @@
 
 #include "DSO_Misc.h"
 #include "DSO_Main.h"
+#ifdef LEON3
+
 #include "grcommon.h"
 static int snoopen;
 
-void WaitMs(const unsigned int ms){
-	const unsigned int x   = FIXED_CPU_FREQUENCY/4000;/* 1;*/
-	volatile unsigned int i = 0;
-	volatile unsigned int j = 0;
+#else
+
+#include "DebugComm.h"
+static DebugComm * RemoteAccess;
+
+void InitRemoteComm(DebugComm * R){
+	RemoteAccess = R;
+}
+
+void RemoteSend(uint32_t addr, uint32_t data){
+	RemoteAccess->Send((uint32_t)addr,&data,1);
+}
+void RemoteSend(uint32_t addr, uint32_t *data, uint32_t Length){
+	RemoteAccess->Send((uint32_t)addr,data,Length);
+}
+
+inline uint32_t RemoteReceive(uint32_t addr) {
+	uint32_t data;
+	RemoteAccess->Receive(addr,&data,1);
+	return data;
+}
+
+void RemoteReceive(uint32_t addr, uint32_t *data, uint32_t Length){
+	RemoteAccess->Receive((uint32_t)addr,data,Length);
+}
+
+#endif
+
+void WaitMs(const uint32_t ms){
+#ifdef LEON3
+#ifdef BOARD_COMPILATION
+	const uint32_t x   = FIXED_CPU_FREQUENCY/4000;/* 1;*/
+	volatile uint32_t i = 0;
+	volatile uint32_t j = 0;
 	for(i;i< ms; ++i){
 		for(j = 0; j < x; ++j);
 	}
+#endif
+#elif WINNT
+	Sleep(ms);
+#else
+	usleep(ms*1000);
+#endif
 }
 
 /* This functions are written as a work around for volatile compiler bugs.
  * TODO: They must be prooven for each compiler version to work! */
-volatile int WaitUntilMaskedAndZero(volatile int * volatile addr, int mask){
-	volatile int temp;
-	volatile int i = 0;	
+volatile uint32_t WaitUntilMaskedAndZero(volatile uint32_t addr, uint32_t mask){
+	volatile uint32_t temp;
+	volatile uint32_t i = 0;	
 	while(1) {
-		temp = loadmem((int)addr);
+		temp = READ_INT(addr);
 		if ((temp & mask) == 0){
 			return ++i;
 		}
@@ -62,11 +100,11 @@ volatile int WaitUntilMaskedAndZero(volatile int * volatile addr, int mask){
 	return i;
 }
 
-volatile int WaitUntilMaskedAndNotZero(volatile int * volatile addr, int mask){
-	volatile int temp;
-	volatile int i = 0;	
+volatile uint32_t WaitUntilMaskedAndNotZero(volatile uint32_t addr, uint32_t mask){
+	volatile uint32_t temp;
+	volatile uint32_t i = 0;	
 	while(1) {
-		temp = loadmem((int)addr);
+		temp = READ_INT(addr);
 		if ((temp & mask) != 0){
 			return ++i;
 		}
@@ -75,11 +113,11 @@ volatile int WaitUntilMaskedAndNotZero(volatile int * volatile addr, int mask){
 	return i;
 }
 
-volatile bool WaitTimeoutAndZero(volatile int * volatile addr, int mask, int timeout){
-	volatile int temp;
-	volatile int i = 0;	
+volatile uint32_t WaitTimeoutAndZero(volatile uint32_t addr, uint32_t mask, uint32_t timeout){
+	volatile uint32_t temp;
+	volatile uint32_t i = 0;	
 	for(i = 0; i < timeout; ++i) {
-		temp = loadmem((int)addr);
+		temp = READ_INT(addr);
 		if ((temp & mask) == 0){
 			return true;
 		}
@@ -88,11 +126,11 @@ volatile bool WaitTimeoutAndZero(volatile int * volatile addr, int mask, int tim
 	return false;
 }
 
-volatile bool WaitTimeoutAndNotZero(volatile int * volatile addr, int mask, int timeout){
-	volatile int temp;
-	volatile int i = 0;	
+volatile uint32_t WaitTimeoutAndNotZero(volatile uint32_t addr, uint32_t mask, uint32_t timeout){
+	volatile uint32_t temp;
+	volatile uint32_t i = 0;	
 	for(i = 0; i < timeout; ++i) {
-		temp = loadmem((int)addr);
+		temp = READ_INT(addr);
 		if ((temp & mask) != 0){
 			return true;
 		}
@@ -102,7 +140,7 @@ volatile bool WaitTimeoutAndNotZero(volatile int * volatile addr, int mask, int 
 }
 
 
-
+#ifdef LEON3
 int loadmem(volatile int addr)
 {
   volatile int tmp;        
@@ -136,4 +174,5 @@ char loadb(volatile int addr)
   }
   return tmp;
 }	
+#endif
 

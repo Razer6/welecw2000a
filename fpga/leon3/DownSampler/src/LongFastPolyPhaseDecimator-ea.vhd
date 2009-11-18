@@ -4,7 +4,7 @@
 -- File       : LongFastPolyPhaseDecimator-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-07-06
--- Last update: 2009-07-06
+-- Last update: 2009-11-14
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -89,7 +89,7 @@ begin
     variable MulRes : aMulRes; 
   begin
     if iResetAsync = cResetActive then
-      R <= cInit;
+    --  R <= cInit;
     elsif rising_edge(iClk) then
       if iInputValid = '1' then
         R.ShiftReg <= iData & R.ShiftReg(0 to R.ShiftReg'high-1);

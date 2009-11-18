@@ -409,18 +409,18 @@ begin
       oSerialClk      => SerialClk);
 
   oFPSW_PE    <= KeysFromPanel.nFetchStrobe;
-  oFPSW_CLK   <= SerialClk;
+  oFPSW_CLK   <= KeysFromPanel.SerialClk;
   --  iFPSW_F2   : in  std_ulogic;
   --  iFPSW_F1   : in  std_ulogic;
   oFPLED_OE   <= LedstoPanel.nOutputEnable;
   oFPLED_WR   <= LedstoPanel.ValidStrobe;
   oFPLED_DIN  <= LedstoPanel.Data;
-  oFPLED_CLK  <= SerialClk;
+  oFPLED_CLK  <= LedstoPanel.SerialClk;
   oCalibrator <= SerialClk;             -- 1 KHz Clk
 
   oDesh    <= AnalogSettings.Addr;      --demux. write strob for 4094
   oDeshENA <= AnalogSettings.Enable;
-  oRegCLK  <= SerialClk;
+  oRegCLK  <= AnalogSettings.SerialClk;
   oRegData <= AnalogSettings.Data;
 
   -- pragma translate_off
@@ -832,12 +832,12 @@ begin
       oRed(5)   <= vgao.video_out_r(7);
       oGreen(5) <= vgao.video_out_g(7);
       oBlue(5)  <= vgao.video_out_b(7);
-      oRed(4)   <= vgao.video_out_r(6);
-      oGreen(4) <= vgao.video_out_g(6);
-      oBlue(4)  <= vgao.video_out_b(6);
-      oRed(3)   <= (vgao.video_out_r(5) and VGA_PWM(0));
-      oGreen(3) <= (vgao.video_out_g(5) and VGA_PWM(0));
-      oBlue(3)  <= (vgao.video_out_b(5) and VGA_PWM(0)); 
+      oRed(3)   <= vgao.video_out_r(6);
+      oGreen(3) <= vgao.video_out_g(6);
+      oBlue(3)  <= vgao.video_out_b(6);
+      oRed(4)   <= (vgao.video_out_r(5) and VGA_PWM(0));
+      oGreen(4) <= (vgao.video_out_g(5) and VGA_PWM(0));
+      oBlue(4)  <= (vgao.video_out_b(5) and VGA_PWM(0)); 
       Dena      <= vgao.blank;
     end if;
   end process;

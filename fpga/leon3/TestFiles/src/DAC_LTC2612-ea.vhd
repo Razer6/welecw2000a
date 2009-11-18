@@ -4,7 +4,7 @@
 -- File       : DAC_LTC2612-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-23
--- Last update: 2009-03-25
+-- Last update: 2009-11-15
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -64,15 +64,15 @@ architecture BHV of DAC_LTC2612 is
                      constant iRef : real;
                      constant iGND : real) return real is
     constant cDenum : real := real(2**(16+1 - gUnusedDataBits));
-    constant cRange : real    := iRef - iGND;
+    constant cRange : real := iRef - iGND;
     variable vRet   : real;
   begin
     if iE = '1' then
       if iU = '1' then
         vRet := real(to_integer(signed(iD)))*cRange/cDenum + iGND;
-    else
-      vRet := iOut;
-  end if;
+      else
+        vRet := iOut;
+      end if;
     else
       vRet := iGND;
     end if;
@@ -109,8 +109,11 @@ begin
         BU  <= '0';
         case command is
           when X"4" =>
-            Aen <= '0';
-            Ben <= '0';
+            if Shift(16) = '0' then
+              Aen <= '0';
+            else
+              Ben <= '0';
+            end if;
           when X"1" | X"3" =>
             if Shift(16) = '1' then
               AU <= '1';

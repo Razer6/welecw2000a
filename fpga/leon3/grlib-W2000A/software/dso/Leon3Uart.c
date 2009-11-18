@@ -121,7 +121,7 @@ void SendCharBlock(uart_regs * uart, char c) {
 			break;
 		}
 		if ((uint32_t)uart == DEBUG_UART_BASE_ADDR){
-			printf("%d ",temp & TX_EMPTY);
+	/*		printf("%d ",temp & TX_EMPTY);*/
 		}
 	}
 	uart->data = c;

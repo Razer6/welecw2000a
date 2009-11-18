@@ -4,7 +4,7 @@
 -- File       : NobDecoder-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-10-23
--- Last update: 2009-10-27
+-- Last update: 2009-11-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -60,7 +60,7 @@ architecture RTL of NobDecoder is
   signal dir    : std_ulogic;
 begin
   
-  Stable(0) <= iStable;
+
   dir       <= not iUnstable when gReverseDir /= 0 else iUnstable;
 
   process (iClk, iResetAsync)
@@ -71,9 +71,9 @@ begin
       Stable(1) <= '0';
     elsif rising_edge(iClk) then
       
-      if iStrobe = '1' then
-        Stable(1) <= iStable;
-
+        if iStrobe = '1' then
+          Stable(0) <= iStable;
+          Stable(1) <= Stable(0);
         case Stable is
           when "01" =>
             case dir is

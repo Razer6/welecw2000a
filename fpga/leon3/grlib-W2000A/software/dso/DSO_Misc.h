@@ -52,19 +52,28 @@ struct spwregs
    volatile int rxdesc;
 };
 
-void WaitMs(const unsigned int ms);
+void WaitMs(const uint32_t ms);
 
 /* This functions are written as a work around for volatile compiler bugs.
  * TODO: They must be prooven for each compiler version to work! */
-volatile int WaitUntilMaskedAndZero   (volatile int * volatile addr, int mask);
-volatile int WaitUntilMaskedAndNotZero(volatile int * volatile addr, int mask);
+volatile uint32_t WaitUntilMaskedAndZero   (volatile uint32_t addr, uint32_t mask);
+volatile uint32_t WaitUntilMaskedAndNotZero(volatile uint32_t addr, uint32_t mask);
 
 /* timeout is just an integer, these are not ms! 
  * exits with false on timeout */
-volatile bool WaitTimeoutAndZero   (volatile int * volatile addr, int mask, int timeout);
-volatile bool WaitTimeoutAndNotZero(volatile int * volatile addr, int mask, int timeout);
+volatile uint32_t WaitTimeoutAndZero   (volatile uint32_t addr, uint32_t mask, uint32_t timeout);
+volatile uint32_t WaitTimeoutAndNotZero(volatile uint32_t addr, uint32_t mask, uint32_t timeout);
 
+#ifdef LEON3
 int loadmem(volatile int addr);
 char loadb(volatile int addr);
+#else
+#include "DebugComm.h"
+void InitRemoteComm(DebugComm * R);
+void RemoteSend(uint32_t addr, uint32_t data);
+void RemoteSend(uint32_t addr, uint32_t *data, uint32_t Length);
+void RemoteReceive(uint32_t addr, uint32_t *data, uint32_t Length);
+uint32_t RemoteReceive(uint32_t addr);
+#endif
 
 #endif

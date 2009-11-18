@@ -27,7 +27,7 @@ CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=1000000010001101000000
+CompilerSettings=1000000010001100100000
 
 [Unit1]
 FileName=WaveRecorder.c

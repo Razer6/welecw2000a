@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-04-05
+-- Last update: 2009-11-15
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -92,10 +92,7 @@ package pSpecialFunctionRegister is
   constant cLedAddr                : natural := 25;
   constant cKeyAddr0               : natural := 26;
   constant cKeyAddr1               : natural := 27;
-  constant cAnalogSettingsPWMAddr  : natural := 28;
-  constant cAnalogSettingsBank7    : natural := 29;
-  constant cAnalogSettingsBank6    : natural := 30;
-  constant cAnalogSettingsBank5    : natural := 31;
-  constant cLastAddr               : natural := 32;
+  constant cAnalogSettingsAddr  : natural := 28;
+  constant cLastAddr               : natural := 29;
   
 end package;

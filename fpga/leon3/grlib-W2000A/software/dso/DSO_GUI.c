@@ -42,11 +42,18 @@
 
 #ifdef BOARD_COMPILATION
 
-uint32_t DrawSample(
-		uint16_t Color,
-		uint32_t y,
-		uint32_t x1, 
-		uint32_t x2);
+
+typedef struct {
+	int32_t P;
+	int32_t C;
+} SampleRet;
+
+void DrawSample(
+		uint16_t ColorBack,
+		uint16_t ColorSignal,
+		uint32_t v,
+		SampleRet hp,
+		SampleRet hc);
 
 void DrawSignal(
 		uint32_t Voffset, 
@@ -56,28 +63,92 @@ void DrawSignal(
 		uint16_t CurrColor){
 
 	register uint32_t i = SIGNAL_HSTART+1;
-	register uint32_t Prev = 0;
-	register uint32_t Curr = 0;
-	register uint32_t lastPrev = 0;
-        register uint32_t lastCurr = 0;
+//	register uint32_t Prev = 0;
+//	register uint32_t Curr = 0;
+	register SampleRet Prev;
+	register SampleRet Curr;
+//	register uint32_t lastPrev = 0;
+//      register uint32_t lastCurr = 0;
 	
 
-	lastCurr = CurrData[SIGNAL_HSTART].i + Voffset;
-	if (lastCurr < 0)     lastCurr = 0;
-	if (lastCurr >= VLEN) lastCurr = VLEN-1;
-	lastPrev = PrevData[SIGNAL_HSTART].i + Voffset;
-	if (lastPrev < 0)     lastPrev = 0;
-	if (lastPrev >= VLEN) lastPrev = VLEN-1;
+	Prev.C = CurrData[SIGNAL_HSTART].i + Voffset;
+	if (Prev.C < 0)     Prev.C = 0;
+	if (Prev.C >= VLEN) Prev.C = VLEN-1;
+	Prev.P = PrevData[SIGNAL_HSTART].i + Voffset;
+	if (Prev.P < 0)     Prev.P = 0;
+	if (Prev.P >= VLEN) Prev.P = VLEN-1;
 
 	for (; i < SIGNAL_HSTOP; ++i){
-		Prev = PrevData[i].i + Voffset;
+/*		Prev = PrevData[i].i + Voffset;
 		lastPrev = DrawSample(PrevColor,i,Prev,lastPrev);
 		Curr = CurrData[i].i + Voffset;
-		lastCurr = DrawSample(CurrColor,i,Curr,lastCurr);
+		lastCurr = DrawSample(CurrColor,i,Curr,lastCurr);*/
+		Curr.P = PrevData[i].i + Voffset;
+		Curr.C = CurrData[i].i + Voffset;
+		/* avoid drawing out of screen only once per sample (return value)*/
+		if (Curr.P < 0)     Curr.P = 0;
+		if (Curr.P >= VLEN) Curr.P = VLEN-1;
+		if (Curr.C < 0)     Curr.C = 0;
+		if (Curr.C >= VLEN) Curr.C = VLEN-1;
+		DrawSample(PrevColor, CurrColor, i, Prev, Curr);
+		Prev = Curr;
+
 	}
 
 }
 
+/* drawing uninterrupted lines in a race condition framebuffer */
+void DrawSample(
+		uint16_t ColorBack,
+		uint16_t ColorSignal,
+		uint32_t v,
+		SampleRet hp,
+		SampleRet hc){
+	register uint32_t pl = 0;
+	register uint32_t ph = 0;
+	register uint32_t cl = 0;
+	register uint32_t ch = 0;
+
+	if (hp.P < hc.P){
+		pl = hp.P;
+		ph = hc.P;
+	} else {
+		pl = hc.P;
+		ph = hp.P;
+	}
+	if (hp.C < hc.C){
+		cl = hp.C;
+		ch = hc.C;
+	} else {
+		cl = hc.C;
+		ch = hp.C;
+	}
+	if ((ph < cl) || (pl > ch)) {
+		DrawVLine(ColorSignal,v,cl,ch);
+		DrawVLine(ColorBack,v,pl,ph);
+		DrawVLine(ColorSignal,v,cl,ch);
+	} else {
+		DrawVLine(ColorSignal,v,cl,ch);
+		DrawVLine(ColorBack,v,pl,ph);
+		DrawVLine(ColorSignal,v,cl,ch);
+		DrawVLine(ColorSignal,v,cl,ch);
+		
+/*		if (cl == ch) {
+			DrawPoint(ColorSignal,v,cl);
+		} else {
+			DrawVLine(ColorSignal,v,cl,ch);
+		}
+		if (pl < cl) {
+			DrawVLine(ColorBack,v,pl,cl-1);
+		}
+		if (ph > ch) {
+			DrawVLine(ColorBack,v,ch+1,ph);
+		}*/
+	}	
+}
+
+	
+/*
 uint32_t DrawSample(
 		uint16_t Color,
 		uint32_t y,
@@ -93,7 +164,7 @@ uint32_t DrawSample(
 		DrawVLine(Color,y,x1,x2);
 	}
 	return x1;
-}
+}*/
 
 
 void ConvSample (

@@ -151,9 +151,11 @@ add wave -noupdate -format Literal -expand /testbench/d3/gensfrdso/sfr0/osfrcont
 add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/addr
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/rd
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/wr
-add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
 add wave -noupdate -format Literal -radix decimal /testbench/d3/gensfrdso/sfr0/sfr/idata
 add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sfr0/sfr/odata
+add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
+add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/interruptvector
+add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/interruptmask
 add wave -noupdate -divider IRQ
 add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbi
 add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbo
@@ -171,7 +173,7 @@ add wave -noupdate -divider Trigger
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclkcpu
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iresetasync
-add wave -noupdate -format Analog-Step -height 40 -offset 128.0 -radix decimal -scale 0.14843137254901961 /testbench/d3/capturesignals/trigger/idata(0)(0)
+add wave -noupdate -format Analog-Step -height 40 -offset 128.0 -radix decimal -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/idata(0)(0)
 add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/idata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/ivalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iexttrigger
@@ -193,23 +195,44 @@ add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /te
 add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/simul/drawdata1
 add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/simul/drawdata2
 add wave -noupdate -format Analog-Step -height 40 -scale 0.14843100000000001 /testbench/d3/capturesignals/trigger/simul/drawdata3
+add wave -noupdate -divider Decimation
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/iadc
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/idata
+add wave -noupdate -format Logic /testbench/d3/capturesignals/decimator/ivalid
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/icpu
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/odata
+add wave -noupdate -format Logic /testbench/d3/capturesignals/decimator/ovalid
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/decimatorbits
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/decimator
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/stagedata0
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/longstagedata0
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/stagevalid0
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/stageinput
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/stageoutput
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/validout
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/fastfirdata
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/longfastfirdata
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/firdatain
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/firdataout
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/addertreevalid
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/firvalid
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimator/dataout
 add wave -noupdate -divider LedsKeysAnalogSettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/iclk
 add wave -noupdate -format Logic /testbench/d3/frontpanel/iresetasync
 add wave -noupdate -format Literal /testbench/d3/frontpanel/ileds
+add wave -noupdate -format Literal /testbench/d3/frontpanel/ledstate
 add wave -noupdate -format Literal /testbench/d3/frontpanel/oleds
 add wave -noupdate -format Logic /testbench/d3/frontpanel/ikeysdata
 add wave -noupdate -format Literal /testbench/d3/frontpanel/onfetchkeys
-add wave -noupdate -format Literal /testbench/d3/frontpanel/okeys
-add wave -noupdate -format Literal /testbench/d3/frontpanel/icputoanalog
+add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/okeys
+add wave -noupdate -format Literal /testbench/d3/frontpanel/keystate
+add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/icputoanalog
+add wave -noupdate -format Literal /testbench/d3/frontpanel/analogsettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/oanalogbusy
 add wave -noupdate -format Literal /testbench/d3/frontpanel/oanalogsettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/strobe
 add wave -noupdate -format Logic /testbench/d3/frontpanel/serialclk
-add wave -noupdate -format Literal /testbench/d3/frontpanel/ledshiftreg
-add wave -noupdate -format Literal /testbench/d3/frontpanel/ledcounter
-add wave -noupdate -format Literal /testbench/d3/frontpanel/keyshiftreg
-add wave -noupdate -format Literal /testbench/d3/frontpanel/keycounter
 add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/analogsettings
 add wave -noupdate -divider {Analog Input Perivials}
 add wave -noupdate -format Logic /testbench/dac/ince
@@ -259,8 +282,8 @@ add wave -noupdate -format Literal /testbench/ch1_regh/oq
 add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {448940232 ps} 0} {{Cursor 2} {262698113 ps} 0} {{Cursor 3} {228215000 ps} 0} {{Cursor 4} {19811321 ps} 0}
-configure wave -namecolwidth 375
+WaveRestoreCursors {{Cursor 1} {437803088 ps} 0} {{Cursor 2} {77665095 ps} 0} {{Cursor 3} {198180680 ps} 0} {{Cursor 4} {0 ps} 0}
+configure wave -namecolwidth 419
 configure wave -valuecolwidth 180
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
@@ -273,4 +296,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ps} {525 us}
+WaveRestoreZoom {197662109 ps} {200123047 ps}

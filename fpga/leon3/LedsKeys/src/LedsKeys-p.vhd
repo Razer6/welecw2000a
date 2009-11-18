@@ -4,7 +4,7 @@
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-10-23
+-- Last update: 2009-11-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -43,11 +43,12 @@ library DSO;
 use DSO.Global.all;
 
 package pLedsKeysAnalogSettings is
-  constant cNobCounterSize : natural := 3;
+  constant cNobCounterSize    : natural := 3;
   constant cAnalogAddrLength  : natural := 3;
   constant cAnalogShiftLength : natural := 24;
 
   type aShiftOut is record
+                      SerialClk     : std_ulogic;
                       nResetSync    : std_ulogic;
                       Data          : std_ulogic;
                       ValidStrobe   : std_ulogic;
@@ -55,6 +56,7 @@ package pLedsKeysAnalogSettings is
                     end record;
   
   type aShiftIn is record
+                     SerialClk    : std_ulogic;
                      nFetchStrobe : std_ulogic;
                      nChipEnable  : std_ulogic;
                    end record;
@@ -102,6 +104,7 @@ package pLedsKeysAnalogSettings is
                 end record;
   
   type aLeds is record
+                  SetLeds        : std_ulogic;
                   LED_CH0        : std_ulogic;  -- Button [Channel 1]
                   LED_CH1        : std_ulogic;  -- Button [Channel 2]
                   LED_CH2        : std_ulogic;  -- Button [Channel 3]
@@ -119,42 +122,21 @@ package pLedsKeysAnalogSettings is
                 end record;
   
   type aAnalogSettings is record
-                            Set           : std_ulogic;
-                            Addr          : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
-                            CH0_K1_ON     : std_ulogic;
-                            CH0_K1_OFF    : std_ulogic;
-                            CH0_K2_ON     : std_ulogic;
-                            CH0_K2_OFF    : std_ulogic;
-                            CH0_OPA656    : std_ulogic;
-                            CH0_BW_Limit  : std_ulogic;
-                            CH0_U14       : std_ulogic;
-                            CH0_U13       : std_ulogic;
-                            CH0_DC        : std_ulogic;
-                            CH1_DC        : std_ulogic;
-                            CH2_DC        : std_ulogic;
-                            CH3_DC        : std_ulogic;
-                            CH1_K1_ON     : std_ulogic;
-                            CH1_K1_OFF    : std_ulogic;
-                            CH1_K2_ON     : std_ulogic;
-                            CH1_K2_OFF    : std_ulogic;
-                            CH1_OPA656    : std_ulogic;
-                            CH1_BW_Limit  : std_ulogic;
-                            CH1_U14       : std_ulogic;
-                            CH1_U13       : std_ulogic;
-                            CH0_src2_addr : std_ulogic_vector(1 downto 0);
-                            CH1_src2_addr : std_ulogic_vector(1 downto 0);
-                            CH2_src2_addr : std_ulogic_vector(1 downto 0);
-                            CH3_src2_addr : std_ulogic_vector(1 downto 0);
-                            DAC_Offset    : aWord;
-                            DAC_Ch        : std_ulogic;
-                            PWM_Offset    : aByte;
+                            Set_PWM_Offset    : std_ulogic;
+                            EnableKeyClock    : std_ulogic;
+                            EnableProbeClock  : std_ulogic;
+                            EnableProbeStrobe : std_ulogic;
+                            Set               : std_ulogic;
+                            Addr              : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
+                            Data              : std_ulogic_vector(cAnalogShiftLength-1 downto 0);
                           end record;
   
   type aAnalogSettingsOut is record
-                               Addr   : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
-                               Enable : std_ulogic;
-                               Data   : std_ulogic;
-                               PWM    : std_ulogic;
+                               SerialClk : std_ulogic;
+                               Addr      : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
+                               Enable    : std_ulogic;
+                               Data      : std_ulogic;
+                               PWM       : std_ulogic;
                              end record;
   
 end;

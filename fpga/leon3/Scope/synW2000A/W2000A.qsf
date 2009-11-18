@@ -123,11 +123,11 @@ set_global_assignment -name HDL_MESSAGE_LEVEL LEVEL3
 set_global_assignment -name NUMBER_OF_PATHS_TO_REPORT 2000
 
 
-set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
-set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name EDA_SIMULATION_TOOL "<None>"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulation
 set_global_assignment -name ENABLE_DA_RULE "C101, C102, C103, C104, C105, C106, R101, R102, R103, R104, R105, T101, T102, A101, A102, A103, A104, A105, A106, A107, A108, A109, A110, S101, S102, S103, S104, D101, D102, D103, H101, H102, M101, M102, M103, M104"
 set_global_assignment -name DISABLE_DA_RULE M105
-set_global_assignment -name FLOW_ENABLE_RTL_VIEWER ON
+set_global_assignment -name FLOW_ENABLE_RTL_VIEWER OFF
 set_global_assignment -name AUTO_RAM_RECOGNITION OFF
 set_global_assignment -name HDL_MESSAGE_OFF 10862
 set_global_assignment -name AUTO_RAM_TO_LCELL_CONVERSION ON
@@ -454,8 +454,7 @@ set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
 
 
 set_global_assignment -name ENABLE_DRC_SETTINGS OFF
-set_global_assignment -name MISC_FILE "C:/ProjekteArbeiten/Welec/SF/fpga/leon3/Scope/synW2000A/W2000A.dpf"
-set_global_assignment -name MUX_RESTRUCTURE ON
+set_global_assignment -name MUX_RESTRUCTURE AUTO
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 set_global_assignment -name IGNORE_LCELL_BUFFERS ON
 set_global_assignment -name FITTER_EFFORT "AUTO FIT"
@@ -705,5 +704,14 @@ set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/l
 set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS "EXTRA EFFORT"
 set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ALWAYS
 
-set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
+set_global_assignment -name STATE_MACHINE_PROCESSING "ONE-HOT"
+set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS ON
+set_global_assignment -name SYNTH_GATED_CLOCK_CONVERSION ON
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIXII NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_MAXII NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_CYCLONE NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
+set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
+
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON

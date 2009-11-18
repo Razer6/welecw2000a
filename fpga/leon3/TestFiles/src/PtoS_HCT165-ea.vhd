@@ -4,7 +4,7 @@
 -- File       : PtoS_HCT165-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-23
--- Last update: 2009-03-23
+-- Last update: 2009-11-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -42,7 +42,8 @@ entity PtoS_hct165 is
     iSD  : in  std_ulogic;
     iCK  : in  std_ulogic;
     inCE : in  std_ulogic;
-    inPL : in  std_ulogic;
+    inMR : in  std_ulogic;
+    inPE : in  std_ulogic;
     iPD  : in  std_ulogic_vector(0 to 7);
     oQ   : out std_ulogic;
     onQ  : out std_ulogic);
@@ -52,15 +53,20 @@ architecture RTL of PtoS_hct165 is
   signal Shift : std_ulogic_vector (0 to 7);
   
 begin
-  
-  process (iCK, inPL)
+
+  -- absolut timing values are not correct!
+  process (iCK, inMR)
   begin
-    if inPL = '0' then
-      Shift <= iPD;
+    if inMR = '0' then
+      Shift <= reject 2 ns inertial (others => 'X') after 0 ns, iPD after 10 ns;
     elsif rising_edge(iCK) then
       if inCE = '0' then
-        Shift(0)               <= iSD;
-        Shift(1 to Shift'high) <= Shift(0 to Shift'high-1);
+        if inPE = '1' then
+          Shift(0)               <= reject 2 ns inertial 'X' after 0 ns, iSD after 10 ns;
+          Shift(1 to Shift'high) <= reject 2 ns inertial Shift(0 to Shift'high-1);
+        else
+          Shift <= reject 2 ns inertial (others => 'X') after 0 ns, iPD after 10 ns;
+        end if;
       end if;
     end if;
   end process;

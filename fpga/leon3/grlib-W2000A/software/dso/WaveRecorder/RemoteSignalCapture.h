@@ -107,7 +107,7 @@ private:
 			const uint32_t CPUFrequency);
 	uint32_t IsFastMode();
 
-	int FastCapture(
+	int Capture(
 		const uint32_t WaitTime, /* just a integer */
 		uint32_t CaptureSize,    /* size in DWORDs*/
 		uint32_t * RawData);

@@ -107,6 +107,9 @@ uint32_t CaptureData(
 		uint32_t * RawData); 
 
 
-
+int FastCapture(
+		const uint32_t WaitTime, /* just a integer */
+		uint32_t CaptureSize,    /* size in DWORDs*/
+		uint32_t * RawData);
 
 #endif

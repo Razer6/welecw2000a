@@ -1,0 +1,34 @@
+CC = g++
+AR = ar
+INCS =  -I"C:/Programme/Dev-Cpp/include"  -I".."  -I"."  -I"C:/Programme/Dev-Cpp/include"
+CFLAGS = $(INCS) $(CXXINCS) -DWINNT -DLITTLE_ENDIAN 
+
+all:	WaveRecorder
+
+clean: 
+	rm WaveRecorder.exe *.o *~
+
+%.o : %.c $(CINCLUDES)
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+%.o : ../%.c $(CINCLUDES)
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+%.o : %.cpp $(CINCLUDES)
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+OBJECTS= \
+	PCUart.o \
+	WaveFilePackage.o \
+	DSO_Remote.o \
+	DebugUart.o \
+	NormalUART.o \
+	RemoteSignalCapture.o \
+	Request.o \
+	DSO_Remote_Master.o \
+	crc.o
+
+
+WaveRecorder:	$(OBJECTS)
+	$(CC) $(CFLAGS) $(PCOFILES) -o WaveRecorder.exe WaveRecorder.c $(OBJECTS) libargtable2.a -lgmon
+

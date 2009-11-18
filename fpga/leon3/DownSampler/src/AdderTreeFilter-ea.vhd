@@ -4,7 +4,7 @@
 -- File       : AdderTreeFilter-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-07-05
--- Last update: 2009-09-11
+-- Last update: 2009-11-14
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description:
@@ -102,17 +102,17 @@ begin
   pTree : process (iResetAsync, iClk)
   begin
     if iResetAsync = cResetActive then
-      Tree.L0(0)    <= (others => '0');
-      Tree.L1       <= (others => (others => '0'));
-      Tree.L2       <= (others => (others => '0'));
-      Tree.L3       <= (others => (others => '0'));
-      Tree.L4       <= (others => (others => '0'));
-      Tree.L5       <= (others => (others => '0'));
-      Tree.L6       <= (others => (others => '0'));
-      Filtered      <= (others => (others => '0'));
-      DataOut       <= (others => (others => '0'));
+--      Tree.L0(0)    <= (others => '0');
+--      Tree.L1       <= (others => (others => '0'));
+--      Tree.L2       <= (others => (others => '0'));
+--      Tree.L3       <= (others => (others => '0'));
+--      Tree.L4       <= (others => (others => '0'));
+--      Tree.L5       <= (others => (others => '0'));
+--      Tree.L6       <= (others => (others => '0'));
+--      Filtered      <= (others => (others => '0'));
+--      DataOut       <= (others => (others => '0'));
       oValid        <= '0';
-      oStageData    <= (others => '0');
+--      oStageData    <= (others => '0');
       oStageValid   <= '0';
       Counter       <= 0;
       PrevDecimator <= (others => '0');

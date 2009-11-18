@@ -35,7 +35,7 @@
 #include "Request.h"
 #include "DSO_Remote.h"
 
-Request::Request(CPUComm * Comm){}
+Request::Request(CPUComm * Comm) : mComm(Comm){}
 Request::~Request(){
 	delete mComm;
 }
@@ -130,17 +130,17 @@ uint32_t Request::ReceiveSamples(
 }
 
 void Request::PrintSFR(){
-	uint32_t data[DSO_REG_SIZE/sizeof(uint32_t)+2] = 
+/*	uint32_t data[DSO_REG_SIZE/sizeof(uint32_t)+2] = 
 		{LOAD_DWORDS, DSO_SFR_BASE_ADDR, DSO_REG_SIZE/sizeof(uint32_t)};
 	uint32_t Length = 3;
 	uint32_t Dummy = 0;
 	mComm->Send(data,Length);
 	
-	data[0] = DSO_REG_SIZE/sizeof(uint32_t)+1;/* length */
+	data[0] = DSO_REG_SIZE/sizeof(uint32_t)+1;//length
 	Length = mComm->Receive(data,data[0]);
 	if (Length > 1){
 		PrintDesc(&data[1], data[0]);
-	}
+	}*/
 }
 
 void Request::PrintDesc(uint32_t *Data, uint32_t Length){

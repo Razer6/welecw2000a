@@ -4,7 +4,7 @@
 -- File       : SpecialFunctionRegister-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-10-25
+-- Last update: 2009-11-18
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -65,8 +65,9 @@ end entity;
 
 architecture RTL of SpecialFunctionRegister is
   signal SFRIn                     : aSFR_in;
-  signal InterruptMask             : aDword;
-  signal InterruptVector           : aDword;
+  signal InterruptMask             : std_ulogic_vector(4-1 downto 0);
+  signal InterruptVector           : std_ulogic_vector(4-1 downto 0);
+  signal PrevInt                   : std_ulogic_vector(4-1 downto 0);
   signal Decimator                 : aDownSampler;
   signal SignalSelector            : aSignalSelector;
   signal ExtTriggerSrc             : aExtTriggerInput;
@@ -77,6 +78,7 @@ architecture RTL of SpecialFunctionRegister is
   signal PrevTriggerBusy           : std_ulogic;
   signal PrevTriggerStartRecording : std_ulogic;
   signal PrevAnalogBusy            : std_ulogic;
+  signal PrevKeys : aKeys;
   signal Addr                      : natural;
 begin
   
@@ -89,17 +91,29 @@ begin
       PrevTriggerBusy           <= '0';
       PrevTriggerStartRecording <= '0';
       PrevAnalogBusy            <= '0';
+      PrevInt <= (others => '0');
     elsif rising_edge(iCLKCPU) then
+   --   InterruptVector <= (others => '0');
+      PrevInt <= InterruptVector;
+      
       PrevTriggerBusy <= SFRIn.Trigger.Busy;
       if PrevTriggerBusy = '1' and SFRIn.Trigger.Busy = '0' then
         InterruptVector(0) <= '1';
       end if;
+      
       PrevTriggerStartRecording <= SFRIn.Trigger.Recording;
       if PrevTriggerStartRecording = '0' and SFRIn.Trigger.Recording = '1' then
         InterruptVector(1) <= '1';
       end if;
+      
+      PrevAnalogBusy <= SFRIn.AnalogBusy;
       if SFRIn.AnalogBusy = '0' and PrevAnalogBusy = '1' then
         InterruptVector(2) <= '1';
+      end if;
+      
+      PrevKeys <= SFRIn.Keys;
+      if SFRIn.Keys /= PrevKeys then
+        InterruptVector(3) <= '1';
       end if;
 
 --      InterruptVector(2) <= SFRIn.KeyInterruptLH;
@@ -108,14 +122,15 @@ begin
 
       if Addr = cInterruptAddr then
         if iWr = '1' then
-          InterruptVector <= iData;
+          InterruptVector <= iData(InterruptVector'range);
         end if;
       end if;
 
-      if (InterruptVector and InterruptMask) = X"00000000" then
-        oCPUInterrupt <= '0';
-      else
+      if (InterruptVector and InterruptMask) /= X"0"
+        and InterruptVector /= PrevInt then
         oCPUInterrupt <= '1';
+      else
+        oCPUInterrupt <= '0';
       end if;
     end if;
   end process;
@@ -138,7 +153,8 @@ begin
     variable vData : aDword;
   begin
     if iResetAsync = cResetActive then
-      InterruptMask <= (others => '0');
+      InterruptMask     <= (others => '0');
+      Trigger.ForceIdle <= '1';
       Decimator <= (
         Stages       => (others => '0'),
         EnableFilter => (others => '0'),
@@ -166,60 +182,56 @@ begin
           SignalSelector <= (
             others => O"0");
       end case;
-      
-      ExtTriggerSrc <= (
+
+     ExtTriggerSrc <= (
         Addr   => 0,
         others => (others => (others => '0')));
 
-      Trigger <= (
-        TriggerOnce     => '0',
-        ForceIdle       => '0',
-        PreambleCounter => to_unsigned(32, aTriggerAddr'length),
-        Trigger         => 2,
-        TriggerChannel  => 0,
-        StorageMode     => "00",
-        -- Trigger mode specific:
-        LowValue        => std_ulogic_vector(to_signed(-16, Trigger.LowValue'length)),
-        HighValue       => std_ulogic_vector(to_signed(16, Trigger.HighValue'length)),
-        LowTime         => std_ulogic_vector(to_signed(50, Trigger.LowTime'length)),
-        HighTime        => std_ulogic_vector(to_signed(50, Trigger.HighTime'length)),
-        SetReadOffset   => '0',
-        ReadOffset      => (others => '0'));
+--      Trigger <= (
+--        TriggerOnce     => '0',
+--        ForceIdle       => '0',
+--        PreambleCounter => to_unsigned(32, aTriggerAddr'length),
+--        Trigger         => 2,
+--        TriggerChannel  => 0,
+--        StorageMode     => "00",
+--        -- Trigger mode specific:
+--        LowValue        => std_ulogic_vector(to_signed(-16, Trigger.LowValue'length)),
+--        HighValue       => std_ulogic_vector(to_signed(16, Trigger.HighValue'length)),
+--        LowTime         => std_ulogic_vector(to_signed(50, Trigger.LowTime'length)),
+--        HighTime        => std_ulogic_vector(to_signed(50, Trigger.HighTime'length)),
+--        SetReadOffset   => '0',
+--        ReadOffset      => (others => '0'));
 
       nConfigADC <= (others => cLowActive);
 
-      Leds <= (others => '0');
+--      Leds <= (others => '0');
 
       AnalogSettings <= (
-        Addr          => (others => '0'),
-        CH0_src2_addr => (others => '0'),
-        CH1_src2_addr => (others => '0'),
-        CH2_src2_addr => (others => '0'),
-        CH3_src2_addr => (others => '0'),
-        DAC_Offset    => (others => '0'),
-        PWM_Offset    => (others => '0'),
-        others        => '0');
-
+        Addr   => (others => '-'),
+        Data   => (others => '-'),
+        EnableKeyClock   => '1',  -- not implemented
+        EnableProbeClock => '1',
+        others => '0');
 
     elsif rising_edge(iClkCPU) then
-      Trigger.TriggerOnce   <= '0';
-      Trigger.ForceIdle     <= '0';
-      Trigger.SetReadOffset <= '0';
-      AnalogSettings.Set    <= '0';
+      Trigger.TriggerOnce           <= '0';
+      Trigger.ForceIdle             <= '0';
+      Trigger.SetReadOffset         <= '0';
+      Leds.SetLeds                  <= '0';
+      AnalogSettings.Set            <= '0';
+      AnalogSettings.Set_PWM_Offset <= '0';
 
---      if SFRIn.Keys.BTN_F1 = cLowActive then
---        nConfigADC(0) <= '0'; -- for W2000A switch to debug uart! 
---      end if;
+      -- W2000A manual switch to the debug uart (if software fails)
+      if SFRIn.Keys.BTN_F1 = '1' and SFRIn.Keys.BTN_F2 = '1' then
+        nConfigADC(0) <= cLowActive;
+      end if;
 
       if iWr = '1' then
         case Addr is
+  --        when cInterruptAddr =>
+ --           InterruptForce <= iData(InterruptForce'range);
           when cInterruptMaskAddr =>
-            for i in iWrMask'range loop
-              if iWrMask(i) = '1' then
-                InterruptMask((i+1)*8-1 downto i*8) <= iData((i+1)*8-1 downto i*8);
-              end if;
-            end loop;
-            
+            InterruptMask <= iData(InterruptMask'range);
           when cSamplingFreqAddr =>
             Decimator.Stages <= iData(Decimator.Stages'range);
           when cFilterEnableAddr =>
@@ -276,12 +288,13 @@ begin
           when cConfigADCEnable =>
             nConfigADC <= not iData(nConfigADC'range);
             -- manual switch to the debug uart (if software fails)
-            if SFRIn.Keys.BTN_F1 = '1' and SFRIn.Keys.BTN_F2 = '1' then
-              nConfigADC(0) <= cLowActive;
-            end if;
+            -- if SFRIn.Keys.BTN_F1 = '1' and SFRIn.Keys.BTN_F2 = '1' then
+            --   nConfigADC(0) <= cLowActive;
+            -- end if;
             
           when cLedAddr =>
             Leds <= (
+              SetLeds        => '1',
               LED_CH0        => iData(0),
               LED_CH1        => iData(1),
               LED_CH2        => iData(2),
@@ -297,50 +310,56 @@ begin
               SINGLE_GREEN   => iData(12),
               SINGLE_RED     => iData(13));
 
-          when cAnalogSettingsPWMAddr =>
-            AnalogSettings.PWM_Offset <= iData(AnalogSettings.PWM_Offset'range);
+          when cAnalogSettingsAddr =>
+            AnalogSettings.Set_PWM_Offset    <= iData(31);
+            AnalogSettings.EnableKeyClock    <= iData(30);  -- not implemented
+            AnalogSettings.EnableProbeClock  <= iData(29);  -- not implemented
+            AnalogSettings.EnableProbeStrobe <= iData(28);  -- not implemented
+
+            AnalogSettings.Set  <= iData(27);
+            AnalogSettings.Addr <= iData(26 downto 24);
+            AnalogSettings.Data <= iData(AnalogSettings.Data'range);
 
             -----------------------------------------------------------------
-            -- You must not change any bits between the AnalogSettingsBanks!
+            -- addr = 7 , Set = 1
             -----------------------------------------------------------------
-          when cAnalogSettingsBank7 =>
-            AnalogSettings.Addr         <= O"7";
-            AnalogSettings.Set          <= '1';
-            AnalogSettings.CH0_K1_ON    <= iData(0);
-            AnalogSettings.CH0_K1_OFF   <= iData(1);
-            AnalogSettings.CH0_K2_ON    <= iData(2);
-            AnalogSettings.CH0_K2_OFF   <= iData(3);
-            AnalogSettings.CH0_OPA656   <= iData(4);
-            AnalogSettings.CH0_BW_Limit <= iData(5);
-            AnalogSettings.CH0_U14      <= iData(6);
-            AnalogSettings.CH0_U13      <= iData(7);
-            AnalogSettings.CH0_DC       <= iData(8);
-            AnalogSettings.CH1_DC       <= iData(9);
-            AnalogSettings.CH2_DC       <= iData(10);
-            AnalogSettings.CH3_DC       <= iData(11);
-            
-          when cAnalogSettingsBank5 =>
-            AnalogSettings.Addr          <= O"5";
-            AnalogSettings.Set           <= '1';
-            AnalogSettings.CH1_K1_ON     <= iData(0);
-            AnalogSettings.CH1_K1_OFF    <= iData(1);
-            AnalogSettings.CH1_K2_ON     <= iData(2);
-            AnalogSettings.CH1_K2_OFF    <= iData(3);
-            AnalogSettings.CH1_OPA656    <= iData(4);
-            AnalogSettings.CH1_BW_Limit  <= iData(5);
-            AnalogSettings.CH1_U14       <= iData(6);
-            AnalogSettings.CH1_U13       <= iData(7);
-            AnalogSettings.CH0_src2_addr <= iData(9 downto 8);
-            AnalogSettings.CH1_src2_addr <= iData(11 downto 10);
-            AnalogSettings.CH2_src2_addr <= iData(13 downto 12);
-            AnalogSettings.CH3_src2_addr <= iData(15 downto 14);
-            
-          when cAnalogSettingsBank6 =>
-            AnalogSettings.Addr       <= O"6";
-            AnalogSettings.Set        <= '1';
-            AnalogSettings.DAC_Offset <= iData(15 downto 0);
-            AnalogSettings.DAC_Ch     <= iData(16);
-            
+--            AnalogSettings.CH0_K1_ON    <= iData(0);
+--            AnalogSettings.CH0_K1_OFF   <= iData(1);
+--            AnalogSettings.CH0_K2_ON    <= iData(2);
+--            AnalogSettings.CH0_K2_OFF   <= iData(3);
+--            AnalogSettings.CH0_OPA656   <= iData(4);
+--            AnalogSettings.CH0_BW_Limit <= iData(5);
+--            AnalogSettings.CH0_U14      <= iData(6);
+--            AnalogSettings.CH0_U13      <= iData(7);
+--            AnalogSettings.CH0_DC       <= iData(8);
+--            AnalogSettings.CH1_DC       <= iData(9);
+--            AnalogSettings.CH2_DC       <= iData(10);
+--            AnalogSettings.CH3_DC       <= iData(11);
+
+            -----------------------------------------------------------------
+            -- addr = 5 , Set = 1
+            -----------------------------------------------------------------
+--            AnalogSettings.CH1_K1_ON     <= iData(0);
+--            AnalogSettings.CH1_K1_OFF    <= iData(1);
+--            AnalogSettings.CH1_K2_ON     <= iData(2);
+--            AnalogSettings.CH1_K2_OFF    <= iData(3);
+--            AnalogSettings.CH1_OPA656    <= iData(4);
+--            AnalogSettings.CH1_BW_Limit  <= iData(5);
+--            AnalogSettings.CH1_U14       <= iData(6);
+--            AnalogSettings.CH1_U13       <= iData(7);
+--            AnalogSettings.CH0_src2_addr <= iData(9 downto 8);
+--            AnalogSettings.CH1_src2_addr <= iData(11 downto 10);
+--            AnalogSettings.CH2_src2_addr <= iData(13 downto 12);
+--            AnalogSettings.CH3_src2_addr <= iData(15 downto 14);
+
+            -----------------------------------------------------------------
+            -- addr = 6 , Set = 1
+            -----------------------------------------------------------------
+            -- DAC LTC2612MS8
+--            AnalogSettings.DAC_Offset <= iData(15 downto 0);
+--            AnalogSettings.DAC_Ch     <= iData(16);
+            -- MODE X2, Addr = Channel1 or Channel2
+--            AnalogSettings.DAC_Control(23 downto 17) <= X"2" & O"0";
           when others =>
             null;
         end case;
@@ -365,9 +384,9 @@ begin
       when cDeviceAddr =>
         oData <= std_ulogic_vector(to_unsigned(cCurrentDevice, oData'length));
       when cInterruptAddr =>
-        oData <= InterruptVector;
+        oData(InterruptVector'range) <= InterruptVector;
       when cInterruptMaskAddr =>
-        oData <= InterruptMask;
+        oData(InterruptMask'range) <= InterruptMask;
       when cSamplingFreqAddr =>
         oData(Decimator.Stages'range) <= Decimator.Stages;
       when cFilterEnableAddr =>
@@ -479,49 +498,21 @@ begin
         oData(22) <= SFRIn.Keys.BTN_QUICKPRINT;
         oData(23) <= SFRIn.Keys.BTN_UTILITY;
         oData(24) <= SFRIn.Keys.BTN_PULSEWIDTH;
-        oData(26) <= SFRIn.Keys.BTN_X1;
-        oData(27) <= SFRIn.Keys.BTN_X2;
+        oData(25) <= SFRIn.Keys.BTN_X1;
+        oData(26) <= SFRIn.Keys.BTN_X2;
         
 
-      when cAnalogSettingsPWMAddr =>
-        oData(AnalogSettings.PWM_Offset'range) <= AnalogSettings.PWM_Offset;
-        
-      when cAnalogSettingsBank7 =>
-        oData(0)  <= AnalogSettings.CH0_K1_ON;
-        oData(1)  <= AnalogSettings.CH0_K1_OFF;
-        oData(2)  <= AnalogSettings.CH0_K2_ON;
-        oData(3)  <= AnalogSettings.CH0_K2_OFF;
-        oData(4)  <= AnalogSettings.CH0_OPA656;
-        oData(5)  <= AnalogSettings.CH0_BW_Limit;
-        oData(6)  <= AnalogSettings.CH0_U14;
-        oData(7)  <= AnalogSettings.CH0_U13;
-        oData(8)  <= AnalogSettings.CH0_DC;
-        oData(9)  <= AnalogSettings.CH1_DC;
-        oData(10) <= AnalogSettings.CH2_DC;
-        oData(11) <= AnalogSettings.CH3_DC;
-        oData(31) <= SFRIn.AnalogBusy;
-      when cAnalogSettingsBank5 =>
-        oData(0)            <= AnalogSettings.CH1_K1_ON;
-        oData(1)            <= AnalogSettings.CH1_K1_OFF;
-        oData(2)            <= AnalogSettings.CH1_K2_ON;
-        oData(3)            <= AnalogSettings.CH1_K2_OFF;
-        oData(4)            <= AnalogSettings.CH1_OPA656;
-        oData(5)            <= AnalogSettings.CH1_BW_Limit;
-        oData(6)            <= AnalogSettings.CH1_U14;
-        oData(7)            <= AnalogSettings.CH1_U13;
-        oData(9 downto 8)   <= AnalogSettings.CH0_src2_addr;
-        oData(11 downto 10) <= AnalogSettings.CH1_src2_addr;
-        oData(13 downto 12) <= AnalogSettings.CH2_src2_addr;
-        oData(15 downto 14) <= AnalogSettings.CH3_src2_addr;
-        oData(31)           <= SFRIn.AnalogBusy;
-      when cAnalogSettingsBank6 =>
-        oData(15 downto 0) <= AnalogSettings.DAC_Offset;
-        oData(16)          <= AnalogSettings.DAC_Ch;
-        oData(31)          <= SFRIn.AnalogBusy;
+      when cAnalogSettingsAddr =>
+        oData(30)                        <= AnalogSettings.EnableKeyClock;  -- not implemented
+        oData(28)                        <= AnalogSettings.EnableProbeClock;  -- not implemented
+        oData(28)                        <= AnalogSettings.EnableProbeStrobe;  -- not implemented
+        oData(27)                        <= SFRIn.AnalogBusy;
+        oData(26 downto 24)              <= AnalogSettings.Addr;
+        oData(AnalogSettings.Data'range) <= AnalogSettings.Data;
       when others =>
-        if Addr >= cLastAddr then
-          oData <= (others => '-');
-        end if;
+        --      if Addr >= cLastAddr then
+        oData <= (others => '-');
+        --      end if;
     end case;
   end process;
   
