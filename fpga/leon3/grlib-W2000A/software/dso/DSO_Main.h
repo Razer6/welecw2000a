@@ -127,5 +127,8 @@
 #define SendStringBlock(A,B) 
 #define printf(...)
 #endif
+#ifndef LEON3
+#define CAPTURESIZE 8192
+#endif
 
 #endif

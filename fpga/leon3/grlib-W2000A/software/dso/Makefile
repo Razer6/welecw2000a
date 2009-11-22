@@ -1,15 +1,15 @@
 DSOPATH=$(GRLIB)/software/dso
 BOOTOPT= -msoft-float -lsmall 
 #BOOTOPT= -msoft-float
-XCC=sparc-elf-gcc -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3 -D$(DSO_TARGET) -D$(DSO_BOARD) 
+XCC=sparc-elf-gcc -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3 -D$(DSO_TARGET) -D$(DSO_BOARD) --std=c99
 XAS=sparc-elf-gcc -c -I. -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3
 MKPROMOPT= -v -freq=63  -stack 0x4001B500 -ramsize 2048 -ramcs 1 -rmw -romws 1 -romsize 8192
 
 TINYFLAGS= -msoft-float -nostdlib  -nostartfiles
 TX= -Tlinkprom -N -L./ -Ttext=0
 
-DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart $(DSOPATH)/DSO_ADC_Control $(DSOPATH)/DSO_SignalCapture $(DSOPATH)/crc $(DSOPATH)/DSO_Remote $(DSOPATH)/DSO_Remote_Slave
-W2000SRC= $(DSOPATH)/DSO_Screen $(DSOPATH)/DSO_FrontPanel $(DSOSRC) $(DSOPATH)/DSO_SignalCTest $(DSOPATH)/DSO_GUI $(DSOPATH)/Filter_I8 
+DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart $(DSOPATH)/DSO_ADC_Control $(DSOPATH)/DSO_SignalCapture $(DSOPATH)/rprintf $(DSOPATH)/convert $(DSOPATH)/crc $(DSOPATH)/DSO_Remote $(DSOPATH)/DSO_Remote_Slave
+W2000SRC= $(DSOPATH)/DSO_Screen $(DSOSRC) $(DSOPATH)/DSO_SignalCTest $(DSOPATH)/DSO_GUI $(DSOPATH)/Filter_I8 
 SBXSRC=$(DSOPATH)/SandboxXBootloader $(DSOSRC)
 
 WCFILES=$(W2000SRC:%=%.c)

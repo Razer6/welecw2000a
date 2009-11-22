@@ -49,6 +49,8 @@
 #include "Leon3Uart.h"
 #endif
 
+#include "rprintf.h"
+
 /*volatile CaptureRegs    * volatile CaptureR;
 volatile TriggerRegs    * volatile TriggerR;
 volatile AnalogSettings * volatile AnalogR;
@@ -303,23 +305,38 @@ void AddDACOffset(uint32_t Ch, int32_t Offset){
 uint32_t SetVoltageRangeBits(uint32_t Ch, const SetAnalog * Settings){
 	uint32_t temp = 0;
 	if (Settings[Ch].myVperDiv < 1000000) {
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_K1_OFF\n");
+		temp = (1 << CH0_K1_OFF);
+	} else {
+//		temp = (1 << CH0_K1_ON);
+	}
+	if (Settings[Ch].myVperDiv < 100000) {
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_K2_OFF\n");
+		temp |= (1 << CH0_K2_OFF);
+	} else {
+//		temp |= (1 << CH0_K2_ON);
+	}
+/*	if ((READ_INT(KEYADDR1) & (1 << BTN_AUTOSCALE)) != 0){
 		temp = (1 << CH0_K1_ON);
 	} else {
 		temp = (1 << CH0_K1_OFF);
 	}
-/*	if (Settings[Ch].myVperDiv < 100000) {
+	if ((READ_INT(KEYADDR1) & (1 << BTN_SAVERECALL)) != 0) {
 		temp |= (1 << CH0_K2_ON);
 	} else {
 		temp |= (1 << CH0_K2_OFF);
-	}
-	if (Settings[Ch].myVperDiv < 10000) {
-		temp |= (1 << CH0_OPA656);
 	}*/
+	if (Settings[Ch].myVperDiv >= 100000) {
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_OPA656\n");
+		temp |= (1 << CH0_OPA656);
+	}
+	
+
 	switch(Settings[Ch].myVperDiv % 9){
+	case 5:   /* fall through */
+	case 4: temp |= (1 << CH0_U13);
+	case 2: temp |= (1 << CH0_U14); break; 
 	case 1: break;
-	case 2: temp |= (1 << CH0_U14); /* fall through */
-	case 4:
-	case 5: temp |= (1 << CH0_U13); break;
 	default: printf("WARNING: myVperDiv is set wrong!\n");
 	}
 	return temp;
@@ -377,7 +394,7 @@ uint32_t SetAnalogInputRange(
 
 	}
 	switch(NoCh){
-	case 2:	bank5 |= SET_ANALOG(ANC_CH1) | SetVoltageRangeBits(0,Settings);
+	case 2:	bank5 |= SET_ANALOG(ANC_CH1) | SetVoltageRangeBits(1,Settings);
 		WRITE_INT(ANALOGSETTINGSADDR,bank5);
 		WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
 	case 1:	bank7 |= SET_ANALOG(ANC_CH0) | SetVoltageRangeBits(0,Settings); 

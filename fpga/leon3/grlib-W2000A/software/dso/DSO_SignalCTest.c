@@ -102,6 +102,11 @@ long _read_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
 
 }
 #endif 
+#if 1
+void rprintc(unsigned data){
+	SendCharBlock((uart_regs*)REMOTE_UART,(char)data);
+}	
+#endif
 
 void IsrDSU(int irq){
 	if (irq == 5) {

@@ -39,6 +39,7 @@
 #include "DSO_SFR.h"
 #include "DSO_SignalCapture.h"
 #include "Leon3Uart.h"
+#include "rprintf.h"
 
 #define SIGNAL_HSTART 0
 #define SIGNAL_HSTOP  HLEN
@@ -56,6 +57,7 @@ void SetAnalogOffset ();
 void SetTriggerLevel();
 void SetKeyFs();
 void SetLeds();
+void SetVoltagePerDivision();
 
 typedef struct {
 	int32_t P;
@@ -280,7 +282,10 @@ void GUI_Main () {
 
 	while(1) {
 		if (READ_INT(KEYADDR1) & (1 << BTN_F1) != 0){
-			WRITE_INT(CONFIGADCENABLE,1); // Set back to Debug Uart
+			WRITE_INT(CONFIGADCENABLE,1); // Set back to debug uart
+		}
+		if (READ_INT(KEYADDR1) & (1 << BTN_F2) != 0){
+	//		WRITE_INT(CONFIGADCENABLE,0); // Set back to generic uart
 		}
 
 		if ((READ_INT(KEYADDR1) & (1 << BTN_RUNSTOP)) == 0){
@@ -305,20 +310,23 @@ void GUI_Main () {
 			}
 			GetCh(0,8, &Ch1[CurrBuffer][0],&Data[0], HLEN+100);
 		/*	DrawSignal(128,&Ch1[PrevBuffer][0].i, &Ch1[PrevBuffer][0].i,COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,0,0));*/
-			DrawSignal(128,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,0));
+			DrawSignal(128,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(4,4,7));
 
 //			DrawHLine(COLOR_R3G3B3(7,7,7), 128+(VLEN/2), 0, HLEN-1);
-			GetCh(1,8, CalcBuffer,&Data[0], HLEN+100);
+/*			GetCh(1,8, CalcBuffer,&Data[0], HLEN+100);
 			Interpolate(HLEN+(FILTER_COEFFS*2),&Ch2[CurrBuffer][0], CalcBuffer,0);
-			DrawSignal(VLEN-128,&Ch2[PrevBuffer][FILTER_COEFFS], &Ch2[CurrBuffer][FILTER_COEFFS],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,7));
+			DrawSignal(VLEN-128,&Ch2[PrevBuffer][FILTER_COEFFS], &Ch2[CurrBuffer][FILTER_COEFFS],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,7));*/
+			GetCh(1,8, &Ch2[CurrBuffer][0],&Data[0], HLEN+100);
+			DrawSignal(VLEN-128,&Ch2[PrevBuffer][0], &Ch2[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,0));
 
-		//	WaitMs(50);
+			WaitMs(50);
 		
 		}
 		SetKeyFs(); 
 		SetAnalogOffset();
-	//	SetTriggerLevel();
+		SetTriggerLevel();
 		SetLeds();
+		SetVoltagePerDivision();
 		TestRotNobs();
 	}
 }
@@ -357,7 +365,14 @@ void SetTriggerLevel(){
 	int32_t kc = (READ_INT(LEDADDR) >> EN_LEVEL) & 7;	
 	int32_t move = 0;
 
+
 	ROTARYMOVE(move,kc,kl);
+	if (move != 0){
+		switch(Ch){
+		case 0:	DrawHLine(BG_COLOR,level+128,0,HLEN-1); break;
+		case 1: DrawHLine(BG_COLOR,level+VLEN-128,0,HLEN-1); break;
+		}
+	}
 	/*
 	if ((READ_INT(KEYADDR1) & (1 << BTN_EDGE)) != 0) {
 		Prefetch += move*8; // 8 = Trigger Alignment 8 samples @125MHz 
@@ -371,10 +386,18 @@ void SetTriggerLevel(){
 	} else {
 		level += move;
 	}*/
+	switch(move){
+		case 3:
+		case -3: move *=8;
+		case 2: 
+		case -2: move *=8; break;
+	} 
 	if (move != 0){
-		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger level = ");
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger move = ");
 		level += move;
-		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'0' + level);
+		if (level > 127) level = 127;
+		if (level < -127) level = -127;
+		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'0' + move);
 		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\n');
 		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\0');
 	}
@@ -382,12 +405,27 @@ void SetTriggerLevel(){
 		Trigger = (Trigger+1)%MAX_TRIGGER_TYPES;
 	}*/
 	if ((READ_INT(KEYADDR1) & (1 << BTN_CH0)) != 0){
+		move = 1;
 		Ch = 0;
 	}
 	if ((READ_INT(KEYADDR1) & (1 << BTN_CH1)) != 0){
+		move = 1;
 		Ch = 1;
 	}
-//	SetTrigger(Trigger,0,Ch, Prefetch,level+2,Pulse,level-2,Pulse);
+	Trigger = (READ_INT(LEDADDR) >> EN_F) & 0x7;
+	if (Trigger == 0) {
+		Trigger = 1;
+	}
+	if (Trigger > 4){
+		Trigger = 4;
+	}
+	if (move != 0){
+		switch(Ch){
+		case 0:	DrawHLine(COLOR_R3G3B3(7,7,7),level+128,0,HLEN-1); break;
+		case 1: DrawHLine(COLOR_R3G3B3(7,7,7),level+VLEN-128,0,HLEN-1); break;
+		}
+	}
+	SetTrigger(Trigger,0,Ch, Prefetch,level-2,Pulse,level+2,Pulse);
 
 }
 
@@ -472,7 +510,8 @@ void SetAnalogOffset () {
 		}
 		Analog[i].DA_Offset += move;
 		move = Analog[i].DA_Offset;
-		printf("DAC offset of CH%d is %d\n",i+1,move);
+	//	SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"test\n");
+	//	printf("DAC offset of CH%d is %d\n",i+1,move);
 		}
 	}
 }
@@ -480,7 +519,7 @@ void SetAnalogOffset () {
 void SetVoltagePerDivision(){
 	
 	static int32_t kl[4] = {0,0,0,0};
-	static int32_t exp[4] = {10000000,10000000,10000000,10000000}; /* 100 MS/s*/
+	static int32_t exp[4] = {1000000,1000000,1000000,1000000}; /* 100 MS/s*/
 	static uint32_t mant[4] = {5,5,5,5};
 	volatile int32_t kc[4];
 	int32_t move = 0;
@@ -501,7 +540,7 @@ void SetVoltagePerDivision(){
 		ROTARYMOVE(move,kc[i],kl[i]);
 		if (move > 0){
 			switch(mant[i]) {
-				case 1: if (exp[i] != 100000) {
+				case 1: if (exp[i] != 10000) {
 						exp[i] = exp[i]/10;
 						mant[i] = 5;
 					}
@@ -514,7 +553,7 @@ void SetVoltagePerDivision(){
 			switch(mant[i]) {
 				case 1: mant[i] = 2; break;
 				case 2: mant[i] = 5; break;
-				case 5: if (exp[i] != 10000000){
+				case 5: if (exp[i] != 1000000){
 						exp[i] = exp[i]*10;
 				       		mant[i] = 1;
 					}
@@ -525,7 +564,21 @@ void SetVoltagePerDivision(){
 		if (move != 0){
 			Update = TRUE;
 			Analog[i].myVperDiv = mant[i]*exp[i];
-			printf("VDiv %d", Analog[i].myVperDiv);
+		//	rprintf("CH%d mant = %d exp = %d\n",i+1,mant[i],exp[i]);
+			SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH ");
+			SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'1' + i);
+			SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR," mant ");
+			SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'0' + mant[i]);
+			move = exp[i];
+			kc[i] = -3;
+			while (move > 1){
+				move /= 10;
+				kc[i]++;
+			}
+			SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR," exp ");
+			SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '0' + kc[i]);
+			SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\n');
+			//printf("VDiv %d", Analog[i].myVperDiv);
 		}
 
 	}
