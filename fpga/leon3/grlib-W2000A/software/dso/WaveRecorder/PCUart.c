@@ -43,6 +43,12 @@
 #include <fcntl.h>
 #include "termios.h"
 struct termios tio;
+#ifndef FALSE
+#define FALSE false
+#endif
+#ifndef TRUE
+#define TRUE true
+#endif
 #endif
 
 void UartClose (uart_regs * uart){

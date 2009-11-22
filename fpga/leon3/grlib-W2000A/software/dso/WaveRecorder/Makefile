@@ -29,6 +29,9 @@ OBJECTS= \
 	$(LIBDIR)/RemoteSignalCapture.o \
 	$(LIBDIR)/Request.o \
 	$(LIBDIR)/DSO_Remote_Master.o \
+	$(LIBDIR)/DSO_SignalCapture.o \
+	$(LIBDIR)/Protocoll.o \
+	$(LIBDIR)/DSO_Misc.o \
 	$(LIBDIR)/crc.o
 
 

@@ -39,8 +39,14 @@
 #include "PCUart.h"
 
 #ifndef	WINNT
+
+#ifndef TRUE
 #define	TRUE	true
+#endif
+
+#ifndef FALSE
 #define	FALSE	false
+#endif
 #endif
 
 class DebugComm : public Object {

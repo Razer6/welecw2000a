@@ -121,7 +121,8 @@
 #ifdef BOARD_COMPILATION
 #define CAPTURESIZE 10000
 /*#define CAPTURESIZE ((RAM_SIZE-0x100000)/sizeof(int))*/
-#else
+#endif
+#ifdef SIM_COMPILATION
 #define CAPTURESIZE 8192
 #define SendStringBlock(A,B) 
 #define printf(...)

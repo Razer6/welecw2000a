@@ -35,6 +35,8 @@
 
 #include "DSO_Misc.h"
 #include "DSO_Main.h"
+#include "unistd.h"
+
 #ifdef LEON3
 
 #include "grcommon.h"
