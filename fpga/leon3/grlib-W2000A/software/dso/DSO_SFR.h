@@ -274,7 +274,19 @@
 #define BTN_X1          25
 #define BTN_X2          26
 
-
+#define ROTARYMOVE(m,k,p) \
+	m = k - p; \
+	switch (m){\
+		case 4: m = 0; break;\
+		case 5: m = -3; break;\
+		case 6: m = -2; break;\
+		case 7: m = -1; break;\
+		case -4: m = 0; break;\
+		case -5: m = 3; break;\
+		case -6: m = 2; break;\
+		case -7: m = 1; break;\
+	}\
+        p = k
 
 
 

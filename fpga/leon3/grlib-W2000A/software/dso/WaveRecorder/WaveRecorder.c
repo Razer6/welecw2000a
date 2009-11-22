@@ -46,12 +46,9 @@
 #include "NormalUART.h"
 #include "DebugUart.h"
 
-#ifndef	WINNT
-#define	TRUE	true
-#define FALSE	false
-#endif
 
-bool CheckArgCount (	
+
+uint32_t CheckArgCount (	
 			void * 	IsCount, 
             const struct arg_str * Command,
 			const int		count,
@@ -66,9 +63,9 @@ bool CheckArgCount (
 		}
 	}
 	if (nerrors != 0){
-		return false;
+		return FALSE;
 	}
-	return true;
+	return TRUE;
 }	
 
 void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Protocoll * R){
@@ -198,7 +195,7 @@ int main(int argc, char * argv[]) {
 		if (StackAddr->count == 1){
 			Stack = StackAddr->ival[0];
 		}
-		if (Ret == false) {
+		if (Ret == FALSE) {
 			printf("%s:%d\n",__FILE__,__LINE__);
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
@@ -213,7 +210,7 @@ int main(int argc, char * argv[]) {
 			Channels,SampleSize,SampleFS,AACFilterStart,AACFilterEnd,
 			Ch0Src,Ch1Src,Ch2Src,Ch3Src};
 		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == false) {
+		if (Ret == FALSE) {
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 /*		printf("C %d SS %d fs %d st %d, stp %d, ch0 %d ch1 %d ch2 %d ch3 %d\n", 
@@ -246,7 +243,7 @@ int main(int argc, char * argv[]) {
 			TriggerLowTime,TriggerHighTime};
 		int TriggerNo = 2;
 		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == false) {
+		if (Ret == FALSE) {
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 		if (strcmp("ExtLH",Trigger->sval[0]) == 0){
@@ -303,7 +300,7 @@ int main(int argc, char * argv[]) {
 		struct arg_int * DAoff[4]= {AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3};	
 		struct arg_str * Src2[4] = {AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3}; 
 		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == false) {
+		if (Ret == FALSE) {
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
 		for (i = 0; i < Channels->ival[0]; ++i) {
@@ -344,7 +341,7 @@ int main(int argc, char * argv[]) {
 			Channels,SampleSize,SampleFS,CapWTime,CapSize,
 			WavForceFS,(arg_int*)WaveFile};
 		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == false) {
+		if (Ret == FALSE) {
 			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
 		uSample * buffer = (uSample *)malloc(CapSize->ival[0]*sizeof(int));

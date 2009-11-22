@@ -4,7 +4,7 @@
 -- File       : DSOConfig-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-11-18
+-- Last update: 2009-11-19
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 

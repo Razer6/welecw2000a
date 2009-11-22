@@ -33,6 +33,8 @@
 #ifndef DSO_GUI_H 
 #define DSO_GUI_H
 
+void GUI_Main();
+
 void DrawSignal(
 		uint32_t Voffset, 
 		uSample * PrevData,

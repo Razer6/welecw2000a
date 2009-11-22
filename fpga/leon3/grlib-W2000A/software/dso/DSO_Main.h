@@ -118,5 +118,13 @@
 #define INT_DEBUG_UART    7
 #define INT_TIMER         8
 
+#ifdef BOARD_COMPILATION
+#define CAPTURESIZE 10000
+/*#define CAPTURESIZE ((RAM_SIZE-0x100000)/sizeof(int))*/
+#else
+#define CAPTURESIZE 8192
+#define SendStringBlock(A,B) 
+#define printf(...)
+#endif
 
 #endif

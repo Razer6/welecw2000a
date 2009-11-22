@@ -65,20 +65,20 @@ uint32_t IsFastMode() {
 	return FMode;
 }
 
-bool InitSignalCapture(){
+uint32_t InitSignalCapture(){
 /*	CaptureR = (CaptureRegs *)   DEVICEADDR;
 	TriggerR = (TriggerRegs *)   TRIGGERONCHADDR;
 	AnalogR  = (AnalogSettings *)ANALOGSETTINGSBANK7;
 	adc_uart = (uart_regs *)     UART_CHCFG_BASE_ADDR;*/    
 /*	UartInit(FIXED_CPU_FREQUENCY, DSO_CHCFG_BAUDRATE, 
 			ENABLE_RX | ENABLE_TX, adc_uart);*/
-	return true;
+	return TRUE;
 }
 
 #include "DSO_Remote.h"
 #include "DSO_Main.h"
 
-bool SetTriggerInput (	
+uint32_t SetTriggerInput (	
 		const uint32_t noChannels, 
 		const uint32_t SampleSize, 
 		const uint32_t SamplingFrequency,
@@ -96,7 +96,7 @@ bool SetTriggerInput (
 	uint32_t M = 0;
 
 	if ((Ch0 > 3) || (Ch1 > 3) || (Ch2 > 3) || (Ch3 > 3)) {
-		return false;
+		return FALSE;
 	}
 /*	SendStringBlock((uart_regs*)REMOTE_UART,DSO_SEND_HEADER);
 	SendStringBlock((uart_regs*)REMOTE_UART,DSO_MESSAGE_RESP);
@@ -199,7 +199,7 @@ bool SetTriggerInput (
 					WRITE_INT(INPUTCH3ADDR, Ch3);
 					break;
 				default : 
-					return false;
+					return FALSE;
 			       break;
 			}
 			break;
@@ -221,19 +221,19 @@ bool SetTriggerInput (
 					WRITE_INT(INPUTCH3ADDR, Ch1+4);
 					break;
 				default : 
-					return false;
+					return FALSE;
 			       break;
 			}
 			break;
 		default : 
-			return false;
+			return FALSE;
 			break;
 	}
-	return true;
+	return TRUE;
 }
 
 /* reference time in samples*/
-bool SetTrigger(
+uint32_t SetTrigger(
 		const uint32_t Trigger, 
 		const uint32_t ExtTrigger,
 		const uint32_t TriggerChannel,
@@ -244,16 +244,16 @@ bool SetTrigger(
 		const uint32_t HighReferenceTime) 
 {
 	if (TriggerChannel > 3) {
-		return false;
+		return FALSE;
 	}
 	if (TriggerPrefetchSamples >= (TRIGGER_MEM_SIZE-16)){
-		return false;
+		return FALSE;
 	}
 	if (Trigger >= MAX_TRIGGER_TYPES){
-		return false;
+		return FALSE;
 	}
 	if (ExtTrigger > MAX_EXT_TRIGGER) {
-		return false;
+		return FALSE;
 	}
 	WRITE_INT(TRIGGERTYPEADDR,	Trigger);
 	WRITE_INT(EXTTRIGGERSRCADDR,	ExtTrigger);
@@ -262,21 +262,86 @@ bool SetTrigger(
 	WRITE_INT(TRIGGERHIGHVALUEADDR, HighReference);
 	WRITE_INT(TRIGGERHIGHTIMEADDR,	HighReferenceTime);
 	WRITE_INT(TRIGGERPREFETCHADDR,	TriggerPrefetchSamples);
-    return true;
+    return TRUE;
 }
 
 
+uint32_t CalibrateDAC(uint32_t Ch){
+	/* set the Trigger tempoarly to force triggering 
+	 * set the analog Ch tempoarly to AC 
+	 * capture data 
+	 * sum of data / data samples
+	 * set the DAC
+	 * goto capture data until sum of data is exeptable low */ 
+}
 
-bool SetAnalogInputRange(
+uint32_t SetDACOffset(uint32_t Ch, int32_t Offset){
+	int32_t temp;
+	switch(Ch) {
+		case 0: temp = SET_OFFSET_CH0(Offset); break;
+		case 1: temp = SET_OFFSET_CH1(Offset); break;
+		default: return FALSE;
+	}
+	WRITE_INT(ANALOGSETTINGSADDR,temp);
+	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
+	return TRUE;
+}
+
+/* 12 bit DAC compability with the 16 bit DACs of this familie */
+#define MIN_DAC_COUNT 16
+
+void AddDACOffset(uint32_t Ch, int32_t Offset){
+	static int32_t dac[4] = {16384,16384,16384,16384};
+	if ((Ch < 4) && (Offset != 0)){
+		dac[Ch] = dac[Ch] + Offset*MIN_DAC_COUNT;
+		if (dac[Ch] > (32768-1)) dac[Ch] = 32768;
+		if (dac[Ch] < 0) dac[Ch] = 0;
+		SetDACOffset(Ch, dac[Ch]);
+	}
+}
+
+uint32_t SetVoltageRangeBits(uint32_t Ch, const SetAnalog * Settings){
+	uint32_t temp = 0;
+	if (Settings[Ch].myVperDiv < 1000000) {
+		temp = (1 << CH0_K1_ON);
+	} else {
+		temp = (1 << CH0_K1_OFF);
+	}
+/*	if (Settings[Ch].myVperDiv < 100000) {
+		temp |= (1 << CH0_K2_ON);
+	} else {
+		temp |= (1 << CH0_K2_OFF);
+	}
+	if (Settings[Ch].myVperDiv < 10000) {
+		temp |= (1 << CH0_OPA656);
+	}*/
+	switch(Settings[Ch].myVperDiv % 9){
+	case 1: break;
+	case 2: temp |= (1 << CH0_U14); /* fall through */
+	case 4:
+	case 5: temp |= (1 << CH0_U13); break;
+	default: printf("WARNING: myVperDiv is set wrong!\n");
+	}
+	return temp;
+}
+
+/* For the analog settings only one SFR does exsist!
+ * The benefit of it is the low logic usage and the possibility to use
+ * bits in the software which aren't known while the hardware development
+ * was done!
+ * The Drawback is that only the last write access could be read back and
+ * other previos settings (other mux adress) are hidden! */
+
+uint32_t SetAnalogInputRange(
 		const uint32_t NoCh, 
 		const SetAnalog * Settings) 
 {
-	uint32_t i = 0;
-	uint32_t temp = 0;
+	uint32_t bank5 = 0;
+	uint32_t bank7 = 0;
+	uint32_t temp;
 	uint32_t j = 0;
-	uint32_t dac = 0;
-
-	temp = SET_ANALOG(7);
+	
+/*	temp = SET_ANALOG(7);
 	WRITE_INT(ANALOGSETTINGSADDR,temp);
 	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
 
@@ -293,93 +358,37 @@ bool SetAnalogInputRange(
 		WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
 //		WaitMs(1000);
 	}
+*/
+	for (j = 0; j < NoCh; ++j) {
+/*		switch (Settings[j].Mode){
+		case normal: 	bank5 |= (SRC2_NONE    << (CH0_SRC2_ADDR+(2*j))); break;
+		case pwm_offset:bank5 |= (SRC2_PWM     << (CH0_SRC2_ADDR+(2*j))); break;
+		case gnd:	bank5 |= (SRC2_GND     << (CH0_SRC2_ADDR+(2*j))); break;
+		case lowpass:	bank5 |= (SRC2_LOWPASS << (CH0_SRC2_ADDR+(2*j))); break;
+		default: 	return FALSE;	break;*
+		}*/
+		if (Settings[j].AC == 0){
+			bank7 |= 1 << (CH0_DC+j);
+		}
+		if (Settings[j].DA_Offset != 0){
+		//	SetDACOffset(j,Settings[j].DA_Offset);
+			temp = SET_ANALOG(ANC_DAC0) | (0x4F << 16);	
+		}
 
-#if 0
-	for(i = 0; i < NoCh; ++i){
-		switch (CaptureR->DeviceAddr) {
-			case WELEC2012:
-			case WELEC2022:
-			case WELEC2014:
-			case WELEC2024:
-				if (NoCh > 2) {
-					return false;
-				}
-				if (Settings[i].myVperDiv < 1000000) {
-					temp = (1 << CH0_K1_ON);
-				} else {
-					temp = (1 << CH0_K1_OFF);
-				}
-				if (Settings[i].myVperDiv < 100000) {
-					temp |= (1 << CH0_K2_ON);
-				} else {
-					temp |= (1 << CH0_K2_OFF);
-				}
-				if (Settings[i].myVperDiv < 10000) {
-					temp |= (1 << CH0_OPA656) |  (1 << CH0_U14) | (1 << CH0_U13);
-				}
-				if (i == 0) {
-					for (j = 0; j < NoCh; ++j) {
-						if (Settings[j].AC == 0){
-							temp |= (1 << (CH0_DC+j));
-						}
-					}
-					/* send the configuration to the hardware*/
-					AnalogR->Bank7 = temp;
-					/*while ((loadmem((int)&AnalogR->Bank7) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
-					WaitUntilMaskedAndZero(&AnalogR->Bank7, (1 << ANALOGSETTINGSBUSY));
-					/* wait until the coils have switched*/
-					WaitMs(COIL_SWITCH_TIME);
-					temp &= ~(0xf); /* turn of the coils*/
-					AnalogR->Bank7 = temp;
-					/*while ((loadmem((int)&AnalogR->Bank7) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
-					WaitUntilMaskedAndZero(&AnalogR->Bank7, (1 << ANALOGSETTINGSBUSY));
-					/* Used DAC types are limited to 16 bits per protocol! */
-					dac = (short)Settings[i].DA_Offset;
-					temp = dac;
-					AnalogR->Bank6 = temp| (i << DAC_CH_OFFSET);
-					/*while ((loadmem((int)&AnalogR->Bank6) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
-					WaitUntilMaskedAndZero(&AnalogR->Bank6, (1 << ANALOGSETTINGSBUSY));
-				}
-				if (i == 1) {
-					for (j = 0; j < NoCh; ++j) {
-						switch (Settings[j].Mode){
-							case normal: 	
-								temp |= (SRC2_NONE    << (CH0_SRC2_ADDR+(2*j)));
-								break;
-							case pwm_offset:	
-								temp |= (SRC2_PWM     << (CH0_SRC2_ADDR+(2*j)));
-								break;
-							case gnd:
-								temp |= (SRC2_GND     << (CH0_SRC2_ADDR+(2*j)));
-								break;
-							case lowpass:
-								temp |= (SRC2_LOWPASS << (CH0_SRC2_ADDR+(2*j)));
-								break;
-							default:
-								return false;
-								break;
-						}
-					}
-					/* send the configuration to the hardware*/
-					AnalogR->Bank5 = temp;
-					/*while ((loadmem((int)&AnalogR->Bank5) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
-					WaitUntilMaskedAndZero(&AnalogR->Bank5, (1 << ANALOGSETTINGSBUSY));
-					/* wait until the coils have switched*/
-					WaitMs(COIL_SWITCH_TIME);
-					temp &= ~(0xf); /* turn of the coils*/
-					AnalogR->Bank5 = temp;
-					/*while ((loadmem((int)&AnalogR->Bank5) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
-					WaitUntilMaskedAndZero(&AnalogR->Bank5, (1 << ANALOGSETTINGSBUSY));
-					/* Used DAC types are limited to 16 bits per protocol! */
-					dac = (short)Settings[i].DA_Offset;
-					temp = dac;
-					AnalogR->Bank6 = temp | (i << DAC_CH_OFFSET);
-					/*while ((loadmem((int)&AnalogR->Bank6) & (1 << ANALOGSETTINGSBUSY)) != 0);*/
-					WaitUntilMaskedAndZero(&AnalogR->Bank6, (1 << ANALOGSETTINGSBUSY));
-				}
-				break;
-			case SANDBOXX:
-				{
+	}
+	switch(NoCh){
+	case 2:	bank5 |= SET_ANALOG(ANC_CH1) | SetVoltageRangeBits(0,Settings);
+		WRITE_INT(ANALOGSETTINGSADDR,bank5);
+		WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
+	case 1:	bank7 |= SET_ANALOG(ANC_CH0) | SetVoltageRangeBits(0,Settings); 
+		WRITE_INT(ANALOGSETTINGSADDR,bank7);
+		WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
+		break;
+	default: return FALSE;
+	}
+	return TRUE;
+}
+
 #if 0
 					ADCSerial cmds[]= {
 					      {ADC_ADDR_SPEED,  (1 << ADC_PIN_LSPEED)},
@@ -391,33 +400,33 @@ bool SetAnalogInputRange(
 					      {ADC_ADDR_OFFSETE,(1 << ADC_PIN_OFFSETE)}};
 					uint32_t cmd = Settings[i].Specific;
 					uint8_t temp = 0;
-				        bool ret = true;	
+				        uint32_t ret = TRUE;	
 					int * ADCConfig = (uint32_t *)CONFIGADCENABLE; 
 					*ADCConfig = ~1;/* low active, one ADC */
 					WaitMs(2); /* Wait until the AVR is ready */
 
-					if (SendADCSerialConfig(adc_uart, cmds, sizeof(cmd)) == false) {
-						return false;
+					if (SendADCSerialConfig(adc_uart, cmds, sizeof(cmd)) == FALSE) {
+						return FALSE;
 					}
 					if (((1 << ADC_SPEC_PGM_CLK) & cmd) != 0){
 					       temp = (uint8_t)(cmd >> ADC_SPEC_CLKF);
 					       ret   = SendADCSerial(adc_uart, ADC_ADDR_CLK,temp);
 					       if (ret != temp) {
-						       return false;
+						       return FALSE;
 					       }
 					}       
 					if (((1 << ADC_SPEC_PGM_OFS) & cmd) != 0){
 						temp = (uint8_t)(cmd >> ADC_SPEC_OTIME);
 						ret  = SendADCSerial(adc_uart, ADC_ADDR_OFFSETD,temp);
 						if (ret != temp) {
-						       return false;
+						       return FALSE;
 						}
 					}
 					if ((( 1 << ADC_SPEC_PGM_PAT) & cmd) != 0){
 						temp = (uint8_t)(cmd >> ADC_SPEC_PATTERN);
 						ret  = SendADCSerial(adc_uart, ADC_ADDR_OFFSETD,temp);
 						if (ret != temp) {
-						       return false;
+						       return FALSE;
 						}
 					}
 
@@ -433,18 +442,19 @@ bool SetAnalogInputRange(
 					SendCharBlock(adc_uart,ADC_RELEASE);
 					WaitMs(2);
 					*ADCConfig = -1; /* high inactive */
-#endif
-					return true;	
+
+					return TRUE;	
 				}
 				
 			default: 
-				return false;
+				return FALSE;
 				break;
 		}
 	}
-#endif
-	return true;
+
+	return TRUE;
 }
+#endif
 
 int FastCapture(
 		const uint32_t WaitTime, /* just a integer */
@@ -454,7 +464,7 @@ int FastCapture(
 	uint32_t i = 0;
 	uint32_t * StopAddr = 0;
 	volatile uint32_t * Addr = 0;
-	uint32_t StartSize = 0;
+	uint32_t StartSize = 8;
 	uint32_t StartData[8] = {0,0,0,0,0,0,0,0};
 	/* The compiler has bugs in the loop optimisation with the keyword volatile 
 	 * even with function call to get the data from an hw address + masking in a condition */
@@ -465,7 +475,7 @@ int FastCapture(
 	WRITE_INT(TRIGGERONCEADDR, 1);
 
 	if (WaitTimeoutAndNotZero(TRIGGERSTATUSREGISTER, 
-			(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
+			(1 << TRIGGERRECORDINGBIT), WaitTime) == FALSE) {
 		return 0;
 	}
 	StopOffset = READ_INT(TRIGGERREADOFFSETADDR);
@@ -564,8 +574,8 @@ int FastCapture(
 /* returns read DWORDS*/
 uint32_t CaptureData(
 		const uint32_t WaitTime, /* just a integer */
-		bool Start,
-		bool ForceFastMode,
+		uint32_t Start,
+		uint32_t ForceFastMode,
 		uint32_t CaptureSize,    /* size in DWORDs*/
 		uint32_t * RawData) 
 {
@@ -579,16 +589,16 @@ uint32_t CaptureData(
 	 * with function call to get the data from an hw address + masking in a condition */
 	volatile int temp = 0; 
 	
-	if ((FMode != 0) || ForceFastMode == true) {
+	if ((FMode != 0) || ForceFastMode == TRUE) {
 		return FastCapture(WaitTime,CaptureSize, RawData);
 	} 
 	printf("Record Normal\n");
 
-	if (Start != false) {
+	if (Start != FALSE) {
 		WRITE_INT(TRIGGERONCEADDR, 0);
 		WRITE_INT(TRIGGERONCEADDR, 1);
 		if (WaitTimeoutAndNotZero(TRIGGERSTATUSREGISTER, 
-					(1 << TRIGGERRECORDINGBIT), WaitTime) == false) {
+					(1 << TRIGGERRECORDINGBIT), WaitTime) == FALSE) {
 			return 0;
 		}
 		Addr = (uint32_t *)TRIGGER_MEM_BASE_ADDR + StopAddr;

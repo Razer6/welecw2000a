@@ -36,6 +36,8 @@
 #define DSO_SIGNALCAPTURE_H
 
 #include "DSO_Main.h"
+#include "types.h"
+#include "crc.h"
 
 enum eSrc2 {
 	normal,
@@ -54,14 +56,14 @@ typedef struct {
 	Src2 Mode;
 } SetAnalog;
 
-bool InitSignalCapture();
+uint32_t InitSignalCapture();
 
 uint32_t FastMode(	
 		const uint32_t SamplingFrequncy, 
 		const uint32_t CPUFrequency);
 uint32_t IsFastMode();
 
-bool SetTriggerInput (	
+uint32_t SetTriggerInput (	
 		const uint32_t noChannels, 
 		const uint32_t SampleSize, 
 		const uint32_t SamplingFrequency,
@@ -77,7 +79,7 @@ bool SetTriggerInput (
 
 
 /* reference time in samples*/
-bool SetTrigger(
+uint32_t SetTrigger(
 		const uint32_t Trigger,
 		const uint32_t ExtTrigger,
 		const uint32_t TriggerChannel,
@@ -94,15 +96,15 @@ bool SetTrigger(
 #define COIL_SWITCH_TIME     0
 #endif
 
-bool SetAnalogInputRange(
+uint32_t SetAnalogInputRange(
 		const uint32_t NoCh, 
 		const SetAnalog * Settings);
 
 /* returns read DWORDS*/
 uint32_t CaptureData(
 		const uint32_t WaitTime, /* just a integer */
-		bool Start,
-		bool ForceFastMode,
+		uint32_t Start,
+		uint32_t ForceFastMode,
 		uint32_t CaptureSize,    /* size in DWORDs*/
 		uint32_t * RawData); 
 

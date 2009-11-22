@@ -713,5 +713,3 @@ set_global_assignment -name AUTO_PACKED_REGISTERS_MAXII NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_CYCLONE NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
-
-set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
