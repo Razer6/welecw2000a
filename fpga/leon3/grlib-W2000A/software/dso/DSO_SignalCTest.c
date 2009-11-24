@@ -50,7 +50,12 @@
 #include "DSO_Misc.h"
 #include "DSO_FrontPanel.h"
 #include "DSO_GUI.h"
+#include "rprintf.h"
 
+#ifdef SIM_COMPILATION
+#define SendStringBlock(A,B) 
+#define rprintf(...)
+#endif
 
 #define FASTFS 1000000000
 #define SLOWFS    500000
@@ -142,14 +147,18 @@ void ReleaseIRQ(){
 uSample Data[CAPTURESIZE];
 
 int main () {
-	uint32_t ReadData = 0;
-	uart_regs * uart = (uart_regs *)GENERIC_UART_BASE_ADDR;
-	uart_regs * uart2 = (uart_regs *)DEBUG_UART_BASE_ADDR;
-	SetAnalog Analog[2];
 	
+	uart_regs * uart = (uart_regs *)GENERIC_UART_BASE_ADDR;
+#ifdef SBX
+	uart_regs * uart2 = (uart_regs *)DEBUG_UART_BASE_ADDR;
+#endif
+
+#ifdef SIM_COMPILATION
+	SetAnalog Analog[2];
 	
 	uint32_t i = 0;
 	uint32_t Prefetch = 64;
+	uint32_t ReadData = 0;
 	char x = 0;
 
 	char ack[] = "success!\n";
@@ -165,6 +174,7 @@ int main () {
 	Analog[1].Mode = normal;
 	Analog[1].DA_Offset = 0xf1;
 //	Analog[1].PWM_Offset = 0xf1;
+#endif
 	
 	/* This is a workaround to share the serial port with the debug uart 
 	 * and the generic uart on the W2000A! */
@@ -334,7 +344,7 @@ int main () {
 }
 
 void TestRotNobs(){
-	static int32_t sl = 0;
+//	static int32_t sl = 0;
 	static int32_t nob = 0;
 	static int32_t kl = 0;
 	int32_t kc = 0;	
@@ -379,7 +389,7 @@ void TestRotNobs(){
 	ROTARYMOVE(move,kc,kl);
 	
 	if (move != 0){
-		printf("kc = %d kl = %d move = %d\n",kc,kl,move);
+		rprintf("kc = %d kl = %d move = %d\n",kc,kl,move);
 /*		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"kc = ");
 		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'0' + kc);
 		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR," kl = ");

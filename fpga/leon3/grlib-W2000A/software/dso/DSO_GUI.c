@@ -40,6 +40,9 @@
 #include "DSO_SignalCapture.h"
 #include "Leon3Uart.h"
 #include "rprintf.h"
+#include "stdio.h"
+#include "string.h"
+#include "DSO_Misc.h"
 
 #define SIGNAL_HSTART 0
 #define SIGNAL_HSTOP  HLEN
@@ -52,6 +55,11 @@
 	else	data = data & ~(1 << LED_Bit)
 
 #ifdef BOARD_COMPILATION
+
+typedef struct {
+	int32_t V;
+	int32_t H;
+} DispOffset;
 
 void SetAnalogOffset ();
 void SetTriggerLevel();
@@ -208,7 +216,7 @@ void Interpolate (
 	
 	for (i = 0; i < srcSamples; ++i){
 		for (j = 0; j < POLYPHASES; ++j){
-			fir = &Filter_I8[j][0];
+			fir = (int32_t*)&Filter_I8[j][0];
 			ConvSample(&Dst[dst_idx].i,&Src[i].i,fir);
 		/*	Dst[dst_idx] = Src[i];*/
 			dst_idx++;
@@ -244,9 +252,10 @@ void GetCh(
 }
 
 
-extern Data[CAPTURESIZE];
+extern uSample Data[CAPTURESIZE];
 
 static SetAnalog Analog[2];
+static DispOffset Offset[2];
 
 void GUI_Main () {
 	uSample Ch1[2][HLEN+100];
@@ -256,7 +265,7 @@ void GUI_Main () {
 	uint32_t CurrBuffer = 1;
 	uint32_t Prefetch = PREFETCH_OFFSET;
 	uint32_t ReadData = 0;
-	char x = 0;
+	int16_t x = 0;
 	
 	Analog[0].myVperDiv = 10000;
 	Analog[0].AC = 0;
@@ -268,23 +277,29 @@ void GUI_Main () {
 	Analog[1].Mode = normal;
 	Analog[1].DA_Offset = 16384;
 
+	Offset[0].V = 128;
+	Offset[1].V = VLEN-128;
+	for (x = 0; x < 2; ++x){
+		Offset[x].H = 8;
+	}
+
 	Prefetch = HLEN;
 	SetTriggerInput(4,8,1000000000,FIXED_CPU_FREQUENCY,0,3,0,1,2,3);
 	SetTrigger(0,0,0,Prefetch,-3,0,1,0);
 	
-	memset(&Ch1[0],HLEN*sizeof(uSample),0);
-	memset(&Ch2[0],HLEN*sizeof(uSample),0);
-	memset(&Ch1[1],HLEN*sizeof(uSample),0);
-	memset(&Ch2[1],HLEN*sizeof(uSample),0);
+	memset(&Ch1[0],0,HLEN*sizeof(uSample));
+	memset(&Ch2[0],0,HLEN*sizeof(uSample));
+	memset(&Ch1[1],0,HLEN*sizeof(uSample));
+	memset(&Ch2[1],0,HLEN*sizeof(uSample));
 	SetAnalogInputRange(2,Analog);
 	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1);
 	x = 50;
 
 	while(1) {
-		if (READ_INT(KEYADDR1) & (1 << BTN_F1) != 0){
+		if ((READ_INT(KEYADDR1) & (1 << BTN_F1)) != 0){
 			WRITE_INT(CONFIGADCENABLE,1); // Set back to debug uart
 		}
-		if (READ_INT(KEYADDR1) & (1 << BTN_F2) != 0){
+		if ((READ_INT(KEYADDR1) & (1 << BTN_F2)) != 0){
 	//		WRITE_INT(CONFIGADCENABLE,0); // Set back to generic uart
 		}
 
@@ -298,26 +313,26 @@ void GUI_Main () {
 			if (CurrBuffer != 0) {
 				CurrBuffer = 0;
 				PrevBuffer = 1;
-				DrawBox(x,0,470,9,479);
+			//	DrawBox(x,0,470,9,479);
 			} else {
 				CurrBuffer = 1;
 				PrevBuffer = 0;
-				DrawBox(x,30,470,39,479);
+			//	DrawBox(x,30,470,39,479);
 			}
 			x++;
 			if ((x == 0) || ((READ_INT(KEYADDR1) & (1 << BTN_SINGLE)) != 0)) {
 				DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1);
 			}
-			GetCh(0,8, &Ch1[CurrBuffer][0],&Data[0], HLEN+100);
-		/*	DrawSignal(128,&Ch1[PrevBuffer][0].i, &Ch1[PrevBuffer][0].i,COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,0,0));*/
-			DrawSignal(128,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(4,4,7));
+			GetCh(0,8, &Ch1[CurrBuffer][0],&Data[Offset[0].H], HLEN+100);
+		/*	DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0].i, &Ch1[PrevBuffer][0].i,COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,0,0));*/
+			DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(4,4,7));
 
 //			DrawHLine(COLOR_R3G3B3(7,7,7), 128+(VLEN/2), 0, HLEN-1);
 /*			GetCh(1,8, CalcBuffer,&Data[0], HLEN+100);
 			Interpolate(HLEN+(FILTER_COEFFS*2),&Ch2[CurrBuffer][0], CalcBuffer,0);
 			DrawSignal(VLEN-128,&Ch2[PrevBuffer][FILTER_COEFFS], &Ch2[CurrBuffer][FILTER_COEFFS],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,7));*/
-			GetCh(1,8, &Ch2[CurrBuffer][0],&Data[0], HLEN+100);
-			DrawSignal(VLEN-128,&Ch2[PrevBuffer][0], &Ch2[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,0));
+			GetCh(1,8, &Ch2[CurrBuffer][0],&Data[Offset[1].H], HLEN+100);
+			DrawSignal(Offset[1].V,&Ch2[PrevBuffer][0], &Ch2[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,0));
 
 			WaitMs(50);
 		
@@ -364,14 +379,12 @@ void SetTriggerLevel(){
 
 	int32_t kc = (READ_INT(LEDADDR) >> EN_LEVEL) & 7;	
 	int32_t move = 0;
+	int16_t color = 0;
 
 
 	ROTARYMOVE(move,kc,kl);
 	if (move != 0){
-		switch(Ch){
-		case 0:	DrawHLine(BG_COLOR,level+128,0,HLEN-1); break;
-		case 1: DrawHLine(BG_COLOR,level+VLEN-128,0,HLEN-1); break;
-		}
+		DrawHLine(BG_COLOR,-level+Offset[Ch].V,0,HLEN-1);
 	}
 	/*
 	if ((READ_INT(KEYADDR1) & (1 << BTN_EDGE)) != 0) {
@@ -388,9 +401,9 @@ void SetTriggerLevel(){
 	}*/
 	switch(move){
 		case 3:
-		case -3: move *=8;
+		case -3: move *=4;
 		case 2: 
-		case -2: move *=8; break;
+		case -2: move *=4; break;
 	} 
 	if (move != 0){
 		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger move = ");
@@ -419,13 +432,13 @@ void SetTriggerLevel(){
 	if (Trigger > 4){
 		Trigger = 4;
 	}
+	
 	if (move != 0){
-		switch(Ch){
-		case 0:	DrawHLine(COLOR_R3G3B3(7,7,7),level+128,0,HLEN-1); break;
-		case 1: DrawHLine(COLOR_R3G3B3(7,7,7),level+VLEN-128,0,HLEN-1); break;
-		}
+		DrawHLine(COLOR_R3G3B3(7,7,7),-level+Offset[Ch].V,0,HLEN-1);
 	}
 	SetTrigger(Trigger,0,Ch, Prefetch,level-2,Pulse,level+2,Pulse);
+	color = COLOR_R3G3B3(0,Trigger+3,7-Trigger);
+	DrawBox(color,30,470,39,479);
 
 }
 

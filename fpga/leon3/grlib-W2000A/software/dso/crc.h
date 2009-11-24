@@ -18,7 +18,7 @@
 
 
 #define FALSE	0
-#define TRUE	!FALSE
+#define TRUE	1
 
 /*
  * Select the CRC standard from the list that follows.

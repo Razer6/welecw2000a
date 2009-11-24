@@ -48,9 +48,9 @@ void DrawTest(void);
 
 /* The display can only draw the three highest bits per color */
 /* Standard color set */
-#define COLOR_R5G5B6(Red,Green,Blue) ((Red << 11) | (Green << 5) | Blue)
+#define COLOR_R5G5B6(Red,Green,Blue) (((Red) << 11) | ((Green) << 5) | (Blue))
 /* 3 bit color set */
-#define COLOR_R3G3B3(Red,Green,Blue) ((Red << 13) | (Green << 8) | (Blue << 2))
+#define COLOR_R3G3B3(Red,Green,Blue) (((Red) << 13) | ((Green) << 8) | ((Blue) << 2))
 #endif
 
 /* VGA Resulotion */

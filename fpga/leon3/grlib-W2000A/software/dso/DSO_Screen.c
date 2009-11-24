@@ -141,8 +141,9 @@ uint32_t * InitDisplay (uint32_t Target){
 /*			FramePointer = (uint16_t *)malloc(HLEN*VLEN*sizeof(uint16_t)+1024);
 			temp = (int32_t)FramePointer;*/
 			temp = (uint32_t)Framebuffer;
-			temp &= ~0x3ff;
-			temp += 1024;
+			temp &= ~0x3ff; /* alignment part 1 */
+			temp += 1024; /* alignment part 2 */
+			
 			FramePointer = (uint16_t * )temp;
 /*			FramePointer = (unsigned char *) SVGA_BUFFER_BASE; */
 /*			printf("FramePointer %d %x ",FramePointer,FramePointer); */ 
@@ -169,6 +170,8 @@ uint32_t * InitDisplay (uint32_t Target){
 				( (1 << VGA_ENABLE_BIT)     | (1 << VGA_RUN_BIT)
 				| (2 << VGA_PIXELSIZE0_BIT) | (0 << VGA_CLOCKSEL0_BIT)
 				| (0 << VGA_H_POL_BIT)      | (0 << VGA_V_POL_BIT));
+		/*	temp -= 0x20000000;*/ /* uncached SRAM mirror */
+			FramePointer = (uint16_t * )temp;
 			return 0;
 			break;
 		default:

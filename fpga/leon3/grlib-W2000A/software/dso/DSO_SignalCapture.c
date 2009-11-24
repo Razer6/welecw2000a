@@ -259,6 +259,7 @@ uint32_t SetTrigger(
 	}
 	WRITE_INT(TRIGGERTYPEADDR,	Trigger);
 	WRITE_INT(EXTTRIGGERSRCADDR,	ExtTrigger);
+	WRITE_INT(TRIGGERONCHADDR,	TriggerChannel);
 	WRITE_INT(TRIGGERLOWVALUEADDR,	LowReference);
 	WRITE_INT(TRIGGERLOWTIMEADDR,	LowReferenceTime);
 	WRITE_INT(TRIGGERHIGHVALUEADDR, HighReference);
@@ -275,6 +276,7 @@ uint32_t CalibrateDAC(uint32_t Ch){
 	 * sum of data / data samples
 	 * set the DAC
 	 * goto capture data until sum of data is exeptable low */ 
+	return 0;
 }
 
 uint32_t SetDACOffset(uint32_t Ch, int32_t Offset){
@@ -308,13 +310,13 @@ uint32_t SetVoltageRangeBits(uint32_t Ch, const SetAnalog * Settings){
 		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_K1_OFF\n");
 		temp = (1 << CH0_K1_OFF);
 	} else {
-//		temp = (1 << CH0_K1_ON);
+		temp = (1 << CH0_K1_ON);
 	}
 	if (Settings[Ch].myVperDiv < 100000) {
 		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_K2_OFF\n");
 		temp |= (1 << CH0_K2_OFF);
 	} else {
-//		temp |= (1 << CH0_K2_ON);
+		temp |= (1 << CH0_K2_ON);
 	}
 /*	if ((READ_INT(KEYADDR1) & (1 << BTN_AUTOSCALE)) != 0){
 		temp = (1 << CH0_K1_ON);
@@ -327,13 +329,13 @@ uint32_t SetVoltageRangeBits(uint32_t Ch, const SetAnalog * Settings){
 		temp |= (1 << CH0_K2_OFF);
 	}*/
 	if (Settings[Ch].myVperDiv >= 100000) {
-		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_OPA656\n");
-		temp |= (1 << CH0_OPA656);
+	//	SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_OPA656\n");
+	//	temp |= (1 << CH0_OPA656);
 	}
 	
 
 	switch(Settings[Ch].myVperDiv % 9){
-	case 5:   /* fall through */
+	case 5: temp |= (1 << CH0_OPA656);  /* fall through */
 	case 4: temp |= (1 << CH0_U13);
 	case 2: temp |= (1 << CH0_U14); break; 
 	case 1: break;
@@ -606,7 +608,7 @@ uint32_t CaptureData(
 	 * with function call to get the data from an hw address + masking in a condition */
 	volatile int temp = 0; 
 	
-	if ((FMode != 0) || ForceFastMode == TRUE) {
+	if ((FMode != 0) || ForceFastMode != FALSE) {
 		return FastCapture(WaitTime,CaptureSize, RawData);
 	} 
 	printf("Record Normal\n");

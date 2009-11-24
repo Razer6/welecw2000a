@@ -124,7 +124,6 @@
 #endif
 #ifdef SIM_COMPILATION
 #define CAPTURESIZE 8192
-#define SendStringBlock(A,B) 
 #define printf(...)
 #endif
 #ifndef LEON3

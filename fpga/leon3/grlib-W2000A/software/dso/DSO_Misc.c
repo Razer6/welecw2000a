@@ -35,7 +35,9 @@
 
 #include "DSO_Misc.h"
 #include "DSO_Main.h"
+#ifndef WINNT
 #include "unistd.h"
+#endif
 
 #ifdef LEON3
 

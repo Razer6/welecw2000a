@@ -26,8 +26,10 @@ OBJECTS= \
 	RemoteSignalCapture.o \
 	Request.o \
 	DSO_Remote_Master.o \
-	crc.o
-
+	crc.o \
+	DSO_SignalCapture.o \
+	Protocoll.o \
+	DSO_Misc.o 
 
 WaveRecorder:	$(OBJECTS)
 	$(CC) $(CFLAGS) $(PCOFILES) -o WaveRecorder.exe WaveRecorder.c $(OBJECTS) libargtable2.a -lgmon

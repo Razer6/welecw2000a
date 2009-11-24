@@ -306,18 +306,19 @@
 
 #define ANC_CH0       7 
 /* subset of ANC_CH0 */
-#define CH0_K1_ON     0
-#define CH0_K1_OFF    1
-#define CH0_K2_ON     2
-#define CH0_K2_OFF    3
-#define CH0_OPA656    4
-#define CH0_BW_Limit  5
-#define CH0_U14       6
-#define CH0_U13       7
-#define CH0_DC        8
-#define CH1_DC        9
-#define CH2_DC       10
-#define CH3_DC       11
+#define CH0_K1_ON     1
+#define CH0_K1_OFF    2
+#define CH0_K2_ON     3
+#define CH0_K2_OFF    4
+#define CH0_OPA656    5
+#define CH0_BW_Limit  6
+#define CH0_U14       7
+#define CH0_U13       8
+#define CH0_DC        9
+#define CH1_DC        10
+#define CH2_DC       11
+#define CH3_DC       12
+
 
 
 
@@ -332,18 +333,19 @@
 
 #define ANC_CH1       5 
 /* subset of ANC_CH1 */
-#define CH1_K1_ON      0
+#define CH1_K1_ON      1
 #define CH1_K1_OFF     2
-#define CH1_K2_ON      1
-#define CH1_K2_OFF     3
-#define CH1_OPA656     4
-#define CH1_BW_Limit   5
-#define CH1_U14        6
-#define CH1_U13        7
-#define CH0_SRC2_ADDR  8
-#define CH1_SRC2_ADDR 10
-#define CH2_SRC2_ADDR 12
-#define CH3_SRC2_ADDR 14
+#define CH1_K2_ON      3
+#define CH1_K2_OFF     4
+#define CH1_OPA656     5
+#define CH1_BW_Limit   6
+#define CH1_U14        7
+#define CH1_U13        8
+#define CH0_SRC2_ADDR  9
+#define CH1_SRC2_ADDR 11
+#define CH2_SRC2_ADDR 13
+#define CH3_SRC2_ADDR 15
+
 
 /* CHX_SRC2_ADDR*/
 #define SRC2_NONE    0

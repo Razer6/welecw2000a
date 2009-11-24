@@ -171,7 +171,9 @@ bool ReceiveHeader(
 	int size = strlen(RefHeader);
 	int i = 0;
 	int errors = 0;
+#ifndef LEON3
 	uint32_t terr = 0;
+#endif
 	char rec = 0;
 	while (i < size){
 
@@ -282,7 +284,9 @@ int ReceiveCaptureData(uart_regs * uart, uint32_t buffersize, uint32_t * FastMod
 int ReceiveData(uart_regs * uart, uint32_t buffersize, uint32_t * data) {
 	uint32_t size = 0;
 	uint32_t i = 0;
+#ifndef LEON3
 	uint32_t error = 0;
+#endif
 	uint32_t dummy = 0;
 /*	if (!ReceiveHeader(uart, DSO_REC_HEADER)){
 #ifndef W2000A
@@ -342,7 +346,9 @@ int ReceiveAll(uart_regs * uart, uint32_t buffersize, uint32_t * data, uint32_t 
 	const char Msg[]     = DSO_MESSAGE_RESP;
 	const char * Current = Ack;
 	uint32_t size = 0;
+#ifndef LEON3
 	uint32_t error = 0;
+#endif
 	char c = '\0';
 
 	do {
