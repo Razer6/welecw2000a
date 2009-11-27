@@ -4,7 +4,7 @@
 -- File       : DSOConfig-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-03-04
--- Last update: 2009-11-19
+-- Last update: 2009-11-26
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -52,13 +52,13 @@ package pDSOConfig is
   constant cCurrentDevice : natural := cWelec2022;  -- can be read in the SFR(0)
 
   -- downsampler settings
-  constant cDecimationStages : natural    := 5;
+  constant cDecimationStages : natural    := 6;
   constant cChannels         : natural    := 2;
   constant cADCsperChannel   : natural    := 4;
   constant cADCClkRate       : natural    := 250E6;
   constant cDesignClkRate    : natural    := 125E6;
   constant cCPUClkRate       : natural    := 62500E3;
-  constant cAnSettStrobeRate : natural    := 2E5;  -- TODO: 1 kHz calibrator freq.
+  constant cAnSettStrobeRate : natural    := 5E4;  -- TODO: 1 kHz calibrator freq.
   constant cResetActive      : std_ulogic := '0';
   constant cADCBitWidth      : natural    := 8;
   constant cBitWidth         : natural    := 8;

@@ -1,6 +1,6 @@
 CC = g++
 AR = ar
-CFLAGS = -I/usr/local/include -I.. -I. -Wall -ansi -g
+CFLAGS = -I/usr/local/include -I.. -I. -I"../../leon3" -Wall -ansi -g
 LDFLAGS = -L/usr/local/lib --enable-auto-import
 LDLIBS = -l argtable2
 LIBDIR = ./objs-linux/

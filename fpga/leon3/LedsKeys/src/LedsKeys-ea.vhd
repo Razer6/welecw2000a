@@ -4,7 +4,7 @@
 -- File       : LedsKeysAnalogSettings-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-11-18
+-- Last update: 2009-11-27
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -77,7 +77,7 @@ architecture RTL of LedsKeysAnalogSettings is
   type aKeyFSM is (IDLE, Fetchstrobe, Reading);
   type aKeyState is record
                       State    : aKeyFSM;
-                      ShiftReg : std_ulogic_vector(cKeyShiftLength-1 downto 0);
+                      ShiftReg : std_ulogic_vector(cKeyShiftLength downto 0);
                       D0Reg    : std_ulogic_vector(cKeyShiftLength-1 downto 0);
                       D1Reg    : std_ulogic_vector(cKeyShiftLength-1 downto 0);
                       Reg      : std_ulogic_vector(cKeyShiftLength-1 downto 0);
@@ -118,8 +118,26 @@ begin
       iResetSync  => '0',
       oStrobe     => Strobe);
 
-  oSerialClk <= SerialClk;
-  
+  ProbeSignal : process(iClk, iResetAsync)
+  begin
+    if iResetAsync = cResetActive then
+      SerialClk  <= '0';
+      oSerialClk <= '0';
+    elsif rising_edge(iClk) then
+      if Strobe = '1' then
+        SerialClk <= not SerialClk;
+      end if;
+      if iCPUtoAnalog.EnableProbeClock = '1' then
+        if iCPUtoAnalog.EnableProbeStrobe = '1' then
+          oSerialClk <= Strobe;
+        else
+          oSerialClk <= SerialClk;
+        end if;
+      else
+        oSerialClk <= '0';
+      end if;
+    end if;
+  end process;
   
   oLeds <= (
     SerialClk     => LedState.Clock(LedState.Clock'high),
@@ -131,7 +149,6 @@ begin
   pLeds : process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
-      SerialClk         <= '0';
       LedState.ShiftReg <= (others => '0');
       LedState.Counter  <= 0;
       LedState.Strobe   <= '0';
@@ -164,7 +181,6 @@ begin
       end if;
 
       if Strobe = '1' then
-        SerialClk <= not SerialClk;
         if LedState.Busy = '1' then
           LedState.Clock(1)                        <= not LedState.Clock(1);
           LedState.Clock(2 to LedState.Clock'high) <= LedState.Clock(1 to LedState.Clock'high-1);
@@ -194,7 +210,7 @@ begin
   pKeys : process (iClk, iResetAsync)
   begin
     if iResetAsync = cResetActive then
-      KeyState.ShiftReg <= (others => '1');
+      KeyState.ShiftReg <= (others => '0');
       KeyState.Counter  <= 3;
       KeyState.State    <= FetchStrobe;
       onFetchKeys <= (
@@ -206,28 +222,32 @@ begin
       onFetchKeys.nChipEnable  <= cLowActive;
       onFetchKeys.nFetchStrobe <= cHighInactive;
       KeyState.Strobe          <= '0';
-      onFetchKeys.SerialClk <= '0';
+      onFetchKeys.SerialClk    <= '0';
 
       case KeyState.State is
         when Idle =>
-          if Strobe = '1' and SerialClk = '1'  then
+          if Strobe = '1' and SerialClk = '1' then
             if iCPUtoAnalog.EnableKeyClock = '1' then
               KeyState.State   <= Reading;
               KeyState.Counter <= 3;
             end if;
           end if;
         when FetchStrobe =>
-          onFetchKeys.SerialClk <= SerialClk;
+          onFetchKeys.SerialClk    <= SerialClk;
           onFetchKeys.nFetchStrobe <= cLowActive;
-          
+
 --          if KeyState.Counter = 0 then
 --            onFetchKeys.nFetchStrobe <= cHighInactive;
 --          end if;
-          
+
           if Strobe = '1' and SerialClk = '1' then
             if KeyState.Counter = 0 then
               KeyState.Counter <= cKeyShiftLength-1;
               KeyState.State   <= Reading;
+              KeyState.ShiftReg(KeyState.ShiftReg'right) <= iKeysData;
+
+              KeyState.ShiftReg(KeyState.ShiftReg'left downto KeyState.ShiftReg'right+1) <=
+                KeyState.ShiftReg(KeyState.ShiftReg'left-1 downto KeyState.ShiftReg'right);
             else
               KeyState.Counter <= KeyState.Counter -1;
               
@@ -247,7 +267,7 @@ begin
               end if;
 
               KeyState.Strobe <= '1';
-              KeyState.D0Reg  <= KeyState.ShiftReg;
+              KeyState.D0Reg  <= KeyState.ShiftReg(KeyState.D0Reg'high downto 0);
               KeyState.D1Reg  <= KeyState.D0Reg;
 
               for i in KeyState.Reg'range loop
@@ -257,6 +277,9 @@ begin
               end loop;
               
             else
+              if iCPUtoAnalog.EnableKeyClock = '0' then
+                KeyState.State <= Idle;
+              end if;
               KeyState.Counter                           <= KeyState.Counter -1;
               KeyState.ShiftReg(KeyState.ShiftReg'right) <= iKeysData;
 
@@ -319,13 +342,13 @@ begin
     oKeys.BTN_MODECOUPLING <= KeyState.Reg(41);
     oKeys.BTN_AUTOSCALE    <= KeyState.Reg(32);
     oKeys.BTN_SAVERECALL   <= KeyState.Reg(39);
-    oKeys.BTN_QUICKPRINT   <= KeyState.Reg(37);
+    oKeys.BTN_QUICKPRINT   <= KeyState.Reg(36);
     oKeys.BTN_UTILITY      <= KeyState.Reg(34);
     oKeys.BTN_PULSEWIDTH   <= KeyState.Reg(47);
     oKeys.BTN_X1           <= KeyState.Reg(42);
     oKeys.BTN_X2           <= KeyState.Reg(46);
   end process;
-  
+
 --            ENX_TIME_DIV     => KeyState.Reg(48),   -- dont care start
 --            ENY_TIME_DIV     => KeyState.Reg(47),
 --            ENX_F            => KeyState.Reg(50),
@@ -354,36 +377,36 @@ begin
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(13),
-      iUnstable   => KeyState.Reg(12),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(13),
+      iB          => KeyState.D0Reg(12),
       oCounter    => oKeys.EN_CH3_VDIV);
 
   CH2_VDIV : entity DSO.NobDecoder
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(11),
-      iUnstable   => KeyState.Reg(10),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(11),
+      iB          => KeyState.D0Reg(10),
       oCounter    => oKeys.EN_CH2_VDIV);
 
   CH1_VDIV : entity DSO.NobDecoder
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(29),
-      iUnstable   => KeyState.Reg(28),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(29),
+      iB          => KeyState.D0Reg(28),
       oCounter    => oKeys.EN_CH1_VDIV);
 
   CH0_VDIV : entity DSO.NobDecoder
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(27),
-      iUnstable   => KeyState.Reg(26),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(27),
+      iB          => KeyState.D0Reg(26),
       oCounter    => oKeys.EN_CH0_VDIV);
 
   CH3_UPDN : entity DSO.NobDecoder
@@ -391,9 +414,9 @@ begin
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(15),
-      iUnstable   => KeyState.Reg(14),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(15),
+      iB          => KeyState.D0Reg(14),
       oCounter    => oKeys.EN_CH3_UPDN);
 
   CH2_UPDN : entity DSO.NobDecoder
@@ -401,9 +424,9 @@ begin
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(8),
-      iUnstable   => KeyState.Reg(9),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(8),
+      iB          => KeyState.D0Reg(9),
       oCounter    => oKeys.EN_CH2_UPDN);
 
   CH1_UPDN : entity DSO.NobDecoder
@@ -411,9 +434,9 @@ begin
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(30),
-      iUnstable   => KeyState.Reg(31),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(30),
+      iB          => KeyState.D0Reg(31),
       oCounter    => oKeys.EN_CH1_UPDN);
 
   CH0_UPDN : entity DSO.NobDecoder
@@ -421,45 +444,45 @@ begin
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(24),
-      iUnstable   => KeyState.Reg(25),
+--      iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(24),
+      iB          => KeyState.D0Reg(25),
       oCounter    => oKeys.EN_CH0_UPDN);
 
   LEVEL : entity DSO.NobDecoder
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(53),
-      iUnstable   => KeyState.Reg(52),
+--     iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(53),
+      iB          => KeyState.D0Reg(52),
       oCounter    => oKeys.EN_LEVEL);
 
   LEFT_RIGHT : entity DSO.NobDecoder
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(55),
-      iUnstable   => KeyState.Reg(54),
+--     iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(55),
+      iB          => KeyState.D0Reg(54),
       oCounter    => oKeys.EN_LEFT_RIGHT);
 
   F : entity DSO.NobDecoder
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(51),
-      iUnstable   => KeyState.Reg(50),
+--     iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(51),
+      iB          => KeyState.D0Reg(50),
       oCounter    => oKeys.EN_F);
 
   TIME_DIV : entity DSO.NobDecoder
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
-      iStrobe     => KeyState.Strobe,
-      iStable     => KeyState.Reg(49),
-      iUnstable   => KeyState.Reg(48),
+      --     iStrobe     => KeyState.Strobe,
+      iA          => KeyState.D0Reg(49),
+      iB          => KeyState.D0Reg(48),
       oCounter    => oKeys.EN_TIME_DIV);
 
   pAnalogSettings : process (iClk, iResetAsync)
@@ -482,23 +505,28 @@ begin
       end if;
       if iCPUtoAnalog.Set = '1' and AnalogSettings.Busy = '0' then
         oAnalogBusy                          <= '1';
-        AnalogSettings.Counter               <= cAnalogShiftLength+1;
         AnalogSettings.Addr                  <= iCPUtoAnalog.Addr;
         AnalogSettings.ShiftReg(23 downto 0) <= iCPUtoAnalog.Data;
         AnalogSettings.Busy                  <= '1';
         if iCPUtoAnalog.Addr = O"6" then
+          AnalogSettings.Counter               <= cAnalogShiftLength+1;
           AnalogSettings.Enable <= '1';
+        else
+          AnalogSettings.Counter               <= cAnalogShiftLength;
         end if;
       end if;
       if AnalogSettings.Busy = '1' then
         AnalogSettings.Clock <= SerialClk;
       else
-        AnalogSettings.Enable <= '0';
+        if Strobe = '1' or iCPUtoAnalog.Addr = O"6"  then
+          AnalogSettings.Enable <= '0';
+        end if;
+        AnalogSettings.Clock <= '1';
       end if;
 
-      if Strobe = '1' and AnalogSettings.Clock = '0' and AnalogSettings.Busy = '1' then
+      if Strobe = '1' and AnalogSettings.Clock = '1' and AnalogSettings.Busy = '1' then
         if (iCPUtoAnalog.Addr = O"6" and AnalogSettings.Counter /= 1 and AnalogSettings.Counter /= 0) or
-          (iCPUtoAnalog.Addr /= O"6" and AnalogSettings.Counter = 1) then
+          (iCPUtoAnalog.Addr /= O"6" and AnalogSettings.Counter = 0) then
           AnalogSettings.Enable <= '1';
         else
           AnalogSettings.Enable <= '0';
@@ -509,7 +537,6 @@ begin
           AnalogSettings.Busy <= '0';
           --      AnalogSettings.Enable <= '0';
         else
-          -- The DAC needs an enable signal! 
           AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high downto 1) <=
             AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high-1 downto 0);
           AnalogSettings.ShiftReg(0) <= '-';
@@ -522,7 +549,7 @@ begin
   oAnalogSettings.Addr      <= not AnalogSettings.Addr;
   oAnalogSettings.Enable    <= not AnalogSettings.Enable;
   oAnalogSettings.Data      <= not AnalogSettings.ShiftReg(AnalogSettings.ShiftReg'high);
-  oAnalogSettings.SerialClk <= AnalogSettings.Clock;
+  oAnalogSettings.SerialClk <= not AnalogSettings.Clock;
 
   pPWM : entity DSO.PWM
     generic map (

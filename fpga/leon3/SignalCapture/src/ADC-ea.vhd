@@ -4,7 +4,7 @@
 -- File       : ADC-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-09-11
+-- Last update: 2009-11-26
 -- Platform   : W2000A
 -------------------------------------------------------------------------------
 -- Description: 
@@ -268,14 +268,14 @@ begin
   process (Phase1n, Phase2n, Phase2p, Phase3n, Delay)
   begin
     for i in 0 to cChannels-1 loop
-      oData(i)(0) <= Delay(i)(0);
-      oData(i)(1) <= Delay(i)(1);
-      oData(i)(2) <= Phase2p(i);
-      oData(i)(3) <= Delay(i)(3);
-      oData(i)(4) <= Delay(i)(4);
-      oData(i)(5) <= Phase1n(i);
-      oData(i)(6) <= Phase2n(i);
-      oData(i)(7) <= Phase3n(i);
+      oData(i)(0) <= not (Delay(i)(0)(cADCBitWidth-1)) & Delay(i)(0)(cADCBitWidth-2 downto 0);
+      oData(i)(1) <= not (Delay(i)(1)(cADCBitWidth-1)) & Delay(i)(1)(cADCBitWidth-2 downto 0);
+      oData(i)(2) <= not (Phase2p(i)(cADCBitWidth-1)) & Phase2p(i)(cADCBitWidth-2 downto 0);
+      oData(i)(3) <= not (Delay(i)(3)(cADCBitWidth-1)) & Delay(i)(3)(cADCBitWidth-2 downto 0);
+      oData(i)(4) <= not (Delay(i)(4)(cADCBitWidth-1)) & Delay(i)(4)(cADCBitWidth-2 downto 0);
+      oData(i)(5) <= not (Phase1n(i)(cADCBitWidth-1)) & Phase1n(i)(cADCBitWidth-2 downto 0);
+      oData(i)(6) <= not (Phase2n(i)(cADCBitWidth-1)) & Phase2n(i)(cADCBitWidth-2 downto 0);
+      oData(i)(7) <= not (Phase3n(i)(cADCBitWidth-1)) & Phase3n(i)(cADCBitWidth-2 downto 0);
     end loop;
   end process;
 

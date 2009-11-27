@@ -39,21 +39,22 @@ add wave -noupdate -format Literal /testbench/frontpanel/oanalogsettings
 add wave -noupdate -format Logic /testbench/frontpanel/oanalogbusy
 add wave -noupdate -format Literal /testbench/frontpanel/pwm_offset
 add wave -noupdate -divider Decoder
-add wave -noupdate -format Logic /testbench/frontpanel/time_div/istrobe
-add wave -noupdate -format Logic /testbench/frontpanel/time_div/iunstable
-add wave -noupdate -format Logic /testbench/frontpanel/time_div/istable
-add wave -noupdate -format Literal /testbench/frontpanel/time_div/ocounter
-add wave -noupdate -format Literal /testbench/frontpanel/time_div/c
-add wave -noupdate -format Literal /testbench/frontpanel/time_div/stable
 add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/iclk
 add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/iresetasync
-add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/istrobe
-add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/iunstable
-add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/istable
+add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/ia
+add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/ib
 add wave -noupdate -format Literal /testbench/frontpanel/ch3_updn/ocounter
 add wave -noupdate -format Literal /testbench/frontpanel/ch3_updn/c
-add wave -noupdate -format Literal /testbench/frontpanel/ch3_updn/stable
-add wave -noupdate -format Logic /testbench/frontpanel/ch3_updn/dir
+add wave -noupdate -format Literal /testbench/frontpanel/ch3_updn/dir
+add wave -noupdate -divider RandomDecoder
+add wave -noupdate -format Logic /testbench/nob/dec/iclk
+add wave -noupdate -format Logic /testbench/nob/dec/iresetasync
+add wave -noupdate -format Logic /testbench/nob/dec/ia
+add wave -noupdate -format Logic /testbench/nob/dec/ib
+add wave -noupdate -format Literal /testbench/nob/dec/ocounter
+add wave -noupdate -format Literal /testbench/nob/dec/p180/fsm/s180
+add wave -noupdate -format Literal /testbench/nob/dec/c
+add wave -noupdate -format Literal /testbench/nob/dec/dir
 add wave -noupdate -divider Leds0
 add wave -noupdate -format Logic /testbench/pleds__0/bank/isd
 add wave -noupdate -format Logic /testbench/pleds__0/bank/isck
@@ -120,45 +121,47 @@ add wave -noupdate -format Logic /testbench/dac/bu
 add wave -noupdate -format Literal /testbench/dac/ao
 add wave -noupdate -format Literal /testbench/dac/bo
 add wave -noupdate -divider CH0
-add wave -noupdate -format Logic /testbench/ch0_regl/isd
-add wave -noupdate -format Logic /testbench/ch0_regl/isck
-add wave -noupdate -format Logic /testbench/ch0_regl/insclr
-add wave -noupdate -format Logic /testbench/ch0_regl/irck
-add wave -noupdate -format Logic /testbench/ch0_regl/ig
-add wave -noupdate -format Logic /testbench/ch0_regl/osd
-add wave -noupdate -format Literal /testbench/ch0_regl/oq
-add wave -noupdate -format Literal /testbench/ch0_regl/reg
+add wave -noupdate -format Literal -expand /testbench/frontpanel/analogsettings
+add wave -noupdate -format Literal -expand /testbench/frontpanel/oanalogsettings
+add wave -noupdate -format Logic /testbench/ch0_regl/clk
+add wave -noupdate -format Logic /testbench/ch0_regl/str
+add wave -noupdate -format Logic /testbench/ch0_regl/oe
+add wave -noupdate -format Logic /testbench/ch0_regl/d
+add wave -noupdate -format Logic /testbench/ch0_regl/qs
+add wave -noupdate -format Logic /testbench/ch0_regl/qs2
+add wave -noupdate -format Literal /testbench/ch0_regl/q
 add wave -noupdate -format Literal /testbench/ch0_regl/shift
-add wave -noupdate -format Logic /testbench/ch0_regh/isd
-add wave -noupdate -format Logic /testbench/ch0_regh/isck
-add wave -noupdate -format Logic /testbench/ch0_regh/insclr
-add wave -noupdate -format Logic /testbench/ch0_regh/irck
-add wave -noupdate -format Logic /testbench/ch0_regh/ig
-add wave -noupdate -format Logic /testbench/ch0_regh/osd
-add wave -noupdate -format Literal /testbench/ch0_regh/oq
-add wave -noupdate -format Literal /testbench/ch0_regh/reg
-add wave -noupdate -divider CH1
-add wave -noupdate -format Logic /testbench/ch1_regl/isd
-add wave -noupdate -format Logic /testbench/ch1_regl/isck
-add wave -noupdate -format Logic /testbench/ch1_regl/insclr
-add wave -noupdate -format Logic /testbench/ch1_regl/irck
-add wave -noupdate -format Logic /testbench/ch1_regl/ig
-add wave -noupdate -format Logic /testbench/ch1_regl/osd
-add wave -noupdate -format Literal /testbench/ch1_regl/oq
-add wave -noupdate -format Literal /testbench/ch1_regl/reg
-add wave -noupdate -format Literal /testbench/ch1_regl/shift
+add wave -noupdate -format Literal /testbench/ch0_regl/latch
+add wave -noupdate -format Logic /testbench/ch0_regh/clk
+add wave -noupdate -format Logic /testbench/ch0_regh/str
+add wave -noupdate -format Logic /testbench/ch0_regh/oe
+add wave -noupdate -format Logic /testbench/ch0_regh/d
+add wave -noupdate -format Logic /testbench/ch0_regh/qs
+add wave -noupdate -format Logic /testbench/ch0_regh/qs2
+add wave -noupdate -format Literal /testbench/ch0_regh/q
 add wave -noupdate -format Literal /testbench/ch0_regh/shift
-add wave -noupdate -format Logic /testbench/ch1_regh/isd
-add wave -noupdate -format Logic /testbench/ch1_regh/isck
-add wave -noupdate -format Logic /testbench/ch1_regh/insclr
-add wave -noupdate -format Logic /testbench/ch1_regh/irck
-add wave -noupdate -format Logic /testbench/ch1_regh/ig
-add wave -noupdate -format Logic /testbench/ch1_regh/osd
-add wave -noupdate -format Literal /testbench/ch1_regh/oq
-add wave -noupdate -format Literal /testbench/ch1_regh/reg
+add wave -noupdate -format Literal /testbench/ch0_regh/latch
+add wave -noupdate -divider CH1
+add wave -noupdate -format Logic /testbench/ch1_regl/clk
+add wave -noupdate -format Logic /testbench/ch1_regl/str
+add wave -noupdate -format Logic /testbench/ch1_regl/oe
+add wave -noupdate -format Logic /testbench/ch1_regl/d
+add wave -noupdate -format Logic /testbench/ch1_regl/qs
+add wave -noupdate -format Logic /testbench/ch1_regl/qs2
+add wave -noupdate -format Literal /testbench/ch1_regl/q
+add wave -noupdate -format Literal /testbench/ch1_regl/shift
+add wave -noupdate -format Literal /testbench/ch1_regl/latch
+add wave -noupdate -format Logic /testbench/ch1_regh/clk
+add wave -noupdate -format Logic /testbench/ch1_regh/str
+add wave -noupdate -format Logic /testbench/ch1_regh/oe
+add wave -noupdate -format Logic /testbench/ch1_regh/d
+add wave -noupdate -format Logic /testbench/ch1_regh/qs
+add wave -noupdate -format Logic /testbench/ch1_regh/qs2
+add wave -noupdate -format Literal /testbench/ch1_regh/q
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
+add wave -noupdate -format Literal /testbench/ch1_regh/latch
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {2073696 ns} 0}
+WaveRestoreCursors {{Cursor 1} {130304 ns} 0} {{Cursor 2} {130656 ns} 0}
 configure wave -namecolwidth 285
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -172,4 +175,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {2063929 ns} {2129451 ns}
+WaveRestoreZoom {32650842 ns} {32654979 ns}

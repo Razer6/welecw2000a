@@ -4,7 +4,7 @@
 -- File       : SignalCapture-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-09-12
+-- Last update: 2009-11-26
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -135,7 +135,7 @@ begin
 --      DownSampler.EnableFilter(2) <= '0';
 --      DownSampler.EnableFilter(3) <= '0';
     DownSampler.EnableFilter(4) <= '0';
---    DownSampler.EnableFilter(5) <= '0';
+    DownSampler.EnableFilter(5) <= '0';
   end process;
 
   Decimator : entity DSO.TopDownSampler

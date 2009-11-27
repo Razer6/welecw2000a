@@ -458,7 +458,7 @@ set_global_assignment -name MUX_RESTRUCTURE AUTO
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 set_global_assignment -name IGNORE_LCELL_BUFFERS ON
 set_global_assignment -name FITTER_EFFORT "AUTO FIT"
-set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE SPEED
 set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION ON
 set_global_assignment -name SYNTH_MESSAGE_LEVEL HIGH
 

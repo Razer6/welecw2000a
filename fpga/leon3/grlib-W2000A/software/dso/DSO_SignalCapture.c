@@ -43,13 +43,17 @@
 #include "DSO_SignalCapture.h"
 #include "DSO_Misc.h"
 #include "DSO_ADC_Control.h"
-/*#include "Leon3Uart.h"*/
+#include "DSO_Remote.h"
+#include "DSO_Main.h"
 
 #ifdef LEON3
 #include "Leon3Uart.h"
+#include "rprintf.h"
+#else
+#define rprintf printf
 #endif
 
-#include "rprintf.h"
+
 
 /*volatile CaptureRegs    * volatile CaptureR;
 volatile TriggerRegs    * volatile TriggerR;
@@ -76,9 +80,6 @@ uint32_t InitSignalCapture(){
 			ENABLE_RX | ENABLE_TX, adc_uart);*/
 	return TRUE;
 }
-
-#include "DSO_Remote.h"
-#include "DSO_Main.h"
 
 uint32_t SetTriggerInput (	
 		const uint32_t noChannels, 
@@ -308,15 +309,15 @@ uint32_t SetVoltageRangeBits(uint32_t Ch, const SetAnalog * Settings){
 	uint32_t temp = 0;
 	if (Settings[Ch].myVperDiv < 1000000) {
 		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_K1_OFF\n");
-		temp = (1 << CH0_K1_OFF);
+		temp = (1 << CH0_K1_10);
 	} else {
-		temp = (1 << CH0_K1_ON);
+		temp = (1 << CH0_K1_1);
 	}
 	if (Settings[Ch].myVperDiv < 100000) {
 		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"CH0_K2_OFF\n");
-		temp |= (1 << CH0_K2_OFF);
+		temp |= (1 << CH0_K2_10);
 	} else {
-		temp |= (1 << CH0_K2_ON);
+		temp |= (1 << CH0_K2_1);
 	}
 /*	if ((READ_INT(KEYADDR1) & (1 << BTN_AUTOSCALE)) != 0){
 		temp = (1 << CH0_K1_ON);
@@ -339,7 +340,7 @@ uint32_t SetVoltageRangeBits(uint32_t Ch, const SetAnalog * Settings){
 	case 4: temp |= (1 << CH0_U13);
 	case 2: temp |= (1 << CH0_U14); break; 
 	case 1: break;
-	default: printf("WARNING: myVperDiv is set wrong!\n");
+	default: rprintf("WARNING: myVperDiv is set wrong!\n");
 	}
 	return temp;
 }

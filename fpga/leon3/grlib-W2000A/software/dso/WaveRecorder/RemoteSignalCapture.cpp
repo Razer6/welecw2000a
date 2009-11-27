@@ -47,6 +47,7 @@
 #include "PCUart.h"
 #include "DSO_Remote.h"
 #include "DSO_Misc.h"
+#include "irqmp.h"
 
 RemoteSignalCapture::RemoteSignalCapture(DebugComm * Comm): mComm(Comm){}
 
@@ -230,6 +231,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	uint32_t data = 0;
 	uint32_t CpuCtl = 0;
 	uint32_t DataArray[cFrameSize];
+	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
 
 	if (hFile == NULL) {
 		printf("Binary software file not found!\n");
@@ -355,17 +357,17 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	//Send(DSU_CTL,);
 	data = 0x00E1000F;
 	Send(DSU_ASI_BASE,	data);
-	printf("DSU_ASI_BASE send:      0x%08x\n",data);
+//	printf("DSU_ASI_BASE send:      0x%08x\n",data);
 	read = mComm->Receive(DSU_ASI_BASE,&data,1);
-	printf("DSU_ASI_BASE  rec:      0x%08x\n",data);
+//	printf("DSU_ASI_BASE  rec:      0x%08x\n",data);
 	i = 0;
 	do {
 	Send(DSU_DBGMODE,	0xFFFFFFFF);
 	data = 0x0061800F;
 	Send(DSU_ASI_BASE,	data);
-	printf("DSU_ASI_BASE send:      0x%08x\n",data);
+//	printf("DSU_ASI_BASE send:      0x%08x\n",data);
 	read = mComm->Receive(DSU_ASI_BASE,&data,1);
-	printf("DSU_ASI_BASE  rec:      0x%08x\n",data);
+//	printf("DSU_ASI_BASE  rec:      0x%08x\n",data);
 	
 	
 	read = mComm->Receive(DSU_CTL,&data,1);
@@ -375,6 +377,13 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	Send(DSU_TIME_TAG,0);
 	printf("Starting Leon3 with DSU_CTL = 0x%08x!\n",data);
 	Send(DSU_CTL,data);
+	printf("Disable all IRQs\n");
+	Send((uint32_t)&lr->irqmask,0);	/* mask all interrupts */
+    Send((uint32_t)&lr->irqlevel,0);	/* clear level reg */
+	Send((uint32_t)&lr->irqforce,0);
+	Send((uint32_t)&lr->irqclear,-1);	/* clear all pending interrupts */
+	printf("Setting the console uart in loop back mode\n");
+	Send(GENERIC_UART_BASE_ADDR+0x8,0xa3);
 	printf("Release Leon3 from single step debugging\n");
 	Send(DSU_SINGLESTEP,0);
 	i++;
@@ -406,7 +415,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		printf("\n");
 	}*/
 
-	mComm->Resync();
+//	mComm->Resync();
 	return TRUE;
 }
 

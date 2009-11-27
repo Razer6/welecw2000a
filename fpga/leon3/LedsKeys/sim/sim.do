@@ -12,6 +12,7 @@ vcom -quiet -work DSO ../../LedsKeys/src/LedsKeys-ea.vhd
 
 vcom -quiet -work work ../../TestFiles/src/StoP_hc595-ea.vhd
 vcom -quiet -work work ../../TestFiles/src/PtoS_HCT165-ea.vhd
+vcom -quiet -work work ../../TestFiles/src/StoP_MC14094b-ea.vhd
 vcom -quiet -work work ../../TestFiles/src/DeMux_HCT238-ea.vhd
 vcom -quiet -work work ../../TestFiles/src/DAC_LTC2612-ea.vhd
 

@@ -1,15 +1,15 @@
 -------------------------------------------------------------------------------
--- Project    : Welec W2000A 
+-- Project    : Welec W2000A
 -------------------------------------------------------------------------------
--- File       : StoP_hc595-ea.vhd
+-- File       : StoP_MC14094b-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
--- Created    : 2009-03-23
--- Last update: 2009-11-26
+-- Created    : 2009-11-27
+-- Last update: 2009-11-27
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
 -------------------------------------------------------------------------------
---  Copyright (c) 2008, Alexander Lindert
+--  Copyright (c) 2009, Alexander Lindert
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -31,47 +31,47 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-03-23  1.0      
+-- 2009-11-27  1.0
 -------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity StoP_hc595 is
+entity StoP_MC14094b is
   port (
-    iSD    : in  std_ulogic;
-    iSCK   : in  std_ulogic;
-    inSCLR : in  std_ulogic;
-    iRCK   : in  std_ulogic;
-    iG     : in  std_ulogic;
-    oSD    : out std_ulogic;
-    oQ     : out std_ulogic_vector (0 to 7));
+    signal clk : in  std_ulogic;
+    signal str : in  std_ulogic;
+    signal oe  : in  std_ulogic;
+    signal d   : in  std_ulogic;
+    signal qs  : out std_ulogic;
+    signal qs2 : out std_ulogic;
+    signal q   : out std_ulogic_vector(0 to 7));
 end entity;
 
-architecture RTL of StoP_hc595 is
-  signal Reg   : std_ulogic_vector (0 to 7);
-  signal Shift : std_ulogic_vector (0 to 7);
+architecture BHV of StoP_MC14094b is
+  signal Shift : std_ulogic_vector(0 to 7);
+  signal Latch : std_ulogic_vector(0 to 7);
 begin
   
-  process (iSCK)
+  R : process (clk)
   begin
-    if inSCLR = '0' then
-      Shift <= (others => '0');
-    elsif rising_edge(iSCK) then
-      Shift(0)               <= iSD;
-      Shift(1 to Shift'high) <= Shift(0 to Shift'high-1);
+    if rising_edge(clk) then
+      Shift(0)      <= d;
+      Shift(1 to 7) <= Shift(0 to 6);
+    end if;
+    if falling_edge(clk) then
+      qs2 <= Shift(7);
+    end if;
+  end process;
+  qs <= Shift(7);
+
+  L : process(Shift, str)
+  begin
+    if str = '1' then
+      Latch <= Shift;
     end if;
   end process;
 
-  process (iRCK)
-  begin
-    if rising_edge(iRCK) then
-      Reg <= Shift;
-    end if;
-  end process;
-
-  oSD <= Shift(Shift'high);
-  oQ  <= Reg when iG = '0' else (others => 'Z');
-  
+  O : q <= Latch when oe = '1' else (others => 'Z');
   
 end architecture;

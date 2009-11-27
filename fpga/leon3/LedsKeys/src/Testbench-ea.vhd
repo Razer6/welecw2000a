@@ -4,7 +4,7 @@
 -- File       : Testbench-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-08-20
--- Last update: 2009-11-18
+-- Last update: 2009-11-27
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -41,6 +41,7 @@ end entity;
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.math_real.all;
 
 library DSO;
 use DSO.pDSOConfig.all;
@@ -100,11 +101,12 @@ architecture bhv of Testbench is
       oQ   : out std_ulogic;
       onQ  : out std_ulogic);
   end component;
-  
+
+  constant cClkTime : time := 1 sec /(2*31250E3);
 begin
   
-  Clk        <= not Clk          after 1 sec /(2*31250E3);
-  ResetAsync <= not cResetActive after 4 sec /(2*31250E3);
+  Clk        <= not Clk          after cClkTime;
+  ResetAsync <= not cResetActive after 4*cClkTime;
 
   StimuliLeds : process
   begin
@@ -294,45 +296,45 @@ begin
       oB   => DAC_B,
       iGND => -2.5);
 
-  CH0_RegL : entity work.StoP_hc595
+  CH0_RegL : entity work.StoP_MC14094b
     port map (
-      iSD    => nFPtoAnalog.Data,
-      iSCK   => nFPtoAnalog.SerialClk,
-      inSCLR => '1',
-      iRCK   => ASEnable(7),
-      iG     => '1',
-      oSD    => ASDCh0,
-      oQ     => open);
+      d    => nFPtoAnalog.Data,
+      clk   => nFPtoAnalog.SerialClk,
+      str   => ASEnable(7),
+      oe     => '0',
+      qs    => ASDCh0,
+      qs2 => open,
+      q     => open);
 
-  CH0_RegH : entity work.StoP_hc595
+  CH0_RegH : entity work.StoP_MC14094b
     port map (
-      iSD    => ASDCh0,
-      iSCK   => nFPtoAnalog.SerialClk,
-      inSCLR => '1',
-      iRCK   => ASEnable(7),
-      iG     => '1',
-      oSD    => open,
-      oQ     => open);
+      d    => ASDCh0,
+      clk   => nFPtoAnalog.SerialClk,
+      str   => ASEnable(7),
+      oe     => '0',
+      qs    => open,
+      qs2 => open,
+      q     => open);
 
-  CH1_RegL : entity work.StoP_hc595
+  CH1_RegL : entity work.StoP_MC14094b
     port map (
-      iSD    => nFPtoAnalog.Data,
-      iSCK   => nFPtoAnalog.SerialClk,
-      inSCLR => '1',
-      iRCK   => ASEnable(5),
-      iG     => '1',
-      oSD    => ASDCh1,
-      oQ     => open);
+      d    => nFPtoAnalog.Data,
+      clk   => nFPtoAnalog.SerialClk,
+      str   => ASEnable(5),
+      oe     => '0',
+      qs    => ASDCh1,
+      qs2 => open,
+      q     => open);
 
-  CH1_RegH : entity work.StoP_hc595
+  CH1_RegH : entity work.StoP_MC14094b
     port map (
-      iSD    => ASDCh1,
-      iSCK   => nFPtoAnalog.SerialClk,
-      inSCLR => '1',
-      iRCK   => ASEnable(5),
-      iG     => '1',
-      oSD    => open,
-      oQ     => open);
+      d    => ASDCh1,
+      clk   => nFPtoAnalog.SerialClk,
+      str   => ASEnable(5),
+      oe     => '0',
+      qs    => open,
+      qs2    => open,
+      q     => open);
 
   
   KeySD(0) <= '-';
@@ -379,5 +381,39 @@ begin
     SINGLE_RED     => LedData(0)(3),
     SINGLE_GREEN   => LedData(0)(2));     
 
+-----------------------------------------------------------------------------------------
+-- Nob decoder testbench
+-----------------------------------------------------------------------------------------
+  Nob : block
+    signal A : std_ulogic_vector(2 downto 0);
+    signal c : std_ulogic_vector(cNobCounterSize-1 downto 0);
+  begin
+    dec : entity DSO.NobDecoder
+      generic map (gReverseDir => 0)
+      port map (
+        iClk        => Clk,
+        iResetAsync => ResetAsync,
+        iA          => A(2),
+        iB          => A(1),
+        oCounter    => C);
 
+    RandomGenProc : process
+      variable RandomVal      : real;
+      -- Declare seeds and initialize
+      --   Uniform uses seeds as state information,
+      --   so initialize only once
+      variable DataSent_seed1 : integer := 7;
+      variable DataSent_seed2 : integer := 1;
+      variable data           : integer;
+    begin
+
+  --    for i in 1 to 100 loop
+        uniform(DataSent_seed1, DataSent_seed2, RandomVal);
+        data := integer(trunc(RandomVal*8.0));
+        A    <= std_ulogic_vector(to_unsigned(data, 3));
+        wait for 2*cClkTime;
+ --     end loop;
+    end process;
+  end block;
+  
 end architecture;

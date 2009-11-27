@@ -1,6 +1,6 @@
 CC = g++
 AR = ar
-INCS =  -I"C:/Programme/Dev-Cpp/include"  -I".."  -I"."  -I"C:/Programme/Dev-Cpp/include"
+INCS =  -I"C:/MinGW/include"  -I".."  -I"."  -I"../../leon3" -L"C:/MinGW/lib"
 CFLAGS = $(INCS) $(CXXINCS) -DWINNT -DLITTLE_ENDIAN 
 
 all:	WaveRecorder
@@ -32,5 +32,5 @@ OBJECTS= \
 	DSO_Misc.o 
 
 WaveRecorder:	$(OBJECTS)
-	$(CC) $(CFLAGS) $(PCOFILES) -o WaveRecorder.exe WaveRecorder.c $(OBJECTS) libargtable2.a -lgmon
+	$(CC) $(CFLAGS) $(PCOFILES) -o WaveRecorder.exe WaveRecorder.c $(OBJECTS) libargtable2.a 
 

@@ -232,15 +232,18 @@ void GetCh(
 		uint32_t srcSamples){
 
 	register uint32_t i = 0;
+	register int32_t data = 0;
 	switch (size){
 		case 8: 
 			for (; i < srcSamples; ++i) {
-				dst[i].i = -src[i].c[ch];
+				data = (int32_t)src[i].c[ch];
+				dst[i].i = -data;
 			}
 			break;
 		case 16:
 			for (; i < srcSamples; ++i) {
-				dst[i].i = -src[i].s[ch];
+				data = (int32_t)src[i].s[ch];
+				dst[i].i = -data;
 			}
 			break;
 		default:
@@ -325,9 +328,8 @@ void GUI_Main () {
 			}
 			GetCh(0,8, &Ch1[CurrBuffer][0],&Data[Offset[0].H], HLEN+100);
 		/*	DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0].i, &Ch1[PrevBuffer][0].i,COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,0,0));*/
-			DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(4,4,7));
+			DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(7,7,0));
 
-//			DrawHLine(COLOR_R3G3B3(7,7,7), 128+(VLEN/2), 0, HLEN-1);
 /*			GetCh(1,8, CalcBuffer,&Data[0], HLEN+100);
 			Interpolate(HLEN+(FILTER_COEFFS*2),&Ch2[CurrBuffer][0], CalcBuffer,0);
 			DrawSignal(VLEN-128,&Ch2[PrevBuffer][FILTER_COEFFS], &Ch2[CurrBuffer][FILTER_COEFFS],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,7));*/
@@ -338,7 +340,7 @@ void GUI_Main () {
 		
 		}
 		SetKeyFs(); 
-		SetAnalogOffset();
+	//	SetAnalogOffset();
 		SetTriggerLevel();
 		SetLeds();
 		SetVoltagePerDivision();
@@ -371,6 +373,7 @@ void SetLeds(){
 
 void SetTriggerLevel(){
 	static int32_t level = 0;
+	static int32_t schmitt = 2;
 	static int32_t Pulse = 1;
 	static int32_t Prefetch = 64;
 	static uint32_t Trigger = 2;
@@ -386,37 +389,47 @@ void SetTriggerLevel(){
 	if (move != 0){
 		DrawHLine(BG_COLOR,-level+Offset[Ch].V,0,HLEN-1);
 	}
-	/*
-	if ((READ_INT(KEYADDR1) & (1 << BTN_EDGE)) != 0) {
-		Prefetch += move*8; // 8 = Trigger Alignment 8 samples @125MHz 
-		if (Prefetch < 48) 	Prefetch = 48;
-		if (Prefetch > 8192)	Prefetch = 8192;
-		
-	} else if ((READ_INT(KEYADDR1) & (1 << BTN_PULSEWIDTH)) != 0) {
-		Pulse += move;
-		if (Pulse < 0) Pulse = 0;
-		if (Pulse > 100) Pulse = 100;
-	} else {
-		level += move;
-	}*/
 	switch(move){
 		case 3:
 		case -3: move *=4;
 		case 2: 
 		case -2: move *=4; break;
-	} 
-	if (move != 0){
-		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger move = ");
+	}
+	if ((READ_INT(KEYADDR1) & (1 << BTN_EDGE)) != 0) {
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger offset move = ");
+		Prefetch += move*8; // 8 = Trigger Alignment 8 samples @125MHz 
+		if (Prefetch < 48) 	Prefetch = 48;
+		if (Prefetch > 8192)	Prefetch = 8192;
+		
+	} else if ((READ_INT(KEYADDR1) & (1 << BTN_PULSEWIDTH)) != 0) {
+		if (move != 0) {
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger pulswidth move = ");
+		}
+		Pulse += move;
+		if (Pulse < 0) Pulse = 0;
+		if (Pulse > 100) Pulse = 100;
+	} else if ((READ_INT(KEYADDR1) & (1 << BTN_MODECOUPLING)) != 0){
+		schmitt += move;
+		if (schmitt < 1) schmitt = 1;
+	 	if (((level + schmitt) > 127) || ((level - schmitt) < -127)) schmitt -= move;
+		if (move != 0) {	
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger hysteresis move = ");
+		}
+		
+	} else {
+		if (move != 0) {
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger level move = ");
+		}
 		level += move;
 		if (level > 127) level = 127;
 		if (level < -127) level = -127;
+	}
+	 
+	if (move != 0){
 		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'0' + move);
 		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\n');
-		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\0');
+		
 	}
-/*	if ((READ_INT(KEYADDR1) & (1 << BTN_MODECOUPLING)) != 0) {
-		Trigger = (Trigger+1)%MAX_TRIGGER_TYPES;
-	}*/
 	if ((READ_INT(KEYADDR1) & (1 << BTN_CH0)) != 0){
 		move = 1;
 		Ch = 0;
@@ -425,18 +438,22 @@ void SetTriggerLevel(){
 		move = 1;
 		Ch = 1;
 	}
-	Trigger = (READ_INT(LEDADDR) >> EN_F) & 0x7;
-	if (Trigger == 0) {
-		Trigger = 1;
-	}
-	if (Trigger > 4){
-		Trigger = 4;
-	}
-	
 	if (move != 0){
 		DrawHLine(COLOR_R3G3B3(7,7,7),-level+Offset[Ch].V,0,HLEN-1);
 	}
-	SetTrigger(Trigger,0,Ch, Prefetch,level-2,Pulse,level+2,Pulse);
+
+	move = (READ_INT(LEDADDR) >> EN_F) & 0x7;
+	if (move == 0) move = 1;
+	if (move > 4)  move = 4;
+	if (move != Trigger) {
+		Trigger = move;
+		SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"trigger type = ");
+		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'0' + move);
+		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\n');
+	}
+	
+	
+	SetTrigger(Trigger,0,Ch, Prefetch,level-schmitt,Pulse,level+schmitt,Pulse);
 	color = COLOR_R3G3B3(0,Trigger+3,7-Trigger);
 	DrawBox(color,30,470,39,479);
 
@@ -591,7 +608,7 @@ void SetVoltagePerDivision(){
 			SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR," exp ");
 			SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '0' + kc[i]);
 			SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\n');
-			//printf("VDiv %d", Analog[i].myVperDiv);
+			//rprintf("VDiv %d", Analog[i].myVperDiv);
 		}
 
 	}
