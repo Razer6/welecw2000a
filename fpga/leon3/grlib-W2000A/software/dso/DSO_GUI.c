@@ -46,7 +46,7 @@
 
 #define SIGNAL_HSTART 0
 #define SIGNAL_HSTOP  HLEN
-#define BG_COLOR COLOR_R3G3B3(1,1,1)
+#define BG_COLOR COLOR_R3G3B3(0,0,0)
 #define PREFETCH_OFFSET 32
 
 #define SETLED(data, BTN_Bit, LED_Bit) \
@@ -273,12 +273,13 @@ void GUI_Main () {
 	Analog[0].myVperDiv = 10000;
 	Analog[0].AC = 0;
 	Analog[0].Mode = normal;
-	Analog[0].DA_Offset = 16384;
-
+//	Analog[0].DA_Offset = 16384;
+	Analog[0].DA_Offset = 0;
 	Analog[1].myVperDiv = 10000;
 	Analog[1].AC = 1;
 	Analog[1].Mode = normal;
-	Analog[1].DA_Offset = 16384;
+//	Analog[1].DA_Offset = 16384;
+	Analog[1].DA_Offset = 0;
 
 	Offset[0].V = 128;
 	Offset[1].V = VLEN-128;
@@ -336,11 +337,11 @@ void GUI_Main () {
 			GetCh(1,8, &Ch2[CurrBuffer][0],&Data[Offset[1].H], HLEN+100);
 			DrawSignal(Offset[1].V,&Ch2[PrevBuffer][0], &Ch2[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,0));
 
-			WaitMs(50);
+		//	WaitMs(50);
 		
 		}
 		SetKeyFs(); 
-	//	SetAnalogOffset();
+//		SetAnalogOffset();
 		SetTriggerLevel();
 		SetLeds();
 		SetVoltagePerDivision();
@@ -532,18 +533,30 @@ void SetAnalogOffset () {
 	for (i = 0; i < 2; ++i){
 		ROTARYMOVE(move,kc[i],kl[i]);
 		if (move != 0){
-		switch(move){
+			/*switch(move){
 			case 2:
 			case -2: move*=8;
 			case 3:
 			case -3: move*=8;
+			}*/
+		
+		if ((READ_INT(KEYADDR1) & (1 << BTN_CURSORS)) != 0){
+			move*=100;
 		}
 		Analog[i].DA_Offset += move;
-		move = Analog[i].DA_Offset;
+		SetDACOffset(i, Analog[i].DA_Offset);
 	//	SendStringBlock((uart_regs*)GENERIC_UART_BASE_ADDR,"test\n");
-	//	printf("DAC offset of CH%d is %d\n",i+1,move);
+		rprintf("DAC offset of CH%d is %d\n",i+1,Analog[i].DA_Offset);
 		}
 	}
+/*	if ((READ_INT(KEYADDR1) & (1 << BTN_CURSORS)) != 0){
+		Analog[0].DA_Offset+= 1;
+		SetDACOffset(0, Analog[0].DA_Offset);
+	}
+	if ((READ_INT(KEYADDR1) & (1 << BTN_QUICKMEAS)) != 0){
+		Analog[1].DA_Offset+= 1;
+		SetDACOffset(1, Analog[1].DA_Offset);
+	}*/
 }
 
 void SetVoltagePerDivision(){

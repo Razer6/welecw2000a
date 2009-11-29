@@ -51,8 +51,8 @@ typedef enum eSrc2 Src2;
 typedef struct {
 	uint32_t myVperDiv;
 	uint32_t AC;
-	int DA_Offset;
 	uint32_t Specific;
+	uint32_t DA_Offset;
 	Src2 Mode;
 } SetAnalog;
 

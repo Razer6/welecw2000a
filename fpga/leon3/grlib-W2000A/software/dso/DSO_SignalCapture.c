@@ -51,6 +51,9 @@
 #include "rprintf.h"
 #else
 #define rprintf printf
+/* do not add this to DSO_Remote.c or so!*/
+#define SendStringBlock(...)
+#define SendCharBlock(...)
 #endif
 
 
@@ -280,7 +283,7 @@ uint32_t CalibrateDAC(uint32_t Ch){
 	return 0;
 }
 
-uint32_t SetDACOffset(uint32_t Ch, int32_t Offset){
+uint32_t SetDACOffset(uint32_t Ch, uint32_t Offset){
 	int32_t temp;
 	switch(Ch) {
 		case 0: temp = SET_OFFSET_CH0(Offset); break;
@@ -295,7 +298,7 @@ uint32_t SetDACOffset(uint32_t Ch, int32_t Offset){
 /* 12 bit DAC compability with the 16 bit DACs of this familie */
 #define MIN_DAC_COUNT 16
 
-void AddDACOffset(uint32_t Ch, int32_t Offset){
+void AddDACOffset(uint32_t Ch, uint32_t Offset){
 	static int32_t dac[4] = {16384,16384,16384,16384};
 	if ((Ch < 4) && (Offset != 0)){
 		dac[Ch] = dac[Ch] + Offset*MIN_DAC_COUNT;
@@ -390,11 +393,12 @@ uint32_t SetAnalogInputRange(
 		if (Settings[j].AC == 0){
 			bank7 |= 1 << (CH0_DC+j);
 		}
-		if (Settings[j].DA_Offset != 0){
+		if (Settings[j].DA_Offset == 0){
 		//	SetDACOffset(j,Settings[j].DA_Offset);
 			temp = SET_ANALOG(ANC_DAC0) | (0x4F << 16);	
+		} else {
+			SetDACOffset(j,Settings[j].DA_Offset);
 		}
-
 	}
 	switch(NoCh){
 	case 2:	bank5 |= SET_ANALOG(ANC_CH1) | SetVoltageRangeBits(1,Settings);
