@@ -90,6 +90,8 @@ public:
 		uint32_t StartAddr,
 		uint32_t StackAddr);
 
+	virtual uint32_t Debug();
+
 protected:
 	void PrintDesc(uint32_t *Data, uint32_t Length);
 private:

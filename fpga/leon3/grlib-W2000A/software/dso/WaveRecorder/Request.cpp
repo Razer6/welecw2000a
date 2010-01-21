@@ -153,3 +153,9 @@ uint32_t Request::LoadProgram(
 		uint32_t StackAddr){
 	return FALSE;
 }
+
+uint32_t Request::Debug(){
+	return FALSE;
+}
+
+

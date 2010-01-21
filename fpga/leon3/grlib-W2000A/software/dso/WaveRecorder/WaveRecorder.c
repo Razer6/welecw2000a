@@ -85,7 +85,7 @@ int main(int argc, char * argv[]) {
 	struct arg_str * UartAddr	= arg_str1("u", "UART", NULL, "Path of serial device, always necessary!");
 	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
-			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs | LoadRun | Message]", 
+			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs | LoadRun | DumpPC | Message]", 
 			"DSO call type, always necessary!");
 	struct arg_str * Trigger	= arg_str0(NULL,"TrType","[ExtLH | ExtHL | SchmittLH | SchmittHL | GlitchLH | GlitchHL]","Trigger type");
 	struct arg_int * ExtTrigger = arg_int0(NULL,"ExtTrigger","<n>", "External trigger, #0 = always, #1 = external trigger 1, #n = external trigger n");
@@ -205,6 +205,12 @@ int main(int argc, char * argv[]) {
 			Stack);
 		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
+        
+	if (strcmp("Debug",Command->sval[0]) == 0){
+		int32_t Ret = DSOInterface->Debug();
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+	}
+
 	if (strcmp("TriggerInput",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,AACFilterStart,AACFilterEnd,

@@ -91,6 +91,9 @@ public:
 		uint32_t StartAddr,
 		uint32_t StackAddr);
 
+	virtual uint32_t Debug();
+
+
 private:
 	/* return retrys */
 	uint32_t SendRetry(
@@ -103,15 +106,15 @@ private:
 		uint32_t * data,
 		uint32_t & length);
 
+	void PrintTraps();  
+        void PrintBackTrace(); 
+
 	uint32_t FastMode(	const uint32_t SamplingFrequncy, 
 			const uint32_t CPUFrequency);
 	uint32_t IsFastMode();
 
-	int Capture(
-		const uint32_t WaitTime, /* just a integer */
-		uint32_t CaptureSize,    /* size in DWORDs*/
-		uint32_t * RawData);
-   uint32_t AddrData[2];
+
+	uint32_t AddrData[2];
    uint32_t Send(uint32_t Addr, uint32_t Data);
    uint32_t Send(uint32_t Addr, uint32_t *Data, uint32_t & Length);
    uint32_t Receive(uint32_t Addr);

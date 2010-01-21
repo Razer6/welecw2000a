@@ -36,8 +36,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef	WINNT
-#include	<unistd.h>
+#ifdef	WINNT
+#include "Windows.h"
+#else
+#include <unistd.h>
+#include <syscall.h> 
 #endif
 #include "DSO_SFR.h"
 #include "LEON3_DSU.h"
@@ -138,16 +141,14 @@ uint32_t RemoteSignalCapture::SendAnalogInput(
 			Settings);
 }
 
+/*
 int RemoteSignalCapture::Capture(
-		const uint32_t WaitTime, /* just a integer */
-		uint32_t CaptureSize,    /* size in DWORDs*/
+		const uint32_t WaitTime, // just a integer 
+		uint32_t CaptureSize,    // size in DWORDs
 		uint32_t * RawData) 
 {
-	return FastCapture(
-			WaitTime, /* just a integer */
-			CaptureSize,    /* size in DWORDs*/
-			RawData);
-}
+	return FastCapture(WaitTime, CaptureSize, RawData);
+}*/
 
 /* returns read DWORDS*/
 uint32_t RemoteSignalCapture::ReceiveSamples(
@@ -379,7 +380,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	Send(DSU_CTL,data);
 	printf("Disable all IRQs\n");
 	Send((uint32_t)&lr->irqmask,0);	/* mask all interrupts */
-    Send((uint32_t)&lr->irqlevel,0);	/* clear level reg */
+	Send((uint32_t)&lr->irqlevel,0);	/* clear level reg */
 	Send((uint32_t)&lr->irqforce,0);
 	Send((uint32_t)&lr->irqclear,-1);	/* clear all pending interrupts */
 	printf("Setting the console uart in loop back mode\n");
@@ -419,3 +420,95 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	return TRUE;
 }
 
+uint32_t RemoteSignalCapture::Debug() {
+	uint32_t data = 0;
+	uint32_t read = 0;
+	uint32_t running = FALSE;
+	read = mComm->Receive(DSU_CTL,&data,1);
+	if (read == 0){
+		printf("Target does not respond!\n");
+		return FALSE;
+	}
+
+	printf("DSU_CTL:      0x%08x\n",data);
+
+	if (data & (1 << DSU_PE) != 0) {
+		printf("LEON3s are in error mode! \n");
+	} else if (data & (1 << DSU_HL) != 0) {
+		printf("LEON3s are in halt mode! \n");
+	} else {
+		printf("Stopping all Leon3s for the backtrace output!\n");
+		Send(DSU_SINGLESTEP,0xFFFF); // debug break for all LEON3s 
+		running = TRUE;
+	}
+
+	PrintTraps();
+	PrintBackTrace();
+
+	if (running == TRUE) {
+		Send(DSU_SINGLESTEP,0x0); 
+		printf("Release Leon3 from single step debugging\n");
+	}
+	return TRUE;		
+}
+
+void RemoteSignalCapture::PrintTraps() {
+	uint32_t data = 0;
+	uint32_t read = 0;
+	read = mComm->Receive(DSU_REG_TRAP,&data,1);
+        printf("DSU_REG_TRAP: 0x%08x\n",data);
+
+}
+
+void RemoteSignalCapture::PrintBackTrace() {
+	uint32_t addr = 0;
+	uint32_t data = 0;
+	uint32_t read = 0;
+	uint32_t curr_addr = 0;
+	uint32_t prev_addr = 0;
+	char grep[80];
+/*
+	printf("Programm counter history\n");
+ 	addr = DSU_ITRACE_BASE; 
+	
+	while (addr < (DSU_ITRACE_BASE + ITRACE_SIZE)){
+		read = mComm->Receive(addr + ITRACE_ADDR_OFFS,&data,1);
+		curr_addr = data & ITRACE_ADDR_MASK;
+#ifdef WINNT
+		sprintf(grep,"grep \"^%08x\" W.S\n",curr_addr);
+		system(grep);
+#else
+		sprintf(grep,"%08x",curr_addr);
+		puts(grep);
+		execl("grep",grep, "W.S");
+#endif
+		addr = addr + ITRACE_ITEM_SIZE;
+	}
+*/
+        printf("Programm counter jump history\n");
+	addr = DSU_ITRACE_BASE; 
+	
+	while (addr < (DSU_ITRACE_BASE + ITRACE_SIZE)){
+		prev_addr = curr_addr;
+		read = mComm->Receive(addr + ITRACE_ADDR_OFFS,&data,1);
+		//printf("Reading from addr 0x%08x \n", addr);
+		curr_addr = data & ITRACE_ADDR_MASK;
+		if (addr == DSU_ITRACE_BASE) {
+			printf("PC: 0x%08x \n",curr_addr); 
+		} else {
+			if ((curr_addr != prev_addr) && (curr_addr != (prev_addr +4))) {
+				printf("PC: 0x%08x =>  0x%08x ", prev_addr, curr_addr);
+			
+				if (data & ITRACE_TRAP_MASK) {
+					printf("TRAPPED ");
+				}
+				if (data & ITRACE_ERROR_MASK) {
+					printf("Break on Error\n");
+				} else {
+					printf("\n");
+				}
+			}
+		}
+		addr = addr + ITRACE_ITEM_SIZE;
+	}
+}

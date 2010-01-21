@@ -37,22 +37,23 @@
 
 #include "DSO_Main.h"
 
-#define DSUSIZE        0x1000000
-#define DSU_CTL        (DSU_BASE_ADDR+ 0x000)
-#define DSU_TIME_TAG   (DSU_BASE_ADDR+ 0x008)
-#define DSU_SINGLESTEP (DSU_BASE_ADDR+ 0x020)
-#define DSU_DBGMODE    (DSU_BASE_ADDR+ 0x024)
-#define DSU_ERRMODE    (DSU_BASE_ADDR+ 0x200)
-#define DSU_REGFILE    (DSU_BASE_ADDR+ 0x300000)
-#define DSU_REG_Y      (DSU_BASE_ADDR+ 0x400000)
-#define DSU_REG_PSR    (DSU_BASE_ADDR+ 0x400004)
-#define DSU_REG_WIM    (DSU_BASE_ADDR+ 0x400008)
-#define DSU_REG_TBR    (DSU_BASE_ADDR+ 0x40000C)
-#define DSU_REG_PC     (DSU_BASE_ADDR+ 0x400010)
-#define DSU_REG_NPC    (DSU_BASE_ADDR+ 0x400014)
-#define DSU_REG_TRAP   (DSU_BASE_ADDR+ 0x400020)
-#define DSU_REG_ASI    (DSU_BASE_ADDR+ 0x400024)
-#define DSU_ASI_BASE   (DSU_BASE_ADDR+ 0x700000)
+#define DSUSIZE         0x1000000
+#define DSU_CTL         (DSU_BASE_ADDR+ 0x000)
+#define DSU_TIME_TAG    (DSU_BASE_ADDR+ 0x008)
+#define DSU_SINGLESTEP  (DSU_BASE_ADDR+ 0x020)
+#define DSU_DBGMODE     (DSU_BASE_ADDR+ 0x024)
+#define DSU_ERRMODE     (DSU_BASE_ADDR+ 0x200)
+#define DSU_ITRACE_BASE (DSU_BASE_ADDR+ 0x100000)
+#define DSU_REGFILE     (DSU_BASE_ADDR+ 0x300000)
+#define DSU_REG_Y       (DSU_BASE_ADDR+ 0x400000)
+#define DSU_REG_PSR     (DSU_BASE_ADDR+ 0x400004)
+#define DSU_REG_WIM     (DSU_BASE_ADDR+ 0x400008)
+#define DSU_REG_TBR     (DSU_BASE_ADDR+ 0x40000C)
+#define DSU_REG_PC      (DSU_BASE_ADDR+ 0x400010)
+#define DSU_REG_NPC     (DSU_BASE_ADDR+ 0x400014)
+#define DSU_REG_TRAP    (DSU_BASE_ADDR+ 0x400020)
+#define DSU_REG_ASI     (DSU_BASE_ADDR+ 0x400024)
+#define DSU_ASI_BASE    (DSU_BASE_ADDR+ 0x700000)
 
 /* DSU_CTL */
 #define DSU_DEBUGMODE  (1 << 6)
@@ -64,6 +65,19 @@
 
 /* DSU_PE Write 1 to it and it clears the error and starts the CPU */
 /* DSU_HL Write 1 to it and it stops the CPU */
+
+/* DSU_ITRACE_BASE(DSU_BASE_ADDR+ 0x100000) */
+#define ITRACE_SIZE         0x400
+#define ITRACE_ITEM_SIZE    (4*4)
+#define ITRACE_OPCODE_OFFS  (3*4)
+
+#define ITRACE_ADDR_OFFS    (2*4)
+#define ITRACE_TRAP_MASK    (1 << 1)
+#define ITRACE_ERROR_MASK   (1 << 0)
+#define ITRACE_ADDR_MASK   (~(ITRACE_TRAP_MASK | ITRACE_ERROR_MASK))
+
+#define ITRACE_ARG_OFFS     (1*4)
+#define ITRACE_TIMETAG_OFFS (0*4) 
 
 /* DSU_REGFILE */
 #define NWINDOWS        8
