@@ -478,10 +478,58 @@ uint32_t RemoteSignalCapture::Debug() {
 
 void RemoteSignalCapture::PrintTraps() {
 	uint32_t data = 0;
-	uint32_t read = 0;
-	read = mComm->Receive(DSU_REG_TRAP,&data,1);
-        printf("DSU_REG_TRAP: 0x%08x\n",data);
+	uint32_t sparc = 0;
+	mComm->Receive(DSU_REG_TRAP,&data,1);
+	sparc = (data>> 4) & 0xff;
+        printf("DSU_REG_TRAP: 0x%08x => Sparc trap 0x%x ",data, sparc);
+	switch(sparc){
 
+	case 0x2B: printf("data_store_error \n"); break;
+	case 0x3C: printf("instruction_access_MMU_miss \n"); break;
+	case 0x21: printf("instruction_access_error \n"); break;
+	case 0x20: printf("r_register_access_error \n"); break;
+	case 0x01: printf("instruction_access_exception \n"); break;
+	case 0x03: printf("privileged_instruction \n"); break;
+	case 0x02: printf("illegal_instruction \n"); break;
+	case 0x04: printf("fp_disabled \n"); break;
+	case 0x24: printf("cp_disabled \n"); break;
+	case 0x25: printf("unimplemented_FLUSH \n"); break;
+	case 0x0B: printf("watchpoint_detected \n"); break;
+	case 0x05: printf("window_overflow \n"); break;
+	case 0x06: printf("window_underflow \n"); break;
+	case 0x07: printf("mem_address_not_aligned \n"); break;
+	case 0x08: printf("fp_exception \n"); break;
+	case 0x28: printf("cp_exception \n"); break;
+	case 0x29: printf("data_access_error \n"); break;
+	case 0x2C: printf("data_access_MMU_miss \n"); break;
+	case 0x09: printf("data_access_exception \n"); break;
+	case 0x0A: printf("tag_overflow \n"); break;
+	case 0x2A: printf("division_by_zero \n"); break;
+
+	case 0x1F: printf("interrupt_level_15 \n"); break;
+	case 0x1E: printf("interrupt_level_14 \n"); break;
+	case 0x1D: printf("interrupt_level_13 \n"); break;
+	case 0x1C: printf("interrupt_level_12 \n"); break;
+	case 0x1B: printf("interrupt_level_11 \n"); break;
+	case 0x1A: printf("interrupt_level_10 \n"); break;
+	case 0x19: printf("interrupt_level_9 \n"); break;
+	case 0x18: printf("interrupt_level_8 \n"); break;
+	case 0x17: printf("interrupt_level_7 \n"); break;
+	case 0x16: printf("interrupt_level_6 \n"); break;
+	case 0x15: printf("interrupt_level_5 \n"); break;
+	case 0x14: printf("interrupt_level_4 \n"); break;
+	case 0x13: printf("interrupt_level_3 \n"); break;
+	case 0x12: printf("interrupt_level_2 \n"); break;
+	case 0x11: printf("interrupt_level_1 \n"); break;
+	default : 
+	if (sparc >= 0x80){
+		printf("trap_instruction \n"); break;
+	}
+	if (sparc >= 0x60) {
+		printf("impl.-dependent exception \n"); break;		
+	}
+	printf("Unknown exception \n");
+	}
 }
 
 void RemoteSignalCapture::PrintBackTrace() {
