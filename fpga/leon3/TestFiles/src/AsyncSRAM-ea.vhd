@@ -32,6 +32,8 @@
 -------------------------------------------------------------------------------
 
 
+library std;
+use std.textio.all;
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -56,7 +58,7 @@ architecture RTL of AsyncSRam is
   type aRam is array (0 to 2**gAddrWidth-1) of integer;
   type aFileHandle is file of character;
 
-  function ReadDword(file Handle : aFileHandle) return integer is
+  impure function ReadDword(file Handle : aFileHandle) return integer is
     variable Ret : integer := 0;
     variable ch  : character;
   begin
@@ -69,7 +71,7 @@ architecture RTL of AsyncSRam is
     return Ret;
   end;
 
-  function ReadREDword(file Handle : aFileHandle) return integer is
+  impure function ReadREDword(file Handle : aFileHandle) return integer is
     variable Ret : integer := 0;
     variable ch  : character;
   begin
@@ -82,7 +84,7 @@ architecture RTL of AsyncSRam is
     return Ret;
   end;
 
-  function Init(constant cFileName : string) return aRam is
+  impure function Init(constant cFileName : string) return aRam is
     variable Ret    : aRam;
     variable Status : file_open_status;
     variable i      : natural := 0;
@@ -95,12 +97,12 @@ architecture RTL of AsyncSRam is
     end if;
     report "AsyncRAM File " & cFileName & " opened!" severity note;
     if gReverseEndian = true then
-      while endfile(Handle) = false loop
+      while endfile(Handle) = false and i < aRam'length loop
         Ret(i) := ReadREDword(Handle);
         i      := i+1;
       end loop;
     else
-      while endfile(Handle) = false loop
+      while endfile(Handle) = false and i < aRam'length loop
         Ret(i) := ReadDword(Handle);
         i      := i+1;
       end loop;

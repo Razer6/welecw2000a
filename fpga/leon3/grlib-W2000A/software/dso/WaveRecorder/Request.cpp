@@ -143,6 +143,13 @@ void Request::PrintSFR(){
 	}*/
 }
 
+uint32_t Request::Receive(
+		uint32_t addr,
+		uint32_t size){
+	return FALSE;
+}
+
+
 void Request::PrintDesc(uint32_t *Data, uint32_t Length){
 	
 }

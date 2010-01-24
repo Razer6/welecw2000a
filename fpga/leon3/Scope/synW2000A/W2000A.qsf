@@ -27,7 +27,7 @@ set_global_assignment -name DEVICE EP2C35F484C8
 set_global_assignment -name TOP_LEVEL_ENTITY leon3mini
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "7.1 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:07:45  MAY 15, 2008"
-set_global_assignment -name LAST_QUARTUS_VERSION 9.0
+set_global_assignment -name LAST_QUARTUS_VERSION 9.1
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
 #set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED WITH WEAK PULL-UP"
@@ -138,7 +138,6 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_COLOR 14622752 -section_id Top
 set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
 set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC1CLK
 set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC2CLK
 set_instance_assignment -name CLOCK_SETTINGS 250 -to oADC3CLK
@@ -688,9 +687,9 @@ set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalSelector-ea
 set_global_assignment -name VHDL_FILE "../../SignalCapture/src/ADC-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalCapture-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../VGA/src/VGA-p.vhd"
-set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-p.vhd"
-set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-ea.vhd"
-set_global_assignment -name VHDL_FILE "../../VGA/src/SimpleVGA-ea.vhd"
+#set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-p.vhd"
+#set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../VGA/src/PlaneVGActl-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../CPU/src/SpecialFunctionRegister-p.vhd"
 set_global_assignment -name VHDL_FILE "../../CPU/src/SpecialFunctionRegister-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SFR-p.vhd"
@@ -713,3 +712,7 @@ set_global_assignment -name AUTO_PACKED_REGISTERS_MAXII NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_CYCLONE NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS NORMAL
 set_global_assignment -name AUTO_PACKED_REGISTERS_STRATIX NORMAL
+
+
+set_global_assignment -name CDF_FILE ../../welec/SF/Scope/synW2000A/Chain1.cdf
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

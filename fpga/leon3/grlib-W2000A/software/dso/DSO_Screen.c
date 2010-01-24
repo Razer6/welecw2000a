@@ -5,7 +5,10 @@
 * Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 02.07.2009
 *****************************************************************************
-* Description	 : 
+* Description	 : This screen driver does not support the original svgactrl 
+*                  from Gaisler Research any more. It is an driver to the 
+*                  8 bit plane buffer VGA. At the moment a byte contains 
+*                  a bit for every plane (pixel)!
 *****************************************************************************
 
 *  Copyright (c) 2009, Alexander Lindert
@@ -46,21 +49,14 @@
 #define VGA_SYNC_LENGTH_ADDR      (VGA_CONFIG_BASE_ADDR + 0x0C)
 #define VGA_LINE_LENGHT_ADDR      (VGA_CONFIG_BASE_ADDR + 0x10)
 #define VGA_FRAMEBUFFER_BASEADDR  (VGA_CONFIG_BASE_ADDR + 0x14)
-#define VGA_CLOCK0_ADDR           (VGA_CONFIG_BASE_ADDR + 0x18)
-#define VGA_CLOCK1_ADDR           (VGA_CONFIG_BASE_ADDR + 0x1C)
-#define VGA_CLOCK2_ADDR           (VGA_CONFIG_BASE_ADDR + 0x20)
-#define VGA_CLOCK3_ADDR           (VGA_CONFIG_BASE_ADDR + 0x24)
-#define VGA_GLUT_REG              (VGA_CONFIG_BASE_ADDR + 0x28)
+#define VGA_COLOR0_ADDR           (VGA_CONFIG_BASE_ADDR + 0x18)
+#define VGA_COLOR1_ADDR           (VGA_CONFIG_BASE_ADDR + 0x1C)
 
 /* VGA_STATUS_ADDR */
 #define VGA_ENABLE_BIT           0
 #define VGA_RESET_BIT            1
 #define VGA_VERTICAL_REFRESH_BIT 2
 #define VGA_RUN_BIT              3
-#define VGA_PIXELSIZE0_BIT       4
-#define VGA_PIXELSIZE1_BIT       5
-#define VGA_CLOCKSEL0_BIT        6
-#define VGA_CLOCKSEL1_BIT        7
 #define VGA_H_POL_BIT            8
 #define VGA_V_POL_BIT            9
 
@@ -74,19 +70,6 @@
 
 /* VGA_FRAMEBUFFER_BASEADDR (1 kB boundary) */
 #define VGA_BASE_ADDR_MASK 0x3ff
-
-/* VGA_CLOCK0_ADDR */
-/* VGA_CLOCK1_ADDR */
-/* VGA_CLOCK2_ADDR */
-/* VGA_CLOCK3_ADDR */
-/* Clock length in pico seconds */
-
-/* VGA_GLUT_REG    */
-/* Color lookup Table! */
-#define CONFIG_BLUE_OFFSET   0
-#define CONFIG_GREEN_OFFSET  8
-#define CONFIG_RED_OFFSET   16
-#define CONFIG_CLUT_OFFSET  24
 
 
 /* VGA Resulotion */
@@ -114,11 +97,8 @@ typedef struct {
 	volatile uint32_t sync_length;
 	volatile uint32_t line_length;
 	volatile uint32_t framebuffer_pointer;
-	volatile uint32_t clock0;
-	volatile uint32_t clock1;
-	volatile uint32_t clock2;
-	volatile uint32_t clock3;
-	volatile uint32_t glut;
+	volatile uint32_t color0;
+	volatile uint32_t color1;
 } volatile aVGA_Config;
 
 static volatile aVGA_Config VGA_Config;
@@ -126,8 +106,8 @@ static volatile aVGA_Config VGA_Config;
 /* The frame buffer has a 1024 byte alignment */
 /* Until it is not known how to set the alignment with the compiler
  * we wast here 1024 bytes */
-uint16_t Framebuffer[HLEN*VLEN+512];
-uint16_t * FramePointer;
+color_t Framebuffer[HLEN*VLEN] __attribute__ ((aligned (1024)));
+color_t * FramePointer;
 
 uint32_t * InitDisplay (uint32_t Target){
 /*	printf("InitDisplay\n");*/
@@ -138,15 +118,7 @@ uint32_t * InitDisplay (uint32_t Target){
 		case WELEC2014:
 		case WELEC2022:
 		case WELEC2024:
-/*			FramePointer = (uint16_t *)malloc(HLEN*VLEN*sizeof(uint16_t)+1024);
-			temp = (int32_t)FramePointer;*/
-			temp = (uint32_t)Framebuffer;
-			temp &= ~0x3ff; /* alignment part 1 */
-			temp += 1024; /* alignment part 2 */
-			
-			FramePointer = (uint16_t * )temp;
-/*			FramePointer = (unsigned char *) SVGA_BUFFER_BASE; */
-/*			printf("FramePointer %d %x ",FramePointer,FramePointer); */ 
+			FramePointer = Framebuffer;
 			VGA_Config = (aVGA_Config*)VGA_CONFIG_BASE_ADDR;
 /*			VGA_Config->status = 
 				( (1 << VGA_ENABLE_BIT)     | (1 << VGA_RUN_BIT)
@@ -161,53 +133,108 @@ uint32_t * InitDisplay (uint32_t Target){
 			VGA_Config->line_length =
 				((HLEN+HFRONT+HSYNC+HBACK) << H_OFFSET) | ((VLEN+VFRONT+VSYNC+VBACK) << V_OFFSET);
 			VGA_Config->framebuffer_pointer = (uint32_t) FramePointer;
-			VGA_Config->clock0 = 40000;
-			VGA_Config->clock1 = 40000;
-			VGA_Config->clock2 = 40000;
-			VGA_Config->clock3 = 40000;
-			/* the vga must be set to 16 bit, because otherwise only a character rom is used */
+			VGA_Config->color0 = 0;
+			VGA_Config->color1 = 0;
+			
 			VGA_Config->status = 
 				( (1 << VGA_ENABLE_BIT)     | (1 << VGA_RUN_BIT)
-				| (2 << VGA_PIXELSIZE0_BIT) | (0 << VGA_CLOCKSEL0_BIT)
+			/*	| (2 << VGA_PIXELSIZE0_BIT) | (0 << VGA_CLOCKSEL0_BIT)*/
 				| (0 << VGA_H_POL_BIT)      | (0 << VGA_V_POL_BIT));
-		/*	temp -= 0x20000000;*/ /* uncached SRAM mirror */
-			FramePointer = (uint16_t * )temp;
+			temp = (uint32_t)Framebuffer;
+			temp -= 0x20000000; /* uncached SRAM mirror */
+			FramePointer = (uSample * )temp;
+		//	FramePointer = Framebuffer;
 			return 0;
 			break;
 		default:
 			break;
 	}
 	return 0;
-
 }
 
-void DrawPoint(uint16_t Color, uint32_t H, uint32_t V){
-	FramePointer[V*HLEN+H] = Color;
+void SetColor(uint8_t Plane, uint8_t Color){
+	uint32_t table = 0;
+	if (Plane < 4){
+		table = READ_INT(VGA_COLOR0_ADDR);
+		table &= ~(0xff << (Plane*8));
+		table |= (Color << (Plane*8));
+		WRITE_INT(VGA_COLOR0_ADDR,table);
+		return;
+	}	
+//	if (Plane < 8){
+		Plane-=4;
+		table = READ_INT(VGA_COLOR1_ADDR);
+		table &= ~(0xff << (Plane*8));
+		table |= (Color << (Plane*8));
+		WRITE_INT(VGA_COLOR1_ADDR,table);
+//	}
+}
+
+//#define SET_POINT(H,V) FramePointer[V*HLEN + (H >> 2)].c[H & 3] |= Color
+
+//#define CLR_POINT(H,V) FramePointer[V*HLEN + (H >> 2)].c[H & 3] &= Color
+
+void SetPoint(color_t Color, uint32_t H, uint32_t V){
+//	SET_POINT(H,V); 
+	FramePointer[V*HLEN+H] |= Color;
+}
+void ClrPoint(color_t Color, uint32_t H, uint32_t V){
+//	CLR_POINT(H,V); 
+	FramePointer[V*HLEN+H] &= ~Color;
 }
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawHLine(uint16_t Color, uint32_t V, uint32_t H1, uint32_t H2){
+void SetHLine(color_t Color, uint32_t V, uint32_t H1, uint32_t H2){
 	register uint32_t i = 0;
 	uint32_t End = V*HLEN + H2;
 	for (i = V*HLEN+H1; i <= End; ++i){
-		FramePointer[i] = Color;
+//		SET_POINT(0,i); 
+		FramePointer[i] |= Color;
 	}
 }
 
+void ClrHLine(color_t Color, uint32_t V, uint32_t H1, uint32_t H2){
+	register uint32_t i = 0;
+	uint32_t End = V*HLEN + H2;
+	for (i = V*HLEN+H1; i <= End; ++i){
+//		CLR_POINT(0,i);
+		FramePointer[i] &= ~Color;
+	}
+}
+
+
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2){
+void SetVLine(color_t Color, uint32_t H, uint32_t V1, uint32_t V2){
 	register uint32_t i = 0;
 	uint32_t End = V2*HLEN + H;
 	for (i = V1*HLEN+H; i <= End; i+= HLEN){
-		FramePointer[i] = Color;
+//		SET_POINT(0,i); 
+		FramePointer[i] |= Color;
 	}
 }
 
+void ClrVLine(color_t Color, uint32_t H, uint32_t V1, uint32_t V2){
+	register uint32_t i = 0;
+	uint32_t End = V2*HLEN + H;
+	for (i = V1*HLEN+H; i <= End; i+= HLEN){
+//		CLR_POINT(0,i);
+		Framebuffer[i] &= ~Color;
+	}
+}
+
+
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawBox(uint16_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
+void SetBox(color_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
 	register uint32_t i = V1;
 	for(i = V1; i <= V2; ++i){
-		DrawHLine(Color,i,H1,H2);
+		SetHLine(Color,i,H1,H2);
+	}
+}
+
+void ClrBox(color_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
+	register uint32_t i = V1;
+	for(i = V1; i <= V2; ++i){
+		ClrHLine(Color,i,H1,H2);
 	}
 }
 
@@ -219,56 +246,62 @@ void DrawCopyHLine(uint32_t Vsrc, uint32_t Vdst) {
 		dst32[i] = src32[i];
 	}
 }
+
 void DrawCopyVLine(uint32_t Hsrc, uint32_t Hdst) {
-	register uint16_t * src = (uint16_t*)&FramePointer[Hsrc];
-	register uint16_t * dst = (uint16_t*)&FramePointer[Hdst];
-	register uint16_t i = 0;
+	register color_t * src = (color_t*)&FramePointer[Hsrc];
+	register color_t * dst = (color_t*)&FramePointer[Hdst];
+	register color_t i = 0;
 	for (i = 0; i < (VLEN*HLEN); i+= HLEN){
 		dst[i] = src[i];
 	}
 }
 
+#include "DSO_SFR.h"
 
 void DrawTest(void){
 	uint32_t h,v;
-	uint16_t dark = 0;
-	uint32_t c = 0;
-	uint16_t col = 0;
-	uint32_t pixel = 0;
-	DrawBox(0,0,0,HLEN-1,VLEN-1);
-/*	DrawHLine(-1,0,0,20);*/
-/*	DrawBox(0xAA,270,190,370,290);*/
-	DrawHLine(0x55,0,0,HLEN-1);
-	DrawHLine(0x55,VLEN-1,0,HLEN-1);
-	DrawVLine(0x55,0,0,VLEN-1); 
-	DrawVLine(0x55,HLEN-1,0,VLEN-1);
-	WaitMs(100);
+	color_t hp, vp = 0;    
 	
-	for (h = 0; h < HLEN; ++h) {
-		pixel++;
-		if (pixel == 10){
-			pixel = 0;
-			dark++;
+	SetColor(0,COLOR_L2R2G2B2(0,0,0,2));
+	SetColor(1,COLOR_L2R2G2B2(0,0,2,0));
+	SetColor(2,COLOR_L2R2G2B2(0,2,0,0));
+	SetColor(3,COLOR_L2R2G2B2(2,0,0,0));
+	SetColor(4,COLOR_L2R2G2B2(2,3,3,3));
+	SetColor(4,0xff);
+	SetColor(5,COLOR_L2R2G2B2(0,2,2,2));
+	SetColor(6,COLOR_L2R2G2B2(0,2,0,0));
+	SetColor(7,COLOR_L2R2G2B2(0,0,2,1));
+
+	WRITE_INT(LEDADDR,0xf);
+	ClrBox(0xff,0,0,HLEN-1,VLEN-1);
+
+	SetHLine(PLANE4,0,0,HLEN-1);
+	SetHLine(PLANE4,VLEN-1,0,HLEN-1);
+	SetVLine(PLANE4,0,0,VLEN-1); 
+	SetVLine(PLANE4,HLEN-1,0,VLEN-1);
+
+	SetHLine(PLANE4,5,5,HLEN-6);
+	SetHLine(PLANE4,VLEN-6,5,HLEN-6);
+	SetVLine(PLANE4,5,5,VLEN-6); 
+	SetVLine(PLANE4,HLEN-5,5,VLEN-5);
+
+
+	SetHLine(PLANE5,400,0,HLEN-1);
+	SetVLine(PLANE5,400,0,VLEN-1);
+
+	vp = PLANE0;
+	for (v = 0; v < 256; ++v) {
+		hp = PLANE0;
+		for (h = 0; h < 256; h+=32) {
+			SetHLine(hp|vp,v,h,h+31);
+			hp = hp << 1;
 		}
-		if (dark == 16) {
-			c++;
-			dark = 0;
+		if ((v % 32 == 0) && (v != 0)) {
+			vp = vp << 1;
 		}
-		if (c == 4) {
-			c = 0;
-		}
-		col = 0;
-		switch (c) {
-			case	0: col = (dark << 1); break;
-			case	1: col = (dark << 7); break;
-			case	2: col = (dark << 12); break;
-			case    3: col = (dark << 1) | (dark << 7) | (dark << 12); break;
-		}
-		DrawPoint(col,h,0);
 	}
-	for (v = 1; v < VLEN; ++v) {
-		DrawCopyHLine(v-1,v);
-	}
+	WaitMs(1000);
+	while((READ_INT(KEYADDR1) & (1 << BTN_RUNSTOP)) == 0); 
 }
 
 #endif

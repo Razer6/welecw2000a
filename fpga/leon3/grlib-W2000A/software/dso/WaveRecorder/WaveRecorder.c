@@ -85,7 +85,7 @@ int main(int argc, char * argv[]) {
 	struct arg_str * UartAddr	= arg_str1("u", "UART", NULL, "Path of serial device, always necessary!");
 	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
-			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadRegs | LoadRun | DumpPC | Message]", 
+			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadAddr | WriteAddr | LoadRun | DumpPC | Message]", 
 			"DSO call type, always necessary!");
 	struct arg_str * Trigger	= arg_str0(NULL,"TrType","[ExtLH | ExtHL | SchmittLH | SchmittHL | GlitchLH | GlitchHL]","Trigger type");
 	struct arg_int * ExtTrigger = arg_int0(NULL,"ExtTrigger","<n>", "External trigger, #0 = always, #1 = external trigger 1, #n = external trigger n");
@@ -121,7 +121,7 @@ int main(int argc, char * argv[]) {
 	struct arg_int * AnDA_OffsetCh2	= arg_int0(NULL,"An_OffCh3", 	"<n>",	"Analog offset Ch3 (integer!)"); 
 	struct arg_int * AnDA_OffsetCh3	= arg_int0(NULL,"An_OffCh4", 	"<n>",	"Analog offset Ch4 (integer!)"); 
 	struct arg_int * AnPWM 		= arg_int0(NULL,"An_Offset2",	"<n>",	"Analog offset from PWM"); 
-	struct arg_int * ForceAddr	= arg_int0(NULL,"Faddr",	"<n>",	"DSO CPU address of data (software base address)"); 
+	struct arg_str * ForceAddr	= arg_str0(NULL,"Faddr",	"",	"DSO CPU address of data (software base address)"); 
 	struct arg_int * StackAddr	= arg_int0(NULL,"Stack",	"<n>",	"Stack address of the CPU"); 
 	struct arg_int * CapWTime	= arg_int0(NULL,"CapWaitTime",	"<n>",	"Abourt time, before recording"); 
 	struct arg_int * CapSize	= arg_int0(NULL,"CapSize",	"<n>",	"Capture data size in Dwords"); 
@@ -153,17 +153,19 @@ int main(int argc, char * argv[]) {
 	if (help->count != 0){
 		arg_print_glossary(stdout,argtable,0);
 		printf("\n");
+		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 0;
 	}
 	if (version->count != 0){
-		printf("Version 0.0.2 (development stage)\n Author: Alexander Lindert\n"
+		printf("Version 0.1.0 (development stage)\n Author: Alexander Lindert\n"
 			"Remote Control for Open Source Digital Storage Scopes\n");
+		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 0;
 	}
 	if (nerrors != 0) {
 		arg_print_errors(stdout,end,argv[0]);
-		arg_print_syntax(stdout,argtable,"");
-		printf("\n");
+	//	arg_print_syntax(stdout,argtable,"");
+		printf("Failed: Try option -h or --help for a detailed help information!\n");
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 1;
 	}	
@@ -184,13 +186,15 @@ int main(int argc, char * argv[]) {
 		printf("%s:%d\n",__FILE__,__LINE__);
 		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
+
 	if (strcmp("LoadRun",Command->sval[0]) == 0){
 		uint32_t BaseAddr = RAM_BASE_ADDR;
 		uint32_t Stack = RAM_BASE_ADDR + RAM_SIZE -0x80;
 		struct arg_int * IsOnce[] = {(arg_int*)ForceFile};
 		int32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (ForceAddr->count == 1){
-			BaseAddr = ForceAddr->ival[0];
+			//BaseAddr = ForceAddr->ival[0];
+			printf("Ignorig user FAddr\n");
 		}
 		if (StackAddr->count == 1){
 			Stack = StackAddr->ival[0];
@@ -209,6 +213,29 @@ int main(int argc, char * argv[]) {
 	if (strcmp("Debug",Command->sval[0]) == 0){
 		int32_t Ret = DSOInterface->Debug();
 		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+	}
+	if (strcmp("ReadAddr",Command->sval[0]) == 0) {
+		struct arg_int * IsOnce[] = {(arg_int*)ForceAddr, CapSize};
+		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		uint32_t addr = 0;
+		if (Ret == FALSE) {
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		}
+		addr = strlen(ForceAddr->sval[0]);
+		if (addr > 2){
+			if (ForceAddr->sval[0][1] == 'x'){
+				sscanf(ForceAddr->sval[0], "%x",&addr);
+				//addr = atohex(ForceAddr->sval[0]);
+			} else {
+				addr = atoi(ForceAddr->sval[0]);
+			}
+		}
+		DSOInterface->Receive(
+			addr,
+			CapSize->ival[0]);
+		if (Ret == FALSE) {
+			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		}	
 	}
 
 	if (strcmp("TriggerInput",Command->sval[0]) == 0){

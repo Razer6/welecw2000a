@@ -179,7 +179,7 @@ int main () {
 	/* This is a workaround to share the serial port with the debug uart 
 	 * and the generic uart on the W2000A! */
 	WaitMs(100);
-	WRITE_INT(CONFIGADCENABLE,0); /* selecting the generic uart for the W2000A */
+//	WRITE_INT(CONFIGADCENABLE,0); /* selecting the generic uart for the W2000A */
 	/*WaitMs(1000);*/
 
 	InitSignalCapture();
@@ -225,8 +225,10 @@ int main () {
 
 #ifdef W2000A
 #ifdef BOARD_COMPILATION
+	WRITE_INT(LEDADDR,0);
 	InitDisplay(WELEC2022);
-//	DrawTest();
+	WRITE_INT(LEDADDR,0xff);
+	DrawTest();
 /*	while(1);*/
 #endif 
 #endif

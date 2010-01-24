@@ -43,10 +43,24 @@
 #include "stdio.h"
 #include "string.h"
 #include "DSO_Misc.h"
+#include "LEON3_DSU.h"
 
 #define SIGNAL_HSTART 0
 #define SIGNAL_HSTOP  HLEN
-#define BG_COLOR COLOR_R3G3B3(0,0,0)
+
+/* Colors of planes 0 to 4 mixed with OR logic on the fly */
+#define CH0_COLOR COLOR_L2R2G2B2(2,3,3,0)
+#define CH1_COLOR COLOR_L2R2G2B2(2,0,3,0)
+#define CH2_COLOR COLOR_L2R2G2B2(2,0,0,3)
+#define CH3_COLOR COLOR_L2R2G2B2(2,3,0,0)
+#define GRID_COLOR COLOR_L2R2G2B2(0,0,1,0)
+
+/* Colors of planes 5 to 7 are mixed with AND logic on the fly */
+#define MENU_COLOR COLOR_L2R2G2B2(2,3,3,3)
+#define F0_COLOR COLOR_L2R2G2B2(2,3,0,0)
+#define F1_COLOR COLOR_L2R2G2B2(2,3,0,0)
+
+
 #define PREFETCH_OFFSET 32
 
 #define SETLED(data, BTN_Bit, LED_Bit) \
@@ -73,8 +87,7 @@ typedef struct {
 } SampleRet;
 
 void DrawSample(
-		uint16_t ColorBack,
-		uint16_t ColorSignal,
+		color_t ColorSignal,
 		uint32_t v,
 		SampleRet hp,
 		SampleRet hc);
@@ -83,8 +96,7 @@ void DrawSignal(
 		uint32_t Voffset, 
 		uSample * PrevData,
 		uSample * CurrData,
-		uint16_t PrevColor,
-		uint16_t CurrColor){
+		color_t CurrColor){
 
 	register uint32_t i = SIGNAL_HSTART+1;
 	register SampleRet Prev;
@@ -109,8 +121,9 @@ void DrawSignal(
 		if (Curr.P >= VLEN) Curr.P = VLEN-1;
 		if (Curr.C < 0)     Curr.C = 0;
 		if (Curr.C >= VLEN) Curr.C = VLEN-1;
-		DrawSample(PrevColor, CurrColor, i, Prev, Curr);
+		DrawSample(CurrColor, i, Prev, Curr);
 		Prev = Curr;
+		WaitMs(1);
 
 	}
 
@@ -118,8 +131,7 @@ void DrawSignal(
 
 /* drawing uninterrupted lines in a race condition framebuffer */
 void DrawSample(
-		uint16_t ColorBack,
-		uint16_t ColorSignal,
+		color_t ColorSignal,
 		uint32_t v,
 		SampleRet hp,
 		SampleRet hc){
@@ -143,14 +155,14 @@ void DrawSample(
 		ch = hp.C;
 	}
 	if ((ph < cl) || (pl > ch)) {
-		DrawVLine(ColorSignal,v,cl,ch);
-		DrawVLine(ColorBack,v,pl,ph);
-		DrawVLine(ColorSignal,v,cl,ch);
+		SetVLine(ColorSignal,v,cl,ch);
+		ClrVLine(ColorSignal,v,pl,ph);
+		//DrawVLine(ColorSignal,v,cl,ch);
 	} else {
-		DrawVLine(ColorSignal,v,cl,ch);
-		DrawVLine(ColorBack,v,pl,ph);
-		DrawVLine(ColorSignal,v,cl,ch);
-		DrawVLine(ColorSignal,v,cl,ch);
+		SetVLine(ColorSignal,v,cl,ch);
+		ClrVLine(ColorSignal,v,pl,ph);
+	//	DrawVLine(ColorSignal,v,cl,ch);
+	//	DrawVLine(ColorSignal,v,cl,ch);
 		
 /*		if (cl == ch) {
 			DrawPoint(ColorSignal,v,cl);
@@ -254,6 +266,10 @@ void GetCh(
 	}
 }
 
+void FlushDataCache() {
+	WRITE_INT(DSU_ASI_BASE,0x16);
+}
+
 
 extern uSample Data[CAPTURESIZE];
 
@@ -269,7 +285,11 @@ void GUI_Main () {
 	uint32_t Prefetch = PREFETCH_OFFSET;
 	uint32_t ReadData = 0;
 	int16_t x = 0;
-	
+	uint32_t data = 0;
+	SETLED(data,1,LED_CH0);
+	WRITE_INT(LEDADDR,data);
+
+
 	Analog[0].myVperDiv = 10000;
 	Analog[0].AC = 0;
 	Analog[0].Mode = normal;
@@ -296,7 +316,29 @@ void GUI_Main () {
 	memset(&Ch1[1],0,HLEN*sizeof(uSample));
 	memset(&Ch2[1],0,HLEN*sizeof(uSample));
 	SetAnalogInputRange(2,Analog);
-	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1);
+	
+	SETLED(data,1,LED_CH1);
+	WRITE_INT(LEDADDR,data);
+
+	for ( x = 0; x < 8; ++x){
+		ClrBox(1 << x,0,0,HLEN-1,VLEN-1);
+	}
+	/* Setting the colors of each plane */
+        /* OR logic */
+	SetColor(POS_CH0,CH0_COLOR);
+	SetColor(POS_CH1,CH1_COLOR);
+	SetColor(POS_CH2,CH2_COLOR);
+	SetColor(POS_CH3,CH3_COLOR);
+	SetColor(POS_GRID,GRID_COLOR);
+	/* AND logic */
+	SetColor(POS_MENU,MENU_COLOR);
+   	SetColor(POS_F0,F0_COLOR);
+	SetColor(POS_F1,F1_COLOR);
+
+	/* Trigger type color box */
+	SetBox(PL_MENU,30,470,39,479);
+	SETLED(data,1,LED_CH2);
+
 	x = 50;
 
 	while(1) {
@@ -317,26 +359,24 @@ void GUI_Main () {
 			if (CurrBuffer != 0) {
 				CurrBuffer = 0;
 				PrevBuffer = 1;
-			//	DrawBox(x,0,470,9,479);
 			} else {
 				CurrBuffer = 1;
 				PrevBuffer = 0;
-			//	DrawBox(x,30,470,39,479);
 			}
 			x++;
-			if ((x == 0) || ((READ_INT(KEYADDR1) & (1 << BTN_SINGLE)) != 0)) {
+/*			if ((x == 0) || ((READ_INT(KEYADDR1) & (1 << BTN_SINGLE)) != 0)) {
 				DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1);
-			}
+			}*/
 			GetCh(0,8, &Ch1[CurrBuffer][0],&Data[Offset[0].H], HLEN+100);
-		/*	DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0].i, &Ch1[PrevBuffer][0].i,COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,0,0));*/
-			DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(7,7,0));
+			DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0], PL_CH0);
 
 /*			GetCh(1,8, CalcBuffer,&Data[0], HLEN+100);
 			Interpolate(HLEN+(FILTER_COEFFS*2),&Ch2[CurrBuffer][0], CalcBuffer,0);
-			DrawSignal(VLEN-128,&Ch2[PrevBuffer][FILTER_COEFFS], &Ch2[CurrBuffer][FILTER_COEFFS],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,7));*/
+			DrawSignal(VLEN-128,&Ch2[PrevBuffer][FILTER_COEFFS], &Ch2[CurrBuffer][FILTER_COEFFS], PLANE1);*/
 			GetCh(1,8, &Ch2[CurrBuffer][0],&Data[Offset[1].H], HLEN+100);
-			DrawSignal(Offset[1].V,&Ch2[PrevBuffer][0], &Ch2[CurrBuffer][0],COLOR_R3G3B3(0,0,0), COLOR_R3G3B3(0,7,0));
-
+			DrawSignal(Offset[1].V,&Ch2[PrevBuffer][0], &Ch2[CurrBuffer][0], PL_CH1);
+			
+			FlushDataCache();	
 		//	WaitMs(50);
 		
 		}
@@ -388,7 +428,7 @@ void SetTriggerLevel(){
 
 	ROTARYMOVE(move,kc,kl);
 	if (move != 0){
-		DrawHLine(BG_COLOR,-level+Offset[Ch].V,0,HLEN-1);
+		ClrHLine(PL_MENU,-level+Offset[Ch].V,0,HLEN-1);
 	}
 	switch(move){
 		case 3:
@@ -440,7 +480,7 @@ void SetTriggerLevel(){
 		Ch = 1;
 	}
 	if (move != 0){
-		DrawHLine(COLOR_R3G3B3(7,7,7),-level+Offset[Ch].V,0,HLEN-1);
+		SetHLine(PL_MENU,-level+Offset[Ch].V,0,HLEN-1);
 	}
 
 	move = (READ_INT(LEDADDR) >> EN_F) & 0x7;
@@ -455,9 +495,8 @@ void SetTriggerLevel(){
 	
 	
 	SetTrigger(Trigger,0,Ch, Prefetch,level-schmitt,Pulse,level+schmitt,Pulse);
-	color = COLOR_R3G3B3(0,Trigger+3,7-Trigger);
-	DrawBox(color,30,470,39,479);
-
+//	color = COLOR_L2R2G2B2(0,0,0,Trigger);
+//	SetColor(5,color);
 }
 
 void SetKeyFs(){

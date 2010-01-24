@@ -1,5 +1,5 @@
 DSOPATH=$(GRLIB)/software/dso
-BOOTOPT= -msoft-float -mv8 -qsvt 
+BOOTOPT= -msoft-float -mv8 
 #BOOTOPT= -msoft-float
 XCC=sparc-elf-gcc -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3 -D$(DSO_TARGET) -D$(DSO_BOARD) --std=c99
 XAS=sparc-elf-gcc -c -I. -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3
@@ -41,6 +41,9 @@ W2000: $(WCFILES)
 
 W2U:
 	$(DSOPATH)/WaveRecorder/WaveRecorder -u  $(UART) -b 115200 -n 2 -p Debugger -c LoadRun --Ffile=sram.bin
+
+W2D:
+	$(DSOPATH)/WaveRecorder/WaveRecorder -u  $(UART) -b 115200 -n 2 -p Debugger -c Debug
 
 W2M:
 	$(DSOPATH)/WaveRecorder/WaveRecorder -u  $(UART) -b 115200 -n 2 -p CPU -c Message

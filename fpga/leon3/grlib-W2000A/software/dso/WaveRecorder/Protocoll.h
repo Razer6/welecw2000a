@@ -80,6 +80,10 @@ public:
 
 	virtual void PrintSFR()=0;
 
+	virtual uint32_t Receive(
+		uint32_t addr,
+		uint32_t size)=0;
+
 	virtual uint32_t LoadProgram( 
 		const char * FileName, 
 		uint32_t StartAddr,

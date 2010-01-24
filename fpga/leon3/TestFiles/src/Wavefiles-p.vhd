@@ -83,7 +83,7 @@ end;
 
 package body WaveFiles is
   
-  function ReadString(file WaveFileHandle : aFileHandle;
+  impure function ReadString(file WaveFileHandle : aFileHandle;
                       constant Name       : string) return boolean is
     variable Ret : boolean := true;
     variable ch  : character;
@@ -97,7 +97,7 @@ package body WaveFiles is
     return Ret;
   end;
 
-  function ReadDword(file WaveFileHandle : aFileHandle) return integer is
+  impure function ReadDword(file WaveFileHandle : aFileHandle) return integer is
     variable Ret : integer := 0;
     variable ch  : character;
   begin
@@ -108,7 +108,7 @@ package body WaveFiles is
     return Ret;
   end;
 
-  function ReadWord(file WaveFileHandle : aFileHandle) return integer is
+  impure function ReadWord(file WaveFileHandle : aFileHandle) return integer is
     variable Ret : integer := 0;
     variable ch  : character;
   begin
@@ -158,7 +158,7 @@ package body WaveFiles is
   end;
 
 
-  function ReadSignedDword(file WaveFileHandle : aFileHandle) return integer is
+  impure function ReadSignedDword(file WaveFileHandle : aFileHandle) return integer is
     variable Ret : integer := 0;
     variable ch  : character;
   begin
@@ -169,7 +169,7 @@ package body WaveFiles is
     return Ret;
   end;
 
-  function ReadSignedWord(file WaveFileHandle : aFileHandle) return integer is
+  impure function ReadSignedWord(file WaveFileHandle : aFileHandle) return integer is
     variable Ret : integer := 0;
     variable ch  : character;
   begin
@@ -184,7 +184,7 @@ package body WaveFiles is
     return Ret;
   end;
 
-  function ReadSignedByte(file WaveFileHandle : aFileHandle) return integer is
+  impure function ReadSignedByte(file WaveFileHandle : aFileHandle) return integer is
     variable Ret : integer := 0;
     variable ch  : character;
   begin

@@ -1,4 +1,4 @@
-GRLIB=../../grlib-w2000a
+GRLIB=../../grlib-W2000A
 include $(GRLIB)/bin/Makefile
 include $(GRLIB)/software/leon3/Makefile
 DSO_TARGET=W2000A

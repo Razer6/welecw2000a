@@ -52,8 +52,9 @@ vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-p.vhd}
 vcom -quiet -93 -work DSO {../../ExtRAM/src/SRamPriorityAccess-ea.vhd}
 vcom -quiet -93 -work DSO {../../VGA/src/StrobeGen_var-e.vhd}
 vcom -quiet -93 -work DSO {../../VGA/src/StrobeGen_var-a.vhd}
-vcom -quiet -93 -work DSO {../../VGA/src/VGA-p.vhd}
-vcom -quiet -93 -work DSO {../../VGA/src/SimpleVGA-ea.vhd}
+#vcom -quiet -93 -work DSO {../../VGA/src/VGA-p.vhd}
+#vcom -quiet -93 -work DSO {../../VGA/src/SimpleVGA-ea.vhd}
+vcom -quiet -93 -work DSO /home/alexander/welec/SF/leon3/VGA/src/PlaneVGActl-ea.vhd
 #vcom -quiet -93 -work DSO {../../CPU/src/ZPU/zpu_config.vhd}
 #vcom -quiet -93 -work DSO {../../CPU/src/ZPU/zpupkg.vhd}
 #vcom -quiet -93 -work DSO {../../CPU/src/ZPU/txt_util.vhd}
@@ -86,7 +87,7 @@ vcom -quiet -93 -work work {../../TestFiles/src/StoP_hc595-ea.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/PtoS_HCT165-ea.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/DeMux_HCT238-ea.vhd}
 vcom -quiet -93 -work work {../../TestFiles/src/DAC_LTC2612-ea.vhd}
-vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/Testbench.vhd
+vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/testbench.vhd
 #vcom -quiet -93 -work work {../../Scope/src/TestbenchTopScope-ea.vhd} # out of date
 
 #vsim -t ps -suppress 3473 -gdisas=1 Testbench

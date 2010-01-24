@@ -55,7 +55,7 @@ use DSO.pSFR.all;
 use DSO.pSpecialFunctionRegister.all;
 use DSO.pTrigger.all;
 use DSO.pSignalAccess.all;
-use DSO.pSRamPriorityAccess.all;
+--use DSO.pSRamPriorityAccess.all;
 use DSO.pLedsKeysAnalogSettings.all;
 use work.config.all;
 
@@ -69,7 +69,7 @@ entity leon3mini is
     disas   : integer := CFG_DISAS;     -- Enable disassembly to console
     dbguart : integer := CFG_DUART;     -- Print UART on console
     pclow   : integer := CFG_PCLOW;
-    freq    : integer := 25000          -- frequency of main clock (used for PLLs)
+    freq    : integer := 25000       -- frequency of main clock (used for PLLs)
     );
   port (
     --RS232
@@ -133,14 +133,14 @@ entity leon3mini is
     iFPGA2_T7   : in std_ulogic;
 
     --CONTROL of inputs
-    iUx6        : in  std_ulogic;       -- not soldering register channels 1,2 è 3,4
+    iUx6        : in  std_ulogic;  -- not soldering register channels 1,2  3,4
     iUx11       : in  std_ulogic;       -- not soldering register channels 1,2
     iAAQpin5    : in  std_ulogic;       -- ? does not fit to analog_inputs.png
     oCalibrator : out std_ulogic;
 
     -- NormalTrigger-ea.vhd,... they all can trigger with 1 Gs!
-    oPWMout  : out std_ulogic;                     --Level Of External Syncro
-    iSinhcro : in  std_ulogic;                     --Comparator external syncro.
+    oPWMout  : out std_ulogic;          --Level Of External Syncro
+    iSinhcro : in  std_ulogic;          --Comparator external syncro.
     oDesh    : out std_ulogic_vector(2 downto 0);  --demux. write strob for 4094
     oDeshENA : out std_ulogic;
     oRegCLK  : out std_ulogic;
@@ -208,7 +208,7 @@ architecture rtl of leon3mini is
   -- signal CPUOut         : aSharedRamReturn;
 
   signal VGA_PWM : unsigned(0 downto 0);
-  signal Dena : std_ulogic;
+  signal Dena    : std_ulogic;
 
   signal memi : memory_in_type;
   signal memo : memory_out_type;
@@ -621,7 +621,7 @@ begin
 
   mg2 : if CFG_SRCTRL = 1 generate
     srctrl0 : srctrl
-      generic map                  -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
+      generic map  -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
       (hindex  => 0,
        romaddr => 0,
        rommask => 16#ff8#,
@@ -812,41 +812,46 @@ begin
 --    port map (vga_bl, vgao.video_out_b(7 downto 6));
 
 
-  oVD   <= vgao.vsync;
-  oHD   <= vgao.hsync;
-  oDCLK <= video_clk;
-  oDENA <= Dena;
-  
-  process (video_clk, ResetAsync)
-  begin
-    if ResetAsync = cResetActive then
-      oRed    <= (others => '0');
-      oGreen  <= (others => '0');
-      oBlue   <= (others => '0');
-      Dena   <= '0';
-      VGA_PWM <= (others => '0');
-    elsif rising_edge(video_clk) then
-      if Dena = '1' or vgao.vsync = '0' then
-        VGA_PWM   <= VGA_PWM + 1;
-        end if;
-      oRed(5)   <= vgao.video_out_r(7);
-      oGreen(5) <= vgao.video_out_g(7);
-      oBlue(5)  <= vgao.video_out_b(7);
-      oRed(3)   <= vgao.video_out_r(6);
-      oGreen(3) <= vgao.video_out_g(6);
-      oBlue(3)  <= vgao.video_out_b(6);
-      oRed(4)   <= (vgao.video_out_r(5) and VGA_PWM(0));
-      oGreen(4) <= (vgao.video_out_g(5) and VGA_PWM(0));
-      oBlue(4)  <= (vgao.video_out_b(5) and VGA_PWM(0)); 
-      Dena      <= vgao.blank;
-    end if;
-  end process;
+  oDENA  <= vgao.blank;
+  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
+  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
+  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
+  oVD    <= vgao.vsync;
+  oHD    <= vgao.hsync;
+  oDCLK  <= not video_clk;
+--  oDENA <= Dena;
+
+--  process (video_clk, ResetAsync)
+--  begin
+--    if ResetAsync = cResetActive then
+--      oRed    <= (others => '0');
+--      oGreen  <= (others => '0');
+--      oBlue   <= (others => '0');
+--      Dena   <= '0';
+--      VGA_PWM <= (others => '0');
+--    elsif rising_edge(video_clk) then
+--      if Dena = '1' or vgao.vsync = '0' then
+--        VGA_PWM   <= VGA_PWM + 1;
+--        end if;
+--      oRed(5)   <= vgao.video_out_r(7);
+--      oGreen(5) <= vgao.video_out_g(7);
+--      oBlue(5)  <= vgao.video_out_b(7);
+--      oRed(3)   <= vgao.video_out_r(6);
+--      oGreen(3) <= vgao.video_out_g(6);
+--      oBlue(3)  <= vgao.video_out_b(6);
+--      oRed(4)   <= (vgao.video_out_r(5) and VGA_PWM(0));
+--      oGreen(4) <= (vgao.video_out_g(5) and VGA_PWM(0));
+--      oBlue(4)  <= (vgao.video_out_b(5) and VGA_PWM(0)); 
+--      Dena      <= vgao.blank;
+--    end if;
+--  end process;
 
   svga : if CFG_SVGA_ENABLE /= 0 generate
-    svga0 : svgactrl generic map(memtech => memtech, pindex => 6, paddr => 6,
-                                 hindex  => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG,
-                                 clk0    => 40000, clk1 => 1000000000/((BOARD_FREQ * CFG_CLKMUL)/CFG_CLKDIV),
-                                 clk2    => 20000, clk3 => 15385, burstlen => 6)
+    svga0 : entity DSO.PlaneVGActl
+      generic map(memtech => memtech, pindex => 6, paddr => 6,
+                  hindex  => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG,
+                  clk0    => 40000, clk1 => 1000000000/((BOARD_FREQ * CFG_CLKMUL)/CFG_CLKDIV),
+                  clk2    => 20000, clk3 => 15385, burstlen => 6)
       port map(rstn, clkm, video_clk, apbi, apbo(6), vgao, ahbmi,
                ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG), clk_sel);
     --   video_clk <= clk when clk_sel = "00"      else clkm;
@@ -874,7 +879,7 @@ begin
 -- pragma translate_off
   x : report_version
     generic map (
-      msg1 => "LEON3 Demonstration design for HPE_mini board",
+      msg1 => "Digital Storage Oscilloscope LEON3 FPGA Design",
       msg2 => "GRLIB Version " & tost(LIBVHDL_VERSION/1000) & "." & tost((LIBVHDL_VERSION mod 1000)/100)
       & "." & tost(LIBVHDL_VERSION mod 100) & ", build " & tost(LIBVHDL_BUILD),
       msg3 => "Target technology: " & tech_table(fabtech) & ",  memory library: " & tech_table(memtech),

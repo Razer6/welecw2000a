@@ -169,6 +169,30 @@ void RemoteSignalCapture::PrintSFR(){
 	PrintDesc(Data,Length);
 }
 
+uint32_t RemoteSignalCapture::Receive(
+			uint32_t addr,
+			uint32_t size) {
+	uint32_t read = 0;
+	uint32_t rec = 0;
+	uint32_t i = 0;
+	uint32_t * data = new uint32_t[size];
+	printf("Startaddress = 0x%08x Size in DWORDS = %d\n",addr,data); 
+	while (read != size) {
+		rec = mComm->Receive(addr,&data[read],size);
+		if (rec == 0) return FALSE;
+		read += rec;
+		for ( ; i < read; i++){
+			printf("0x%08x ",data[i]);
+			if ((i % 8) == 7) {
+				printf("\n");
+			} 
+		}
+
+	}		
+	delete data;
+	return TRUE;
+}
+
 uint32_t RemoteSignalCapture::SendRetry(
 		uint32_t addr,
 		uint32_t data) {

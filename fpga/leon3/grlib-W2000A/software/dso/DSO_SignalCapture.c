@@ -58,7 +58,6 @@
 
 
 
-
 /*volatile CaptureRegs    * volatile CaptureR;
 volatile TriggerRegs    * volatile TriggerR;
 volatile AnalogSettings * volatile AnalogR;
