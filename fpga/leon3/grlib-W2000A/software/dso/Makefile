@@ -1,5 +1,5 @@
 DSOPATH=$(GRLIB)/software/dso
-BOOTOPT= -msoft-float -mv8 
+BOOTOPT= -msoft-float -mv8 -qsvt 
 #BOOTOPT= -msoft-float
 XCC=sparc-elf-gcc -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3 -D$(DSO_TARGET) -D$(DSO_BOARD) --std=c99
 XAS=sparc-elf-gcc -c -I. -I$(GRLIB)/software/leon3 -I$(DSOPATH) -DLEON3

@@ -465,187 +465,228 @@ set_global_assignment -name TIMEQUEST_DO_REPORT_TIMING ON
 set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 set_global_assignment -name USE_TIMEQUEST_TIMING_ANALYZER ON
 set_global_assignment -name SDC_FILE W2000.sdc
-set_global_assignment -name VHDL_FILE ../../Altera/src/jtag_uart_0.vhd
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/version.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/stdlib/stdlib.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/sparc/sparc.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/modgen/multlib.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/modgen/leaves.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/amba.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/devices.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/defmst.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/apbctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/grlib/amba/ahbctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/gencomp/gencomp.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/memory_inferred.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/tap_inferred.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/ddr_inferred.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/inferred/mul_inferred.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/altera_mf/memory_altera_mf.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/altera_mf/clkgen_altera_mf.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/altera_mf/tap_altera_mf.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allclkgen.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allddr.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allmem.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/allpads.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/alltap.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkgen.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkmux.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkand.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ddr_ireg.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ddr_oreg.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ddrphy.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram64.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram_2p.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncram_dp.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/syncfifo.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/regfile_3p.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/tap.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/techbuf.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkpad.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/clkpad_ds.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/inpad.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/inpad_ds.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/iodpad.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/iopad.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/iopad_ds.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/lvds_combo.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/odpad.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/outpad.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/outpad_ds.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/toutpad.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/grspwc_net.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/mul_61x61.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/cpu_disas_net.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/usbhc_net.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ringosc.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/techmap/maps/ssrctrl_net.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/comp/ethcomp.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/greth_pkg.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/eth_rstgen.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/eth_ahb_mst.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/greth_tx.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/greth_rx.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/core/grethc.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/wrapper/greth_gen.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/eth/wrapper/greth_gbit_gen.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/occomp/occomp.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/can/cancomp.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/can/can_top.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/can/can_top_core_sync.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/i2c/i2c_master_bit_ctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/i2c/i2c_master_byte_ctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/i2c/i2coc.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/ud_cnt.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/ro_cnt.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_dma_fifo.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_dma_actrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_dma_tctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_pio_tctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_pio_actrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_controller.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/atahost_pio_controller.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/opencores/ata/ocidec2_controller.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/arith/arith.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/arith/mul32.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/arith/div32.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/memctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/sdctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/sdmctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/memctrl/srctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmuconfig.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmuiface.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libmmu.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libiu.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libcache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/libproc3.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/cachemem.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_icache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_dcache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_acache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmutlbcam.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmulrue.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmulru.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmutlb.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmutw.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mmu_cache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/acache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/dcache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/icache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/cache.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/cpu_disasx.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/iu3.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/mfpwx.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/tbufmem.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/dsu3x.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/dsu3.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/proc3.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3s.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3cg.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/irqmp.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/grfpwxsh.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/grfpushwx.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/leon3/leon3sh.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_mod.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_oc.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_mc.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/canmux.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/can/can_rd.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/misc.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/rstgen.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/gptimer.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbram.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbtrace.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbmst.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/grgpio.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbstat.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/logan.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/apbps2.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/charrom_package.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/charrom.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/apbvga.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/ahbdma.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/svgactrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/i2cmst.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/spictrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/misc/i2cslv.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/net/net.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/net/eth_arb.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/uart.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/libdcom.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/apbuart.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/dcom.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/dcom_uart.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/uart/ahbuart.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/jtag.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/libjtagcom.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/jtagcom.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/ahbjtag.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/jtag/ahbjtag_bsd.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/ethernet_mac.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/greth.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/greth_gbit.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/greth/grethm.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/usb/usb.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/usb/usbdcl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/ata.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/ata_inf.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atahost_amba_slave.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atahost_ahbmst.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/ocidec2_amba_slave.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atactrl_nodma.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atactrl_dma.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/ata/atactrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/hapstrak.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/test_1x2.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/sram_1x1.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/gaisler/haps/flash_1x1.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/esa/memoryctrl/memoryctrl.vhd"
-set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/../../lib/esa/memoryctrl/mctrl.vhd"
+#set_global_assignment -name VHDL_FILE ../../Altera/src/jtag_uart_0.vhd
+
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/stdlib/version.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/stdlib/stdlib.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/sparc/sparc.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/modgen/multlib.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/modgen/leaves.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/amba/amba.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/amba/devices.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/amba/defmst.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/amba/apbctrl.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/amba/ahbctrl.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/amba/dma2ahb_pkg.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/grlib/amba/dma2ahb.vhd" -library grlib
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/gencomp/gencomp.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/gencomp/netcomp.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/inferred/memory_inferred.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/inferred/ddr_inferred.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/inferred/mul_inferred.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/inferred/ddr_phy_inferred.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/altera_mf/memory_altera_mf.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/altera_mf/clkgen_altera_mf.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/altera_mf/tap_altera_mf.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/allclkgen.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/allddr.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/allmem.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/allpads.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/alltap.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/clkgen.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/clkmux.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/clkand.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/ddr_ireg.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/ddr_oreg.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/ddrphy.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/syncram.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/syncram64.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/syncram_2p.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/syncram_dp.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/syncfifo.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/regfile_3p.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/tap.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/techbuf.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/nandtree.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/clkpad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/clkpad_ds.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/inpad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/inpad_ds.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/iodpad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/iopad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/iopad_ds.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/lvds_combo.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/odpad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/outpad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/outpad_ds.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/toutpad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/skew_outpad.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/grspwc_net.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/grspwc2_net.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/mul_61x61.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/cpu_disas_net.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/grusbhc_net.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/ringosc.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/ssrctrl_net.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/system_monitor.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/grgates.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/inpad_ddr.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/outpad_ddr.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/techmap/maps/iopad_ddr.vhd" -library techmap
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/comp/ethcomp.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/core/greth_pkg.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/core/eth_rstgen.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/core/eth_ahb_mst.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/core/greth_tx.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/core/greth_rx.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/core/grethc.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/wrapper/greth_gen.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/eth/wrapper/greth_gbit_gen.vhd" -library eth
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/occomp/occomp.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/can/cancomp.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/can/can_top.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/can/can_top_core_sync.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/i2c/i2c_master_bit_ctrl.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/i2c/i2c_master_byte_ctrl.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/i2c/i2coc.vhd" -library opencores
+set_global_assignment -name VERILOG_FILE "../../grlib-W2000A/lib/opencores/spi/simple_spi_top.v" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/ud_cnt.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/ro_cnt.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/atahost_dma_fifo.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/atahost_dma_actrl.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/atahost_dma_tctrl.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/atahost_pio_tctrl.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/atahost_pio_actrl.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/atahost_controller.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/atahost_pio_controller.vhd" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/opencores/ata/ocidec2_controller.vhd" -library opencores
+set_global_assignment -name VERILOG_FILE "../../grlib-W2000A/lib/opencores/ac97/ac97_top.v" -library opencores
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/arith/arith.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/arith/mul32.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/arith/div32.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/memctrl/memctrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/memctrl/sdctrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/memctrl/sdmctrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/memctrl/srctrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/memctrl/spimctrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/leon3.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmuconfig.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmuiface.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/libmmu.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/libiu.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/libcache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/libproc3.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/cachemem.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmu_icache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmu_dcache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmu_acache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmutlbcam.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmulrue.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmulru.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmutlb.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmutw.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmu.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mmu_cache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/acache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/dcache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/icache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/cache.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/cpu_disasx.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/iu3.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/grfpwx.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/mfpwx.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/grlfpwx.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/tbufmem.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/dsu3x.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/dsu3.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/proc3.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/leon3s.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/leon3cg.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/irqmp.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/grfpwxsh.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/grfpushwx.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/leon3/leon3sh.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/can/can.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/can/can_mod.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/can/can_oc.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/can/can_mc.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/can/canmux.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/can/can_rd.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/misc.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/rstgen.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/gptimer.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/ahbram.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/ahbdpram.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/ahbtrace.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/ahbmst.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/grgpio.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/ahbstat.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/logan.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/apbps2.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/charrom_package.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/charrom.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/apbvga.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/ahbdma.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/svgactrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/i2cmst.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/i2cmst_gen.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/spictrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/i2cslv.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/wild.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/wild2ahb.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/grsysmon.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/gracectrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/misc/grgpreg.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/net/net.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/uart/uart.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/uart/libdcom.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/uart/apbuart.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/uart/dcom.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/uart/dcom_uart.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/uart/ahbuart.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/jtag/jtag.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/jtag/libjtagcom.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/jtag/jtagcom.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/jtag/ahbjtag.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/jtag/ahbjtag_bsd.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/greth/ethernet_mac.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/greth/greth.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/greth/greth_gbit.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/greth/grethm.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/usb/grusb.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/ata.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/ata_inf.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/atahost_amba_slave.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/atahost_ahbmst.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/ocidec2_amba_slave.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/atactrl_nodma.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/atactrl_dma.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gaisler/ata/atactrl.vhd" -library gaisler
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/esa/memoryctrl/memoryctrl.vhd" -library esa
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/esa/memoryctrl/mctrl.vhd" -library esa
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/clockgen/ge_clkgen_p.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/clockgen/clockgenerator_ea.vhd" -library gleichmann
+set_global_assignment -name VERILOG_FILE "../../grlib-W2000A/lib/gleichmann/miscellaneous/postponer.v" -library gleichmann
+set_global_assignment -name VERILOG_FILE "../../grlib-W2000A/lib/gleichmann/miscellaneous/ahb2wb.v" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/miscellaneous/miscellaneous_p.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/ahb2hpi/hpi_p.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/ahb2hpi/ahb2hpi2_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/ahb2hpi/hpi_ram_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/i2c/i2c.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/i2c/partoi2s.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/dac/dac_p.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/dac/dac_sigdelt_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/dac/adc_sigdelt_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/dac/adcdac_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/dac/dac_ahb_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/spi/sspi_p.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/spi/spi_oc_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/spi/spi_p.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/spi/spi_xmit_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/multiio/multiio_p.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/multiio/multiio_ea.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/ac97/ac97.vhd" -library gleichmann
+set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/gleichmann/ac97/ac97_oc.vhd" -library gleichmann
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/config.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/ahbrom.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/designs/leon3-w2000a/DSOConfig-p.vhd"
@@ -689,7 +730,7 @@ set_global_assignment -name VHDL_FILE "../../SignalCapture/src/SignalCapture-ea.
 set_global_assignment -name VHDL_FILE "../../VGA/src/VGA-p.vhd"
 #set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-p.vhd"
 #set_global_assignment -name VHDL_FILE "../../ExtRAM/src/SRamPriorityAccess-ea.vhd"
-set_global_assignment -name VHDL_FILE "../../VGA/src/PlaneVGActl-ea.vhd"
+set_global_assignment -name VHDL_FILE "../../VGA/src/DoubleBufferVGA-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../CPU/src/SpecialFunctionRegister-p.vhd"
 set_global_assignment -name VHDL_FILE "../../CPU/src/SpecialFunctionRegister-ea.vhd"
 set_global_assignment -name VHDL_FILE "../../grlib-W2000A/lib/DSO/SFR/SFR-p.vhd"

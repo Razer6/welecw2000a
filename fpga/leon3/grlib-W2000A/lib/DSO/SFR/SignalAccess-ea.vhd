@@ -4,7 +4,7 @@
 -- File       : SignalAccess-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-08-29
+-- Last update: 2010-01-26
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -78,7 +78,7 @@ architecture rtl of SignalAccess is
   signal   hready  : std_ulogic;
   constant abits   : integer := logXY(kbytes, 2) + 2;
   constant hconfig : ahb_config_type := (
-    0      => ahb_device_reg (VENDOR_LINDERT, LINDERT_DSO_SIGNALACCESS, 0, abits+2, 0),
+    0      => ahb_device_reg (VENDOR_FHH, FHH_DSO_SIGNALACCESS, 0, abits+2, 0),
     4      => ahb_membar(haddr, '1', '1', hmask),
     others => zero32);
   signal hsel   : std_ulogic;
@@ -103,7 +103,7 @@ begin  -- rtl
         hsize  <= std_ulogic_vector(ahbsi.hsize);
         align  <= std_ulogic_vector(ahbsi.haddr(1 downto 0));
       elsif iTriggerMem.ACK = '1' then
-        hsel   <= '0';
+        hsel <= '0';
       end if;
 --      end if;
     end if;
@@ -151,8 +151,13 @@ begin  -- rtl
 --    end if;
 
 
-    MemIn.Addr <= aTriggerAddr(ahbsi.haddr(aTriggerAddr'length+1 downto 2));
-    MemIn.Rd   <= '0';
+    if is_x(ahbsi.haddr) then
+      MemIn.Addr <= (others => '0');
+    else
+      MemIn.Addr <= aTriggerAddr(ahbsi.haddr(aTriggerAddr'length+1 downto 2));
+    end if;
+
+    MemIn.Rd <= '0';
     if ahbsi.hsel(hindex) = '1' then
       case ahbsi.htrans is
         when "10" | "11" =>

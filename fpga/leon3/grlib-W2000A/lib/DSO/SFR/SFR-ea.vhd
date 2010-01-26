@@ -74,7 +74,7 @@ architecture rtl of SFR is
   signal Rd, Wr       : std_ulogic;
   signal CPUInterrupt : std_ulogic;
   constant pconfig : apb_config_type := (
-    0 => ahb_device_reg (VENDOR_LINDERT, LINDERT_DSO_SFR, 0, 0, 0),
+    0 => ahb_device_reg (VENDOR_FHH, FHH_DSO_SFR, 0, 0, 0),
     1 => apb_iobar(paddr, pmask));
 
 begin  -- rtl

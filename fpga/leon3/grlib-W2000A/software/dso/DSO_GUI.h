@@ -39,7 +39,8 @@ void DrawSignal(
 		uint32_t Voffset, 
 		uSample * PrevData,
 		uSample * CurrData,
-		color_t CurrColor);
+		uint16_t PrevColor,
+		uint16_t CurrColor);
 
 void Interpolate (
 		uint32_t srcSamples, 

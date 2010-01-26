@@ -81,7 +81,7 @@ package config is
   constant CFG_NWIN : integer := (8);
   constant CFG_V8 : integer := 2;
   constant CFG_MAC : integer := 1;
-  constant CFG_SVT : integer := 0;
+  constant CFG_SVT : integer := 1;
   constant CFG_RSTADDR : integer := 16#00000#;
   constant CFG_LDDEL : integer := (1);
   constant CFG_NWP : integer := (0);
@@ -100,7 +100,7 @@ package config is
   constant CFG_DCEN : integer := 1;
   constant CFG_DSETS : integer := 1;
   constant CFG_DSETSZ : integer := 2;
-  constant CFG_DLINE : integer := 4;
+  constant CFG_DLINE : integer := 8;
   constant CFG_DREPL : integer := 0;
   constant CFG_DLOCK : integer := 0;
   constant CFG_DSNOOP : integer := 0 + 0 + 4*0;
@@ -126,7 +126,7 @@ package config is
   constant CFG_DISAS : integer := 0 + 0;
   constant CFG_PCLOW : integer := 2;
 -- AMBA settings
-  constant CFG_DEFMST : integer := (1);
+  constant CFG_DEFMST : integer := (2);
   constant CFG_RROBIN : integer := 0;
   constant CFG_SPLIT : integer := 0;
   constant CFG_AHBIO : integer := 16#FFF#;
@@ -214,7 +214,7 @@ package config is
   constant CFG_DSO_CHANNELS : integer := (2);
   constant CFG_DSO_SAMPLING_FREQUENCY : integer := (1000000000);
   constant CFG_DSO_INPUT_BIT_WIDTH : integer := (8);
-  constant CFG_DSO_TRIGGER_DATA_SIZE : integer := (32);
+  constant CFG_DSO_TRIGGER_DATA_SIZE : integer := (16);
 -- GRLIB debugging
   constant CFG_DUART : integer := 1;
 end;

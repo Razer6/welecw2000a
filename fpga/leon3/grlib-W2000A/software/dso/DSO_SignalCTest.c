@@ -113,13 +113,14 @@ void rprintc(unsigned data){
 }	
 #endif
 
-void IsrDSU(int irq){
+/*
+void IsrDSO(int irq){
 	if (irq == 5) {
 		WRITE_INT(INTERRUPTADDR,0);
 	} else {
 		WRITE_INT(DSO_SFR_BASE_ADDR,16);
 	}
-}
+}*/
 
 static volatile uint32_t IRQMask;
 
@@ -181,7 +182,7 @@ int main () {
 	WaitMs(100);
 //	WRITE_INT(CONFIGADCENABLE,0); /* selecting the generic uart for the W2000A */
 	/*WaitMs(1000);*/
-
+//	while(1);
 	InitSignalCapture();
 	UartInit(FIXED_CPU_FREQUENCY,DSO_REMOTE_UART_BAUDRATE, 
 			FIFO_EN | ENABLE_RX | ENABLE_TX | RX_INT /*| LOOP_BACK*/, uart);
@@ -190,7 +191,7 @@ int main () {
 			FIFO_EN | ENABLE_RX | ENABLE_TX | RX_INT /*| LOOP_BACK*/, uart2);
 #endif
 /*	InitIRQ();*/
-	
+//	while(1);
 
 /* Uart communication test */
 #ifdef SBX	
@@ -225,10 +226,8 @@ int main () {
 
 #ifdef W2000A
 #ifdef BOARD_COMPILATION
-	WRITE_INT(LEDADDR,0);
 	InitDisplay(WELEC2022);
-	WRITE_INT(LEDADDR,0xff);
-	DrawTest();
+//	DrawTest();
 /*	while(1);*/
 #endif 
 #endif
@@ -242,7 +241,7 @@ int main () {
 	WRITE_INT(INTERRUPTMASKADDR,0xf);
 	/* Enable the interrupt the interrupt controller */
 	InitIRQ();
-	catch_interrupt(IsrDSU, INT_DSO);
+	catch_interrupt(IsrDSO, INT_DSO);
 
 	printf("DSO Test programm: \nstart testing SetTriggerInput \n");
 	if (SetTriggerInput(2,8,FASTFS,FIXED_CPU_FREQUENCY,0,0,0,1,2,3) == true){

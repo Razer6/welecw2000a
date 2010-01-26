@@ -27,6 +27,7 @@ vcom -quiet -93 -work work {../../TestFiles/src/BhvDisplay-ea.vhd}
 vcom -quiet -93 -work work {../../VGA/src/TestbenchPlaneVGActl-ea.vhd}
 vsim -suppress 3473 Testbench
 
+
 do wave.do
 #run 2 us
 run 500 us
