@@ -52,6 +52,7 @@ component mctrl
     oepol     : integer := 0;
     syncrst   : integer := 0;
     pageburst : integer := 0;
+    scantest  : integer := 0;
     mobile    : integer := 0
   );
   port (

@@ -17,4 +17,3 @@ gleichmann
 fmf
 spansion
 gsi
-DSO

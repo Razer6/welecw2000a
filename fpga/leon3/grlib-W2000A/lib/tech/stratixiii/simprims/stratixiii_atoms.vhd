@@ -4176,7 +4176,8 @@ asdatadelaybuffer1: stratixiii_and1
                      Tviol_sclr_clk or Tviol_sload_clk or Tviol_ena_clk;
     
     
-        if ((devpor = '0') or (devclrn = '0') or (clrn_ipd = '1'))  then
+        --if ((devpor = '0') or (devclrn = '0') or (clrn_ipd = '1'))  then
+        if ((devpor = '0') or (devclrn = '0') or (clrn_ipd = '0'))  then -- changed ***
             iq := '0';
         elsif (aload_ipd = '1') then
             iq := asdata_dly1;

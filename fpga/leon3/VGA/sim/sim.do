@@ -29,3 +29,5 @@ vsim -suppress 3473 Testbench
 
 do wave.do
 #run 2 us
+run 500 us
+run 7 ms

@@ -43,7 +43,10 @@ add wave -noupdate -format Logic /testbench/svga0/read_en_fifo
 add wave -noupdate -format Logic /testbench/svga0/write_en_fifo
 add wave -noupdate -format Literal /testbench/svga0/r.color0
 add wave -noupdate -format Literal /testbench/svga0/r.color1
-add wave -noupdate -format Literal /testbench/svga0/t.data
+add wave -noupdate -format Literal /testbench/svga0/t.memcnt
+add wave -noupdate -format Literal /testbench/svga0/t.bycnt
+add wave -noupdate -format Literal /testbench/svga0/t.memdata
+add wave -noupdate -format Literal /testbench/svga0/t.shiftdata
 add wave -noupdate -format Literal /testbench/svga0/planes
 add wave -noupdate -format Literal /testbench/svga0/orplane
 add wave -noupdate -format Literal /testbench/svga0/andplane
@@ -101,4 +104,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {2730771153 ps} {2731100819 ps}
+WaveRestoreZoom {2730771153 ps} {2730811345 ps}

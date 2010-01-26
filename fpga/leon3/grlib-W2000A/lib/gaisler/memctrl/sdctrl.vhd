@@ -1,6 +1,7 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003, Gaisler Research
+--  Copyright (C) 2003 - 2008, Gaisler Research
+--  Copyright (C) 2008 - 2010, Aeroflex Gaisler
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -755,7 +756,9 @@ begin
     sdo.dqm      <= "11111111" & r.dqm;
     sdo.rasn     <= r.rasn;
     sdo.casn     <= r.casn;
-    sdo.data(31 downto 0) <= r.hwdata;
+    drivebus: for i in 0 to sdbits/64 generate
+      sdo.data(31+32*i downto 32*i) <= r.hwdata;
+    end generate;
   end generate;
 
   ngen : if SDINVCLK generate
@@ -770,7 +773,9 @@ begin
         sdo.dqm      <= "11111111" & r.dqm;
         sdo.rasn     <= r.rasn;
         sdo.casn     <= r.casn;
-        sdo.data(31 downto 0) <= r.hwdata;
+        for i in 0 to sdbits/64 loop 
+          sdo.data(31+32*i downto 32*i) <= r.hwdata;
+        end loop;
       end if;
       if rst = '0' then sdo.sdcsn <= (others => '1'); end if;
     end process;

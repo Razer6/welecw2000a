@@ -77,8 +77,8 @@
 #define HFRONT 16
 #define VSYNC 5
 #define HSYNC 10
-#define HBACK 10
-#define VBACK 10
+#define HBACK 100
+#define VBACK 100
 
 /* VGA Resulotion from grmon 640x480 60 Hz 16 Bit */
 /*
@@ -104,10 +104,9 @@ typedef struct {
 static volatile aVGA_Config VGA_Config;
 
 /* The frame buffer has a 1024 byte alignment */
-/* Until it is not known how to set the alignment with the compiler
- * we wast here 1024 bytes */
-color_t Framebuffer[HLEN*VLEN] __attribute__ ((aligned (1024)));
-color_t * FramePointer;
+/* 8 planes, 32 bit plane blocks */
+uSample Framebuffer[HLEN*VLEN*8/32] __attribute__ ((aligned (1024)));
+uSample * FramePointer;
 
 uint32_t * InitDisplay (uint32_t Target){
 /*	printf("InitDisplay\n");*/
@@ -143,7 +142,7 @@ uint32_t * InitDisplay (uint32_t Target){
 			temp = (uint32_t)Framebuffer;
 			temp -= 0x20000000; /* uncached SRAM mirror */
 			FramePointer = (uSample * )temp;
-		//	FramePointer = Framebuffer;
+			FramePointer = Framebuffer;
 			return 0;
 			break;
 		default:
@@ -170,17 +169,20 @@ void SetColor(uint8_t Plane, uint8_t Color){
 //	}
 }
 
-//#define SET_POINT(H,V) FramePointer[V*HLEN + (H >> 2)].c[H & 3] |= Color
+#define SET_POINT(H,V,P) \
+FramePointer[(((V*HLEN)+H)  >> 3) + P].i |= (1 << (H & 31))
 
-//#define CLR_POINT(H,V) FramePointer[V*HLEN + (H >> 2)].c[H & 3] &= Color
+#define CLR_POINT(H,V,P) \
+FramePointer[(((V*HLEN)+H)  >> 3) + P].i &= ~(1 << (H & 31))
+
 
 void SetPoint(color_t Color, uint32_t H, uint32_t V){
-//	SET_POINT(H,V); 
-	FramePointer[V*HLEN+H] |= Color;
+	SET_POINT(H,V, Color); 
+//	FramePointer[V*HLEN+H] |= Color;
 }
 void ClrPoint(color_t Color, uint32_t H, uint32_t V){
-//	CLR_POINT(H,V); 
-	FramePointer[V*HLEN+H] &= ~Color;
+	CLR_POINT(H,V, Color); 
+//	FramePointer[V*HLEN+H] &= ~Color;
 }
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
@@ -188,8 +190,8 @@ void SetHLine(color_t Color, uint32_t V, uint32_t H1, uint32_t H2){
 	register uint32_t i = 0;
 	uint32_t End = V*HLEN + H2;
 	for (i = V*HLEN+H1; i <= End; ++i){
-//		SET_POINT(0,i); 
-		FramePointer[i] |= Color;
+		SET_POINT(0,i,Color); 
+//		FramePointer[i] |= Color;
 	}
 }
 
@@ -197,8 +199,8 @@ void ClrHLine(color_t Color, uint32_t V, uint32_t H1, uint32_t H2){
 	register uint32_t i = 0;
 	uint32_t End = V*HLEN + H2;
 	for (i = V*HLEN+H1; i <= End; ++i){
-//		CLR_POINT(0,i);
-		FramePointer[i] &= ~Color;
+		CLR_POINT(0,i,Color);
+//		FramePointer[i] &= ~Color;
 	}
 }
 
@@ -208,8 +210,8 @@ void SetVLine(color_t Color, uint32_t H, uint32_t V1, uint32_t V2){
 	register uint32_t i = 0;
 	uint32_t End = V2*HLEN + H;
 	for (i = V1*HLEN+H; i <= End; i+= HLEN){
-//		SET_POINT(0,i); 
-		FramePointer[i] |= Color;
+		SET_POINT(0,i,Color); 
+//		FramePointer[i] |= Color;
 	}
 }
 
@@ -217,8 +219,8 @@ void ClrVLine(color_t Color, uint32_t H, uint32_t V1, uint32_t V2){
 	register uint32_t i = 0;
 	uint32_t End = V2*HLEN + H;
 	for (i = V1*HLEN+H; i <= End; i+= HLEN){
-//		CLR_POINT(0,i);
-		Framebuffer[i] &= ~Color;
+		CLR_POINT(0,i,Color);
+//		Framebuffer[i] &= ~Color;
 	}
 }
 

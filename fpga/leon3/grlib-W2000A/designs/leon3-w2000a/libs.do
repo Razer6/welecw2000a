@@ -13,6 +13,5 @@ vlib modelsim/gleichmann
 vlib modelsim/fmf 
 vlib modelsim/spansion 
 vlib modelsim/gsi 
-vlib modelsim/DSO 
 vlib modelsim/micron 
 vlib modelsim/work 

@@ -36,7 +36,7 @@ library DSO;
 use DSO.pDSOConfig.all;
 use DSO.Global.all;
 --use DSO.pshram.all;
-use DSO.pVGA.all;
+--use DSO.pVGA.all;
 --use DSO.pSFR.all;
 --use DSO.pSpecialFunctionRegister.all;
 --use DSO.pTrigger.all;
@@ -457,17 +457,16 @@ begin
     end generate;
   end generate;
 
-  Display : entity work.BhvDisplay
-    generic map (gGenVGA => cGenVGA)
-    port map (
-      iDCLK  => DCLK,
-      iHD    => HD,
-      iVD    => VD,
-      iDENVD => DENA,
-      iDENHD => DENA,
-      iRed   => Red(5 downto 4),
-      iGreen => Green(5 downto 4),
-      iBlue  => Blue(5 downto 4));
+--  Display : entity work.BhvDisplay
+--    generic map (gGenVGA => cGenVGA)
+--    port map (
+--      iDCLK  => DCLK,
+--      iHD    => HD,
+--      iVD    => VD,
+--      iDENA => DENA,
+--      iRed   => Red(5 downto 4),
+--      iGreen => Green(5 downto 4),
+--      iBlue  => Blue(5 downto 4));
 
   iclk25_2  <= clk;
   iclk25_7  <= clk;

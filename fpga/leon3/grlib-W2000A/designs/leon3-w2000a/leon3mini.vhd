@@ -50,7 +50,7 @@ library DSO;
 use DSO.pDSOConfig.all;
 use DSO.Global.all;
 --use DSO.pshram.all;
-use DSO.pVGA.all;
+--use DSO.pVGA.all;
 use DSO.pSFR.all;
 use DSO.pSpecialFunctionRegister.all;
 use DSO.pTrigger.all;
@@ -219,6 +219,12 @@ architecture rtl of leon3mini is
   signal ahbso : ahb_slv_out_vector := (others => ahbs_none);
   signal ahbmi : ahb_mst_in_type;
   signal ahbmo : ahb_mst_out_vector := (others => ahbm_none);
+
+  signal MEMahbsi   : ahb_slv_in_type;
+  signal MEMahbso   : ahb_slv_out_vector := (others => ahbs_none);
+  signal MEMahbmi   : ahb_mst_in_type;
+  signal MEMahbmo   : ahb_mst_out_vector := (others => ahbm_none);
+  signal MEMahb_ctl : ahb_slv_out_vector := (others => ahbs_none);
 
   signal clkm, rstn, sdclkl : std_ulogic;
   signal cgi                : clkgen_in_type;
@@ -438,65 +444,6 @@ begin
       oACK  => BootACK);
   -- pragma translate_on
 
-  -----------------------------------------------------------------------------
-  -- These few lines solve an incompability with the mctrl and the
-  -- SRamPriorityAccess which both make a conversation from the bidirectional
-  -- data to the unidirectional idata and odata
-  -----------------------------------------------------------------------------
---  CPUIn.Addr      <= std_ulogic_vector(memo.address(CPUIn.Addr'high+2 downto 2));
---  CPUIn.Data      <= memi.data;
---  CPUIn.Rd        <= ((not memo.iosn) or (not memo.ramsn(0))) and (not memo.ramoen(0));
---  CPUIn.Wr        <= ((not memo.iosn) or (not memo.ramsn(0))) and (not memo.writen);
---  --              ((not memo.wen(0)) or (not memo.wen(1)) or
---  --               (not memo.wen(2)) or (not memo.wen(3)));
---  CPUIn.WriteMask <= not std_ulogic_vector(memo.wrn);
---  memi.bexcn      <= '1';
---  memi.writen     <= '1';
---  memi.wrn        <= "1111";
---  memi.bwidth     <= "10";
---  memi.data       <= bD_SRAM;
-
---  process (CPUOut.ACK, BootACK, memo.ramsn(0), memo.romsn)
---  begin
---    memi.brdyn <= '1';
---    if (memo.ramsn(0) = cLowActive and CPUOut.ACK = '0') or
---      (BootACK = '0' and memo.romsn(0) = cLowActive) then
---      memi.brdyn <= '0';
---    end if;
---  end process;
-
---  ExtRam : entity DSO.SRamPriorityAccess
---    port map (
---      iClk             => ClkDesign,
---      iResetAsync      => ResetAsync,
---      bSRAMData   => memi.data,
---     -- bSRAMData        => bD_SRAM,
---      oExtRam.SRAMAddr => oA_SRAM,
---      oExtRam.nSRAM_CE => oCE_SRAM,
---      oExtRam.nSRAM_WE => oWE_SRAM,
---      oExtRam.nSRAM_OE => oOE_SRAM,
---      oExtRam.UB1_SRAM => oUB1_SRAM,
---      oExtRam.UB2_SRAM => oUB2_SRAM,
---      oExtRam.LB1_SRAM => oLB1_SRAM,
---      oExtRam.LB2_SRAM => oLB2_SRAM,
---      iVGA             => VGAtoRAM,
---      oVGA             => RAMtoVGA,
---      iCPU             => CPUIn,
---      oCPU             => CPUOut);
-
---  Display : entity DSO.SimpleVGA
---    port map (
---      iClk        => ClkDesign,
---      iResetAsync => ResetAsync,
---      oMem        => VGAtoRam,
---      iMem        => RamtoVGA,
---      oDCLK       => oDCLK,
---      oHD         => oHD,
---      oVD         => oVD,
---      oDENA       => oDENA,
---      oRed        => oRed,
---      oGreen      => oGreen,
---      oBlue       => oBlue);
 
 ----------------------------------------------------------------------
 ---  Reset and Clock generation  -------------------------------------
@@ -521,14 +468,160 @@ begin
   -- rstn   <= resetn;
   cgo  <= (others => '1') after 1 ns,
           (others => '1') after 100 ns;
+
+-------------------------------------------------------------------------------
+-- AHB CONTROLLER for the plane VGA
+-------------------------------------------------------------------------------
+  ahb1 : ahbctrl                        -- AHB arbiter/multiplexer
+    generic map (defmast => CFG_DEFMST, split => CFG_SPLIT,
+                 rrobin  => CFG_RROBIN, ioaddr => CFG_AHBIO,
+                 nahbm   => 2, nahbs => 1)
+    port map (rstn, clkm, MEMahbmi, MEMahbmo, MEMahbsi, MEMahbso);
+
+----------------------------------------------------------------------
+---  Memory controllers ----------------------------------------------
+----------------------------------------------------------------------
+
+  mg2 : if CFG_SRCTRL = 1 generate
+    srctrl0 : srctrl
+      generic map  -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
+      (hindex  => 0,
+       romaddr => 0,
+       rommask => 16#ff8#,
+       ramaddr => 16#400#,
+       rammask => 16#ffe#,
+       ioaddr  => 16#200#,
+       iomask  => 16#ffe#,
+       ramws   => CFG_SRCTRL_RAMWS,
+       romws   => CFG_SRCTRL_PROMWS,
+       iows    => CFG_SRCTRL_IOWS,
+       rmw     => CFG_SRCTRL_RMW,       -- read-modify-write enable
+       prom8en => CFG_SRCTRL_8BIT,
+       oepol   => 0,
+       srbanks => CFG_SRCTRL_SRBANKS,
+       banksz  => CFG_SRCTRL_BANKSZ,
+       romasel => CFG_SRCTRL_ROMASEL)
+      port map (rstn, ClkDesign, MEMahbsi, MEMahbso(0), memi, memo, open);
+
+  end generate;
+
+  bD_SRAM <= memo.data after 1 ns when
+             (memo.writen = '0' and memo.ramsn(0) = '0')
+             else (others => 'Z');      --  when others;
+  memi.data <= bD_SRAM after 1 ns;      -- when
+  --  (memo.writen = '1' and memo.ramsn(0) = '0')
+  --  else (others => 'Z');    -- when others;
+  oA_SRAM   <= std_ulogic_vector(memo.address(oA_SRAM'length+1 downto 2));
+  oA_FLASH  <= std_ulogic_vector(memo.address(oA_FLASH'length+1 downto 2));
+  -- oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
+  oOE_SRAM  <= memo.ramoen(0);
+  oWE_SRAM  <= memo.writen;
+--  oLB1_SRAM <= memo.wrn(0);
+--  oUB1_SRAM <= memo.wrn(1);
+--  oLB2_SRAM <= memo.wrn(2);
+--  oUB2_SRAM <= memo.wrn(3);
+  oCE_SRAM  <= cLowActive;
+  oLB1_SRAM <= cLowActive;
+  oUB1_SRAM <= cLowActive;
+  oLB2_SRAM <= cLowActive;
+  oUB2_SRAM <= cLowActive;
+
+  memi.brdyn  <= '1'; memi.bexcn <= '1';
+  memi.writen <= '1'; memi.wrn <= "1111"; memi.bwidth <= "10";
+
+  -- AHB/AHB uni-directional bridge
+  ahb2ahb0 : ahb2ahb generic map (
+    hsindex => 1,
+    hmindex => 0,
+    dir     => 1,
+    slv     => 0,
+    ffact   => 2,
+    memtech => memtech,
+    pfen    => 1,
+    irqsync => 1,
+    rbufsz  => 16,
+    wbufsz  => 8,
+    iburst  => 4,
+    rburst  => 16,
+    bar0    => ahb2ahb_membar(16#000#, '1', '1', 16#E00#),
+    bar1    => 0,
+    bar2    => 0,
+    bar3    => 0,
+    sbus    => 0,
+    mbus    => 1,
+    ioarea  => 16#FFF#,
+    ibrsten => 0)
+    port map (
+      hclkm  => clkm,
+      hclks  => ClkDesign,
+      rstn   => rstn,
+      ahbsi  => ahbsi,                  -- CPU side
+      ahbso  => ahbso(0),               -- CPU side
+      ahbmi  => MEMahbmi,
+      ahbmo  => MEMahbmo(0),
+      ahbso2 => MEMahb_ctl,
+      lcki   => (others => '0'),
+      lcko   => open);
+
+
+  oDENA  <= vgao.blank;
+  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
+  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
+  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
+  oVD    <= vgao.vsync;
+  oHD    <= vgao.hsync;
+  oDCLK  <= not video_clk;
+--  oDENA <= Dena;
+
+--  process (video_clk, ResetAsync)
+--  begin
+--    if ResetAsync = cResetActive then
+--      oRed    <= (others => '0');
+--      oGreen  <= (others => '0');
+--      oBlue   <= (others => '0');
+--      Dena   <= '0';
+--      VGA_PWM <= (others => '0');
+--    elsif rising_edge(video_clk) then
+--      if Dena = '1' or vgao.vsync = '0' then
+--        VGA_PWM   <= VGA_PWM + 1;
+--        end if;
+--      oRed(5)   <= vgao.video_out_r(7);
+--      oGreen(5) <= vgao.video_out_g(7);
+--      oBlue(5)  <= vgao.video_out_b(7);
+--      oRed(3)   <= vgao.video_out_r(6);
+--      oGreen(3) <= vgao.video_out_g(6);
+--      oBlue(3)  <= vgao.video_out_b(6);
+--      oRed(4)   <= (vgao.video_out_r(5) and VGA_PWM(0));
+--      oGreen(4) <= (vgao.video_out_g(5) and VGA_PWM(0));
+--      oBlue(4)  <= (vgao.video_out_b(5) and VGA_PWM(0)); 
+--      Dena      <= vgao.blank;
+--    end if;
+--  end process;
+
+  svga : if CFG_SVGA_ENABLE /= 0 generate
+    svga0 : entity DSO.PlaneVGActl
+      generic map(memtech => memtech, pindex => 6, paddr => 6,
+                  hindex  => 1,
+                  clk0    => 40000, clk1 => 1000000000/((BOARD_FREQ * CFG_CLKMUL)/CFG_CLKDIV),
+                  clk2    => 20000, clk3 => 15385, burstlen => 6)
+      port map(rstn, ClkDesign, video_clk, apbi, apbo(6), vgao, MEMahbmi,
+               MEMahbmo(1), clk_sel);
+    --   video_clk <= clk when clk_sel = "00"      else clkm;
+    video_clk <= iclk25_2;              -- when clk_sel = "00" else ClkCPU;
+  end generate;
+
+  novga : if CFG_VGA_ENABLE+CFG_SVGA_ENABLE = 0 generate
+    apbo(6) <= apb_none; vgao <= vgao_none;
+  end generate;
+
 ---------------------------------------------------------------------- 
----  AHB CONTROLLER --------------------------------------------------
+---  AHB CONTROLLER for the CPU
 ----------------------------------------------------------------------
 
   ahb0 : ahbctrl                        -- AHB arbiter/multiplexer
     generic map (defmast => CFG_DEFMST, split => CFG_SPLIT,
                  rrobin  => CFG_RROBIN, ioaddr => CFG_AHBIO,
-                 nahbm   => 8, nahbs => 8)
+                 nahbm   => 2, nahbs => 4)
     port map (rstn, clkm, ahbmi, ahbmo, ahbsi, ahbso);
 
 ----------------------------------------------------------------------
@@ -574,126 +667,6 @@ begin
   end generate;
   nouah : if CFG_AHB_UART = 0 generate apbo(4) <= apb_none; end generate;
 
---  ahbjtaggen0 : if CFG_AHB_JTAG = 1 generate
---    ahbjtag0 : ahbjtag generic map(tech => fabtech, hindex => CFG_NCPU+CFG_AHB_UART)
---      port map(rstn, clkm, tck, tms, tdi, tdo, ahbmi, ahbmo(CFG_NCPU+CFG_AHB_UART),
---               open, open, open, open, open, open, open, gnd(0));
---  end generate;
-
-----------------------------------------------------------------------
----  Memory controllers ----------------------------------------------
-----------------------------------------------------------------------
-
-  mg1 : if CFG_MCTRL_LEON2 = 1 generate  -- LEON2 memory controller
---    sr1 : mctrl
---      generic map (
---        hindex    => 0,
---        pindex    => 0,
---        romaddr   => 16#000#,
---        -- rommask   => 16#E00#,
---        rommask   => 16#FF7#,
---        ioaddr    => 16#200#,
---        -- iomask    => 16#E00#,
---        iomask    => 16#FFE#,
---        ramaddr   => 16#400#,
---        -- rammask   => 16#C00#,
---        rammask   => 16#FFE#,
---        paddr     => 0,
---        pmask     => 16#fff#,
---        wprot     => 0,
---        invclk    => 0,
---        fast      => 0,
---        romasel   => 28,
---        sdrasel   => 29,
---        -- srbanks   => 4,
---        srbanks   => CFG_SRCTRL_SRBANKS,
---        ram8      => 0,
---        ram16     => 0,
---        sden      => CFG_MCTRL_SDEN,
---        sepbus    => 0,
---        sdbits    => 32,
---        sdlsb     => 2,                  -- set to 12 for the GE-HPE board
---        oepol     => 0,
---        syncrst   => 1,
---        pageburst => 0)
---      port map (rstn, clkm, memi, memo, ahbsi, ahbso(0), apbi, apbo(0), wpo, sdo);
-  end generate;
-
-  mg2 : if CFG_SRCTRL = 1 generate
-    srctrl0 : srctrl
-      generic map  -- (rmw => 1, prom8en => 0, srbanks => 1, banksz => 9)
-      (hindex  => 0,
-       romaddr => 0,
-       rommask => 16#ff8#,
-       ramaddr => 16#400#,
-       rammask => 16#ffe#,
-       ioaddr  => 16#200#,
-       iomask  => 16#ffe#,
-       ramws   => CFG_SRCTRL_RAMWS,
-       romws   => CFG_SRCTRL_PROMWS,
-       iows    => CFG_SRCTRL_IOWS,
-       rmw     => CFG_SRCTRL_RMW,       -- read-modify-write enable
-       prom8en => CFG_SRCTRL_8BIT,
-       oepol   => 0,
-       srbanks => CFG_SRCTRL_SRBANKS,
-       banksz  => CFG_SRCTRL_BANKSZ,
-       romasel => CFG_SRCTRL_ROMASEL)
-      port map (rstn, clkm, ahbsi, ahbso(0), memi, memo, open);
-
---    addr_pad : outpadv generic map (width => 14, tech => padtech)
---      port map (address, memo.address(15 downto 2));
---    bdr : for i in 0 to 3 generate
---      data_pad : iopadv generic map (tech => padtech, width => 8)
---        port map (data(31-i*8 downto 24-i*8), memo.data(31-i*8 downto 24-i*8),
---                  memo.bdrive(i), memi.data(31-i*8 downto 24-i*8));
---    end generate;
-  end generate;
-
-  bD_SRAM <= memo.data after 1 ns when
-             (memo.writen = '0' and memo.ramsn(0) = '0')
-             else (others => 'Z');      --  when others;
-  memi.data <= bD_SRAM after 1 ns;      -- when
-  --  (memo.writen = '1' and memo.ramsn(0) = '0')
-  --  else (others => 'Z');    -- when others;
-  oA_SRAM   <= std_ulogic_vector(memo.address(oA_SRAM'length+1 downto 2));
-  oA_FLASH  <= std_ulogic_vector(memo.address(oA_FLASH'length+1 downto 2));
-  -- oCE_SRAM  <= memo.ramsn(0) and memo.iosn;
-  oOE_SRAM  <= memo.ramoen(0);
-  oWE_SRAM  <= memo.writen;
---  oLB1_SRAM <= memo.wrn(0);
---  oUB1_SRAM <= memo.wrn(1);
---  oLB2_SRAM <= memo.wrn(2);
---  oUB2_SRAM <= memo.wrn(3);
-  oCE_SRAM  <= cLowActive;
-  oLB1_SRAM <= cLowActive;
-  oUB1_SRAM <= cLowActive;
-  oLB2_SRAM <= cLowActive;
-  oUB2_SRAM <= cLowActive;
-
-  memi.brdyn  <= '1'; memi.bexcn <= '1';
-  memi.writen <= '1'; memi.wrn <= "1111"; memi.bwidth <= "10";
-
-
--- pragma translate_off
---  mgpads : if CFG_MCTRL_LEON2 = 1 generate
---    rams_pad : outpadv generic map (width => 5, tech => padtech)
---      port map (ramsn, memo.ramsn(4 downto 0));
---    roms_pad : outpadv generic map (width => 2, tech => padtech)
---      port map (romsn, memo.romsn(1 downto 0));
---    oen_pad : outpad generic map (tech => padtech)
---      port map (oen, memo.oen);
---    rwen_pad : outpadv generic map (width => 4, tech => padtech)
---      port map (rwen, memo.wrn);
---    roen_pad : outpadv generic map (width => 5, tech => padtech)
---      port map (ramoen, memo.ramoen(4 downto 0));
---    wri_pad : outpad generic map (tech => padtech)
---      port map (writen, memo.writen);
---    read_pad : outpad generic map (tech => padtech)
---      port map (read, memo.read);
---    iosn_pad : outpad generic map (tech => padtech)
---      port map (iosn, memo.iosn);
---  end generate;
--- pragma translate_on
 
   ---------------------------------------------------------------------------------------
   -- DSO: AHB devices
@@ -744,13 +717,6 @@ begin
       end if;
     end process;
 
-    ux : entity work.jtag_uart_0_log_module
-      port map (
-        -- inputs:
-        clk    => clkm,
-        data   => apbi.pwdata(7 downto 0),
-        strobe => ux_valid,
-        valid  => ux_valid);
   end generate;
   noua0 : if CFG_UART1_ENABLE = 0 generate apbo(1) <= apb_none; end generate;
 
@@ -795,72 +761,6 @@ begin
                oSFRControl  => SFRControlfromCPU);
   end generate;
 
-  vga : if CFG_VGA_ENABLE /= 0 generate
-    vga0 : apbvga generic map(memtech => memtech, pindex => 5, paddr => 6)
-      --    port map(rstn, clkm, clk, apbi, apbo(5), vgao);
-      port map(rstn, clkm, ClkDesign, apbi, apbo(5), vgao);
-  end generate;
---  vert_sync_pad : outpad generic map (tech => padtech)
---    port map (vga_vsync, vgao.vsync);
---  horiz_sync_pad : outpad generic map (tech => padtech)
---    port map (vga_hsync, vgao.hsync);
---  video_out_r_pad : outpadv generic map (width => 2, tech => padtech)
---    port map (vga_rd, vgao.video_out_r(7 downto 6));
---  video_out_g_pad : outpadv generic map (width => 2, tech => padtech)
---    port map (vga_gr, vgao.video_out_g(7 downto 6));
---  video_out_b_pad : outpadv generic map (width => 2, tech => padtech)
---    port map (vga_bl, vgao.video_out_b(7 downto 6));
-
-
-  oDENA  <= vgao.blank;
-  oRed   <= std_ulogic_vector(vgao.video_out_r(7 downto 5));
-  oGreen <= std_ulogic_vector(vgao.video_out_g(7 downto 5));
-  oBlue  <= std_ulogic_vector(vgao.video_out_b(7 downto 5));
-  oVD    <= vgao.vsync;
-  oHD    <= vgao.hsync;
-  oDCLK  <= not video_clk;
---  oDENA <= Dena;
-
---  process (video_clk, ResetAsync)
---  begin
---    if ResetAsync = cResetActive then
---      oRed    <= (others => '0');
---      oGreen  <= (others => '0');
---      oBlue   <= (others => '0');
---      Dena   <= '0';
---      VGA_PWM <= (others => '0');
---    elsif rising_edge(video_clk) then
---      if Dena = '1' or vgao.vsync = '0' then
---        VGA_PWM   <= VGA_PWM + 1;
---        end if;
---      oRed(5)   <= vgao.video_out_r(7);
---      oGreen(5) <= vgao.video_out_g(7);
---      oBlue(5)  <= vgao.video_out_b(7);
---      oRed(3)   <= vgao.video_out_r(6);
---      oGreen(3) <= vgao.video_out_g(6);
---      oBlue(3)  <= vgao.video_out_b(6);
---      oRed(4)   <= (vgao.video_out_r(5) and VGA_PWM(0));
---      oGreen(4) <= (vgao.video_out_g(5) and VGA_PWM(0));
---      oBlue(4)  <= (vgao.video_out_b(5) and VGA_PWM(0)); 
---      Dena      <= vgao.blank;
---    end if;
---  end process;
-
-  svga : if CFG_SVGA_ENABLE /= 0 generate
-    svga0 : entity DSO.PlaneVGActl
-      generic map(memtech => memtech, pindex => 6, paddr => 6,
-                  hindex  => CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG,
-                  clk0    => 40000, clk1 => 1000000000/((BOARD_FREQ * CFG_CLKMUL)/CFG_CLKDIV),
-                  clk2    => 20000, clk3 => 15385, burstlen => 6)
-      port map(rstn, clkm, video_clk, apbi, apbo(6), vgao, ahbmi,
-               ahbmo(CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG), clk_sel);
-    --   video_clk <= clk when clk_sel = "00"      else clkm;
-    video_clk <= iclk25_2;              -- when clk_sel = "00" else ClkCPU;
-  end generate;
-
-  novga : if CFG_VGA_ENABLE+CFG_SVGA_ENABLE = 0 generate
-    apbo(6) <= apb_none; vgao <= vgao_none;
-  end generate;
 
 -----------------------------------------------------------------------
 ---  Drive unused bus elements  ---------------------------------------
@@ -870,7 +770,7 @@ begin
     ahbmo(i) <= ahbm_none;
   end generate;
   nap0 : for i in 7 to NAPBSLV-1-CFG_GRETH generate apbo(i) <= apb_none; end generate;
-  nah0 : for i in 8 to NAHBSLV-1 generate ahbso(i)          <= ahbs_none; end generate;
+--  nah0 : for i in 8 to NAHBSLV-1 generate ahbso(i)          <= ahbs_none; end generate;
 
 -----------------------------------------------------------------------
 ---  Boot message  ----------------------------------------------------

@@ -1,6 +1,7 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003, Gaisler Research
+--  Copyright (C) 2003 - 2008, Gaisler Research
+--  Copyright (C) 2008 - 2010, Aeroflex Gaisler
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -92,6 +93,15 @@ type pci_out_type is record
   rst           : std_ulogic;
 end record;
 
+constant pci_out_none : pci_out_type := (
+  aden => '1', vaden => (others => '1'), cbeen => (others => '1'),
+  frameen => '1', irdyen => '1', trdyen => '1', devselen => '1',
+  stopen => '1', ctrlen => '1', perren => '1', paren => '1', reqen => '1',
+  locken => '1', serren => '1', inten => '1', req => '1', ad => (others => '0'),
+  cbe => (others => '1'), frame => '1', irdy => '1', trdy => '1', devsel => '1',
+  stop => '1', perr => '1', serr => '1', par => '1', lock => '1',
+  power_state => (others => '1'), pme_enable => '1',pme_clear => '1',
+  int => '1', rst => '1');
 
   component pci_target
   generic (
@@ -147,6 +157,7 @@ end record;
     pindex    : integer := 0;
     paddr     : integer := 0;
     pmask     : integer := 16#fff#;
+    pirq      : integer := 0;
     blength   : integer := 4);
   port (
     rst       : in std_logic;
@@ -231,7 +242,10 @@ component pcipads
     oepol        : integer := 0;
     host         : integer := 1;
     int          : integer := 0;
-    no66         : integer := 0
+    no66         : integer := 0;
+    onchipreqgnt : integer := 0;
+    drivereset   : integer := 0;
+    constidsel   : integer := 0
   );
   port (
     pci_rst     : inout std_logic;
@@ -264,6 +278,7 @@ component pcidma
     dapbndx   : integer := 0;
     dapbaddr  : integer := 0;
     dapbmask  : integer := 16#fff#;
+    dapbirq   : integer := 0;
     blength   : integer := 16;
     mstndx    : integer := 0;
     abits     : integer := 21;

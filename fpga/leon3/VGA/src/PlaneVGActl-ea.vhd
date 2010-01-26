@@ -78,13 +78,19 @@ architecture rtl of PlaneVGActl is
   type RegisterType is array (1 to 5) of std_logic_vector(31 downto 0);
   type state_type is (running, not_running, reset);
 
+  type aScrambledData is array (0 to 7) of std_logic_vector(31 downto 0);
+  type aScrambledShift is array(0 to 7) of std_logic_vector(7 downto 0);
+
   type read_type is record
     read_pointer     : integer range 0 to length;
     read_pointer_out : integer range 0 to length;
     sync             : std_logic_vector(2 downto 0);
-    data             : std_logic_vector(7 downto 0);
+    MemData          : aScrambledData;
+    ShiftData        : aScrambledShift;
+    MemCnt           : integer range 0 to 7;
+    ByCnt            : integer range 0 to 3;
     lock             : std_logic;
-    index            : std_logic_vector(1 downto 0);
+--    index            : std_logic_vector(1 downto 0);
     mem_index        : integer;
     hcounter         : std_logic_vector(15 downto 0);
     vcounter         : std_logic_vector(15 downto 0);
@@ -93,11 +99,7 @@ architecture rtl of PlaneVGActl is
     hsync            : std_logic;
     vsync            : std_logic;
     csync            : std_logic;
-    blank            : std_logic;
-    hsync2           : std_logic;
-    vsync2           : std_logic;
-    csync2           : std_logic;
-    blank2           : std_logic;
+    blank            : std_logic_vector(0 to 2);
   end record;
 
   type control_type is record
@@ -169,11 +171,11 @@ architecture rtl of PlaneVGActl is
 
 --  signal mred, mgreen, mblue : ColorMask;
 --  signal mlight              : std_ulogic_vector(ColorMask'range);
-  signal Planes   : ColorMask;
-  signal orPlane  : aPlaneRegs;
-  signal andPlane : aPlaneRegs;
-  signal toggle, dena, PlaneSel : std_ulogic;
-  
+  signal Planes           : ColorMask;
+  signal orPlane          : aPlaneRegs;
+  signal andPlane         : aPlaneRegs;
+  signal toggle, PlaneSel : std_ulogic;
+
 
   function "or" (l, r : aPlaneRegs) return aPlaneRegs is
     variable vr : aPlaneRegs;
@@ -369,29 +371,39 @@ begin
 
 -- Assertions 
 
-    rin                <= v;
-    sync_c.s1          <= v.sync_c;
-    sync_w.s1          <= r.sync_w;
-    res_mod            <= sync_c.s3(1);
-    en_mod             <= sync_c.s3(0);
-    write_status       <= sync_w.s3;
-    hvideo             <= r.int_reg(1)(15 downto 0);
-    vvideo             <= r.int_reg(1)(31 downto 16);
-    hfporch            <= r.int_reg(2)(15 downto 0);
-    vfporch            <= r.int_reg(2)(31 downto 16);
-    hsyncpulse         <= r.int_reg(3)(15 downto 0);
-    vsyncpulse         <= r.int_reg(3)(31 downto 16);
-    hmax               <= r.int_reg(4)(15 downto 0);
-    vmax               <= r.int_reg(4)(31 downto 16);
-    apbo.prdata        <= rdata;
-    dmai.wdata         <= (others => '0');
-    dmai.burst         <= '1';
-    dmai.irq           <= '0';
-    dmai.size          <= "10";
-    dmai.write         <= '0';
-    dmai.busy          <= '0';
-    dmai.start         <= r.start and r.enable;
-    dmai.address       <= r.adress;
+    rin          <= v;
+    sync_c.s1    <= v.sync_c;
+    sync_w.s1    <= r.sync_w;
+    res_mod      <= sync_c.s3(1);
+    en_mod       <= sync_c.s3(0);
+    write_status <= sync_w.s3;
+    hvideo       <= r.int_reg(1)(15 downto 0);
+    vvideo       <= r.int_reg(1)(31 downto 16);
+    hfporch      <= r.int_reg(2)(15 downto 0);
+    vfporch      <= r.int_reg(2)(31 downto 16);
+    hsyncpulse   <= r.int_reg(3)(15 downto 0);
+    vsyncpulse   <= r.int_reg(3)(31 downto 16);
+    hmax         <= r.int_reg(4)(15 downto 0);
+    vmax         <= r.int_reg(4)(31 downto 16);
+    apbo.prdata  <= rdata;
+    dmai.wdata   <= (others => '0');
+    dmai.burst   <= '1';
+    dmai.irq     <= '0';
+    dmai.size    <= "10";
+    dmai.write   <= '0';
+    dmai.busy    <= '0';
+    dmai.start   <= r.start and r.enable;
+
+    -- with this read DWORD (32 pixels) read the plane data gets reordered on the fly  
+    -- dmai.address       <= r.adress(31 downto 19) & r.adress(2 downto 0) & r.adress(18 downto 3);
+
+-- normal access addr mod 8
+--    0 => 32 pixel from plane 0
+--    1 => 32 pixel from plane 1
+--    ...
+--    7 => 32 pixel from plane 7    
+    dmai.address <= r.adress;
+
     write_pointer_fifo <= conv_std_logic_vector(v.ram_address, 10);
     datain_fifo        <= v.data;
     clk_sel            <= r.clk_sel;
@@ -407,9 +419,8 @@ begin
     
   begin
 
-    v        := t;
-    v.vsync2 := t.vsync; v.hsync2 := t.hsync; v.csync2 := t.csync;
-    v.blank2 := t.blank;
+    v                          := t;
+    v.blank(1 to v.blank'high) := t.blank(0 to t.blank'high-1);
 
 -- Syncsignals generation functions.
 -------------------------------------------------------------------------------
@@ -439,8 +450,8 @@ begin
       else v.vsync := not r.vpolarity; end if;
 
       --generate csync & blank signal
-      v.csync := not (v.hsync xor v.vsync);
-      v.blank := not t.fifo_ren;
+      v.csync    := not (v.hsync xor v.vsync);
+      v.blank(0) := not t.fifo_ren;
 
       --generate fifo_ren -signal
       if (t.hcounter = (hmax -1) and t.vcounter = vmax) or
@@ -459,10 +470,6 @@ begin
 
     end if;
 
-    if r.func /= "01" then  -- do not delay strobes when not using CLUT
-      v.vsync2 := v.vsync; v.hsync2 := v.hsync; v.csync2 := v.csync;
-      v.blank2 := v.blank;
-    end if;
 
     -- Sync reset part ---------
     if res_mod = '0' then
@@ -470,7 +477,7 @@ begin
       v.vcounter := vmax - 1;
       v.hsync    := r.hpolarity;
       v.vsync    := r.vpolarity;
-      v.blank    := '0';
+      v.blank    := (others => '0');
       v.fifo_ren := '1';
       v.fifo_en  := '1';
     end if;
@@ -486,7 +493,7 @@ begin
       
       if (v.read_pointer_out = 0 or v.read_pointer_out = part or
           v.read_pointer_out = (part + part)) and t.fifo_ren = '0'
-        and v.index = "00"
+        and v.ByCnt = 0                 -- and v.MemCnt = 0
       then
         case t.sync is
           when "111" | "011" =>
@@ -510,22 +517,30 @@ begin
 
       if t.fifo_ren = '0' and v.lock = '0' then
 
-        case t.index is
-          when "00" =>
-            v.data  := dataout_fifo(31 downto 24);
-            v.index := "01";
-          when "01" =>
-            v.data  := dataout_fifo(23 downto 16);
-            v.index := "10";
-          when "10" =>
-            v.data  := dataout_fifo(15 downto 8);
-            v.index := "11";
-          when "11" =>
-            v.data  := dataout_fifo(7 downto 0);
-            v.index := "00"; inc_pointer := '1';
-          when others =>
-            v.data := (others => 'X');
-        end case;
+        if v.MemCnt = 0 then
+          for i in 0 to 7 loop
+            case v.ByCnt is
+              when 0 => v.ShiftData(i) := v.MemData(i)(7 downto 0);
+              when 1 => v.ShiftData(i) := v.MemData(i)(15 downto 8);
+              when 2 => v.ShiftData(i) := v.MemData(i)(23 downto 16);
+              when 3 => v.ShiftData(i) := v.MemData(i)(31 downto 24);
+            end case;
+          end loop;
+        else
+          for i in 0 to 7 loop
+            v.ShiftData(i)(6 downto 0) := v.ShiftData(i)(7 downto 1);
+          end loop;
+        end if;
+
+        if v.ByCnt = 0 then
+          inc_pointer         := '1';
+          v.MemData(v.MemCnt) := dataout_fifo;
+        end if;
+        if v.MemCnt = 7 then
+          v.ByCnt := (v.ByCnt +1) mod 4;
+        end if;
+        v.MemCnt := (v.MemCnt +1) mod 8;
+
       end if;
 
       if inc_pointer = '1' then
@@ -542,7 +557,7 @@ begin
       end if;
       
     else
-      v.data := (others => '0');
+      --  v.data := (others => '0');
     end if;
 
     ------------------------------------------
@@ -551,9 +566,11 @@ begin
       v.sync             := "111";
       v.read_pointer_out := 0;
       v.read_pointer     := 1;
-      v.data             := (others => '0');
+      --     v.data             := (others => '0');
       v.lock             := '1';
-      v.index            := "00";
+--      v.index            := "00";
+      v.MemCnt           := 0;
+      v.ByCnt            := 0;
     end if;  ------------------------------------------
 
     tin               <= v;
@@ -564,10 +581,10 @@ begin
     fifo_en           <= t.fifo_en;
     read_pointer_fifo <= conv_std_logic_vector(v.read_pointer_out, 10);
     read_en_fifo      <= not v.fifo_ren;
-    vgao.hsync        <= t.hsync2;
-    vgao.vsync        <= t.vsync2;
-    vgao.comp_sync    <= t.csync2;
---    vgao.blank        <= t.blank2;
+    vgao.hsync        <= t.hsync;
+    vgao.vsync        <= t.vsync;
+    vgao.comp_sync    <= t.csync;
+    vgao.blank        <= t.blank(t.blank'high);
 
   end process;
 
@@ -577,28 +594,28 @@ begin
   begin
     if rst = '0' then
       toggle <= '0';
-      dena   <= '0';
+      --     dena   <= '0';
     elsif rising_edge(clk) then
 
-      if t.blank2 = '1' or t.vsync2 = '0' then
+      if t.blank(t.blank'high) = '1' or t.vsync = '0' then
         toggle <= not toggle;
       end if;
 
-      for i in 0 to 5 loop
+      for i in 0 to 4 loop
         Planes(i) <= (light => '0', others => "00");
       end loop;
-      for i in 6 to 7 loop
+      for i in 5 to 7 loop
         Planes(i) <= (light => '1', others => "11");
       end loop;
 
       for i in 0 to 3 loop
-        if t.data(i) = '1' then
+        if t.ShiftData(i)(0) = '1' then
           Planes(i).light <= r.Color0(i*8 +7) or (r.Color0(i*8 +6));
           Planes(i).red   <= std_ulogic_vector(r.Color0(i*8 +5 downto i*8 +4));
           Planes(i).green <= std_ulogic_vector(r.Color0(i*8 +3 downto i*8 +2));
           Planes(i).blue  <= std_ulogic_vector(r.Color0(i*8 +1 downto i*8));
         end if;
-        if t.data(i+4) = '1' then
+        if t.ShiftData(i+4)(0) = '1' then
           Planes(i+4).light <= r.Color1(i*8 +7) or (r.Color1(i*8 +6));
           Planes(i+4).red   <= std_ulogic_vector(r.Color1(i*8 +5 downto i*8 +4));
           Planes(i+4).green <= std_ulogic_vector(r.Color1(i*8 +3 downto i*8 +2));
@@ -619,10 +636,10 @@ begin
         vgao.video_out_b <= orPlane.blue(1) & orPlane.light & orPlane.blue(0) & "00000";
       end if;
 
-      PlaneSel <= t.data(5);
+      PlaneSel <= t.ShiftData(5)(0) or t.ShiftData(6)(0) or t.ShiftData(7)(0);
 
-      vgao.blank <= dena;
-      dena      <= t.blank2;
+      --   vgao.blank <= dena;
+      --   dena       <= t.blank(t.blank'high);
 
     end if;
   end process;

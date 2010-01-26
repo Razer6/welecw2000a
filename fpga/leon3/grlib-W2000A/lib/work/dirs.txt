@@ -1,5 +1,4 @@
 debug 
-../../../TestFiles/src
 #s1/sparc_libs
 #s1/sparc_core
 #s1/s1_top

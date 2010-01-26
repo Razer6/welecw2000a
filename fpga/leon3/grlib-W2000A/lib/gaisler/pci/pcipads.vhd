@@ -1,6 +1,7 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003, Gaisler Research
+--  Copyright (C) 2003 - 2008, Gaisler Research
+--  Copyright (C) 2008 - 2010, Aeroflex Gaisler
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -38,7 +39,10 @@ entity pcipads is
     oepol        : integer := 0;
     host         : integer := 1;
     int          : integer := 0;
-    no66         : integer := 0
+    no66         : integer := 0;
+    onchipreqgnt : integer := 0;        -- Internal req and gnt signals
+    drivereset   : integer := 0;        -- Drive PCI rst with outpad
+    constidsel   : integer := 0         -- pci_idsel is tied to local constant
   );
   port (
     pci_rst     : inout std_logic;
@@ -74,16 +78,40 @@ begin
 
   -- Reset
   rstpad : if noreset = 0 generate
+    nodrive: if drivereset = 0 generate
       pci_rst_pad : iodpad generic map (tech => padtech, level => pci33, oepol => 0) 
           port map (pci_rst, pcio.rst, pcii.rst);
+    end generate nodrive;
+    drive: if drivereset /= 0 generate
+      pci_rst_pad : outpad generic map (tech => padtech, level => pci33) 
+        port map (pci_rst, pcio.rst);
+      pcii.rst <= pcio.rst;
+    end generate drive;
   end generate;
   norstpad : if noreset = 1 generate
     pcii.rst <= pci_rst;
   end generate;
-  
-  pad_pci_gnt   : inpad generic map (padtech, pci33, 0) port map (pci_gnt, pcii.gnt);
-  pad_pci_idsel : inpad generic map (padtech, pci33, 0) port map (pci_idsel, pcii.idsel);
-  
+
+  localgnt: if onchipreqgnt = 1 generate
+    pcii.gnt <= pci_gnt;
+    pci_req <= pcio.req when pcio.reqen = conv_std_logic(oepol=1) else '1';
+  end generate localgnt;
+  extgnt: if onchipreqgnt = 0 generate
+    pad_pci_gnt   : inpad generic map (padtech, pci33, 0) port map (pci_gnt, pcii.gnt);
+    pad_pci_req   : toutpad generic map (tech => padtech, level => pci33, oepol => oepol)
+      port map (pci_req, pcio.req, pcio.reqen);
+  end generate extgnt;
+
+  idsel_pad: if constidsel = 0 generate
+    pad_pci_idsel : inpad generic map (padtech, pci33, 0) port map (pci_idsel, pcii.idsel);
+  end generate idsel_pad;
+  idsel_local: if constidsel /= 0 generate
+    pcii.idsel <= pci_idsel;
+  end generate idsel_local;
+
+  onlyhost : if host = 2 generate
+    pcii.host <= '0';   -- Always host
+  end generate;
   dohost : if host = 1 generate
     pad_pci_host  : inpad generic map (padtech, pci33, 0) port map (pci_host, pcii.host);
   end generate;
@@ -125,8 +153,6 @@ begin
 	          port map (pci_perr, pcio.perr, pcio.perren, pcii.perr);
   pad_pci_par   : iopad generic map (tech => padtech, level => pci33, oepol => oepol)
 	          port map (pci_par, pcio.par, pcio.paren, pcii.par);
-  pad_pci_req   : toutpad generic map (tech => padtech, level => pci33, oepol => oepol)
-	          port map (pci_req, pcio.req, pcio.reqen);
   pad_pci_serr  : iopad generic map (tech => padtech, level => pci33, oepol => oepol)
 	          port map (pci_serr, pcio.serr, pcio.serren, pcii.serr);
 

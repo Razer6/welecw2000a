@@ -78,7 +78,7 @@ architecture rtl of SignalAccess is
   signal   hready  : std_ulogic;
   constant abits   : integer := logXY(kbytes, 2) + 2;
   constant hconfig : ahb_config_type := (
-    0      => ahb_device_reg (VENDOR_FHH, FHH_DSO_SIGNALACCESS, 0, abits+2, 0),
+    0      => ahb_device_reg (VENDOR_LINDERT, LINDERT_DSO_SIGNALACCESS, 0, abits+2, 0),
     4      => ahb_membar(haddr, '1', '1', hmask),
     others => zero32);
   signal hsel   : std_ulogic;

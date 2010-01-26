@@ -1,1 +1,1 @@
-grlib altera altera_mf dw02 synplify techmap eth opencores gaisler esa gleichmann fmf spansion gsi DSO micron work 
+grlib altera altera_mf dw02 synplify techmap eth opencores gaisler esa gleichmann fmf spansion gsi micron work 
