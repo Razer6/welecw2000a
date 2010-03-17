@@ -35,7 +35,23 @@
 #ifndef DSO_FRONTPANEL_H
 #define DSO_FRONTPANEL_H
 
-void FrontPanelTest(uart_regs * uart);
+//void FrontPanelTest(uart_regs * uart);
+
+#define KEYMASK	0x1FFFFFF
+
+void readkeys(void);
+
+uint32_t getKeyPressed(uint32_t keymask);
+
+extern uint32_t encoder_changed0;
+extern uint32_t encoder_changed1;
+extern uint32_t encoder_state0;
+extern uint32_t encoder_state1;
+
+uint32_t get_encoder_diff(uint32_t *reg, uint32_t *change_t, uint32_t *old, int32_t *diff);
+void read_encoders(void);
+
+
 
 #endif
 

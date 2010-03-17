@@ -46,7 +46,7 @@
 #include "DSO_Screen.h"
 #include "DSO_FrontPanel.h"
 #include "Filter_I8.h"
-#include "irqmp.h"
+#include "../leon3/irqmp.h"
 #include "DSO_Misc.h"
 #include "DSO_FrontPanel.h"
 #include "DSO_GUI.h"
@@ -109,7 +109,7 @@ long _read_r ( struct _reent *ptr, int fd, const void *buf, size_t cnt ) {
 #endif 
 #if 1
 void rprintc(unsigned data){
-	SendCharBlock((uart_regs*)REMOTE_UART,(char)data);
+	SendCharBlock(REMOTE_UART,(char)data);
 }	
 #endif
 
@@ -180,7 +180,7 @@ int main () {
 	/* This is a workaround to share the serial port with the debug uart 
 	 * and the generic uart on the W2000A! */
 	WaitMs(100);
-//	WRITE_INT(CONFIGADCENABLE,0); /* selecting the generic uart for the W2000A */
+	WRITE_INT(CONFIGADCENABLE,0); /* selecting the generic uart for the W2000A */
 	/*WaitMs(1000);*/
 //	while(1);
 	InitSignalCapture();
@@ -192,6 +192,7 @@ int main () {
 #endif
 /*	InitIRQ();*/
 //	while(1);
+
 
 /* Uart communication test */
 #ifdef SBX	

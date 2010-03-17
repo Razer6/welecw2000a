@@ -1,4 +1,4 @@
-/****************************************************************************
+ /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
 * File           : DSO_Screen.c
@@ -33,15 +33,17 @@
 * Revision		: 0
 ****************************************************************************/
 
+#include <stddef.h>
 #include "types.h"
 #include "DSO_SFR.h"
 #include "DSO_Screen.h"
 #include "DSO_Misc.h"
 
+#include "GUI.h"
+
 #ifdef BOARD_COMPILATION
 
 #define VGA_STATUS_ADDR           (VGA_CONFIG_BASE_ADDR + 0x00)
-#define VGA_VIDEO_LENGTH_ADDR     (VGA_CONFIG_BASE_ADDR + 0x04) 
 #define VGA_FRONT_PORCH_ADDR      (VGA_CONFIG_BASE_ADDR + 0x08)
 #define VGA_SYNC_LENGTH_ADDR      (VGA_CONFIG_BASE_ADDR + 0x0C)
 #define VGA_LINE_LENGHT_ADDR      (VGA_CONFIG_BASE_ADDR + 0x10)
@@ -127,6 +129,8 @@ static volatile aVGA_Config VGA_Config;
 color_t Framebuffer[HLEN*VLEN] __attribute__ ((aligned (1024)));
 color_t * FramePointer;
 
+sRect *clippingRect = NULL;
+
 uint32_t * InitDisplay (uint32_t Target){
 /*	printf("InitDisplay\n");*/
 	aVGA_Config * volatile VGA_Config = (aVGA_Config *)VGA_CONFIG_BASE_ADDR;
@@ -171,25 +175,141 @@ uint32_t * InitDisplay (uint32_t Target){
 
 }
 
-void DrawPoint(uint16_t Color, uint32_t H, uint32_t V){
+void DrawPoint(uint16_t Color, uint32_t H, uint32_t V)
+{
 	FramePointer[V*HLEN+H] = Color;
 }
 
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawHLine(uint16_t Color, uint32_t V, uint32_t H1, uint32_t H2){
+void DrawHLine(uint16_t Color, uint32_t V, uint32_t H1, uint32_t H2)
+{
 	register uint32_t i = 0;
 	uint32_t End = V*HLEN + H2;
-	for (i = V*HLEN+H1; i <= End; ++i){
+
+	for (i = V*HLEN+H1; i <= End; ++i, H1++)
+	{
 		FramePointer[i] = Color;
 	}
 }
 
+
 /* H1 <= H2 and V1 <= V2 and Hx < HLEN and Vx < VLEN */
-void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2){
+void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2)
+{
 	register uint32_t i = 0;
 	uint32_t End = V2*HLEN + H;
-	for (i = V1*HLEN+H; i <= End; i+= HLEN){
+
+	for (i = V1*HLEN+H; i <= End; i+= HLEN, V1++)
+	{
 		FramePointer[i] = Color;
+	}
+}
+
+
+
+void DrawVLineClipped(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2)
+{
+	register uint32_t i = 0;
+	uint32_t End = V2*HLEN + H;
+
+	for (i = V1*HLEN+H; i <= End; i+= HLEN, V1++)
+	{
+		if(clippingRect != NULL && H >= clippingRect->x && H <= clippingRect->x+clippingRect->width && V1 >= clippingRect->y && V1 <= clippingRect->y+clippingRect->height)
+			continue;
+
+		DrawPixel32(Color, H, V1);
+	}
+}
+
+void ClearVLineClipped(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2)
+{
+	register uint32_t i = 0;
+	uint32_t End = V2*HLEN + H;
+
+	for (i = V1*HLEN+H; i <= End; i+= HLEN, V1++)
+	{
+		if(clippingRect != NULL && H >= clippingRect->x && H <= clippingRect->x+clippingRect->width && V1 >= clippingRect->y && V1 <= clippingRect->y+clippingRect->height)
+			continue;
+
+		uint32_t grid = (gridbuffer[V1][H/32]);
+		uint32_t mask = (1<<(31-(H%32)));
+
+		if(grid & mask)
+		{
+			DrawPixel32(GRIDCOLOR, H, V1);
+		}
+		else
+		{
+			DrawPixel32(Color, H, V1);
+		}
+	}
+}
+
+void DrawPixel32(color_t color, uint32_t x, uint32_t y)
+{
+	uint32_t *fp = (uint32_t*)Framebuffer;
+
+	if((x%2)==0)
+	{
+		fp[(y*HLEN+x)/2] = (fp[(y*HLEN+x)/2] & 0x0000FFFF) | (color << 16);
+	}
+	else
+	{
+		fp[(y*HLEN+x)/2] = (fp[(y*HLEN+x)/2] & 0xFFFF0000) | color;
+	}
+}
+
+void DrawPixel32Clipped(color_t color, uint32_t x, uint32_t y)
+{
+	uint32_t *fp = (uint32_t*)Framebuffer;
+
+	if(clippingRect != NULL && x >= clippingRect->x && x <= clippingRect->x+clippingRect->width && y >= clippingRect->y && y <= clippingRect->y+clippingRect->height)
+		return;
+
+	if((x%2)==0)
+	{
+		fp[(y*HLEN+x)/2] = (fp[(y*HLEN+x)/2] & 0x0000FFFF) | (color << 16);
+	}
+	else
+	{
+		fp[(y*HLEN+x)/2] = (fp[(y*HLEN+x)/2] & 0xFFFF0000) | color;
+	}
+}
+
+
+
+
+void DrawHLine32(uint16_t color, uint32_t x1, uint32_t x2, uint32_t y)
+{
+	for(; x1<x2; x1++)
+	{
+		DrawPixel32(color, x1, y);
+	}
+}
+
+void DrawVLine32(uint16_t color, uint32_t x, uint32_t y1, uint32_t y2)
+{
+	for(; y1<y2; y1++)
+	{
+		DrawPixel32(color, x, y1);
+	}
+}
+
+void DrawRect32(uint16_t color, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t filled)
+{
+	if(filled)
+	{
+		for(uint32_t i=y; i<y+height; i++)
+		{
+			DrawHLine32(color, x, x+width, i);
+		}
+	}
+	else
+	{
+		DrawHLine32(color, x, x+width, y);
+		DrawHLine32(color, x, x+width, y+height);
+		DrawVLine32(color, x, y+1, y+height);
+		DrawVLine32(color, x+width-1, y+1, y+height);
 	}
 }
 
@@ -197,7 +317,7 @@ void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2){
 void DrawBox(uint16_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2){
 	register uint32_t i = V1;
 	for(i = V1; i <= V2; ++i){
-		DrawHLine(Color,i,H1,H2);
+		DrawHLine32(Color,H1,H2, i);
 	}
 }
 
@@ -212,7 +332,8 @@ void DrawCopyHLine(uint32_t Vsrc, uint32_t Vdst) {
 void DrawCopyVLine(uint32_t Hsrc, uint32_t Hdst) {
 	register uint16_t * src = (uint16_t*)&FramePointer[Hsrc];
 	register uint16_t * dst = (uint16_t*)&FramePointer[Hdst];
-	register uint16_t i = 0;
+	register uint32_t i = 0;
+
 	for (i = 0; i < (VLEN*HLEN); i+= HLEN){
 		dst[i] = src[i];
 	}
@@ -228,8 +349,8 @@ void DrawTest(void){
 	DrawBox(0,0,0,HLEN-1,VLEN-1);
 /*	DrawHLine(-1,0,0,20);*/
 /*	DrawBox(0xAA,270,190,370,290);*/
-	DrawHLine(0x55,0,0,HLEN-1);
-	DrawHLine(0x55,VLEN-1,0,HLEN-1);
+//	DrawHLine(0x55,0,0,HLEN-1);
+	//DrawHLine(0x55,VLEN-1,0,HLEN-1);
 	DrawVLine(0x55,0,0,VLEN-1); 
 	DrawVLine(0x55,HLEN-1,0,VLEN-1);
 	WaitMs(100);
@@ -261,4 +382,98 @@ void DrawTest(void){
 	}
 }
 
+inline void setClippingRect(sRect *clipping)
+{
+	clippingRect = clipping;
+}
+
+inline sRect* getClippingRect(void)
+{
+	return clippingRect;
+}
+
 #endif
+
+
+static uint8_t erroricon_glcd_bmp[]={
+                                     0x00, 0x1f, 0xe0, 0x00,
+                                     0x00, 0xff, 0xfc, 0x00,
+                                     0x01, 0xff, 0xfe, 0x00,
+                                     0x07, 0xff, 0xff, 0x80,
+                                     0x0f, 0xff, 0xff, 0xc0,
+                                     0x1f, 0xff, 0xff, 0xe0,
+                                     0x1f, 0xff, 0xff, 0xe0,
+                                     0x3f, 0xff, 0xff, 0xf0,
+                                     0x7f, 0xcf, 0xcf, 0xf8,
+                                     0x7f, 0x87, 0x87, 0xf8,
+                                     0x7f, 0x03, 0x03, 0xf8,
+                                     0xff, 0x00, 0x03, 0xfc,
+                                     0xff, 0x80, 0x07, 0xfc,
+                                     0xff, 0xc0, 0x0f, 0xfc,
+                                     0xff, 0xe0, 0x1f, 0xfc,
+                                     0xff, 0xe0, 0x1f, 0xfc,
+                                     0xff, 0xc0, 0x0f, 0xfc,
+                                     0xff, 0x80, 0x07, 0xfc,
+                                     0xff, 0x00, 0x03, 0xfc,
+                                     0x7f, 0x03, 0x03, 0xf8,
+                                     0x7f, 0x87, 0x87, 0xf8,
+                                     0x7f, 0xcf, 0xcf, 0xf8,
+                                     0x3f, 0xff, 0xff, 0xf0,
+                                     0x1f, 0xff, 0xff, 0xe0,
+                                     0x1f, 0xff, 0xff, 0xe0,
+                                     0x0f, 0xff, 0xff, 0xc0,
+                                     0x07, 0xff, 0xff, 0x80,
+                                     0x01, 0xff, 0xfe, 0x00,
+                                     0x00, 0xff, 0xfc, 0x00,
+                                     0x00, 0x1f, 0xe0, 0x00,
+};
+
+#define errorIconWIDTH 	30	//Width in pixels
+#define errorIconHEIGHT 	30	//Height in pixels
+#define errorIconBYTEWIDTH 	4	//Width in bytes
+
+
+void LoadBitmap(unsigned const char *bitmap, uint16_t xpos , uint16_t ypos, uint16_t width, uint16_t height, color_t color_bg, color_t color_fg)
+{
+	uint32_t bwidth, xp, xend;
+	uint8_t byte, mask;
+
+	xend = xpos +  width;
+	if(xend>HLEN-1)
+	{
+		xend=HLEN-1;
+	}
+
+	bwidth = width / 8; //Anzahl Bytes horizontal
+
+	if((width % 8) != 0)
+	{
+		bwidth++; //Bei Rest noch ein Byte mehr
+	}
+
+	for(uint32_t i=0; i<height; i++, ypos++)
+	{
+		xp=xpos;
+
+		for(uint32_t j=0; j<bwidth; j++)
+		{
+			byte = *bitmap++;
+			mask=0x80;
+
+			for(uint32_t k=0; k<8; k++, mask >>=1, xp++)
+			{
+				if(byte & mask)
+				{
+					DrawPixel32Clipped(color_fg, xp,ypos);
+				}
+			}
+		}
+	}
+}
+
+void DrawBmpTest(void)
+{
+	LoadBitmap(erroricon_glcd_bmp, 50, 50, errorIconWIDTH, errorIconHEIGHT, COLOR_R3G3B3(7,0,0), COLOR_R3G3B3(0,0,7));
+}
+
+ 	  	 

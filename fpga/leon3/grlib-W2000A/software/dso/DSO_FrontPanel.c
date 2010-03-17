@@ -9,6 +9,7 @@
 *****************************************************************************
 
 *  Copyright (c) 2009, Alexander Lindert
+*  				 2010,  Robert Schilling
 
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -42,6 +43,7 @@
 #define CLEN 40
 void TestKeys(uart_regs * uart, int value , int change, char ** M, int size);
 
+#if 0
 
 void FrontPanelTest(uart_regs * uart) {
 	char Ml[][CLEN] = {
@@ -181,4 +183,97 @@ void TestKeys(uart_regs * uart, int value, int change, char ** M, int size) {
 		}
 	}
 }
+
+#endif
+
+static uint32_t keystate = 0;
+static uint32_t keypress = 0;
+
+void readkeys(void)
+{
+	static uint32_t ct0 = 0, ct1 = 0;
+
+	register uint32_t i = keystate^READ_INT(KEYADDR1);
+
+	/* 2 Bit vertical counter */
+	ct0 = ~(ct0 & i);
+	ct1 = ct0 ^ (ct1 & i);
+	i &= ct0 & ct1;
+
+	keystate ^= i;
+	keypress |= keystate & i;
+}
+
+
+
+uint32_t getKeyPressed(uint32_t keymask)
+{
+//	DisableIRQ();			//Must be atomic
+	keymask &= keypress;
+	keypress ^= keymask;
+//	ReleaseIRQ();
+	return keymask;
+}
+
+uint32_t encoder_changed0;
+uint32_t encoder_changed1;
+uint32_t encoder_state0;
+uint32_t encoder_state1;
+
+void read_encoders(void)
+{
+	static uint32_t old_encoder_state0 = 0, old_encoder_state1;
+
+	encoder_state0 = READ_INT(LEDADDR) & 0xFFFF0000;
+	encoder_state1 = READ_INT(KEYADDR0);
+
+	encoder_changed0 = old_encoder_state0 ^ encoder_state0;
+	encoder_changed1 = old_encoder_state1^encoder_state1;
+
+	old_encoder_state0 = encoder_state0;
+	old_encoder_state1 = encoder_state1;
+}
+
+uint32_t get_encoder_diff(uint32_t *reg, uint32_t *change_t, uint32_t *old, int32_t *diff)
+{
+	register uint32_t enc = *reg;
+	register uint32_t change = *change_t;
+	register uint32_t mask = 0x07;
+	register uint32_t i = 0;
+	register uint32_t old_t = *old;
+
+	while(enc)
+	{
+		if(enc & 0x07) //Encoder changed?
+
+		{
+			*diff = (change & 0x07) - (old_t & 0x07);
+
+			if(*diff == -7)
+				*diff = 1;
+			else if(*diff == 7)
+				*diff = -1;
+
+			*reg &= ~mask; //Clear change
+			*old = (*old & ~mask) | ((change & 0x07)<<i); //save current state
+			return mask;
+		}
+		//Next Encoder
+		old_t >>= 4;
+		i += 4;
+		mask <<= 4;
+		enc >>= 4;
+		change >>= 4;
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
+
 #endif

@@ -122,7 +122,7 @@
 #define EXTTRIGGERPWM3_STARTBIT 24
 
 
-/* INPUTCH0ADDR INPUTCH0ADDR INPUTCH1ADDR INPUTCH2ADDR*/
+/* INPUTCH0ADDR INPUTCH1ADDR INPUTCH2ADDR INPUTC3ADDR*/
 /* Signal Selector: The trigger does always have on each device 4 channels with each 8 bits*/
 /* For the lower 8 bits from a 16 bit signal use CHxLOWER */
 #define CH0UPPER 0
@@ -183,6 +183,14 @@
 #define MAX_TRIGGER_TYPES 8
 /* TODO add more trigger types*/
 
+typedef enum TriggerTypes
+{
+	NORMAL_TRIGGER = 2,
+	GLITCH_TRIGGER = 4,
+	EXTERNAL_TRIGGER = 0
+}
+eTriggerTypes;
+
 
 /* NORMALTRIGGER is an 8 bit trigger*/
 /* The NORMALTRIGGER is a schmitt trigger with an stable counter.*/
@@ -221,7 +229,7 @@
 #define LED_EDGE       9
 #define RUN_GREEN     10
 #define RUN_RED       11
-#define SINGLE_GREEN  12 
+#define SINGLE_GREEN  12
 #define SINGLE_RED    13
 
 /*  (read only) */
@@ -262,7 +270,7 @@
 #define BTN_SINGLE      13
 #define BTN_CURSORS     14
 #define BTN_QUICKMEAS   15
-#define BTN_ACQUIRE     16
+#define BTN_ACQUIRE   	16
 #define BTN_DISPLAY     17
 #define BTN_EDGE        18
 #define BTN_MODECOUPLING 19
@@ -357,4 +365,12 @@
 /*int Uart16550Addr          40;*/
 /*int Uart16550Data          41;*/
 
+
+#define CH0		0
+#define CH1		1
+#define CH2		2
+#define	CH3		3
+
 #endif
+
+ 	  	 

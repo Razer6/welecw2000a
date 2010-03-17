@@ -68,7 +68,7 @@ bool UartInit(	const unsigned int CPUFreq,
 char ReceiveCharBlock(uart_regs * uart);
 char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error);
 
-void SendCharBlock(uart_regs * uart, char c);
+void SendCharBlock(uart_regs * uart, int c);
 
 /* interrupts if the rx buffer is empty!*/
 void ReceiveString (uart_regs * uart, char * c, unsigned int * size);

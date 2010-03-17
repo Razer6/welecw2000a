@@ -9,7 +9,7 @@ TINYFLAGS= -msoft-float -nostdlib  -nostartfiles
 TX= -Tlinkprom -N -L./ -Ttext=0
 
 DSOSRC= $(DSOPATH)/DSO_Misc $(DSOPATH)/Leon3Uart $(DSOPATH)/DSO_ADC_Control $(DSOPATH)/DSO_SignalCapture $(DSOPATH)/rprintf $(DSOPATH)/convert $(DSOPATH)/crc $(DSOPATH)/DSO_Remote $(DSOPATH)/DSO_Remote_Slave
-W2000SRC= $(DSOPATH)/DSO_Screen $(DSOSRC) $(DSOPATH)/DSO_SignalCTest $(DSOPATH)/DSO_GUI $(DSOPATH)/Filter_I8 
+W2000SRC= $(DSOPATH)/DSO_Screen $(DSOSRC) $(DSOPATH)/DSO_SignalCTest $(DSOPATH)/DSO_GUI $(DSOPATH)/Filter_I8 $(DSOPATH)/font_Arial_Bold_14 $(DSOPATH)/font_Arial_18 $(DSOPATH)/DSO_Font $(DSOPATH)/DSO_FrontPanel $(DSOPATH)/GUI $(DSOPATH)/util
 SBXSRC=$(DSOPATH)/SandboxXBootloader $(DSOSRC)
 
 WCFILES=$(W2000SRC:%=%.c)
@@ -28,7 +28,7 @@ SbxTBRom: prom.exe
 	./BootRomGen prom.bin W2000ROM.vhd
 
 WTBRom:  $(DSOPATH)/Startup.S
-	$(XCC) $(TINYFLAGS)  $(DSOPATH)/Startup.S -o Startup.exe
+	$(XCC) $(TINYFLAGS)  $(DSOPATH)/Startup.S -o Startup.ex
 	sparc-elf-objcopy -O binary Startup.exe Startup.bin
 	./BootRomGen Startup.bin W2000ROM.vhd
 
@@ -40,7 +40,7 @@ W2000: $(WCFILES)
 	sparc-elf-objcopy -O binary W2000ROM.exe sram.bin
 
 W2U:
-	$(DSOPATH)/WaveRecorder/WaveRecorder -u  $(UART) -b 115200 -n 2 -p Debugger -c LoadRun --Ffile=sram.bin
+	$(DSOPATH)/WaveRecorder/WaveRecorder -p Debugger -u com4 -b 115200 -n 2 -c LoadRun --Ffile=sram.bin
 
 W2D:
 	$(DSOPATH)/WaveRecorder/WaveRecorder -u  $(UART) -b 115200 -n 2 -p Debugger -c Debug

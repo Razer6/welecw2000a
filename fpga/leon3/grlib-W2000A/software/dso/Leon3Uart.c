@@ -113,7 +113,7 @@ char ReceiveChar(uart_regs * uart, unsigned int TimeoutMs, unsigned int *error){
 	return loadmem((int)&uart->data);
 }
 
-void SendCharBlock(uart_regs * uart, char c) {
+void SendCharBlock(uart_regs * uart, int c) {
 	volatile int temp = 0;
 	while (1) {
 		temp = loadmem((int)&uart->status);

@@ -36,8 +36,18 @@
 #define DSO_SCREEN_H
 
 #include "types.h"
+#include "util.h"
 
 typedef uint16_t color_t;
+
+typedef struct Rect
+{
+	uint16_t x;
+	uint16_t y;
+	uint16_t width;
+	uint16_t height;
+}
+sRect;
 
 uint32_t * InitDisplay (uint32_t Target);
 
@@ -50,13 +60,38 @@ void DrawVLine(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2);
 void DrawBox(uint16_t Color, uint32_t H1, uint32_t V1, uint32_t H2, uint32_t V2);
 void DrawTest(void);
 
+void DrawVLineClipped(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2);
+
+void DrawPixel32(color_t color, uint32_t x, uint32_t y);
+void DrawPixel32Clipped(color_t color, uint32_t x, uint32_t y);
+
+void DrawRect32(uint16_t color, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t filled);
+
+void LoadBitmap(unsigned const char *bitmap, uint16_t xpos , uint16_t ypos, uint16_t width, uint16_t height, color_t color_bg, color_t color_fg);
+
+void DrawBmpTest(void);
+
+void generategrid(void);
+
+void drawGrid(void);
+
+void ClearVLineClipped(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2);
+
+void setClippingRect(sRect *clipping);
+inline sRect* getClippingRect(void);
+
+
 /* The display can only draw the three highest bits per color */
 /* Standard color set */
 #define COLOR_R5G5B6(Red,Green,Blue) (((Red) << 11) | ((Green) << 5) | (Blue))
 /* 3 bit color set */
 #define COLOR_R3G3B3(Red,Green,Blue) (((Red) << 13) | ((Green) << 8) | ((Blue) << 2))
-#endif
 
 /* VGA Resulotion */
 #define HLEN 640
 #define VLEN 480
+
+
+
+#endif
+

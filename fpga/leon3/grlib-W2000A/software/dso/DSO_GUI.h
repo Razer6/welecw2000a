@@ -55,4 +55,8 @@ void GetCh(
 		uSample * src, 
 		uint32_t srcSamples);
 
+#define CHANNEL_ON	1
+#define CHANNEL_OFF	0
+
+
 #endif
