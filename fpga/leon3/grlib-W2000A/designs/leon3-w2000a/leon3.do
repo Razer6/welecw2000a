@@ -275,3 +275,8 @@
 	vcom -quiet  -93  -work work ../../grlib-W2000A/lib/work/debug/debug.vhd
 	vcom -quiet  -93  -work work ../../grlib-W2000A/lib/work/debug/grtestmod.vhd
 	vcom -quiet  -93  -work work ../../grlib-W2000A/lib/work/debug/cpu_disas.vhd
+#	vcom -quiet  -93  -work work config.vhd
+#	vcom -quiet  -93  -work work ahbrom.vhd
+#	vcom -quiet  -93  -work work W2000ROM.vhd
+#	vcom -quiet  -93  -work work leon3mini.vhd
+#	vcom -quiet  -93  -work work testbench.vhd

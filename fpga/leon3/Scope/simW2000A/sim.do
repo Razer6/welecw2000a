@@ -76,9 +76,10 @@ vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/SFR/SignalAccess-ea.vhd
 
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/ahbrom.vhd
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/W2000ROM.vhd
+vcom -quiet -93 -work dso ../../grlib-W2000A/lib/DSO/shram/FastSRAMctrl-ea.vhd
 vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/leon3mini.vhd
 #vcom -quiet -93 -work work ../../Scope/src/leon3mini.vhd      # out of date
-#vcom -quiet -93 -work DSO {../../Scope/src/TopScope-ea.vhd}  # out of date
+#vcom -quiet -93 -work dso {../../Scope/src/TopScope-ea.vhd}  # out of date
 
 # behavional files for testing
 vcom -quiet -93 -work work {../../TestFiles/src/Wavefiles-p.vhd}

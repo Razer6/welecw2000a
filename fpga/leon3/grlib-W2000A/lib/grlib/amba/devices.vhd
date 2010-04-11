@@ -256,7 +256,7 @@ package devices is
   
   constant LINDERT_DSO_SFR              : amba_device_type := 16#001#;
   constant LINDERT_DSO_SIGNALACCESS     : amba_device_type := 16#002#;
-  constant LINDERT_SHRAM                : amba_device_type := 16#003#;
+  constant LINDERT_SRCTL                : amba_device_type := 16#003#;
   
 -- Orbita device id's
 
@@ -522,7 +522,7 @@ package devices is
   constant lindert_device_table : device_table_type := (
     LINDERT_DSO_SFR           => "DSO Special Function Register  ",
     LINDERT_DSO_SIGNALACCESS  => "DSO Trigger memory access      ",
-    LINDERT_SHRAM             => "CPU shared RAM with any VGA    ",
+    LINDERT_SRCTL             => "AHB Fast ROM/SRAM controller   ",
     others                => "Unknown                        ");
   constant Lindert_lib : vendor_library_type := (
     vendorid     => VENDOR_LINDERT,

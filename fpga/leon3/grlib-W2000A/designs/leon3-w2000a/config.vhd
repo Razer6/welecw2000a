@@ -81,9 +81,10 @@ package config is
   constant CFG_NWIN : integer := (8);
   constant CFG_V8 : integer := 2;
   constant CFG_MAC : integer := 1;
+  constant CFG_BP : integer := 1;
   constant CFG_SVT : integer := 1;
   constant CFG_RSTADDR : integer := 16#00000#;
-  constant CFG_LDDEL : integer := (1);
+  constant CFG_LDDEL : integer := (2);
   constant CFG_NWP : integer := (0);
   constant CFG_PWD : integer := 0*2;
   constant CFG_FPU : integer := 0 + 16*0;
@@ -113,6 +114,7 @@ package config is
   constant CFG_DTLBNUM : integer := 2;
   constant CFG_TLB_TYPE : integer := 1 + 0*2;
   constant CFG_TLB_REP : integer := 1;
+  constant CFG_MMU_PAGE : integer := 0;
   constant CFG_DSU : integer := 1;
   constant CFG_ITBSZ : integer := 1;
   constant CFG_ATBSZ : integer := 0;
@@ -127,7 +129,7 @@ package config is
   constant CFG_PCLOW : integer := 2;
 -- AMBA settings
   constant CFG_DEFMST : integer := (2);
-  constant CFG_RROBIN : integer := 0;
+  constant CFG_RROBIN : integer := 1;
   constant CFG_SPLIT : integer := 0;
   constant CFG_AHBIO : integer := 16#FFF#;
   constant CFG_APBADDR : integer := 16#800#;
@@ -143,14 +145,14 @@ package config is
   constant CFG_ETH_BUF : integer := 1;
   constant CFG_ETH_IPM : integer := 16#C0A8#;
   constant CFG_ETH_IPL : integer := 16#0033#;
-  constant CFG_ETH_ENM : integer := 16#00007A#;
-  constant CFG_ETH_ENL : integer := 16#CC0001#;
+  constant CFG_ETH_ENM : integer := 16#020000#;
+  constant CFG_ETH_ENL : integer := 16#000009#;
 -- PROM/SRAM controller
   constant CFG_SRCTRL : integer := 1;
   constant CFG_SRCTRL_PROMWS : integer := (4);
   constant CFG_SRCTRL_RAMWS : integer := (0);
   constant CFG_SRCTRL_IOWS : integer := (0);
-  constant CFG_SRCTRL_RMW : integer := 0;
+  constant CFG_SRCTRL_RMW : integer := 1;
   constant CFG_SRCTRL_8BIT : integer := 0;
   constant CFG_SRCTRL_SRBANKS : integer := 1;
   constant CFG_SRCTRL_BANKSZ : integer := 8;
@@ -214,7 +216,7 @@ package config is
   constant CFG_DSO_CHANNELS : integer := (2);
   constant CFG_DSO_SAMPLING_FREQUENCY : integer := (1000000000);
   constant CFG_DSO_INPUT_BIT_WIDTH : integer := (8);
-  constant CFG_DSO_TRIGGER_DATA_SIZE : integer := (16);
+  constant CFG_DSO_TRIGGER_DATA_SIZE : integer := (32);
 -- GRLIB debugging
   constant CFG_DUART : integer := 1;
 end;

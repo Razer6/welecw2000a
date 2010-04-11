@@ -4,8 +4,8 @@ vlib altera_mf
 vmap altera_mf altera_mf
 vlib cycloneii
 vmap cycloneii
-vlib DSO
-vmap DSO
+vlib dso
+vmap dso dso
 
 vlib lpm
 vlib altera

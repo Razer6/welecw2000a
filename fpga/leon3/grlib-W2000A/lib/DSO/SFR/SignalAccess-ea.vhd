@@ -4,7 +4,7 @@
 -- File       : SignalAccess-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2010-01-26
+-- Last update: 2010-02-09
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -78,7 +78,7 @@ architecture rtl of SignalAccess is
   signal   hready  : std_ulogic;
   constant abits   : integer := logXY(kbytes, 2) + 2;
   constant hconfig : ahb_config_type := (
-    0      => ahb_device_reg (VENDOR_FHH, FHH_DSO_SIGNALACCESS, 0, abits+2, 0),
+    0      => ahb_device_reg (VENDOR_LINDERT, LINDERT_DSO_SIGNALACCESS, 0, abits+2, 0),
     4      => ahb_membar(haddr, '1', '1', hmask),
     others => zero32);
   signal hsel   : std_ulogic;
