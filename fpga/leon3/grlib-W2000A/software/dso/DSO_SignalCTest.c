@@ -113,14 +113,14 @@ void rprintc(unsigned data){
 }	
 #endif
 
-/*
+
 void IsrDSO(int irq){
 	if (irq == 5) {
 		WRITE_INT(INTERRUPTADDR,0);
 	} else {
 		WRITE_INT(DSO_SFR_BASE_ADDR,16);
 	}
-}*/
+}
 
 static volatile uint32_t IRQMask;
 

@@ -90,7 +90,21 @@ public:
 		uint32_t StackAddr) = 0;
 
 	virtual uint32_t Debug() = 0;
+        
+	virtual uint32_t SendRAWFile(
+		uint32_t StartAddr,
+		const char * FileName) = 0;
 
+
+	virtual uint32_t Send(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length) = 0;
+
+   	virtual uint32_t Receive(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length) = 0;
 
 protected:
 	Protocoll(){};

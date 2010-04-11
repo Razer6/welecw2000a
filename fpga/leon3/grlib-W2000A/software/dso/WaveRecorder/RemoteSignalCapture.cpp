@@ -74,14 +74,15 @@ uint32_t RemoteSignalCapture::Receive(uint32_t Addr){
 	return Data;
 }
 
-
+/*
 void RemoteSignalCapture::WaitMs(uint32_t Milliseconds){
 #ifdef WINNT
 	Sleep((DWORD)Milliseconds);
 #else
 	usleep(Milliseconds*1000);
 #endif
-}
+}*/
+
 uint32_t RemoteSignalCapture::SendTriggerInput (	
 			const uint32_t noChannels, 
 			const uint32_t SampleSize, 
@@ -138,7 +139,7 @@ uint32_t RemoteSignalCapture::SendAnalogInput(
 {
 	return SetAnalogInputRange(
 			NoCh, 
-			Settings);
+			(SetAnalog *)Settings);
 }
 
 /*
@@ -176,9 +177,9 @@ uint32_t RemoteSignalCapture::Receive(
 	uint32_t rec = 0;
 	uint32_t i = 0;
 	uint32_t * data = new uint32_t[size];
-	printf("Startaddress = 0x%08x Size in DWORDS = %d\n",addr,data); 
-	while (read != size) {
-		rec = mComm->Receive(addr,&data[read],size);
+	printf("Startaddress = 0x%08x Size in DWORDS = %d\n",addr,size); 
+	while (read < size) {
+		rec = mComm->Receive(addr,&data[read],size-read);
 		if (rec == 0) return FALSE;
 		read += rec;
 		for ( ; i < read; i++){
@@ -192,6 +193,81 @@ uint32_t RemoteSignalCapture::Receive(
 	delete data;
 	return TRUE;
 }
+
+uint32_t RemoteSignalCapture::Receive(
+			uint32_t Addr,
+			uint32_t *Data,
+			uint32_t & Length) {
+	uint32_t rec = 0;
+	uint32_t size = Length;
+	Length = 0;
+	if (Data == 0) return FALSE;
+	
+	while (Length < size) {
+		rec = mComm->Receive(Addr,&Data[Length],size-Length);
+		if (rec == 0) return FALSE;
+		Length += rec;
+	}		
+	return TRUE;
+
+}
+
+uint32_t RemoteSignalCapture::Send(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length){
+	uint32_t Retrys = SendRetry(Addr,Data,Length);
+	if (Retrys == cMaxRetrys) return FALSE;
+	return FALSE;
+}
+
+
+uint32_t RemoteSignalCapture::SendRAWFile(
+		uint32_t StartAddr,
+		const char * FileName){
+	uint32_t addr = StartAddr;
+	uint32_t i = 0;
+	uint32_t read = 0;
+	uint32_t data = 0;
+	uint32_t DataArray[cFrameSize];
+ 	FILE * hFile = fopen(FileName,"rb");
+	if (hFile == NULL) {
+		printf("Binary software file not found!\n");
+		return FALSE;
+	}
+	while (feof(hFile) == FALSE){
+		read = fread(DataArray,4,cFrameSize,hFile);
+		if (read == 0){
+			break;
+		}
+		if ((uint32_t)read > cFrameSize) {
+			printf("Unexpected error\n");
+			read = 1;
+			//return FALSE;
+		}
+//Data from binary (ELF-) files are already in correct endianess. As SendRetry will try to correct endianess again
+//change endianess to wrong order beforehand.
+		data = read*sizeof(uint32_t);
+		ChangeEndian(DataArray,data);
+		i = SendRetry(addr,DataArray,read);
+		addr+=read*sizeof(uint32_t);
+		if (i == cMaxRetrys) {
+			printf("%d Transmission errors on addr 0x%08x!\n",cMaxRetrys, addr);
+			fclose(hFile);
+			return FALSE;
+		}
+		
+		if (addr % 0x1000 == 0){
+			/*printf("addr 0x%x\n",addr);*/
+			printf(".");
+		}
+	}
+	fclose(hFile);
+	printf("\nUploading raw data done (%d bytes)!\n",addr-StartAddr);
+	return addr-StartAddr;
+}
+
+
 
 uint32_t RemoteSignalCapture::SendRetry(
 		uint32_t addr,
@@ -217,7 +293,7 @@ uint32_t RemoteSignalCapture::SendRetry(
 	uint32_t i = 0;
 	uint32_t j = 0;
 	uint32_t k = 0;
-	uint32_t read = 0;
+//	uint32_t read = 0;
 	uint32_t * RecData = new uint32_t[length];
 	for (i = 0; i < cMaxRetrys; ++i){
 		k = length-j;
@@ -255,7 +331,6 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	uint32_t read = 0;
 	uint32_t data = 0;
 	uint32_t CpuCtl = 0;
-	uint32_t DataArray[cFrameSize];
 	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
 
 	if (hFile == NULL) {
@@ -284,8 +359,9 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	read = mComm->Receive(DSU_CTL,&data,1);
 	printf("DSU_CTL 0x%08x\n",data);
 	printf("Starting software upload!\n");
+	SendRAWFile(StartAddr,FileName);
 
-
+#if 0
 	/* write the binary file into the RAM */
 	while (feof(hFile) == FALSE){
 		read = fread(DataArray,4,cFrameSize,hFile);
@@ -315,9 +391,10 @@ uint32_t RemoteSignalCapture::LoadProgram(
 		}
 	}
 	fclose(hFile);
+
 	printf("Uploading software done (%d bytes)!\n",addr-StartAddr);
 	mComm->Resync();
-
+#endif
 	
 	
 	// Clear the REGFILE 
@@ -456,9 +533,9 @@ uint32_t RemoteSignalCapture::Debug() {
 
 	printf("DSU_CTL:      0x%08x\n",data);
 
-	if (data & (1 << DSU_PE) != 0) {
+	if ((data & (1 << DSU_PE)) != 0) {
 		printf("LEON3s are in error mode! \n");
-	} else if (data & (1 << DSU_HL) != 0) {
+	} else if ((data & (1 << DSU_HL)) != 0) {
 		printf("LEON3s are in halt mode! \n");
 	} else {
 		printf("Stopping all Leon3s for the backtrace output!\n");
@@ -522,13 +599,13 @@ void RemoteSignalCapture::PrintTraps() {
 	case 0x12: printf("interrupt_level_2 \n"); break;
 	case 0x11: printf("interrupt_level_1 \n"); break;
 	default : 
-	if (sparc >= 0x80){
+	if (sparc >= 0x80) {
 		printf("trap_instruction \n"); break;
-	}
-	if (sparc >= 0x60) {
+	} else if (sparc >= 0x60) {
 		printf("impl.-dependent exception \n"); break;		
+	} else if (sparc != 0x00) {
+		printf("Unknown exception \n");
 	}
-	printf("Unknown exception \n");
 	}
 }
 
@@ -538,8 +615,8 @@ void RemoteSignalCapture::PrintBackTrace() {
 	uint32_t read = 0;
 	uint32_t curr_addr = 0;
 	uint32_t prev_addr = 0;
-	char grep[80];
-/*
+/*	char grep[80];
+
 	printf("Programm counter history\n");
  	addr = DSU_ITRACE_BASE; 
 	

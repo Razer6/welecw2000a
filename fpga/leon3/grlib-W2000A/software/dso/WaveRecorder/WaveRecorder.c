@@ -39,6 +39,7 @@
 #include "WaveFilePackage.h"
 #include "DSO_Remote_Master.h"
 #include "argtable2.h"
+#include "arg_costums.h"
 #include "crc.h"
 #include "Protocoll.h"
 #include "Request.h"
@@ -47,12 +48,13 @@
 #include "DebugUart.h"
 
 
+#define SYNTAX_ERROR 2
 
 uint32_t CheckArgCount (	
-			void * 	IsCount, 
-            const struct arg_str * Command,
-			const int		count,
-			const int		size){ 
+		void * 	IsCount, 
+		const struct arg_str * Command,
+		const int		count,
+		const int		size){ 
 	int i = 0;
 	int nerrors = 0;
 	arg_lit ** IsX = (arg_lit **)IsCount;
@@ -63,29 +65,32 @@ uint32_t CheckArgCount (
 		}
 	}
 	if (nerrors != 0){
-		return FALSE;
+		return SYNTAX_ERROR;
 	}
 	return TRUE;
-}	
+}
 
 void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Protocoll * R){
 	delete R;
 	R = 0;
 	arg_freetable(argtable, TableItems);
-	if (Ret != 0){
+	if (Ret == TRUE){
 		printf("Success!\n");
 		exit(0);
-	 } else {
+	 } else if (Ret == FALSE) {
 		printf("Error in communication!\n"); 
 		exit(3);
-	 }			
+	 } else {
+		printf("Syntax error!\n"); 
+		exit(SYNTAX_ERROR);
+	}	
 }
 
 int main(int argc, char * argv[]) {
 	struct arg_str * UartAddr	= arg_str1("u", "UART", NULL, "Path of serial device, always necessary!");
 	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
-			"[TriggerInput | Trigger | AnalogSettings | Capture | ForceRegs | ReadAddr | WriteAddr | LoadRun | DumpPC | Message]", 
+			"[TriggerInput | Trigger | AnalogSettings | Capture | ReadAddr | WriteAddr | LoadRun | DumpPC | Message]", 
 			"DSO call type, always necessary!");
 	struct arg_str * Trigger	= arg_str0(NULL,"TrType","[ExtLH | ExtHL | SchmittLH | SchmittHL | GlitchLH | GlitchHL]","Trigger type");
 	struct arg_int * ExtTrigger = arg_int0(NULL,"ExtTrigger","<n>", "External trigger, #0 = always, #1 = external trigger 1, #n = external trigger n");
@@ -121,10 +126,11 @@ int main(int argc, char * argv[]) {
 	struct arg_int * AnDA_OffsetCh2	= arg_int0(NULL,"An_OffCh3", 	"<n>",	"Analog offset Ch3 (integer!)"); 
 	struct arg_int * AnDA_OffsetCh3	= arg_int0(NULL,"An_OffCh4", 	"<n>",	"Analog offset Ch4 (integer!)"); 
 	struct arg_int * AnPWM 		= arg_int0(NULL,"An_Offset2",	"<n>",	"Analog offset from PWM"); 
-	struct arg_str * ForceAddr	= arg_str0(NULL,"Faddr",	"",	"DSO CPU address of data (software base address)"); 
+	struct arg_int * ForceAddr	= arg_int0(NULL,"Faddr",	"<n>",	"DSO CPU address of data (software base address)"); 
 	struct arg_int * StackAddr	= arg_int0(NULL,"Stack",	"<n>",	"Stack address of the CPU"); 
 	struct arg_int * CapWTime	= arg_int0(NULL,"CapWaitTime",	"<n>",	"Abourt time, before recording"); 
-	struct arg_int * CapSize	= arg_int0(NULL,"CapSize",	"<n>",	"Capture data size in Dwords"); 
+	struct arg_int * CapSize	= arg_int0("s","CapSize",	"<n>",	"Capture data size in Dwords"); 
+        struct arg_int * Data		= arg_intn("d","Data",	        "<n>",0,64,	"Data Dword(s) for WriteAddr"); 
 	struct arg_int * WavForceFS	= arg_int0(NULL,"WavForcefs",	"<n>",	"Set sampling fs to x istead of Fs");
 	struct arg_lit * AnAC_Ch0	= arg_lit0(NULL,"ACModeCh1",		"AC Mode, if not set AC=off"); 
 	struct arg_lit * AnAC_Ch1	= arg_lit0(NULL,"ACModeCh2",		"AC Mode, if not set AC=off"); 
@@ -144,21 +150,53 @@ int main(int argc, char * argv[]) {
 	AnGainCh3,AnAC_Ch0,AnAC_Ch1,AnAC_Ch2,AnAC_Ch3,
 	AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,
 	AnPWM,AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3,ForceAddr,
-	StackAddr,ForceFile,CapWTime,CapSize,WavForceFS,
+	StackAddr,ForceFile,CapWTime,CapSize,Data,WavForceFS,
 	WaveFile,UartAddr,BaudRate,help,version,end};
+
+	SampleFS->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
+	TriggerLowRef->hdr.scanfn   = (arg_scanfn*)arg_exp_scanfn;
+	TriggerHighRef->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	TriggerLowTime->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	TriggerHighTime->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	AnGainCh0->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
+	AnGainCh1->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
+	AnGainCh2->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
+	AnGainCh3->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
+	AnDA_OffsetCh0->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	AnDA_OffsetCh1->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	AnDA_OffsetCh2->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	AnDA_OffsetCh3->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	CapWTime->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
+	CapSize->hdr.scanfn         = (arg_scanfn*)arg_exp_scanfn;
+	Data->hdr.scanfn            = (arg_scanfn*)arg_exp_scanfn;
+	BaudRate->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
+
 	int Retry = 0;
     
 	int nerrors = arg_parse(argc,argv,argtable);
 
 	if (help->count != 0){
+		printf("\nDSO specific commands:\n\n");
+		printf("TriggerInput \t... Sets the sampling rate, lowpass-filters and the pre trigger mux. \n"); 
+		printf("Trigger \t... Sets the trigger type and values. \n"); 
+		printf("AnalogSettings \t... Sets the voltage range, dc offset and so on.\n"); 
+		printf("Capture \t... Captures raw data from the scope.\n"); 
+		printf("Message \t... Displays debug information if the serial port is also used for the remote control.\n");
+		printf("\nLEON3 Debugging commands:\n\n");
+		printf("ReadAddr \t... Reads -s DWORDs with the start address Faddr.\n"); 
+		printf("WriteAddr \t... Writes -d or --Ffile data to start address Faddr \n"); 
+		printf("LoadRun \t... Loads the software into the FPGA.\n"); 
+		printf("DumpPC \t\t... Generates a backtrace output\n"); 
+		printf("\nCommand line arguments\n\n");
 		arg_print_glossary(stdout,argtable,0);
 		printf("\n");
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 0;
 	}
 	if (version->count != 0){
-		printf("Version 0.1.0 (development stage)\n Author: Alexander Lindert\n"
-			"Remote Control for Open Source Digital Storage Scopes\n");
+		printf("Version 0.1.1, compile time: %s %s (development stage)\n"
+			"Author: Alexander Lindert\n"
+			"Remote Control for Open Source Digital Storage Scopes\n",__DATE__,__TIME__);
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 0;
 	}
@@ -183,7 +221,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	if (!DSOInterface->InitComm((char*)UartAddr->sval[0],5000,BaudRate->ival[0])){
-		printf("%s:%d\n",__FILE__,__LINE__);
+	//	printf("%s:%d\n",__FILE__,__LINE__);
 		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
 
@@ -199,9 +237,9 @@ int main(int argc, char * argv[]) {
 		if (StackAddr->count == 1){
 			Stack = StackAddr->ival[0];
 		}
-		if (Ret == FALSE) {
+		if (Ret != TRUE) {
 			printf("%s:%d\n",__FILE__,__LINE__);
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
 		Ret = DSOInterface->LoadProgram(
 			ForceFile->filename[0],
@@ -218,33 +256,50 @@ int main(int argc, char * argv[]) {
 		struct arg_int * IsOnce[] = {(arg_int*)ForceAddr, CapSize};
 		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		uint32_t addr = 0;
-		if (Ret == FALSE) {
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		if (Ret != TRUE) {
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
-		addr = strlen(ForceAddr->sval[0]);
-		if (addr > 2){
-			if (ForceAddr->sval[0][1] == 'x'){
-				sscanf(ForceAddr->sval[0], "%x",&addr);
-				//addr = atohex(ForceAddr->sval[0]);
-			} else {
-				addr = atoi(ForceAddr->sval[0]);
-			}
-		}
-		DSOInterface->Receive(
+		addr = ForceAddr->ival[0];
+		Ret = DSOInterface->Receive(
 			addr,
 			CapSize->ival[0]);
-		if (Ret == FALSE) {
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
-		}	
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);	
 	}
+
+	if (strcmp("WriteAddr",Command->sval[0]) == 0) {
+		struct arg_int * IsOnce[] = {(arg_int*)ForceAddr};
+		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		if (Ret != TRUE) {
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		}
+		uint32_t addr = ForceAddr->ival[0];
+
+		uint32_t * data = (uint32_t*)&Data->ival[0];
+		uint32_t length = Data->count;
+		if (ForceFile->count != 0) {
+			DSOInterface->SendRAWFile(
+				addr,
+				ForceFile->filename[0]);
+		} else if (length == 0) {
+			printf("Write data not set -d=<n> | --Data=<n> | Ffile=<file>\n");
+			ExitWaveRecorder(SYNTAX_ERROR,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		} else {
+			Ret = DSOInterface->Send(
+				addr,
+				data,
+				length);
+		}
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);	
+	}
+
 
 	if (strcmp("TriggerInput",Command->sval[0]) == 0){
 		struct arg_int * IsOnce[] = {
 			Channels,SampleSize,SampleFS,AACFilterStart,AACFilterEnd,
 			Ch0Src,Ch1Src,Ch2Src,Ch3Src};
 		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == FALSE) {
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		if (Ret != TRUE) {
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 /*		printf("C %d SS %d fs %d st %d, stp %d, ch0 %d ch1 %d ch2 %d ch3 %d\n", 
                 Channels->ival[0],
@@ -267,7 +322,7 @@ int main(int argc, char * argv[]) {
 			Ch2Src->ival[0],
 			Ch3Src->ival[0]);
 
-        ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);	
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);	
 	}
 
 	if (strcmp("Trigger",Command->sval[0]) == 0){
@@ -276,8 +331,8 @@ int main(int argc, char * argv[]) {
 			TriggerLowTime,TriggerHighTime};
 		int TriggerNo = 2;
 		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == FALSE) {
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		if (Ret != TRUE) {
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 		if (strcmp("ExtLH",Trigger->sval[0]) == 0){
 			TriggerNo = 0;
@@ -333,8 +388,8 @@ int main(int argc, char * argv[]) {
 		struct arg_int * DAoff[4]= {AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3};	
 		struct arg_str * Src2[4] = {AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3}; 
 		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == FALSE) {
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		if (Ret != TRUE) {
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
 		for (i = 0; i < Channels->ival[0]; ++i) {
 			Settings[i].myVperDiv 	= Gain[i]->ival[0];
@@ -374,15 +429,15 @@ int main(int argc, char * argv[]) {
 			Channels,SampleSize,SampleFS,CapWTime,CapSize,
 			WavForceFS,(arg_int*)WaveFile};
 		uint32_t Ret = CheckArgCount(IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
-		if (Ret == FALSE) {
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		if (Ret != TRUE) {
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
 		uSample * buffer = (uSample *)malloc(CapSize->ival[0]*sizeof(int));
 		uint32_t FastMode = 0;
  
 		if (buffer == 0){
 			printf("Not enough memory aviable!\n");
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}	
 		Ret = DSOInterface->ReceiveSamples(
 			CapWTime->ival[0],
@@ -430,13 +485,13 @@ int main(int argc, char * argv[]) {
 				SampleSize->ival[0],FastMode);
 			free(buffer);
 			buffer = 0;
-			ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		 } else {
 			ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		 }		
 	/*	}}}} */
 	}
-
-	ExitWaveRecorder(TRUE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+	printf("\nUnknown Command, Try -h or --help for help!\n");
+	ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	return 0;
 }

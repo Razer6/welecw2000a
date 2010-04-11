@@ -166,3 +166,27 @@ uint32_t Request::Debug(){
 }
 
 
+uint32_t Request::SendRAWFile(
+		uint32_t StartAddr,
+		const char * FileName){
+	return FALSE;
+}
+
+
+uint32_t Request::Send(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length){
+	return FALSE;
+}
+
+
+uint32_t Request::Receive(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length){
+	return FALSE;
+}
+
+
+

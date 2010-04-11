@@ -96,6 +96,21 @@ public:
 
 	virtual uint32_t Debug();
 
+	virtual uint32_t SendRAWFile(
+		uint32_t StartAddr,
+		const char * FileName);
+
+	virtual uint32_t Send(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length);
+
+   	virtual uint32_t Receive(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length);
+
+
 protected:
 	void PrintDesc(uint32_t *Data, uint32_t Length);
 private:

@@ -2,8 +2,10 @@ CC = g++
 AR = ar
 CFLAGS = -I/usr/local/include -I.. -I. -I"../../leon3" -Wall -ansi -g
 LDFLAGS = -L/usr/local/lib --enable-auto-import
-LDLIBS = -l argtable2
-LIBDIR = ./objs-linux/
+LDLIBS = -L/usr/bin/lib -largtable2
+#LDLIBS = argtable2.o
+LIBDIR = ./objs-linux
+
 
 all:	WaveRecorder
 
@@ -32,9 +34,16 @@ OBJECTS= \
 	$(LIBDIR)/DSO_SignalCapture.o \
 	$(LIBDIR)/Protocoll.o \
 	$(LIBDIR)/DSO_Misc.o \
+	$(LIBDIR)/arg_costums.o \
 	$(LIBDIR)/crc.o
 
 
-WaveRecorder:	$(OBJECTS)
+WaveRecorder:	$(OBJECTS) 
 	$(CC) $(LDFLAGS) $(PCOFILES) -o WaveRecorder $(LDLIBS) $(LIBDIR)/*.o
+
+
+
+
+#C_Files:
+#	gcc -ansi -c $(CFLAGS) arg_costums.c 
 

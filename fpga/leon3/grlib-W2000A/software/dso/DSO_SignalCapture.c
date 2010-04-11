@@ -320,8 +320,8 @@ uint32_t SetDACOffset(uint32_t Ch, uint32_t Offset)
 		default:
 			return FALSE;
 	}
-	WRITE_INT(ANALOGSETTINGSADDR,temp);
-	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
+/*	WRITE_INT(ANALOGSETTINGSADDR,temp);
+	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));*/
 	return TRUE;
 }
 

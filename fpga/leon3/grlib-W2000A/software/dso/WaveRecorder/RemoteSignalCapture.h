@@ -97,6 +97,20 @@ public:
 
 	virtual uint32_t Debug();
 
+        virtual uint32_t SendRAWFile(
+		uint32_t StartAddr,
+		const char * FileName);
+
+	virtual uint32_t Send(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length);
+
+   	virtual uint32_t Receive(
+		uint32_t Addr, 
+		uint32_t *Data, 
+		uint32_t & Length);
+
 
 private:
 	/* return retrys */
@@ -113,18 +127,17 @@ private:
 	void PrintTraps();  
         void PrintBackTrace(); 
 
-	uint32_t FastMode(	const uint32_t SamplingFrequncy, 
-			const uint32_t CPUFrequency);
+	uint32_t FastMode(	
+		const uint32_t SamplingFrequncy, 
+		const uint32_t CPUFrequency);
 	uint32_t IsFastMode();
 
 
 	uint32_t AddrData[2];
    uint32_t Send(uint32_t Addr, uint32_t Data);
-   uint32_t Send(uint32_t Addr, uint32_t *Data, uint32_t & Length);
    uint32_t Receive(uint32_t Addr);
-   uint32_t Receive(uint32_t Addr, uint32_t *Data, uint32_t & Length);
-   void WaitUntilMaskedAndZero(uint32_t Addr, uint32_t Ref);
-   void WaitMs(uint32_t Miliseconds);
+//   void WaitUntilMaskedAndZero(uint32_t Addr, uint32_t Ref);
+//   void WaitMs(uint32_t Miliseconds);
 private:
 	DebugComm * mComm;
 	static const uint32_t cFrameSize = 64;
