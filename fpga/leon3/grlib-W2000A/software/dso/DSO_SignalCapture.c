@@ -142,7 +142,6 @@ uint32_t SetTriggerInput(const uint32_t noChannels, const uint32_t SampleSize,
 	}
 
 	WRITE_INT(SAMPLINGFREQADDR,x);
-	Stage = READ_INT(SAMPLINGFREQADDR);
 	//	printf("SAMPLINGFREQADDR write = %d read = %d\n",M,Stage);
 
 	for(M = AACFilterStart; M < AACFilterStop; ++M)

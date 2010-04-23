@@ -336,7 +336,7 @@ void changeCouplingCh0(uint32_t selection);
 void changeCouplingCh1(uint32_t selection);
 void toggleBWLimitCh0(uint32_t selection);
 void toggleBWLimitCh1(uint32_t selection);
-
+void changeHWFilters(int32_t x);
 void onChannel0(void);
 void onChannel1(void);
 
@@ -345,8 +345,10 @@ void onChannel1(void);
  */
 sCheckBox cbBwLimitCh0 = {"BW Limit", DEFAULT_BOUNDS_F2, 0, toggleBWLimitCh0};
 sCheckBox cbBwLimitCh1 = {"BW Limit", DEFAULT_BOUNDS_F2, 0, toggleBWLimitCh1};
-sCheckBox cbInvertCh0 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};
-sCheckBox cbInvertCh1 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};
+/*sCheckBox cbInvertCh0 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};
+sCheckBox cbInvertCh1 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};*/
+sSubMenuList smlHWFilter = {"HW-Filters", DEFAULT_BOUNDS_F3, {213, SML_START_POS_Y(4), 103, SML_HEIGHT(4)}, 4, 0, changeHWFilters, 
+{"None", "1G>100M", "1G>10MS", "1G>1MS"}};
 
 sSubMenuList smlCoublingCh0 = {"Coupling", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 0, changeCouplingCh0, {"AC", "DC"}};
 sSubMenuList smlCoublingCh1 = {"Coupling", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 0, changeCouplingCh1,	{"AC", "DC"}};
@@ -357,17 +359,18 @@ sSubMenuList smlCoublingCh1 = {"Coupling", DEFAULT_BOUNDS_F1, {0, SML_START_POS_
  */
 sSubMenu smBwLimitCh0 = {CHECKBOX, &cbBwLimitCh0};
 sSubMenu smBwLimitCh1 = {CHECKBOX, &cbBwLimitCh1};
-sSubMenu smInvertCh0 = {CHECKBOX, &cbInvertCh0};
-sSubMenu smInvertCh1 = {CHECKBOX, &cbInvertCh1};
+/*sSubMenu smInvertCh0 = {CHECKBOX, &cbInvertCh0};
+sSubMenu smInvertCh1 = {CHECKBOX, &cbInvertCh1};*/
 
 sSubMenu smCoublingCh0 = {SUBMENU_LIST, &smlCoublingCh0};
 sSubMenu smCoublingCh1 = {SUBMENU_LIST, &smlCoublingCh1};
+sSubMenu smHWFilter = {SUBMENU_LIST, &smlHWFilter};
 
 /*
  * Menus for all channels
  */
-sMenu men_ch[] = {{{&smCoublingCh0, &smBwLimitCh0, &smInvertCh0, NULL, NULL, NULL}, onChannel0},
-                  {{&smCoublingCh1, &smBwLimitCh1, &smInvertCh1, NULL, NULL, NULL}, onChannel1}};
+sMenu men_ch[] = {{{&smCoublingCh0, &smBwLimitCh0, /*&smInvertCh0,*/ &smHWFilter, NULL, NULL, NULL}, onChannel0},
+                  {{&smCoublingCh1, &smBwLimitCh1, /*&smInvertCh1,*/ &smHWFilter, NULL, NULL, NULL}, onChannel1}};
 
 /*
  * Submenu items for trigger menu
@@ -765,24 +768,50 @@ void changeTriggerLevel(int32_t diff)
 
 }
 
-/*
- * This function changes the timebase. It also updates the titlebar.
- */
-void setTimebase(int32_t diff)
-{
+	/* Some timebases are disabled, they might not work with all filter settings
+         * AACFilterStart <= 1 and AACFilterStop >= 1! (not a bug) */ 
 	const uint32_t timebase[] = {
-		10000, 12500, 25000, 31250, 50000, 62500,
-		100000, 125000, 250000, 312500, 500000, 625000, // 100ks/s - 500ks/s
-		1000000, 1250000, 2500000, 3125000, 5000000, 6250000, // 1Ms/s - 5Ms/s
-		10000000, 15000000, 25000000, 31250000, 50000000, 62500000, // 10Ms/s - 50Ms/s
+		10000, /*12500,*/ 25000, /*31250,*/ 50000, /*62500,*/
+		100000, /*125000,*/ 250000, /*312500,*/ 500000, /*625000,*/ // 100ks/s - 500ks/s
+		1000000, /*1250000,*/ 2500000, /*3125000,*/ 5000000, /*6250000,*/ // 1Ms/s - 5Ms/s
+		10000000, /*15000000,*/ 25000000, /*31250000,*/ 50000000, /*62500000,*/ // 10Ms/s - 50Ms/s
 		100000000, 125000000, 250000000, 500000000, // 100Ms/s - 500Ms/s
 		1000000000}; // 1Gs/s
 
 	char *timebase_str[] = {
-		"10 kS/s", "12.5 kS/s", "25 kS/s", "31.25 kS/s", "50 kS/s", "62.5 kS/s",
-		"100 kS/s", "125 kS/s", "250 kS/s", "312.5 kS/s", "500 kS/s", "625 kS/s",
-		"1 MS/s", "1.25 MS/s", "2.5 MS/s", "3.125 MS/s", "5 MS/s", "6.25 MS/s",
-		"10 MS/s", "12.5 MS/s", "25 MS/s", "31.25 MS/s", "50 MS/s", "62.5 MS/s",
+		"10 kS/s", /*"12.5 kS/s",*/ "25 kS/s", /*"31.25 kS/s",*/ "50 kS/s", /*"62.5 kS/s",*/
+		"100 kS/s", /*"125 kS/s",*/ "250 kS/s", /*"312.5 kS/s",*/ "500 kS/s", /*"625 kS/s",*/
+		"1 MS/s", /*"1.25 MS/s",*/ "2.5 MS/s", /*"3.125 MS/s",*/ "5 MS/s", /*"6.25 MS/s",*/
+		"10 MS/s", /*"12.5 MS/s",*/ "25 MS/s", /*"31.25 MS/s",*/ "50 MS/s", /*"62.5 MS/s",*/
+		"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
+		"1 GS/s"};
+
+	static int32_t selectedTimebase = 0;
+
+
+/*
+ * This function changes the timebase. It also updates the titlebar.
+ */
+
+static int AACFilterStop = 0;
+
+void setTimebase(int32_t diff)
+{
+	/* Some timebases are disabled, they might not work with all filter settings
+         * AACFilterStart <= 1 and AACFilterStop >= 1! (not a bug) */ 
+	const uint32_t timebase[] = {
+		10000, /*12500,*/ 25000, /*31250,*/ 50000, /*62500,*/
+		100000, /*125000,*/ 250000, /*312500,*/ 500000, /*625000,*/ // 100ks/s - 500ks/s
+		1000000, /*1250000,*/ 2500000, /*3125000,*/ 5000000, /*6250000,*/ // 1Ms/s - 5Ms/s
+		10000000, /*15000000,*/ 25000000, /*31250000,*/ 50000000, /*62500000,*/ // 10Ms/s - 50Ms/s
+		100000000, 125000000, 250000000, 500000000, // 100Ms/s - 500Ms/s
+		1000000000}; // 1Gs/s
+
+	char *timebase_str[] = {
+		"10 kS/s", /*"12.5 kS/s",*/ "25 kS/s", /*"31.25 kS/s",*/ "50 kS/s", /*"62.5 kS/s",*/
+		"100 kS/s", /*"125 kS/s",*/ "250 kS/s", /*"312.5 kS/s",*/ "500 kS/s", /*"625 kS/s",*/
+		"1 MS/s", /*"1.25 MS/s",*/ "2.5 MS/s", /*"3.125 MS/s",*/ "5 MS/s", /*"6.25 MS/s",*/
+		"10 MS/s", /*"12.5 MS/s",*/ "25 MS/s", /*"31.25 MS/s",*/ "50 MS/s", /*"62.5 MS/s",*/
 		"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
 		"1 GS/s"};
 
@@ -800,8 +829,14 @@ void setTimebase(int32_t diff)
 	}
 
 	updateTitleBar(TIMEBASE, timebase_str[selectedTimebase]);
-	SetTriggerInput(4,8,timebase[(uint32_t)selectedTimebase],FIXED_CPU_FREQUENCY,0,1,0,1,2,3);
+	SetTriggerInput(4,8,timebase[(uint32_t)selectedTimebase],FIXED_CPU_FREQUENCY,0,AACFilterStop,0,1,2,3);
 }
+
+void changeHWFilters(int32_t x){
+	AACFilterStop = x;
+	setTimebase(0);
+}
+
 
 void setAnalogOffset(uint32_t ch, int32_t diff)
 {
