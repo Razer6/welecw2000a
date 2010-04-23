@@ -227,10 +227,13 @@ eTriggerTypes;
 #define LED_WHEEL      7
 #define LED_PULSEWIDTH 8
 #define LED_EDGE       9
-#define RUN_GREEN     10
-#define RUN_RED       11
+#define RUN_RED       10
+#define RUN_GREEN     11
 #define SINGLE_GREEN  12
 #define SINGLE_RED    13
+
+#define SET_LED(Led) WRITE_INT(LEDADDR, (READ_INT(LEDADDR) |  (1 << Led)))
+#define CLR_LED(Led) WRITE_INT(LEDADDR, (READ_INT(LEDADDR) & ~(1 << Led)))
 
 /*  (read only) */
 /* rotary nob counter (3 bit) base adresses */

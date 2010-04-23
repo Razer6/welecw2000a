@@ -236,6 +236,7 @@ void read_encoders(void)
 
 uint32_t get_encoder_diff(uint32_t *reg, uint32_t *change_t, uint32_t *old, int32_t *diff)
 {
+/* The 3 bit encoder counters do exsist in hardware, so this code should be replaced by the previous define */ 
 	register uint32_t enc = *reg;
 	register uint32_t change = *change_t;
 	register uint32_t mask = 0x07;

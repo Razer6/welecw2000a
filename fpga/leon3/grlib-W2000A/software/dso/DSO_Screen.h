@@ -78,7 +78,7 @@ void drawGrid(void);
 void ClearVLineClipped(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2);
 
 void setClippingRect(sRect *clipping);
-inline sRect* getClippingRect(void);
+sRect* getClippingRect(void);
 
 
 /* The display can only draw the three highest bits per color */

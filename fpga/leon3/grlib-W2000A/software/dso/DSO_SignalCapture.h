@@ -97,11 +97,11 @@ uint32_t SetTrigger(const uint32_t Trigger, const uint32_t ExtTrigger,
 
 uint32_t SetDACOffset(uint32_t Ch, uint32_t Offset);
 
-
+/*
  uint32_t SetAnalogInputRange(
  const uint32_t NoCh,
  const SetAnalog * Settings);
- 
+ */
 
 uint32_t SetAnalogInputRange(uint32_t ch, SetAnalog *settings);
 

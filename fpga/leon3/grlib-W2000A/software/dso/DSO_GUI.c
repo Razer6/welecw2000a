@@ -331,6 +331,7 @@ void changeTriggerEdge(uint32_t selection);
 void changeTriggerType(uint32_t selection);
 void changeTriggerChannel(uint32_t selection);
 void changeTriggerLevel(int32_t diff);
+void setFramePosition(uint32_t diff);
 void changeCouplingCh0(uint32_t selection);
 void changeCouplingCh1(uint32_t selection);
 void toggleBWLimitCh0(uint32_t selection);
@@ -407,6 +408,7 @@ void encoder_handler(void)
 		setTimebase(diff);
 		break;
 		case 0x07<<EN_LEFT_RIGHT:
+		setFramePosition(diff);
 		break;
 		case 0x07<<EN_LEVEL:
 		changeTriggerLevel(diff);
@@ -829,6 +831,66 @@ void setVoltagePerDiv(uint32_t ch, int32_t diff)
 	SetAnalogInputRange(ch, &channel[ch].analog);
 }
 
+#define FRAMESIZE 600
+#define FRAMEPOS_HEIGHT 8
+#define FRAMEPOS_RES    518
+#define FRAMEPOS_VSTART 32
+#define FRAMEPOS_HSTART 64
+int32_t Zoom = 1; 
+uint32_t Captured = 32786;
+
+void DrawFramePos(uint16_t Color, uint32_t ViewedStart, uint32_t ViewedStop){
+	static int32_t Start = 320 + (FRAMESIZE/2); 
+	static int32_t Stop  = 320 - (FRAMESIZE/2);
+	DrawVLineClipped(BG_COLOR,Start+FRAMEPOS_HSTART,FRAMEPOS_VSTART, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT);
+	DrawVLineClipped(BG_COLOR,Stop+FRAMEPOS_HSTART, FRAMEPOS_VSTART, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT);
+	Start = ViewedStart;
+	Stop = ViewedStop;
+	DrawVLineClipped(Color,Start+FRAMEPOS_HSTART,FRAMEPOS_VSTART, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT);
+	DrawVLineClipped(Color,Stop+FRAMEPOS_HSTART, FRAMEPOS_VSTART, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT);
+	DrawVLineClipped(Color, FRAMEPOS_HSTART, FRAMEPOS_VSTART, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT);
+	DrawVLineClipped(Color, FRAMEPOS_HSTART + FRAMEPOS_RES, FRAMEPOS_VSTART, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT);
+	DrawHLine(Color, FRAMEPOS_VSTART                  , FRAMEPOS_HSTART, FRAMEPOS_HSTART + FRAMEPOS_RES);
+	DrawHLine(Color, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT, FRAMEPOS_HSTART, FRAMEPOS_HSTART + FRAMEPOS_RES);
+
+}
+ 
+void setFramePosition(uint32_t diff){
+/* Zoom = 0 ... error
+ * Zoom > 1 ... Timerange multiplied by Zoom
+ * Zoom < 1 ... Timerange divided   by -Zoom
+*/
+	int32_t ViewedOffset = 0;
+	int32_t ViewedStart = 0; 
+	int32_t ViewedStop  = 0; 
+	if (((1 << BTN_MAINDEL) & READ_INT(KEYADDR1)) != 0){
+		Zoom = 1; // Zoom is now only used for a faster navigation
+	} else {
+		Zoom = 40;
+	} 
+	triggerSettings.prefetch += diff*Zoom;
+	if (triggerSettings.prefetch < (8+(FRAMESIZE/2))) {
+		triggerSettings.prefetch = (8+(FRAMESIZE/2));
+	}
+	if (triggerSettings.prefetch > (Captured - (FRAMESIZE/2))) {
+		triggerSettings.prefetch = Captured - (FRAMESIZE/2);	
+	}
+
+	Offset[0].H = triggerSettings.prefetch - (FRAMESIZE/2); 
+	Offset[1].H = Offset[0].H;
+
+	ViewedOffset = Captured/(FRAMESIZE/2);
+	ViewedStart = ((FRAMEPOS_RES)*Offset[0].H)/Captured;
+	ViewedStop  = ((FRAMEPOS_RES)*Offset[0].H)/Captured + ViewedOffset;
+	DrawFramePos(COLOR_R3G3B3(3,2,2), ViewedStart, ViewedStop);
+
+	/* The hardware trigger does only support the non roll mode prefetch size */
+	if (triggerSettings.prefetch > (CAPTURESIZE - (FRAMESIZE/2))) {
+		triggerSettings.prefetch = CAPTURESIZE - (FRAMESIZE/2);	
+	}
+
+}
+
 void GUI_Main(void)
 {
 	generategrid();
@@ -837,8 +899,9 @@ void GUI_Main(void)
 	uSample Ch2[2][HLEN+100];
 	uint32_t PrevBuffer = 0;
 	uint32_t CurrBuffer = 1;
-	uint32_t Prefetch = PREFETCH_OFFSET;
 	uint32_t ReadData = 0;
+	uint32_t Run = TRUE;
+	uint32_t Single = FALSE;
 	int16_t x = 0;
 
 	channel[0].analog.myVperDiv = 5000000;
@@ -868,8 +931,6 @@ void GUI_Main(void)
 	channel[1].state = CHANNEL_OFF;
 	channel[1].selectedVoltagePerDiv = 0;
 
-	Prefetch = HLEN;
-
 	memset(&Ch1[0],0,HLEN*sizeof(uSample));
 	memset(&Ch2[0],0,HLEN*sizeof(uSample));
 	memset(&Ch1[1],0,HLEN*sizeof(uSample));
@@ -877,24 +938,28 @@ void GUI_Main(void)
 
 	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1); //Draw ba	lck background
 	drawGrid();						     //Draws
-
 	/*
 	 * Init Encoder
 	 * Doesn't work right for now
 	 */
-	uint32_t tmp = 0;
-	uint32_t tmp2 = 0;
+	int32_t tmp = 0;
+	int32_t tmp2 = 0;
 
 	read_encoders();
 
-	for(uint8_t i=0; i<100; i++)
-	{
+/*	for(uint8_t i=0; i<100; i++)
+	{*/
+	/*
+	* The hardware encoder counters do not have an initial value,
+        * so the first access of the get_encoder_diff does return a wrong result!
+        * (This is not at all a bug!) 
+	*/
 		get_encoder_diff(&encoder_changed0, &encoder_state0, &tmp2, &tmp);
-	}
+/*	}
 	for(uint8_t i=0; i<100; i++)
-	{
+	{*/
 		get_encoder_diff(&encoder_changed1, &encoder_state1, &tmp2, &tmp);
-	}
+/*	}*/
 
 	WRITE_INT(LEDADDR,0); //Clear leds
 
@@ -908,7 +973,7 @@ void GUI_Main(void)
 	setVoltagePerDiv(CH1,0);
 
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
-
+	SET_LED(RUN_GREEN);
 	/*
 	 * Main loop
 	 */
@@ -930,18 +995,53 @@ void GUI_Main(void)
 		{
 			//		WRITE_INT(CONFIGADCENABLE,0); // Set back to generic uart
 		}
+		
+		if ((READ_INT(KEYADDR1) & (1 << BTN_RUNSTOP)) != 0)
+		{
+			Run^= TRUE; // Toogle Run Stop	for TRUE = 1 or TRUE = -1
+			CLR_LED(SINGLE_GREEN);
+			CLR_LED(SINGLE_RED);
 
-		if ((READ_INT(KEYADDR1) & (1 << BTN_RUNSTOP)) == 0)
+			if (Run == TRUE){
+				SET_LED(RUN_GREEN);
+				CLR_LED(RUN_RED);
+			} else {
+				SET_LED(RUN_RED);
+				CLR_LED(RUN_GREEN);
+			}
+			WaitMs(100);
+		}
+		if ((READ_INT(KEYADDR1) & (1 << BTN_SINGLE)) != 0)
+		{
+			Run    = TRUE; 
+			Single = TRUE;	
+			SET_LED(SINGLE_GREEN);
+			CLR_LED(SINGLE_RED);
+			CLR_LED(RUN_GREEN);
+			CLR_LED(RUN_RED);
+
+		}
+
+		if (Run == TRUE)
 		{
 			ReadData = CaptureData(1000, true, true, 32768, (uint32_t*)Data);
 		}
-		else
+/*		else
 		{
 			ReadData = 0;
-		}
+		}*/
 
-		if (ReadData >= (6400+Prefetch))
+		if ((ReadData >= (FRAMESIZE+triggerSettings.prefetch)) || (Run == FALSE) )
 		{
+			if (Single == TRUE) {
+				Run = FALSE;
+				Single = FALSE;
+				SET_LED(SINGLE_RED);
+				CLR_LED(SINGLE_GREEN);
+
+			}
+
+			Captured = ReadData;
 			if (CurrBuffer != 0)
 			{
 				CurrBuffer = 0;

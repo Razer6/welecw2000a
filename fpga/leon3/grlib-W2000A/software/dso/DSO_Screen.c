@@ -382,18 +382,15 @@ void DrawTest(void){
 	}
 }
 
-inline void setClippingRect(sRect *clipping)
+void setClippingRect(sRect *clipping)
 {
 	clippingRect = clipping;
 }
 
-inline sRect* getClippingRect(void)
+sRect* getClippingRect(void)
 {
 	return clippingRect;
 }
-
-#endif
-
 
 static uint8_t erroricon_glcd_bmp[]={
                                      0x00, 0x1f, 0xe0, 0x00,
@@ -476,4 +473,4 @@ void DrawBmpTest(void)
 	LoadBitmap(erroricon_glcd_bmp, 50, 50, errorIconWIDTH, errorIconHEIGHT, COLOR_R3G3B3(7,0,0), COLOR_R3G3B3(0,0,7));
 }
 
- 	  	 
+#endif	  	 
