@@ -48,6 +48,9 @@
 #define STDCALL __stdcall
 #endif
 
+// Fix the following to use a portable stdint.h on Windows; all C99 conforming platforms should have stdint.h
+// Several can be found here: http://en.wikipedia.org/wiki/Stdint.h (under External Links)
+#ifdef WIN32
 typedef unsigned char  uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int   uint32_t;
@@ -57,6 +60,9 @@ typedef char            int8_t;
 #endif
 typedef short           int16_t;
 typedef int             int32_t;
+#else //WIN32
+#include <stdint.h>
+#endif //WIN32
 
 typedef union {
 	int32_t i;
