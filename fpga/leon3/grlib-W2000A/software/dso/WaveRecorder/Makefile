@@ -1,6 +1,6 @@
 CC = g++
 AR = ar
-CFLAGS = -I/usr/local/include -I.. -I. -I"../../leon3" -Wall -ansi -g
+CFLAGS += -I/usr/local/include -I.. -I. -I"../../leon3" -Wall -ansi -g
 LDFLAGS = -L/usr/local/lib --enable-auto-import
 LDLIBS = -L/usr/bin/lib -largtable2
 #LDLIBS = argtable2.o
