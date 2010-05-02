@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -38,7 +37,7 @@ use gaisler.libiu.all;
 
 package libproc3 is
 
-  component proc3
+  component proc3 
   generic (
     hindex    : integer               := 0;
     fabtech   : integer range 0 to NTECH  := 0;
@@ -85,18 +84,16 @@ package libproc3 is
     smp       : integer range 0 to 15 := 0;     -- support SMP systems
     cached    : integer := 0;
     clk2x     : integer := 0;
-    scantest : integer := 0;
-    mmupgsz   : integer range 0 to 5  := 0;
-    bp        : integer range 0 to 5  := 1
+    scantest : integer := 0    
   );
   port (
     clk    : in  std_ulogic;
     rstn   : in  std_ulogic;
-    holdn  : out std_ulogic;
+    holdn  : out std_ulogic;    
     ahbi   : in  ahb_mst_in_type;
     ahbo   : out ahb_mst_out_type;
     ahbsi  : in  ahb_slv_in_type;
-    ahbso  : in  ahb_slv_out_vector;
+    ahbso  : in  ahb_slv_out_vector;    
     rfi    : out iregfile_in_type;
     rfo    : in  iregfile_out_type;
     crami  : out cram_in_type;
@@ -114,14 +111,14 @@ package libproc3 is
     hclk, sclk : in  std_ulogic;
     hclken : in std_ulogic
   );
-  end component;
+  end component; 
 
-  component grfpwx
+  component grfpwx 
   generic (fabtech  : integer range 0 to NTECH := 0;
-           memtech  : integer range 0 to NTECH := 0;
-           mul      : integer range 0 to 3 := 0;
+           memtech  : integer range 0 to NTECH := 0;           
+           mul      : integer range 0 to 2 := 0;
            pclow    : integer range 0 to 2 := 2;
-           dsu      : integer              := 0;
+           dsu      : integer              := 0;           
            disas    : integer range 0 to 2 := 0;
            netlist  : integer              := 0;
            index    : integer              := 0);
@@ -134,10 +131,10 @@ package libproc3 is
     );
   end component;
 
-  component mfpwx
+  component mfpwx 
   generic (tech     : integer := 0;
            pclow    : integer range 0 to 2 := 2;
-           dsu      : integer range 0 to 1 := 0;
+           dsu      : integer range 0 to 1 := 0;           
            disas    : integer range 0 to 2 := 0);
   port (
     rst    : in  std_ulogic;			-- Reset
@@ -148,14 +145,13 @@ package libproc3 is
     );
   end component;
 
-  component grlfpwx
+  component grlfpwx 
   generic (tech     : integer := 0;
            pclow    : integer range 0 to 2 := 2;
-           dsu      : integer range 0 to 1 := 0;
+           dsu      : integer range 0 to 1 := 0;           
            disas    : integer range 0 to 2 := 0;
            pipe     : integer              := 0;
-           netlist  : integer              := 0;
-           index    : integer              := 0);
+           netlist  : integer              := 0);
   port (
     rst    : in  std_ulogic;			-- Reset
     clk    : in  std_ulogic;
@@ -163,7 +159,7 @@ package libproc3 is
     cpi    : in  fpc_in_type;
     cpo    : out fpc_out_type
     );
-  end component;
-
+  end component;  
+  
 
 end;

@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -786,8 +785,7 @@ begin
               
               if pciin.ifc.devsel = '0' then v.tocnt := 0; end if;
 
-              --if pciin.ifc.stop = '0' then
-              if (pciin.ifc.stop or pciin.ifc.irdy) = '0' then
+              if pciin.ifc.stop = '0' then
                   v.pcien(0) := pciin.ifc.frame; stop := '1'; v.state := idle; v.pci.ifc.irdy := pciin.ifc.frame;
               end if;
               
@@ -795,7 +793,7 @@ begin
                   v.state := done; v.pci.ifc.irdy := '1'; v.pcien(0) := '1'; v.pci.arb.req(slot) := '1';
               end if;
               v.pci.ifc.frame := not (r.burst and not stop);
-                  
+              
           when done =>
               v.running := '0'; ready := '1';
               if cmd.started = '0' and cmd.pci = true then
@@ -869,8 +867,7 @@ begin
                   else
                       r.last <= '0';
                   end if;
-              --elsif cmd.len = 1 or r.current_word >= (cmd.len-2) then
-              elsif cmd.len = 1 or rin.current_word >= (cmd.len-1) then
+              elsif cmd.len = 1 or r.current_word >= (cmd.len-2) then
                   r.last <= '1';
                   r.pci.ifc.frame <= '1';
                   r.running <= '0';
@@ -883,9 +880,8 @@ begin
           case r.state is
               
               when idle =>
-                  --count := 0;
-                  count := r.current_word; -- Need to use current_word if the burst is resumed
-
+                  count := 0;
+                  
                   if cmd.check = 2 and (cmd.started and not r.f_open) = '1' then
                       file_open(writefile, cmd.file1(1 to strlen(cmd.file1)), write_mode);
                       r.f_open <= '1';

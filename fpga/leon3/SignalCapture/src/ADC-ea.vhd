@@ -108,7 +108,7 @@ begin
     elsif rising_edge(Clk125(3)) then
       if iFilterDepth = 0 then
         case iDecimator is
-          when X"1" =>
+          when X"1" | X"A" =>
             pllena <= "111";
           when X"2" =>
             pllena <= "010";

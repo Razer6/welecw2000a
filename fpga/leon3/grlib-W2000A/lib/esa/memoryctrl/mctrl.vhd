@@ -244,7 +244,6 @@ begin
   variable vbdrive : std_logic_vector(31 downto 0);
   variable vsbdrive : std_logic_vector(63 downto 0);
   variable bdrive_sel : std_logic_vector(3 downto 0);
-  variable haddrsel   : std_logic_vector(31 downto 13);
   begin 
 
 -- Variable default settings to avoid latches
@@ -296,11 +295,9 @@ begin
     if area(rom) = '1' then
       busw := r.mcfg1.romwidth;
     end if;
-    haddrsel := (others => '0'); 
-    haddrsel(sdrasel downto 13) := haddr(sdrasel downto 13);
     if area(ram) = '1' then
-      adec := genmux(r.mcfg2.rambanksz, haddrsel(sdrasel downto 14)) &
-              genmux(r.mcfg2.rambanksz, haddrsel(sdrasel-1 downto 13));
+      adec := genmux(r.mcfg2.rambanksz, haddr(sdrasel downto 14)) &
+              genmux(r.mcfg2.rambanksz, haddr(sdrasel-1 downto 13));
 
       if sdhsel = '1' then busw := "10";
 

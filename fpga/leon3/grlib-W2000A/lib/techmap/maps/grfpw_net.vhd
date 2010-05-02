@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -343,7 +342,9 @@ begin
 
   disasen <= '1' when disas /= 0 else '0';
 
-  uni : if (is_unisim(tech) = 1) generate
+  uni : if (tech = virtex2) or (tech = virtex4) or (tech = virtex5) or 
+		(tech = spartan3) or  (tech = spartan3e) 
+  generate
     grfpw0 : grfpw_unisim
       generic map (tech => tech)
       port map (rst, clk, holdn, cpi_flush, cpi_exack, cpi_a_rs1, cpi_d_pc,

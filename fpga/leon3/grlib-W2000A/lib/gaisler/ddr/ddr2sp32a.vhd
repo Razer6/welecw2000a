@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -50,12 +49,7 @@ entity ddr2sp32a is
       pwron   : integer := 0;
       oepol   : integer := 0;
       readdly : integer := 1;
-      odten   : integer := 0;
-      octen   : integer := 0;
-      dqsgating  : integer := 0;
-      nosync     : integer := 0;
-      eightbanks : integer range 0 to 1 := 0;  -- Set to 1 if 8 banks instead of 4
-      dqsse      : integer range 0 to 1 := 0   -- single ended DQS
+      odten   : integer := 0
    );
    port (
       rst     : in  std_ulogic;
@@ -95,27 +89,25 @@ type icycletype is (iidle, pre, ref1, ref2, emode23, emode, lmode, emodeocd, fin
 -- sdram configuration register
 
 type sdram_cfg_type is record
-   command    : std_logic_vector(2 downto 0);
-   csize      : std_logic_vector(1 downto 0);
-   bsize      : std_logic_vector(2 downto 0);
-   trcd       : std_ulogic;  -- tCD : 2/3 clock cycles
-   trfc       : std_logic_vector(4 downto 0);
-   trp        : std_ulogic;  -- precharge to activate: 2/3 clock cycles
-   refresh    : std_logic_vector(11 downto 0);
-   renable    : std_ulogic;
-   dllrst     : std_ulogic;
-   refon      : std_ulogic;
-   cke        : std_ulogic;
-   cal_en     : std_logic_vector(7 downto 0);
-   cal_inc    : std_logic_vector(7 downto 0);
-   cal_pll    : std_logic_vector(1 downto 0);  -- *** ??? pll_reconf
-   cal_rst    : std_logic;
-   readdly    : std_logic_vector(1 downto 0);
-   twr        : std_logic_vector(4 downto 0);
-   emr        : std_logic_vector(1 downto 0); -- selects EM register
-   ocd        : std_ulogic; -- enable/disable ocd
-   dqsctrl    : std_logic_vector(7 downto 0);
-   eightbanks : std_ulogic;
+   command  : std_logic_vector(2 downto 0);
+   csize    : std_logic_vector(1 downto 0);
+   bsize    : std_logic_vector(2 downto 0);
+   trcd     : std_ulogic;  -- tCD : 2/3 clock cycles
+   trfc     : std_logic_vector(4 downto 0);
+   trp      : std_ulogic;  -- precharge to activate: 2/3 clock cycles
+   refresh  : std_logic_vector(11 downto 0);
+   renable  : std_ulogic;
+   dllrst   : std_ulogic;
+   refon    : std_ulogic;
+   cke      : std_ulogic;
+   cal_en   : std_logic_vector(7 downto 0);
+   cal_inc  : std_logic_vector(7 downto 0);
+   cal_pll  : std_logic_vector(1 downto 0);  -- *** ??? pll_reconf
+   cal_rst  : std_logic;
+   readdly  : std_logic_vector(1 downto 0);
+   twr      : std_logic_vector(4 downto 0);
+   emr      : std_logic_vector(1 downto 0); -- selects EM register
+   ocd      : std_ulogic; -- enable/disable ocd
 end record;
 
 type access_param is record
@@ -166,7 +158,7 @@ type ddr_reg_type is record
    dqm         : std_logic_vector(7 downto 0);
    dqm_dly     : std_logic_vector(7 downto 0);  -- *** ??? delay ctrl
    address     : std_logic_vector(15 downto 2);  -- memory address
-   ba          : std_logic_vector(2  downto 0);
+   ba          : std_logic_vector(1  downto 0);
    waddr       : std_logic_vector(abuf-1 downto 0);
    waddr_d     : std_logic_vector(abuf-1 downto 0); -- Same as waddr but delayed to compensate for pipelined output data
    cfg         : sdram_cfg_type;
@@ -176,12 +168,9 @@ type ddr_reg_type is record
    wdata       : std_logic_vector(63 downto 0);
    initnopdly  : std_logic_vector(7 downto 0); -- 400 ns delay
    sync        : std_logic;
-   odt         : std_logic_vector(1 downto 0);
-   sdo_bdrive  : std_logic; -- *** ??? delay ctrl
-   sdo_qdrive  : std_logic; -- *** ??? delay ctrl
-   oct         : std_logic;
-   dqsctrl     : std_logic_vector(6 downto 0);
-   dqsgate     : std_ulogic;
+   odt          : std_logic_vector(1 downto 0);
+   sdo_bdrive   : std_logic; -- *** ??? delay ctrl
+   sdo_qdrive   : std_logic; -- *** ??? delay ctrl
 end record;
 
 signal vcc : std_ulogic;
@@ -191,7 +180,6 @@ signal rbdrive, ribdrive : std_logic_vector(31 downto 0);
 signal rdata, wdata : std_logic_vector(63 downto 0);
 signal ddr_rst : std_logic;
 signal ddr_rst_gen  : std_logic_vector(3 downto 0);
-signal dqsgate180   : std_ulogic;
 attribute syn_preserve : boolean;
 attribute syn_preserve of rbdrive : signal is true; 
 
@@ -214,13 +202,8 @@ begin
       else v.hrdata := rdata(31 downto 0); end if;
 
       -- Sync ------------------------------------------------
-      if nosync = 0 then
-        v.sync(1) := r.startsdold; v.sync(2) := ra.sync(1);
-        ready := ra.startsd_ack xor ra.sync(2);
-      else
-        v.sync := (others => '0');
-        ready := ra.startsd_ack xor r.startsdold;
-      end if;
+      v.sync(1) := r.startsdold; v.sync(2) := ra.sync(1);
+      ready := ra.startsd_ack xor ra.sync(2);
       --------------------------------------------------------
 
       if ((ahbsi.hready and ahbsi.hsel(hindex)) = '1') then
@@ -310,7 +293,7 @@ begin
    variable raddr    : std_logic_vector(13 downto 0);
    variable adec     : std_ulogic;
    variable rams     : std_logic_vector(1 downto 0);
-   variable ba       : std_logic_vector(2 downto 0);
+   variable ba       : std_logic_vector(1 downto 0);
    variable haddr    : std_logic_vector(31 downto 0);
    variable hsize    : std_logic_vector(1 downto 0);
    variable hwrite   : std_ulogic;
@@ -322,7 +305,6 @@ begin
    variable regsd1   : std_logic_vector(31 downto 0);   -- data from registers
    variable regsd2   : std_logic_vector(31 downto 0);   -- data from registers
    variable regsd3   : std_logic_vector(31 downto 0);   -- data from registers
-   variable regsd4   : std_logic_vector(31 downto 0);   -- data from registers
    begin
 
 -- Variable default settings to avoid latches
@@ -348,12 +330,7 @@ begin
       regsd3(22 downto 18) := r.cfg.trfc;
       regsd3(27 downto 23) := r.cfg.twr;
       regsd3(28) := r.cfg.trp;
-      if dqsgating = 1 then
-        regsd4 := (others => '0');
-        regsd4(7 downto 0) := r.cfg.dqsctrl;
-      end if;
-      regsd4(8) := r.cfg.eightbanks;
-      
+
 -- generate DQM from address and write size
 
       case ra.acc.size is
@@ -379,11 +356,7 @@ begin
       end case;
 
       -- Sync ------------------------------------------
-      if nosync = 0 then
-        v.sync := ra.startsd; v.startsd := r.sync;
-      else
-        v.sync := '0'; v.startsd := '0';
-      end if;
+      v.sync := ra.startsd; v.startsd := r.sync;
       --------------------------------------------------
 
       --v.startsd := ra.startsd;
@@ -401,11 +374,7 @@ begin
 --      when others => null;
 --      end case;
 
-      if nosync = 0 then
-        startsd := r.startsd xor r.startsdold;
-      else
-        startsd := ra.startsd xor r.startsdold;
-      end if;
+      startsd := r.startsd xor r.startsdold;
 
 -- generate row and column address size
 
@@ -421,15 +390,8 @@ begin
 
 -- generate bank address
 
-      if r.cfg.eightbanks = '0' then
-        ba := '0' &
-              genmux(r.cfg.bsize, haddr(29 downto 22)) &
-              genmux(r.cfg.bsize, haddr(28 downto 21));
-      else
-        ba := genmux(r.cfg.bsize, haddr(29 downto 22)) &
-              genmux(r.cfg.bsize, haddr(28 downto 21)) &
-              genmux(r.cfg.bsize, haddr(27 downto 20));
-      end if;
+      ba := genmux(r.cfg.bsize, haddr(29 downto 22)) &
+            genmux(r.cfg.bsize, haddr(28 downto 21));
 
 -- generate chip select
 
@@ -440,22 +402,9 @@ begin
 -- sdram access FSM
 
       if r.trfc /= "00000" then v.trfc := r.trfc - 1; end if;
-      
-      -- DQS strobe enable control
-      if dqsgating = 1 then
-        if r.dqsctrl(6) = '1' then
-          v.dqsgate := '1';
-        elsif r.dqsctrl = "0000000" then
-          v.dqsgate := '1';
-        end if;
-        if r.dqsctrl(6) /= '1' then 
-          v.dqsctrl := r.dqsctrl - '1';
-        end if;
-      end if;
 
       case r.sdstate is
       when sidle =>
-         v.oct := '0';
          if (startsd = '1') and (r.cfg.command = "000") and (r.cmstate = midle)
             and (r.istate = finish) then
             v.address := raddr; v.ba := ba;
@@ -487,12 +436,7 @@ begin
             v.sdwen := '0'; 
             --v.waddr := r.waddr + 2; v.waddr(0) := '0';        -- *** ??? delay ctrl
             v.trfc := r.cfg.twr;
-         else 
-           v.sdstate := rd1; 
-             if dqsgating = 1 then
-               v.dqsctrl := r.cfg.dqsctrl(7 downto 1); v.dqsgate := '0';
-             end if;
-         end if;
+         else v.sdstate := rd1; end if;
          v.newcom(0) :=  '0';
          if (ra.acc.haddr(4) = '1' or ra.raddr(2 downto 0) < "100") then v.newcom(1) := '1'; 
          else v.newcom(1) := '0'; end if;
@@ -538,12 +482,8 @@ begin
             end if;
          else
             v.sdstate := wr2;
-            v.dqm := (others => '1');
-            if nosync = 0 then
-              v.startsdold := r.startsd;
-            else
-              v.startsdold := ra.startsd;
-            end if;
+            v.dqm := (others => '1'); 
+            v.startsdold := r.startsd;
          end if;
       when wr2 =>
          v.sdstate := wr3; v.qdrive := '1';
@@ -564,7 +504,6 @@ begin
          v.odt := (others => '0'); -- *** ??? odt
          v.sdstate := sidle;
       when rd1 =>
-         if octen = 1 then v.oct := '1'; end if;
          v.address(4) := not ra.acc.haddr(4); -- Set address for next read command
          v.casn := '1'; v.sdstate := rd7;
       when rd7 =>
@@ -573,9 +512,6 @@ begin
          v.readdly := r.cfg.readdly + 1;                                              -- *** ??? delay ctrl
          if ra.acc.haddr(4) = '0' then -- start new read command if needed.
             v.casn := '0'; 
-            if dqsgating = 1 then
-              v.dqsctrl := r.cfg.dqsctrl(7 downto 1);
-            end if;
          end if;
       when rd8 => -- (CL = 3)
          v.casn := '1';
@@ -587,20 +523,14 @@ begin
       when rd2 =>
          v.casn := '1'; v.sdstate := rd3;
       when rd3 =>
-         if nosync = 0 then
-           if fast = 0 then v.startsdold := r.startsd; end if;
-         end if;
+         if fast = 0 then v.startsdold := r.startsd; end if;
          v.sdstate := rd4; v.hready := '1'; v.casn := '1';
          if v.hready = '1' then v.waddr := r.waddr + 2; end if;
       when rd4 =>
          v.hready := '1'; v.casn := '1';
          if (r.sdcsn = "11") or (r.waddr(2 downto 1) = "11") then
             v.dqm := (others => '1'); 
-            if nosync = 0 then
-              if fast /= 0 then v.startsdold := r.startsd; end if;
-            else
-              v.startsdold := ra.startsd;
-            end if;
+            if fast /= 0 then v.startsdold := r.startsd; end if;
             if (r.sdcsn /= "11") then
                v.rasn := '0'; v.sdwen := '0'; v.sdstate := rd5; -- precharge
             else
@@ -621,17 +551,12 @@ begin
          if r.waddr(1) = '0' then
             v.hrdata := regsd1 & regsd2;
          else
-            v.hrdata := regsd3 & regsd4;
+            v.hrdata := regsd3 & regsd3;
          end if;
          v.sdstate := ioreg2;
          if ra.acc.hwrite = '0' then v.hready := '1'; end if;
       when ioreg2 =>
-         writecfg := ra.acc.hwrite;
-         if nosync = 0 then
-           v.startsdold := r.startsd;
-         else
-           v.startsdold := ra.startsd;
-         end if;
+         writecfg := ra.acc.hwrite; v.startsdold := r.startsd;
          v.sdstate := sidle;
       when others =>
          v.sdstate := sidle;
@@ -651,17 +576,17 @@ begin
                v.cmstate := active;
             when CMD_EMR => -- load-ext-mode-reg
                v.sdcsn := (others => '0'); v.rasn := '0'; v.casn := '0'; 
-               v.sdwen := '0'; v.cmstate := active; v.ba := '0' & r.cfg.emr; --v.ba select EM register
+               v.sdwen := '0'; v.cmstate := active; v.ba := r.cfg.emr; --v.ba select EM register
                --v.address := "0000"&r.cfg.ocd&r.cfg.ocd&r.cfg.ocd&"0000000"; 
                if r.cfg.emr = "01" then
-                 v.address := "000"&conv_std_logic(dqsse=1)&r.cfg.ocd&r.cfg.ocd&r.cfg.ocd 
+                 v.address := "0000"&r.cfg.ocd&r.cfg.ocd&r.cfg.ocd 
                               & odtvalue(1)&"000"&odtvalue(0)&"00"; 
                else
-                 v.address := "000"&conv_std_logic(dqsse=1)&r.cfg.ocd&r.cfg.ocd&r.cfg.ocd&"0000000"; 
+                 v.address := "0000"&r.cfg.ocd&r.cfg.ocd&r.cfg.ocd&"0000000"; 
                end if;
             when CMD_LMR => -- load-mode-reg
                v.sdcsn := (others => '0'); v.rasn := '0'; v.casn := '0'; 
-               v.sdwen := '0'; v.cmstate := active; v.ba := "000";
+               v.sdwen := '0'; v.cmstate := active; v.ba := "00";
                v.address := "00010" & r.cfg.dllrst & "0" & "01" & "10010";  -- CAS = 3 WR = 3 burts = 4
             when others => null;
             end case;
@@ -680,7 +605,7 @@ begin
       when iidle =>
          if r.cfg.renable = '1' then
             v.cfg.cke := '1'; v.cfg.dllrst := '1';
-            v.ba := "000"; v.cfg.ocd := '0'; v.cfg.emr := "10"; -- EMR(2)
+            v.ba := "00"; v.cfg.ocd := '0'; v.cfg.emr := "10"; -- EMR(2)
             if r.cfg.cke = '1' then
                if r.initnopdly = "00000000" then -- 400 ns of NOP and CKE
                   v.istate := pre; v.cfg.command := CMD_PRE; 
@@ -790,9 +715,6 @@ begin
             v.cfg.trp       :=  wdata(28+32);
             v.cfg.cal_pll   :=  wdata(30+32 downto 29+32);                            -- *** ??? pll_reconf
             v.cfg.cal_rst   :=  wdata(31+32);
-         elsif r.waddr(1 downto 0) = "11" and (dqsgating=1 or eightbanks=1) then
-            v.cfg.dqsctrl(6 downto 0) :=  r.wdata(6 downto 0);
-            v.cfg.eightbanks          :=  r.wdata(8);
          end if;
       end if;
 
@@ -833,13 +755,6 @@ begin
          if pwron = 1 then v.cfg.renable :=  '1';
          else v.cfg.renable :=  '0'; end if;
          v.odt          := (others => '0');
-         v.oct          := '0';
-         if dqsgating = 1 then
-           v.cfg.dqsctrl  := (others => '0');
-           v.dqsctrl      := (others => '0');
-           v.dqsgate      := '1';
-         end if;
-         v.cfg.eightbanks := conv_std_logic_vector(eightbanks, 1)(0);
       end if;
       
       if oepol = 1 then v.sdo_bdrive := r.nbdrive;            -- *** ??? delay ctrl
@@ -855,7 +770,6 @@ begin
    ahbso.hconfig <= hconfig;
    ahbso.hirq    <= (others => '0');
    ahbso.hindex  <= hindex;
-   ahbso.hsplit  <= (others => '0');
 
    ahbregs : process(clk_ahb) begin
       if rising_edge(clk_ahb) then
@@ -876,20 +790,9 @@ begin
          if oepol = 0 then rbdrive <= (others => '1');
          else rbdrive <= (others => '0'); end if;
          r.cfg.cke <= '0';
-         r.sdo_bdrive <= '1';
-         r.sdo_qdrive <= '1';
          r.odt <= (others => '0');
       end if;
    end process;
-
-   dqsgate180reg : if dqsgating = 1 generate
-     process (clk_ddr)
-     begin
-       if falling_edge(clk_ddr) then
-         dqsgate180 <= r.dqsgate;
-       end if;
-     end process;
-   end generate;
 
    sdo.address  <= '0' & r.address; --'0' & ri.address;                     -- *** ??? delay ctrl
    sdo.ba       <= r.ba; --ri.ba;                                           -- *** ??? delay ctrl
@@ -908,10 +811,7 @@ begin
    sdo.cal_pll  <= r.cfg.cal_pll;                                           -- *** ??? pll_reconf
    sdo.cal_rst  <= r.cfg.cal_rst;
    sdo.odt      <= r.odt;
-   sdo.oct      <= r.oct;
-   sdo.dqs_gate <= r.dqsgate when r.cfg.dqsctrl(0) = '0' else
-                   dqsgate180;
-   
+
    read_buff : syncram_2p
    generic map (tech => memtech, abits => 5, dbits => 64, sepclk => 1, wrfst => 0)
    port map ( rclk => clk_ahb, renable => vcc, raddress => rai.raddr(5 downto 1),

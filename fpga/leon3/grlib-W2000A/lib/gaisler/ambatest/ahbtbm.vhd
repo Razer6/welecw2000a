@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -165,7 +164,7 @@ begin
         
         if kblimit = '1' then v.ac(1).htrans := HTRANS_NONSEQ; end if;
 
-    elsif ahbmi.hready = '0' and (ahbmi.hresp = HRESP_RETRY or ahbmi.hresp = HRESP_SPLIT) and r.grant2 = '1' then 
+    elsif ahbmi.hready = '0' and ahbmi.hresp = HRESP_RETRY and r.grant2 = '1' then 
       if r.retry = "00" then
         v.retryac := r.ac(1);
         v.ac(1) := r.curac;
@@ -283,10 +282,6 @@ begin
           if r.dbgl >= 3 then
             print(ptime & "Read[" & tost(r.haddr) & "]: [RETRY]");
           end if;
-      elsif ahbmi.hresp = HRESP_SPLIT then
-          if r.dbgl >= 3 then
-            print(ptime & "Read[" & tost(r.haddr) & "]: [SPLIT]");
-          end if;
       elsif ahbmi.hresp = HRESP_ERROR then
           if r.dbgl >= 1 then
             print(ptime & "Read[" & tost(r.haddr) & "]: [ERROR]");
@@ -302,11 +297,6 @@ begin
         if r.dbgl >= 3 then
           print(ptime & "Write[" & tost(r.haddr) & "]: " & tost(r.hdata) 
                 & " [RETRY]");
-        end if;
-      elsif ahbmi.hresp = HRESP_SPLIT then
-        if r.dbgl >= 3 then
-          print(ptime & "Write[" & tost(r.haddr) & "]: " & tost(r.hdata) 
-                & " [SPLIT]");
         end if;
       elsif ahbmi.hresp = HRESP_ERROR then
         if r.dbgl >= 1 then

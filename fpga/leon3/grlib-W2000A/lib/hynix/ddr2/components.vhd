@@ -28,11 +28,8 @@ package components is
 component HY5PS121621F
   generic (
      TimingCheckFlag : boolean := TRUE;
-     PUSCheckFlag    : boolean := FALSE;
-     Part_Number     : PART_NUM_TYPE := B400;
-     bbits           : natural := 64;
-     index           : integer := 0;
-     fname           : string := "sdram.srec");
+     PUSCheckFlag : boolean := FALSE;
+     Part_Number : PART_NUM_TYPE := B400);
   Port (  DQ    :  inout   std_logic_vector(15 downto 0) := (others => 'Z');
           LDQS  :  inout   std_logic := 'Z';
           LDQSB :  inout   std_logic := 'Z';

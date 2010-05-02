@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -164,7 +163,7 @@ begin
 
   end generate;
 
-  xc4v : if (tech = virtex4) or (tech = virtex5) or (tech = virtex6) generate
+  xc4v : if (tech = virtex4) or (tech = virtex5) generate
 
     ddr_phy0 : virtex4_ddr_phy 
      generic map (MHz => MHz, rstdelay => rstdelay
@@ -184,7 +183,7 @@ begin
 
   end generate;
 
-  xc3se : if (tech = spartan3e) or  (tech = spartan6) generate
+  xc3se : if tech = spartan3e generate
 
     ddr_phy0 : spartan3e_ddr_phy 
      generic map (MHz => MHz, rstdelay => rstdelay
@@ -227,8 +226,7 @@ entity ddr2phy is
 	ddelayb0 : integer := 0; ddelayb1 : integer := 0; ddelayb2 : integer := 0;
 	ddelayb3 : integer := 0; ddelayb4 : integer := 0; ddelayb5 : integer := 0;
 	ddelayb6 : integer := 0; ddelayb7 : integer := 0;
-        numidelctrl : integer := 4; norefclk : integer := 0; rskew : integer := 0;
-        eightbanks  : integer  range 0 to 1 := 0; dqsse : integer range 0 to 1 := 0);
+        numidelctrl : integer := 4; norefclk : integer := 0; rskew : integer := 0);
   port (
     rst            : in    std_ulogic;
     clk            : in    std_logic;   -- input clock
@@ -245,16 +243,16 @@ entity ddr2phy is
     ddr_web        : out   std_ulogic;  -- ddr write enable
     ddr_rasb       : out   std_ulogic;  -- ddr ras
     ddr_casb       : out   std_ulogic;  -- ddr cas
-    ddr_dm         : out   std_logic_vector (dbits/8-1 downto 0);    -- ddr dm
-    ddr_dqs        : inout std_logic_vector (dbits/8-1 downto 0);    -- ddr dqs
-    ddr_dqsn       : inout std_logic_vector (dbits/8-1 downto 0);    -- ddr dqsn
-    ddr_ad         : out   std_logic_vector (13 downto 0);           -- ddr address
-    ddr_ba         : out   std_logic_vector (1+eightbanks downto 0); -- ddr bank address
-    ddr_dq         : inout std_logic_vector (dbits-1 downto 0);      -- ddr data
+    ddr_dm         : out   std_logic_vector (dbits/8-1 downto 0);  -- ddr dm
+    ddr_dqs        : inout std_logic_vector (dbits/8-1 downto 0);  -- ddr dqs
+    ddr_dqsn       : inout std_logic_vector (dbits/8-1 downto 0);  -- ddr dqsn
+    ddr_ad         : out   std_logic_vector (13 downto 0);         -- ddr address
+    ddr_ba         : out   std_logic_vector (1 downto 0);          -- ddr bank address
+    ddr_dq         : inout std_logic_vector (dbits-1 downto 0);    -- ddr data
     ddr_odt        : out   std_logic_vector(1 downto 0);
 
     addr           : in    std_logic_vector (13 downto 0);
-    ba             : in    std_logic_vector ( 2 downto 0);
+    ba             : in    std_logic_vector ( 1 downto 0);
     dqin           : out   std_logic_vector (dbits*2-1 downto 0);  -- ddr output data
     dqout          : in    std_logic_vector (dbits*2-1 downto 0);  -- ddr input data
     dm             : in    std_logic_vector (dbits/4-1 downto 0);  -- data mask
@@ -270,16 +268,15 @@ entity ddr2phy is
     cal_inc        : in    std_logic_vector(dbits/8-1 downto 0);
     cal_pll        : in    std_logic_vector(1 downto 0);
     cal_rst        : in    std_logic;
-    odt            : in    std_logic_vector(1 downto 0);
-    oct            : in    std_logic;
-    dqs_gate       : in    std_ulogic
+    odt            : in    std_logic_vector(1 downto 0)
     );
 end;
 
 architecture rtl of ddr2phy is
+
 begin
 
-  xc4v : if (tech = virtex4) or (tech = virtex5) or (tech = virtex6) generate
+  xc4v : if (tech = virtex4) or (tech = virtex5) generate
 
     ddr_phy0 : virtex5_ddr2_phy 
      generic map (MHz => MHz, rstdelay => rstdelay
@@ -291,8 +288,8 @@ begin
 	ddelayb0 => ddelayb0, ddelayb1 => ddelayb1, ddelayb2 => ddelayb2, 
 	ddelayb3 => ddelayb3, ddelayb4 => ddelayb4, ddelayb5 => ddelayb5, 
 	ddelayb6 => ddelayb6, ddelayb7 => ddelayb7,
-        numidelctrl => numidelctrl, norefclk => norefclk, 
-        tech => tech, eightbanks => eightbanks
+   numidelctrl => numidelctrl, norefclk => norefclk, 
+   tech => tech
 	)
      port map (
 	rst, clk, clkref200, clkout, lock,
@@ -302,25 +299,6 @@ begin
 	addr, ba, dqin, dqout, dm, oen, dqs, dqsoen,
 	rasn, casn, wen, csn, cke, cal_en, cal_inc, cal_rst, odt);
 
-  end generate;
-
-  stra2 : if (tech = stratix2) generate
-
-      ddr_phy0 : stratixii_ddr2_phy
-      generic map (MHz => MHz, rstdelay => rstdelay
-        -- reduce 200 us start-up delay during simulation
-        -- pragma translate_off
-        / 200
-        -- pragma translate_on
-        , clk_mul => clk_mul, clk_div => clk_div, dbits => dbits
-      )
-      port map (
-        rst, clk, clkout, lock, ddr_clk, ddr_clkb,
-        ddr_cke, ddr_csb, ddr_web, ddr_rasb, ddr_casb,
-        ddr_dm, ddr_dqs, ddr_ad, ddr_ba, ddr_dq, ddr_odt,
-        addr, ba, dqin, dqout, dm, oen, dqs, dqsoen,
-        rasn, casn, wen, csn, cke, cal_en, cal_inc, cal_rst, odt);
-                                                                                  
   end generate;
 
   stra3 : if (tech = stratix3) generate
@@ -335,8 +313,8 @@ begin
 	ddelayb0 => ddelayb0, ddelayb1 => ddelayb1, ddelayb2 => ddelayb2, 
 	ddelayb3 => ddelayb3, ddelayb4 => ddelayb4, ddelayb5 => ddelayb5, 
 	ddelayb6 => ddelayb6, ddelayb7 => ddelayb7,
-        numidelctrl => numidelctrl, norefclk => norefclk, 
-        tech => tech, rskew => rskew, eightbanks => eightbanks
+   numidelctrl => numidelctrl, norefclk => norefclk, 
+   tech => tech, rskew => rskew
 	)
      port map (
 	rst, clk, clkref200, clkout, lock,
@@ -344,7 +322,7 @@ begin
 	ddr_cke, ddr_csb, ddr_web, ddr_rasb, ddr_casb, 
 	ddr_dm, ddr_dqs, ddr_dqsn, ddr_ad, ddr_ba, ddr_dq, ddr_odt,
 	addr, ba, dqin, dqout, dm, oen, dqs, dqsoen,
-	rasn, casn, wen, csn, cke, cal_en, cal_inc, cal_pll, cal_rst, odt, oct);
+	rasn, casn, wen, csn, cke, cal_en, cal_inc, cal_pll, cal_rst, odt);
 
   end generate;
 
@@ -355,8 +333,7 @@ begin
 -- pragma translate_off
                   / 200
 -- pragma translate_on
-                  , clk_mul => clk_mul, clk_div => clk_div, dbits => dbits, tech => tech, rskew => rskew,
-                  eightbanks => eightbanks)
+                  , clk_mul => clk_mul, clk_div => clk_div, dbits => dbits, tech => tech, rskew => rskew)
      port map (   rst, clk, clkout, lock, ddr_clk, ddr_clkb, ddr_clk_fb_out, ddr_clk_fb,
                   ddr_cke, ddr_csb, ddr_web, ddr_rasb, ddr_casb, 
                   ddr_dm, ddr_dqs, ddr_dqsn, ddr_ad, ddr_ba, ddr_dq, ddr_odt,
@@ -364,38 +341,5 @@ begin
                   rasn, casn, wen, csn, cke, cal_pll, odt);
   end generate;
 
-  nextreme : if (tech = easic90) generate
-    ddr_phy0 : easic90_ddr2_phy
-      generic map (
-        tech       => tech,
-        MHz        => MHz,
-        clk_mul    => clk_mul,
-        clk_div    => clk_div,
-        dbits      => dbits,
-        rstdelay   => rstdelay,
-        eightbanks => eightbanks)
-     port map (
-	rst, clk, clkout, lock, ddr_clk, ddr_clkb, ddr_clk_fb_out,
-	ddr_cke, ddr_csb, ddr_web, ddr_rasb, ddr_casb, 
-	ddr_dm, ddr_dqs, ddr_dqsn, ddr_ad, ddr_ba, ddr_dq, ddr_odt,
-	addr, ba, dqin, dqout, dm, oen, dqs, dqsoen,
-	rasn, casn, wen, csn, cke, odt, dqs_gate);
-  end generate;
-
-  sp6 : if  (tech = spartan6) generate
-    ddr_phy0 : spartan6_ddr2_phy 
-     generic map (MHz => MHz, rstdelay => rstdelay
--- reduce 200 us start-up delay during simulation
--- pragma translate_off
-                  / 200
--- pragma translate_on
-                  , clk_mul => clk_mul, clk_div => clk_div, dbits => dbits, tech => tech, rskew => rskew,
-                  eightbanks => eightbanks)
-     port map (   rst, clk, clkout, lock, ddr_clk, ddr_clkb, ddr_clk_fb_out, ddr_clk_fb,
-                  ddr_cke, ddr_csb, ddr_web, ddr_rasb, ddr_casb, 
-                  ddr_dm, ddr_dqs, ddr_dqsn, ddr_ad, ddr_ba, ddr_dq, ddr_odt,
-                  addr, ba, dqin, dqout, dm, oen, dqs, dqsoen,
-                  rasn, casn, wen, csn, cke, cal_pll, odt);
-  end generate;
-
+  
 end;

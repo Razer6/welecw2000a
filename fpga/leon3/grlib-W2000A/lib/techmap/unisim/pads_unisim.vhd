@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -32,18 +31,14 @@ library unisim;
 use unisim.IBUF;
 -- pragma translate_on
 
-entity unisim_inpad is
+entity virtex_inpad is
   generic (level : integer := 0; voltage : integer := x33v);
   port (pad : in std_ulogic; o : out std_ulogic);
 end; 
-architecture rtl of unisim_inpad is
+architecture rtl of virtex_inpad is
   component IBUF generic(
       CAPACITANCE : string := "DONT_CARE"; IOSTANDARD : string := "LVCMOS25");
     port (O : out std_ulogic; I : in std_ulogic); end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of IBUF : component is true;
-  
 begin
   pci0 : if level = pci33 generate
     pci_5 : if voltage = x50v generate
@@ -85,20 +80,16 @@ library unisim;
 use unisim.IOBUF;
 -- pragma translate_on
 
-entity unisim_iopad  is
+entity virtex_iopad  is
   generic (level : integer := 0; slew : integer := 0;
 	   voltage : integer := x33v; strength : integer := 12);
   port (pad : inout std_ulogic; i, en : in std_ulogic; o : out std_ulogic);
 end ;
-architecture rtl of unisim_iopad is
+architecture rtl of virtex_iopad is
   component IOBUF generic (
       CAPACITANCE : string := "DONT_CARE"; DRIVE : integer := 12;
       IOSTANDARD  : string := "LVCMOS25"; SLEW : string := "SLOW");
     port (O : out std_ulogic; IO : inout std_logic; I, T : in std_ulogic); end component;
-  
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of IOBUF : component is true;
-  
 begin
   pci0 : if level = pci33 generate
     pci_5 : if voltage = x50v generate
@@ -121,25 +112,13 @@ begin
     end generate;
   end generate;
   cmos0 : if level = cmos generate
-    cmos_33 : if voltage = x33v generate
-      slow0 : if slew = 0 generate
-        op : IOBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33")
-          port map (O => o, IO => pad, I => i, T => en);
-      end generate;
-      fast0 : if slew /= 0 generate
-        op : IOBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33", SLEW => "FAST")
-          port map (O => o, IO => pad, I => i, T => en);
-      end generate;
+    slow0 : if slew = 0 generate
+      op : IOBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33")
+                 port map (O => o, IO => pad, I => i, T => en);
     end generate;
-    cmos_25 : if voltage /= x33v generate
-      slow0 : if slew = 0 generate
-        op : IOBUF generic map (drive => strength, IOSTANDARD => "LVCMOS25")
-          port map (O => o, IO => pad, I => i, T => en);
-      end generate;
-      fast0 : if slew /= 0 generate
-        op : IOBUF generic map (drive => strength, IOSTANDARD => "LVCMOS25", SLEW => "FAST")
-          port map (O => o, IO => pad, I => i, T => en);
-      end generate;
+    fast0 : if slew /= 0 generate
+      op : IOBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33", SLEW => "FAST")
+                 port map (O => o, IO => pad, I => i, T => en);
     end generate;
   end generate;
   sstl2x : if level = sstl2_i generate
@@ -173,20 +152,16 @@ library unisim;
 use unisim.OBUF;
 -- pragma translate_on
 
-entity unisim_outpad  is
+entity virtex_outpad  is
   generic (level : integer := 0; slew : integer := 0;
 	   voltage : integer := 0; strength : integer := 12);
   port (pad : out std_ulogic; i : in std_ulogic);
 end ;
-architecture rtl of unisim_outpad is
+architecture rtl of virtex_outpad is
   component OBUF generic (
       CAPACITANCE : string := "DONT_CARE"; DRIVE : integer := 12;
       IOSTANDARD  : string := "LVCMOS25"; SLEW : string := "SLOW");
     port (O : out std_ulogic; I : in std_ulogic); end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of OBUF : component is true;
-
 begin
   pci0 : if level = pci33 generate
     pci_5 : if voltage = x50v generate
@@ -209,25 +184,13 @@ begin
     end generate;
   end generate;
   cmos0 : if level = cmos generate
-    cmos_3: if voltage = x33v generate
-      slow0 : if slew = 0 generate
-        op : OBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33")
-          port map (O => pad, I => i);
-      end generate;
-      fast0 : if slew /= 0 generate
-        op : OBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33", SLEW => "FAST")
-          port map (O => pad, I => i);
-      end generate;
+    slow0 : if slew = 0 generate
+      op : OBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33")
+                port map (O => pad, I => i);
     end generate;
-    cmos_25: if voltage /= x33v generate
-      slow0 : if slew = 0 generate
-        op : OBUF generic map (drive => strength, IOSTANDARD => "LVCMOS25")
-          port map (O => pad, I => i);
-      end generate;
-      fast0 : if slew /= 0 generate
-        op : OBUF generic map (drive => strength, IOSTANDARD => "LVCMOS25", SLEW => "FAST")
-          port map (O => pad, I => i);
-      end generate;
+    fast0 : if slew /= 0 generate
+      op : OBUF generic map (drive => strength, IOSTANDARD => "LVCMOS33", SLEW => "FAST")
+                port map (O => pad, I => i);
     end generate;
   end generate;
   sstl2x : if level = sstl2_i generate
@@ -262,20 +225,16 @@ library unisim;
 use unisim.OBUFT;
 -- pragma translate_on
 
-entity unisim_toutpad  is
+entity virtex_toutpad  is
   generic (level : integer := 0; slew : integer := 0;
 	   voltage : integer := 0; strength : integer := 12);
   port (pad : out std_ulogic; i, en : in std_ulogic);
 end ;
-architecture rtl of unisim_toutpad is
+architecture rtl of virtex_toutpad is
   component OBUFT generic (
       CAPACITANCE : string := "DONT_CARE"; DRIVE : integer := 12;
       IOSTANDARD  : string := "LVCMOS25"; SLEW : string := "SLOW");
     port (O : out std_ulogic; I, T : in std_ulogic); end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of OBUFT : component is true;
-
 begin
   pci0 : if level = pci33 generate
     pci_5 : if voltage = x50v generate
@@ -323,13 +282,13 @@ use unisim.BUFG;
 use unisim.DCM;
 -- pragma translate_on
 
-entity unisim_skew_outpad  is
+entity virtex_skew_outpad  is
   generic (level : integer := 0; slew : integer := 0;
 	   voltage : integer := 0; strength : integer := 12; skew : integer := 0);
   port (pad : out std_ulogic; i : in std_ulogic; rst : in std_ulogic;
         o : out std_ulogic);
 end ;
-architecture rtl of unisim_skew_outpad is
+architecture rtl of virtex_skew_outpad is
   component OBUF generic (
       CAPACITANCE : string := "DONT_CARE"; DRIVE : integer := 12;
       IOSTANDARD  : string := "LVCMOS25"; SLEW : string := "SLOW");
@@ -374,12 +333,7 @@ architecture rtl of unisim_skew_outpad is
       STATUS   : out std_logic_vector (7 downto 0));
   end component;
   component BUFG port (O : out std_logic; I : in std_logic); end component;
-
-  signal reset, clk0, clk0b, gnd, vcc : std_ulogic;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of OBUF : component is true;
-  
+signal reset, clk0, clk0b, gnd, vcc : std_ulogic;
 begin
   gnd <= '0'; vcc <= '1';
   reset <= not rst;
@@ -392,7 +346,7 @@ begin
 
   o <= clk0b; -- output before pad
   
-  --x0 : unisim_outpad generic map (level, slew, voltage, strength) port map (pad, clk0b);
+  --x0 : virtex_outpad generic map (level, slew, voltage, strength) port map (pad, clk0b);
   pci0 : if level = pci33 generate
     pci_5 : if voltage = x50v generate
       op : OBUF generic map (drive => strength, IOSTANDARD => "PCI33_5")
@@ -458,11 +412,11 @@ use unisim.BUFGMUX;
 use unisim.BUFG;
 -- pragma translate_on
 
-entity unisim_clkpad is
+entity virtex_clkpad is
   generic (level : integer := 0; voltage : integer := x33v; arch : integer := 0; hf : integer := 0);
   port (pad : in std_ulogic; o : out std_ulogic; rstn : in std_ulogic := '1'; lock : out std_ulogic);
 end; 
-architecture rtl of unisim_clkpad is
+architecture rtl of virtex_clkpad is
   component IBUFG  generic(
       CAPACITANCE : string := "DONT_CARE"; IOSTANDARD : string := "LVCMOS25");
     port (O : out std_logic; I : in std_logic); end component;
@@ -480,12 +434,7 @@ architecture rtl of unisim_clkpad is
       LOCKED : out std_ulogic; CLKFB  : in std_ulogic; CLKIN  : in std_ulogic; RST   : in std_ulogic);
   end component;
   signal gnd, ol, ol2, ol3 : std_ulogic;
-  signal rst : std_ulogic;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of IBUFG : component is true;
-  attribute syn_noprune of IBUF : component is true; 
-  
+  signal rst : std_ulogic;  
 begin
   gnd <= '0'; rst <= not rstn;
   g0 : if arch = 0 generate
@@ -501,7 +450,7 @@ begin
       ip : IBUFG generic map (IOSTANDARD => "LVTTL") port map (O => o, I => pad);
     end generate;
     cmos0 : if level = cmos generate
-      cmos_33 : if voltage = x33v generate
+	  cmos_33 : if voltage = x33v generate
         ip : IBUFG generic map (IOSTANDARD => "LVCMOS33") port map (O => o, I => pad);
       end generate;
       cmos_25 : if voltage /= x33v generate
@@ -557,14 +506,8 @@ begin
       bf : BUFG port map (O => o, I => ol);
     end generate;
     cmos0 : if level = cmos generate
-      cmos_33 : if voltage = x33v generate
-        ip : IBUFG generic map (IOSTANDARD => "LVCMOS33") port map (O => ol, I => pad);
-        bf : BUFG port map (O => o, I => ol);
-      end generate;
-      cmos_25 : if voltage /= x33v generate
-        ip : IBUFG generic map (IOSTANDARD => "LVCMOS25") port map (O => ol, I => pad);
-        bf : BUFG port map (O => o, I => ol);
-      end generate;
+      ip : IBUFG generic map (IOSTANDARD => "LVCMOS33") port map (O => ol, I => pad);
+      bf : BUFG port map (O => o, I => ol);
     end generate;
     gen0 : if (level /= pci33) and (level /= ttl) and (level /= cmos) generate
       ip : IBUFG port map (O => ol, I => pad);
@@ -609,16 +552,48 @@ library techmap;
 use techmap.gencomp.all;
 -- pragma translate_off
 library unisim;
+use unisim.OBUFDS_LVDS_25;
+use unisim.OBUFDS_LVDS_33;
+-- pragma translate_on
+
+entity virtex_outpad_ds  is
+  generic (level : integer := lvds; voltage : integer := x33v);
+  port (padp, padn : out std_ulogic; i : in std_ulogic);
+end ;
+architecture rtl of virtex_outpad_ds is
+  component OBUFDS_LVDS_25
+     port ( O : out std_ulogic; OB : out std_ulogic; I : in std_ulogic);
+  end component;
+  component OBUFDS_LVDS_33
+     port ( O : out std_ulogic; OB : out std_ulogic; I : in std_ulogic);
+  end component;
+begin
+  xlvds : if level = lvds generate
+    lvds_33 : if voltage = x33v generate
+      op : OBUFDS_LVDS_33 port map (O => padp, OB => padn, I => i);
+    end generate;
+    lvds_25 : if voltage /= x33v generate
+      op : OBUFDS_LVDS_25 port map (O => padp, OB => padn, I => i);
+    end generate;
+  end generate;
+end;
+
+library ieee;
+use ieee.std_logic_1164.all;
+library techmap;
+use techmap.gencomp.all;
+-- pragma translate_off
+library unisim;
 use unisim.IBUFDS_LVDS_25;
 use unisim.IBUFDS_LVDS_33;
 -- pragma translate_on
 
-entity unisim_inpad_ds is
+entity virtex_inpad_ds is
   generic (level : integer := lvds; voltage : integer := x33v);
   port (padp, padn : in std_ulogic; o : out std_ulogic);
 end; 
 
-architecture rtl of unisim_inpad_ds is
+architecture rtl of virtex_inpad_ds is
   component IBUFDS_LVDS_25
      port ( O : out std_ulogic; I : in std_ulogic; IB : in std_ulogic);
   end component;
@@ -649,23 +624,18 @@ use unisim.IBUFGDS_LVDS_25;
 use unisim.IBUFGDS_LVDS_33;
 -- pragma translate_on
 
-entity unisim_clkpad_ds is
+entity virtex_clkpad_ds is
   generic (level : integer := lvds; voltage : integer := x33v);
   port (padp, padn : in std_ulogic; o : out std_ulogic);
 end; 
 
-architecture rtl of unisim_clkpad_ds is
+architecture rtl of virtex_clkpad_ds is
   component IBUFGDS_LVDS_25
      port ( O : out std_ulogic; I : in std_ulogic; IB : in std_ulogic);
   end component;
   component IBUFGDS_LVDS_33
      port ( O : out std_ulogic; I : in std_ulogic; IB : in std_ulogic);
   end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of IBUFGDS_LVDS_25 : component is true;
-  attribute syn_noprune of IBUFGDS_LVDS_33 : component is true;
-
 begin
   xlvds : if level = lvds generate
     lvds_33 : if voltage = x33v generate
@@ -701,10 +671,6 @@ architecture rtl of virtex4_inpad_ds is
 	IFD_DELAY_VALUE : string := "AUTO"; IOSTANDARD : string := "DEFAULT");
      port ( O : out std_ulogic; I : in std_ulogic; IB : in std_ulogic);
   end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of IBUFDS : component is true;
-  
 begin
   xlvds : if level = lvds generate
     lvds_33 : if voltage = x33v generate
@@ -742,10 +708,6 @@ architecture rtl of virtex4_clkpad_ds is
 	IOSTANDARD : string := "DEFAULT");
      port ( O : out std_ulogic; I : in std_ulogic; IB : in std_ulogic);
   end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of IBUFGDS : component is true;
-  
 begin
   xlvds : if level = lvds generate
     lvds_33 : if voltage = x33v generate
@@ -771,43 +733,19 @@ library unisim;
 use unisim.IOBUFDS;
 -- pragma translate_on
 
-entity unisim_iopad_ds  is
+entity virtex5_iopad_ds  is
   generic (level : integer := 0; slew : integer := 0;
 	   voltage : integer := x33v; strength : integer := 12);
   port (padp, padn : inout std_ulogic; i, en : in std_ulogic; o : out std_ulogic);
 end ;
-architecture rtl of unisim_iopad_ds is
+architecture rtl of virtex5_iopad_ds is
   component IOBUFDS generic (
       CAPACITANCE : string := "DONT_CARE"; IBUF_DELAY_VALUE : string := "0";
       IOSTANDARD  : string := "DEFAULT"; IFD_DELAY_VALUE : string := "AUTO");
     port (O : out std_ulogic; IO, IOB : inout std_logic; I, T : in std_ulogic); end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of IOBUFDS : component is true;
-
 begin
-  xlvds : if level = lvds generate
-    lvds_33 : if voltage = x33v generate
-      iop : IOBUFDS generic map (IOSTANDARD  => "LVDS_33")
-        port map (O => o, IO => padp, IOB => padn, I => i, T => en);
-    end generate;
-    lvds_25 : if voltage /= x33v generate
-      iop : IOBUFDS generic map (IOSTANDARD  => "LVDS_25")
-        port map (O => o, IO => padp, IOB => padn, I => i, T => en);
-    end generate;
-  end generate;
-  xsstl18_i : if level = sstl18_i generate
-    iop : IOBUFDS generic map (IOSTANDARD  => "DIFF_SSTL18_I")
-      port map (O => o, IO => padp, IOB => padn, I => i, T => en);
-  end generate;
-  xsstl18_ii : if level = sstl18_ii generate
-    iop : IOBUFDS generic map (IOSTANDARD  => "DIFF_SSTL18_II")
-      port map (O => o, IO => padp, IOB => padn, I => i, T => en);
-  end generate;
-  default :  if (level /= lvds) and (level /= sstl18_i) and (level /= sstl18_ii) generate
-    iop : IOBUFDS generic map (IOSTANDARD => "DEFAULT")
-      port map (O => o, IO => padp, IOB => padn, I => i, T => en);
-  end generate;
+      iop : IOBUFDS generic map (IOSTANDARD => "DEFAULT")
+                 port map (O => o, IO => padp, IOB => padn, I => i, T => en);
 end;
 
 library ieee;
@@ -819,18 +757,14 @@ library unisim;
 use unisim.OBUFDS;
 -- pragma translate_on
 
-entity unisim_outpad_ds  is
+entity virtex5_outpad_ds  is
   generic (level : integer := lvds; voltage : integer := x33v);
   port (padp, padn : out std_ulogic; i : in std_ulogic);
 end ;
-architecture rtl of unisim_outpad_ds is
+architecture rtl of virtex5_outpad_ds is
   component OBUFDS generic( IOSTANDARD  : string := "DEFAULT");
      port ( O : out std_ulogic; OB : out std_ulogic; I : in std_ulogic);
   end component;
-
-  attribute syn_noprune : boolean;
-  attribute syn_noprune of OBUFDS : component is true;
-  
 begin
   xlvds : if level = lvds generate
     lvds_33 : if voltage = x33v generate
@@ -843,11 +777,11 @@ begin
     end generate;
   end generate;
   xsstl18_i : if level = sstl18_i generate
-      op : OBUFDS generic map(IOSTANDARD  => "DIFF_SSTL18_I")
+      op : OBUFDS generic map(IOSTANDARD  => "SSTL18_I")
          port map (O => padp, OB => padn, I => i);
   end generate;
   xsstl18_ii : if level = sstl18_ii generate
-      op : OBUFDS generic map(IOSTANDARD  => "DIFF_SSTL18_II")
+      op : OBUFDS generic map(IOSTANDARD  => "SSTL18_II")
          port map (O => padp, OB => padn, I => i);
   end generate;
 end;

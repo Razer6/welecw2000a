@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -131,52 +130,6 @@ package misc is
     );
   end component;
 
-  component ftahbram2 is
-    generic (
-      hindex    : integer := 0;
-      haddr     : integer := 0;
-      hmask     : integer := 16#fff#;
-      tech      : integer := DEFMEMTECH;
-      kbytes    : integer := 1;
-      pindex    : integer := 0;
-      paddr     : integer := 0;
-      pmask     : integer := 16#fff#;
-      testen    : integer := 0);
-    port (
-      rst     : in  std_ulogic;
-      clk     : in  std_ulogic;
-      ahbsi   : in  ahb_slv_in_type;
-      ahbso   : out ahb_slv_out_type;
-      apbi    : in  apb_slv_in_type;
-      apbo    : out apb_slv_out_type;
-      aramo   : out ahbram_out_type
-    );
-  end component;
-
-  component ahbdpram
-  generic (
-    hindex  : integer := 0;
-    haddr   : integer := 0;
-    hmask   : integer := 16#fff#;
-    tech    : integer := 2;
-    abits   : integer range 8 to 19 := 8;
-    bytewrite : integer range 0 to 1 := 0
-  );
-  port (
-    rst     : in  std_ulogic;
-    clk     : in  std_ulogic;
-    ahbsi   : in  ahb_slv_in_type;
-    ahbso   : out ahb_slv_out_type;
-    clkdp   : in std_ulogic;
-    address : in std_logic_vector((abits -1) downto 0);
-    datain  : in std_logic_vector(31 downto 0);
-    dataout : out std_logic_vector(31 downto 0);
-    enable  : in std_ulogic;			-- active high chip select
-    bwrite  : in std_logic_vector(0 to 3)	-- active high byte write enable
-  );						-- big-endian write: bwrite(0) => data(31:24)
-  end component;
-
-
   component ahbtrace is
   generic (
     hindex  : integer := 0;
@@ -250,7 +203,6 @@ end record;
   type ahb2ahb_ctrl_type is record
     slck  : std_ulogic;
     blck  : std_ulogic;
-    mlck  : std_ulogic;
   end record;
 
  component grgpio
@@ -297,8 +249,7 @@ end record;
     sbus     : integer := 0;
     mbus     : integer := 0;
     ioarea   : integer := 0;
-    ibrsten  : integer := 0;
-    lckdac   : integer range 0 to 2 := 0);
+    ibrsten  : integer := 0);
   port (
     rstn   : in std_ulogic;
     hclkm  : in std_ulogic;
@@ -335,8 +286,7 @@ end record;
     lsb_bank1     : integer range 0 to 1073741823 := 0;
     lsb_bank2     : integer range 0 to 1073741823 := 0;
     lsb_bank3     : integer range 0 to 1073741823 := 0;
-    lsb_ioarea    : integer := 0;
-    lckdac        : integer range 0 to 2 := 0);
+    lsb_ioarea    : integer := 0);
   port (
     rstn    : in std_ulogic;
     hsb_clk : in std_ulogic;
@@ -480,8 +430,7 @@ end record;
     pmask       : integer := 16#fff#;
     pirq        : integer := 0;
     fKHz        : integer := 50000;
-    fixed       : integer := 0;
-    oepol       : integer range 0 to 1 := 0);
+    fixed       : integer := 1);
   port(
     rst         : in std_ulogic;                -- Global asynchronous reset
     clk         : in std_ulogic;                -- Global clock
@@ -500,7 +449,6 @@ end record;
     video_out_r     : std_logic_vector(7 downto 0);     -- red channel
     video_out_g     : std_logic_vector(7 downto 0);     -- green channel
     video_out_b     : std_logic_vector(7 downto 0);     -- blue channel
-    bitdepth        : std_logic_vector(1 downto 0);     -- Bith depth
   end record;
 
   component apbvga
@@ -550,7 +498,7 @@ end record;
   end component;
 
   constant vgao_none : apbvga_out_type :=
-	('0', '0', '0', '0', "00000000", "00000000", "00000000", "00");
+	('0', '0', '0', '0', "00000000", "00000000", "00000000");
   constant ps2o_none : ps2_out_type := ('1', '1', '1', '1');
 
 --  component ahbrom
@@ -618,7 +566,7 @@ end record;
          pmask:            Integer := 16#FFF#;
          pirq:             Integer := 1;                 -- index of first irq
          dwidth:           Integer := 16;                -- data width
-         ptrwidth:         Integer range 16 to 16 := 16; --  16 to  64k bytes
+         ptrwidth:         Integer range 4 to 16 := 12;  --  16 to  64k bytes
                                                          -- 128 to 512k bits
          singleirq:        Integer range 0 to 1 := 0;    -- single irq output
          oepol:            Integer := 1);                -- output enable polarity
@@ -694,7 +642,7 @@ end record;
   -----------------------------------------------------------------------------
   -- I2C types and components
   -----------------------------------------------------------------------------
-
+  
   type i2c_in_type is record
       scl : std_ulogic;
       sda : std_ulogic;
@@ -705,9 +653,8 @@ end record;
       scloen : std_ulogic;
       sda    : std_ulogic;
       sdaoen : std_ulogic;
-      enable : std_ulogic;
   end record;
-
+    
   -- AMBA wrapper for OC I2C-master
   component i2cmst
     generic (
@@ -727,35 +674,13 @@ end record;
     );
   end component;
 
-  component i2cmst_gen
-    generic (oepol  : integer range 0 to 1 := 0);
-    port (
-      rstn        : in  std_ulogic;
-      clk         : in  std_ulogic;
-      psel        : in  std_ulogic;
-      penable     : in  std_ulogic;
-      paddr       : in  std_logic_vector(31 downto 0);
-      pwrite      : in  std_ulogic;
-      pwdata      : in  std_logic_vector(31 downto 0);
-      prdata      : out std_logic_vector(31 downto 0);
-      irq         : out std_logic;
-      i2ci_scl    : in  std_ulogic;
-      i2ci_sda    : in  std_ulogic;
-      i2co_scl    : out std_ulogic;
-      i2co_scloen : out std_ulogic;
-      i2co_sda    : out std_ulogic;
-      i2co_sdaoen : out std_ulogic;
-      i2co_enable : out std_ulogic
-      );
-  end component;
-
   component i2cslv
     generic (
       pindex  : integer := 0;
       paddr   : integer := 0;
       pmask   : integer := 16#fff#;
       pirq    : integer := 0;
-      hardaddr : integer range 0 to 1 := 0;
+      hardaddr : integer range 0 to 1 := 0; 
       tenbit   : integer range 0 to 1 := 0;
       i2caddr  : integer range 0 to 1023 := 0;
       oepol    : integer range 0 to 1 := 0
@@ -769,7 +694,7 @@ end record;
       i2co    : out i2c_out_type
       );
   end component;
-
+  
   -----------------------------------------------------------------------------
   -- SPI controller
   -----------------------------------------------------------------------------
@@ -778,7 +703,6 @@ end record;
     mosi    : std_ulogic;
     sck     : std_ulogic;
     spisel  : std_ulogic;
-    astart  : std_ulogic;
   end record;
 
   type spi_out_type is record
@@ -788,9 +712,7 @@ end record;
     mosioen  : std_ulogic;
     sck      : std_ulogic;
     sckoen   : std_ulogic;
-    ssn      : std_logic_vector(7 downto 0);  -- used by GE/OC SPI core
-    enable   : std_ulogic;
-    astart   : std_ulogic;
+    ssn  : std_logic_vector(7 downto 0);  -- used by GE/OC SPI core
   end record;
 
   component spictrl
@@ -802,13 +724,7 @@ end record;
       fdepth   : integer range 1 to 7  := 1;
       slvselen : integer range 0 to 1  := 0;
       slvselsz : integer range 1 to 32 := 1;
-      oepol    : integer range 0 to 1  := 0;
-      odmode   : integer range 0 to 1  := 0;
-      automode : integer range 0 to 1  := 0;
-      acntbits : integer range 1 to 32 := 32;
-      aslvsel  : integer range 0 to 1  := 0;
-      twen     : integer range 0 to 1  := 1;
-      maxwlen  : integer range 0 to 15 := 0
+      oepol    : integer range 0 to 1  := 0
       );
     port (
       rstn   : in std_ulogic;
@@ -821,146 +737,7 @@ end record;
     );
   end component;
 
-  -----------------------------------------------------------------------------
-  -- AMBA wrapper for System Monitor
-  -----------------------------------------------------------------------------
-  type grsysmon_in_type is record
-     convst       : std_ulogic;
-     convstclk    : std_ulogic;
-     vauxn        : std_logic_vector(15 downto 0);
-     vauxp        : std_logic_vector(15 downto 0);
-     vn           : std_ulogic;
-     vp           : std_ulogic;
-  end record;
-
-  type grsysmon_out_type is record
-     alm          : std_logic_vector(2 downto 0);
-     ot           : std_ulogic;
-     eoc          : std_ulogic;
-     eos          : std_ulogic;
-     channel      : std_logic_vector(4 downto 0);
-  end record;
-
-  constant grsysmon_in_gnd : grsysmon_in_type :=
-    ('0', '0', (others => '0'), (others => '0'), '0', '0');
-
-  component grsysmon
-  generic (
-    -- GRLIB generics
-    tech      : integer := DEFFABTECH;
-    hindex    : integer := 0;             -- AHB slave index
-    hirq      : integer := 0;             -- Interrupt line
-    caddr     : integer := 16#000#;       -- Base address for configuration area
-    cmask     : integer := 16#fff#;       -- Area mask
-    saddr     : integer := 16#001#;       -- Base address for sysmon register area
-    smask     : integer := 16#fff#;       -- Area mask
-    split     : integer := 0;             -- Enable AMBA SPLIT support
-    extconvst : integer := 0;             -- Use external CONVST signal
-    wrdalign  : integer := 0;             -- Word align System Monitor registers
-    -- Virtex 5 SYSMON generics
-    INIT_40 : bit_vector := X"0000";
-    INIT_41 : bit_vector := X"0000";
-    INIT_42 : bit_vector := X"0800";
-    INIT_43 : bit_vector := X"0000";
-    INIT_44 : bit_vector := X"0000";
-    INIT_45 : bit_vector := X"0000";
-    INIT_46 : bit_vector := X"0000";
-    INIT_47 : bit_vector := X"0000";
-    INIT_48 : bit_vector := X"0000";
-    INIT_49 : bit_vector := X"0000";
-    INIT_4A : bit_vector := X"0000";
-    INIT_4B : bit_vector := X"0000";
-    INIT_4C : bit_vector := X"0000";
-    INIT_4D : bit_vector := X"0000";
-    INIT_4E : bit_vector := X"0000";
-    INIT_4F : bit_vector := X"0000";
-    INIT_50 : bit_vector := X"0000";
-    INIT_51 : bit_vector := X"0000";
-    INIT_52 : bit_vector := X"0000";
-    INIT_53 : bit_vector := X"0000";
-    INIT_54 : bit_vector := X"0000";
-    INIT_55 : bit_vector := X"0000";
-    INIT_56 : bit_vector := X"0000";
-    INIT_57 : bit_vector := X"0000";
-    SIM_MONITOR_FILE : string := "sysmon.txt");
-  port (
-    rstn    : in  std_ulogic;
-    clk     : in  std_ulogic;
-    ahbsi   : in  ahb_slv_in_type;
-    ahbso   : out ahb_slv_out_type;
-    sysmoni : in  grsysmon_in_type;
-    sysmono : out grsysmon_out_type
-    );
-  end component;
-
-  -----------------------------------------------------------------------------
-  -- AMBA System ACE Interface Controller
-  -----------------------------------------------------------------------------
-  type gracectrl_in_type is record
-     di   : std_logic_vector(15 downto 0);
---     brdy : std_ulogic;
-     irq  : std_ulogic;
-  end record;
-
-  type gracectrl_out_type is record
-     addr : std_logic_vector(6 downto 0);
-     do   : std_logic_vector(15 downto 0);
-     cen  : std_ulogic;
-     wen  : std_ulogic;
-     oen  : std_ulogic;
-     doen : std_ulogic;                 -- Data output enable to pad
-  end record;
-
-  constant gracectrl_none : gracectrl_out_type :=
-    ((others => '1'), (others => '1'), '1', '1', '1', '1');
-
-  component gracectrl
-  generic (
-    hindex  : integer := 0;              -- AHB slave index
-    hirq    : integer := 0;              -- Interrupt line
-    haddr   : integer := 16#000#;        -- Base address
-    hmask   : integer := 16#fff#;        -- Area mask
-    split   : integer range 0 to 1 := 0; -- Enable AMBA SPLIT support
-    swap    : integer range 0 to 1 := 0;
-    oepol   : integer range 0 to 1 := 0  -- Output enable polarity
-    );
-  port (
-    rstn    : in  std_ulogic;
-    clk     : in  std_ulogic;
-    clkace  : in  std_ulogic;
-    ahbsi   : in  ahb_slv_in_type;
-    ahbso   : out ahb_slv_out_type;
-    acei    : in  gracectrl_in_type;
-    aceo    : out gracectrl_out_type
-    );
-  end component;
-
-  -----------------------------------------------------------------------------
-  -- General purpose register
-  -----------------------------------------------------------------------------
-  component grgpreg is
-    generic (
-        pindex   : integer := 0;
-        paddr    : integer := 0;
-        pmask    : integer := 16#fff#;
-        nbits    : integer range 1 to 64 := 16;
-        rstval   : integer := 0;
-        rstval2  : integer := 0
-        );
-    port (
-        rst    : in  std_ulogic;
-        clk    : in  std_ulogic;
-        apbi   : in  apb_slv_in_type;
-        apbo   : out apb_slv_out_type;
-        gprego : out std_logic_vector(nbits-1 downto 0)
-        );
-  end component;
-
-  -----------------------------------------------------------------------------
-  -- Function declarations
-  -----------------------------------------------------------------------------
-
---  function nandtree(v : std_logic_vector) return std_ulogic;
+  function nandtree(v : std_logic_vector) return std_ulogic;
 
 end;
 
@@ -996,20 +773,20 @@ package body misc is
     return(res);
   end;
 
---  function nandtree(v : std_logic_vector) return std_ulogic is
---  variable a : std_logic_vector(v'length-1 downto 0);
---  variable b : std_logic_vector(v'length downto 0);
---  begin
---
---    a := v; b(0) := '1';
---
---    for i in 0 to v'length-1 loop
---      b(i+1) := a(i) nand b(i);
---    end loop;
---
---    return b(v'length);
---
---  end;
+  function nandtree(v : std_logic_vector) return std_ulogic is
+  variable a : std_logic_vector(v'length-1 downto 0);
+  variable b : std_logic_vector(v'length downto 0);
+  begin
+
+    a := v; b(0) := '1';
+
+    for i in 0 to v'length-1 loop
+      b(i+1) := a(i) nand b(i);
+    end loop;
+
+    return b(v'length);
+
+  end;
 
 
 end;

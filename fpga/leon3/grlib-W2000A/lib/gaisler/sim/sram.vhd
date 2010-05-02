@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -78,7 +77,6 @@ begin
   variable BUF : std_logic_vector(31 downto 0);
   variable CH : character;
   variable ai : integer := 0;
-  variable len : integer := 0;
   file TCF : text open read_mode is fname;
   variable rectype : std_logic_vector(3 downto 0);
   variable recaddr : std_logic_vector(31 downto 0);
@@ -102,7 +100,6 @@ begin
             if (ch = 'S') or (ch = 's') then
               hexread(L1, rectype);
               hexread(L1, reclen);
-	      len := conv_integer(reclen)-1;
 	      recaddr := (others => '0');
 	      case rectype is 
 		when "0001" =>

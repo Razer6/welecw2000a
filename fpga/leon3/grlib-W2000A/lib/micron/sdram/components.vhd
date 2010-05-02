@@ -143,8 +143,7 @@ package components is
         data_bits : INTEGER := 16;
         col_bits  : INTEGER :=  9;
         index     : INTEGER :=  0;
-	fname     : string := "sdram.srec";	-- File to read from
-        err       : INTEGER :=  0
+	fname     : string := "sdram.srec"	-- File to read from
     );
     PORT (
         Dq    : INOUT STD_LOGIC_VECTOR (data_bits - 1 DOWNTO 0) := (OTHERS => 'Z');
@@ -170,7 +169,7 @@ package components is
     DQS_BITS : integer := 2;
     TRRD : integer := 10000;
     TFAW : integer := 50000;
-    DEBUG   : integer := 0
+    DEBUG   : integer := 1
   );
   port (
     ck      : in std_ulogic;
@@ -192,7 +191,7 @@ package components is
   end component;
 
   component mobile_ddr
-    --GENERIC (                                   -- Timing for -75Z CL2
+    GENERIC (                                   -- Timing for -75Z CL2
     --    tCK       : TIME    :=  7.500 ns;
     --    tCH       : TIME    :=  3.375 ns;       -- 0.45*tCK
     --    tCL       : TIME    :=  3.375 ns;       -- 0.45*tCK
@@ -209,20 +208,17 @@ package components is
     --    tRP       : TIME    := 20.000 ns;
     --    tRRD      : TIME    := 15.000 ns;
     --    tWR       : TIME    := 15.000 ns;
-    --    addr_bits : INTEGER := 13;
-    --    data_bits : INTEGER := 16;
+        addr_bits : INTEGER := 13;
+        data_bits : INTEGER := 16;
     --    cols_bits : INTEGER :=  9;
     --    index     : INTEGER :=  0;
 	  --    fname     : string := "sdram.srec";	-- File to read from
-    --    bbits     : INTEGER :=  32
-    --);
+        bbits     : INTEGER :=  32
+    );
     PORT (
-        Dq    : INOUT STD_LOGIC_VECTOR (15 DOWNTO 0) := (OTHERS => 'Z');
-        ----Dq    : INOUT STD_LOGIC_VECTOR (data_bits - 1 DOWNTO 0) := (OTHERS => 'Z');
-        Dqs   : INOUT STD_LOGIC_VECTOR (1 DOWNTO 0) := (OTHERS => 'Z');
-        ----Dqs   : INOUT STD_LOGIC_VECTOR (data_bits/8 - 1 DOWNTO 0) := (OTHERS => 'Z');
-        Addr  : IN    STD_LOGIC_VECTOR (12 DOWNTO 0);
-        ----Addr  : IN    STD_LOGIC_VECTOR (addr_bits - 1 DOWNTO 0);
+        Dq    : INOUT STD_LOGIC_VECTOR (data_bits - 1 DOWNTO 0) := (OTHERS => 'Z');
+        Dqs   : INOUT STD_LOGIC_VECTOR (data_bits/8 - 1 DOWNTO 0) := "ZZZZ";
+        Addr  : IN    STD_LOGIC_VECTOR (addr_bits - 1 DOWNTO 0);
         Ba    : IN    STD_LOGIC_VECTOR (1 DOWNTO 0);
         Clk   : IN    STD_LOGIC;
         Clk_n : IN    STD_LOGIC;
@@ -231,20 +227,19 @@ package components is
         Ras_n : IN    STD_LOGIC;
         Cas_n : IN    STD_LOGIC;
         We_n  : IN    STD_LOGIC;
-        Dm    : IN    STD_LOGIC_VECTOR (1 DOWNTO 0)
-        ----Dm    : IN    STD_LOGIC_VECTOR (data_bits/8 - 1 DOWNTO 0)
+        Dm    : IN    STD_LOGIC_VECTOR (data_bits/8 - 1 DOWNTO 0)
     );
   END component;
   
   component mobile_sdr
-    --GENERIC (
-    --    DEBUG     : INTEGER := 1;
-    --    addr_bits : INTEGER := 13;
-    --    data_bits : INTEGER := 16
-    --);
+    GENERIC (
+        DEBUG     : INTEGER := 1;
+        addr_bits : INTEGER := 13;
+        data_bits : INTEGER := 16
+    );
     PORT (
-        Dq    : INOUT STD_LOGIC_VECTOR (15 DOWNTO 0) := (OTHERS => 'Z');
-        Addr  : IN    STD_LOGIC_VECTOR (12 DOWNTO 0) := (OTHERS => '0');
+        Dq    : INOUT STD_LOGIC_VECTOR (data_bits - 1 DOWNTO 0) := (OTHERS => 'Z');
+        Addr  : IN    STD_LOGIC_VECTOR (addr_bits - 1 DOWNTO 0) := (OTHERS => '0');
         Ba    : IN    STD_LOGIC_VECTOR := "00";
         Clk   : IN    STD_LOGIC := '0';
         Cke   : IN    STD_LOGIC := '1';

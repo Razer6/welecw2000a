@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -325,11 +324,6 @@ end;
 function ldpara(insn : pc_op_type; rd : std_logic_vector; base : base_type) return string is
 begin
   return("[" & regimm(insn,dec,true) & "]" & " " & tost(insn.op(12 downto 5)) & ", " & ireg2st(rd));
-end;
-function ldpara_cas(insn : pc_op_type; rs1, rs2, rd : std_logic_vector; base : base_type) return string is
-begin
-  return("[" & ireg2st(rs1) & "]" & " " & tost(insn.op(12 downto 5)) & ", " & 
-	ireg2st(rs2) & ", " & ireg2st(rd));
 end;
 function stparc(insn : pc_op_type; rd : std_logic_vector; base : base_type) return string is
 begin
@@ -681,8 +675,6 @@ begin
 	return(tostf(pc) & bb & "ldstuba" & bl2 & ldpara(insn, rd, dec));
       when SWAPA   => 
 	return(tostf(pc) & bb & "swapa" & bl2 & ldpara(insn, rd, dec));
-      when CASA    => 
-	return(tostf(pc) & bb & "casa" & bl2 & ldpara_cas(insn, rs1, rs2, rd, dec));
 
       when others => return(tostf(pc) & bb & "unknown opcode: " & tost(op));
       end case;
@@ -692,12 +684,14 @@ end;
 
 procedure print_insn(ndx: integer; pc, op, res : std_logic_vector(31 downto 0);
 	 valid, trap, wr, rest : boolean) is
+variable t : integer;
 begin
   if valid then
-    if rest then grlib.testlib.print ("cpu" & tost(ndx) &": " & ins2st(pc, op) & "  (restart)");
-    elsif trap then grlib.testlib.print ("cpu" & tost(ndx) &": " & ins2st(pc, op) & "  (trapped)");
-    elsif wr then grlib.testlib.print ("cpu" & tost(ndx) & ": " & ins2st(pc, op) & "  [" & tost(res) & "]");
-    else grlib.testlib.print ("cpu" & tost(ndx) & ": " & ins2st(pc, op)); end if;
+    t := now / 1 ns;
+    if trap then print (tost(t) & " cpu" & tost(ndx) &": " & ins2st(pc, op) & "  (trapped)");
+    elsif rest then print (tost(t) & " cpu" & tost(ndx) &": " & ins2st(pc, op) & "  (restart)");
+    elsif wr then print (tost(t) & " cpu" & tost(ndx) & ": " & ins2st(pc, op) & "  [" & tost(res) & "]");
+    else print (tost(t) & " cpu" & tost(ndx) & ": " & ins2st(pc, op)); end if;
   end if;
 end;
 
@@ -708,11 +702,11 @@ variable t : integer;
 begin
   if valid then
     t := now / 1 ns;
-    if trap then grlib.testlib.print ("cpu" & tost(ndx) &": " & ins2st(pc, op) & "  (trapped)");
+    if trap then print (tost(t) & " cpu" & tost(ndx) &": " & ins2st(pc, op) & "  (trapped)");
     elsif wr then
-      if dpres then grlib.testlib.print ("cpu" & tost(ndx) & ": " & ins2st(pc, op) & "  [" & tost(res) & "]");
-      else grlib.testlib.print ("cpu" & tost(ndx) & ": " & ins2st(pc, op) & "  [" & tost(res(63 downto 32)) & "]"); end if;
-    else grlib.testlib.print ("cpu" & tost(ndx) & ": " & ins2st(pc, op)); end if;
+      if dpres then print (tost(t) & " cpu" & tost(ndx) & ": " & ins2st(pc, op) & "  [" & tost(res) & "]");
+      else print (tost(t) & " cpu" & tost(ndx) & ": " & ins2st(pc, op) & "  [" & tost(res(63 downto 32)) & "]"); end if;
+    else print (tost(t) & " cpu" & tost(ndx) & ": " & ins2st(pc, op)); end if;
   end if;
 end;
 

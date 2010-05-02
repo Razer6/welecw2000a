@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -43,8 +42,7 @@ entity mmutlb is
     tech     : integer range 0 to NTECH := 0;
     entries  : integer range 2 to 32 := 8;
     tlb_type  : integer range 0 to 3 := 1;
-    tlb_rep  : integer range 0 to 1 := 1;
-    mmupgsz   : integer range 0 to 5  := 0
+    tlb_rep  : integer range 0 to 1 := 1
   );
   port (
     rst   : in  std_logic;
@@ -87,14 +85,14 @@ architecture rtl of mmutlb is
       tpos        : std_logic_vector(entries_log-1 downto 0);
       touch       : std_logic;
       sync_isw    : std_logic;
+      hold        : std_logic;
   end record;
   signal c,r   : tlb_rtype;
 
   -- tlb cams
   component mmutlbcam 
     generic ( 
-      tlb_type  : integer range 0 to 3 := 1;
-      mmupgsz   : integer range 0 to 5  := 0
+      tlb_type  : integer range 0 to 3 := 1
     );
     port (
       rst     : in std_logic;
@@ -331,7 +329,7 @@ begin
     fault_pro := '0'; fault_pri := '0'; fault_mexc := '0'; fault_trans := '0'; fault_inv := '0'; fault_access := '0';
     twi_walk_op_ur := '0'; twi_areq_ur := '0'; twi_aaddr := dr1_dataout&"00";
     finish := '0';
-    store := '0'; savewalk := '0'; tlbo_s1finished := '0';
+    store := '0'; v.hold := '0'; savewalk := '0'; tlbo_s1finished := '0';
     selstate := '0'; 
     
     cam_hitaddr := (others => '0');
@@ -412,7 +410,7 @@ begin
             TLB_CheckFault( twACC, r.s2_isid, r.s2_su, r.s2_read, v.walk_fault.fault_pro, v.walk_fault.fault_pri );
           end if;
 
-          TLB_MergeData( mmupgsz, tlbi.mmctrl1, two.lvl , two.data, r.s2_data, v.walk_transdata.data );
+          TLB_MergeData( two.lvl , two.data, r.s2_data, v.walk_transdata.data );
           v.walk_transdata.cache := two.data(PTE_C);
           v.walk_fault.fault_lvl := two.fault_lvl;
           v.walk_fault.fault_access := '0';
@@ -510,7 +508,7 @@ begin
         
       wb_transdata.cache := wb_CAC;
 
-      TLB_MergeData( mmupgsz, tlbi.mmctrl1, wb_LVL, wb_PTE, tlbi.transdata.data, wb_transdata.data );
+      TLB_MergeData( wb_LVL, wb_PTE, tlbi.transdata.data, wb_transdata.data );
 
       --# fault, todo: should we flush on a fault?
       TLB_CheckFault( wb_ACC, tlbi.transdata.isid, tlbi.transdata.su, tlbi.transdata.read, wb_fault_pro, wb_fault_pri );
@@ -520,7 +518,7 @@ begin
     end if;
     
     --# merge data
-    TLB_MergeData( mmupgsz, tlbi.mmctrl1, LVL, PTE, r.s2_data, transdata.data );
+    TLB_MergeData( LVL, PTE, r.s2_data, transdata.data );
     
     --# reset
     if (rst = '0') then
@@ -603,7 +601,6 @@ begin
     dr1_write         <= dr1write;
     
     for i in entries-1 downto 0 loop
-      tlbcami(i).mmctrl    <= tlbi.mmctrl1;
       tlbcami(i).tagin     <= tlbcam_tagin;
       tlbcami(i).trans_op  <= tlbi.trans_op; --tlbcam_trans_op;
       tlbcami(i).wb_op     <= tlbi.wb_op; --tlbcam_trans_op;
@@ -635,7 +632,7 @@ begin
   -- tag-cam tlb entries
   tlbcam0: for i in entries-1 downto 0 generate
     tag0 : mmutlbcam
-      generic map ( tlb_type, mmupgsz )
+      generic map ( tlb_type )
       port map (rst, clk, tlbcami(i), tlbcamo(i));
   end generate tlbcam0;
   tlbcamnone: for i in M_ENT_MAX-1 downto entries generate

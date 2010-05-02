@@ -44,7 +44,7 @@ CONFIG_GRUSBHC_VBUSEXT
 
 CONFIG_GRUSBHC_FAULTL
   Selects active level of fault signal from external USB power switch.
-  Select None if the external USB power switch doesn't have fault 
+  Select None if the external USB power switch does'nt have fault 
   detection.
 
 CONFIG_GRUSBHC_ENABLEH

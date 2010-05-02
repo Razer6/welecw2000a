@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2006-2008, Gaisler Research AB - all rights reserved.
---  Copyright (C) 2008-2009, Aeroflex Gaisler AB - all rights reserved.
+--  Copyright (C) 2006, Gaisler Research AB - all rights reserved.
 --
 -- ANY USE OR REDISTRIBUTION IN PART OR IN WHOLE MUST BE HANDLED IN 
 -- ACCORDANCE WITH THE GAISLER LICENSE AGREEMENT AND MUST BE APPROVED 
@@ -9,7 +8,7 @@
 -----------------------------------------------------------------------------
 -- Entity: 	grfpw_unisim
 -- File:	grfpw_unisim.vhd
--- Author:	Jan Andersson - Aeroflex Gaisler
+-- Author:	Jan Andersson - Gaisler Research 
 -- Description: tech wrapper for xilinx/unisim grfpw netlist
 ------------------------------------------------------------------------------
 library ieee;

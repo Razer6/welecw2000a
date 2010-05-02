@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -46,7 +45,6 @@ package leon3 is
     intack	: std_ulogic;
     irl		: std_logic_vector(3 downto 0);
     pwd         : std_ulogic;
-    fpen        : std_ulogic;
   end record;
 
   type l3_debug_in_type is record
@@ -130,9 +128,7 @@ package leon3 is
     rstaddr   : integer := 16#00000#;          -- reset vector address [31:12]
     smp       : integer range 0 to 15 := 0;    -- support SMP systems
     cached    : integer               := 0;     -- cacheability table
-    scantest  : integer               := 0;
-    mmupgsz   : integer range 0 to 5  := 0;
-    bp        : integer               := 1
+    scantest  : integer               := 0
   );
   port (
     clk    : in  std_ulogic;
@@ -194,9 +190,7 @@ package leon3 is
     rstaddr   : integer := 16#00000#;          -- reset vector address [31:12]
     smp       : integer range 0 to 15 := 0;    -- support SMP systems
     cached    : integer               := 0;     -- cacheability table
-    scantest  : integer               := 0;
-    mmupgsz   : integer range 0 to 5  := 0;
-    bp        : integer               := 1
+    scantest  : integer               := 0
   );
   port (
     clk    : in  std_ulogic;
@@ -265,9 +259,7 @@ package leon3 is
     ceinj     : integer range 0 to 3  := 0;   
     cached    : integer               := 0;     -- cacheability table
     netlist   : integer               := 0;     -- use netlist
-    scantest  : integer               := 0;      -- enable scan test support
-    mmupgsz   : integer range 0 to 5  := 0;
-    bp        : integer               := 1
+    scantest  : integer               := 0      -- enable scan test support
   );
   port (
     clk    : in  std_ulogic;
@@ -331,9 +323,7 @@ package leon3 is
     smp       : integer range 0 to 15 := 0;     -- support SMP systems
     cached    : integer               := 0;	-- cacheability table
     clk2x     : integer 	      := 1;
-    scantest  : integer               := 0;
-    mmupgsz   : integer range 0 to 5  := 0;
-    bp        : integer               := 1
+    scantest  : integer               := 0
   );
   port (
     clk    : in  std_ulogic;
@@ -512,9 +502,7 @@ package leon3 is
     rstaddr   : integer               := 0;
     smp       : integer range 0 to 15 := 0;     -- support SMP systems
     cached    : integer               := 0;	-- cacheability table
-    scantest  : integer               := 0;
-    mmupgsz   : integer range 0 to 5  := 0;
-    bp        : integer               := 1
+    scantest  : integer               := 0
   );
   port (
     clk    : in  std_ulogic;
@@ -552,8 +540,7 @@ package leon3 is
     tbits   : integer := 30; -- timer bits (instruction trace time tag)
     tech    : integer := DEFMEMTECH; 
     irq     : integer := 0; 
-    kbytes  : integer := 0;
-    testen  : integer := 0
+    kbytes  : integer := 0
   );
   port (
     rst    : in  std_ulogic;
@@ -577,8 +564,7 @@ package leon3 is
     tbits   : integer := 30; -- timer bits (instruction trace time tag)
     tech    : integer := DEFMEMTECH; 
     irq     : integer := 0; 
-    kbytes  : integer := 0;
-    testen  : integer := 0
+    kbytes  : integer := 0
   );
   port (
     rst    : in  std_ulogic;
@@ -606,8 +592,7 @@ package leon3 is
     tech    : integer := DEFMEMTECH; 
     irq     : integer := 0; 
     kbytes  : integer := 0;
-    clk2x   : integer range 0 to 1 := 0;
-    testen  : integer := 0
+    clk2x   : integer range 0 to 1 := 0
   );
   port (
     rst    : in  std_ulogic;
@@ -718,9 +703,7 @@ component leon3ftsh
     ceinj     : integer range 0 to 3  := 0;
     cached    : integer               := 0;
     netlist   : integer               := 0;
-    scantest  : integer               := 0;
-    mmupgsz   : integer range 0 to 5  := 0;
-    bp        : integer               := 1
+    scantest  : integer               := 0
   );
   port (
     clk    : in  std_ulogic;	-- free-running clock

@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -67,7 +66,6 @@ type pci_config_command_type is record
   mwie     : std_logic; -- Memory write and invalidate enable
 --  vgaps    : std_logic; -- VGA palette snooping enable
   per      : std_logic; -- Parity error response enable
-  ser      : std_logic; -- SERR error response enable
 --  wcc      : std_logic; -- Address stepping enable
 --  serre    : std_logic; -- Enable SERR# driver
 --  fbtbe    : std_logic; -- Fast back-to-back enable
@@ -81,7 +79,7 @@ type pci_config_status_type is record
   sta      : std_logic; -- Signaled target abort
   rta      : std_logic; -- Received target abort
   rma      : std_logic; -- Received master abort
-  sse      : std_logic; -- Signaled system error
+--  sse      : std_logic; -- Signaled system error
   dpe      : std_logic; -- Detected parity error
 end record;
 --type pci_config_type is record
@@ -103,7 +101,6 @@ type pci_sigs_type is record
   par      : std_logic; -- PCI bus parity
   req      : std_logic; -- Master bus request
   perr     : std_logic; -- Parity Error
-  serr     : std_logic;
   oe_par   : std_logic;
   oe_ad    : std_logic;
   oe_ctrl  : std_logic;
@@ -112,7 +109,6 @@ type pci_sigs_type is record
   oe_irdy  : std_logic;
   oe_req   : std_logic;
   oe_perr  : std_logic;
-  oe_serr  : std_logic;
 end record;
 
 

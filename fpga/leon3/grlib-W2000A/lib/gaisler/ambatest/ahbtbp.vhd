@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -131,10 +130,7 @@ end component;
 -- dprint (Debug print)
 -----------------------------------------------------------------------------
 procedure dprint(
-  constant doprint : in boolean := true;
-  constant s       : in string);
-
-procedure dprint(
+  constant doprint : in boolean;
   constant s       : in string);
 
 -----------------------------------------------------------------------------
@@ -243,7 +239,7 @@ end function ptime;
 -- dprint (Debug print)
 -----------------------------------------------------------------------------
 procedure dprint(
-  constant doprint : in boolean := true;
+  constant doprint : in boolean;
   constant s       : in string) is
 begin
   if doprint = true then
@@ -251,11 +247,6 @@ begin
   end if;
 end procedure dprint;
 
-procedure dprint(
-  constant s       : in string) is
-begin
-  print(s);
-end procedure dprint;
 
 -----------------------------------------------------------------------------
 -- AHBTB init

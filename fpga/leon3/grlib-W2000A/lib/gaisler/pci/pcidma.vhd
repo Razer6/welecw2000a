@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -43,7 +42,6 @@ entity pcidma is
     dapbndx   : integer := 0;
     dapbaddr  : integer := 0;
     dapbmask  : integer := 16#fff#;
-    dapbirq   : integer := 0;
     blength   : integer := 16;
     mstndx    : integer := 0;
     abits     : integer := 21;
@@ -91,7 +89,7 @@ signal ahbso2 : ahb_slv_out_type;
 
 begin
       dma : dmactrl generic map (hindex => dmstndx, slvindex => slvndx, pindex => dapbndx, 
-				 paddr => dapbaddr, pirq => dapbirq, blength => blength)
+				 paddr => dapbaddr, blength => blength)
       port map (rst, clk, apbi, dapbo, ahbmi, dahbmo, ahbsi, ahbso, ahbsi2, ahbso2);
 
       pci : pci_mtf generic map (memtech => memtech, hmstndx => mstndx, dmamst => dmstndx, 

@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -43,8 +42,10 @@ begin
   gen0 : if has_pads(tech) = 0 generate
     pad <= i after 2 ns when slew = 0 else i;
   end generate;
-  xcv : if (is_unisim(tech) = 1) generate
-    x0 : unisim_skew_outpad generic map (level, slew, voltage, strength, skew) port map (pad, i, rst, o);
+  xcv : if (tech = virtex) or (tech = virtex2) or (tech = spartan3) or
+	(tech = virtex4) or (tech = spartan3e) or (tech = virtex5)
+  generate
+    x0 : virtex_skew_outpad generic map (level, slew, voltage, strength, skew) port map (pad, i, rst, o);
   end generate;
 end;
 

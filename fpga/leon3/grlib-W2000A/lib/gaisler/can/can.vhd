@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -142,37 +141,10 @@ package can is
          pmask:            integer := 16#ffc#;
          pirq:             integer := 1;                 -- index of first irq
          singleirq:        integer := 0;                 -- single irq output
-         txchannels:       integer range 1 to 1  := 1;   -- 1 to 1 channels
-         rxchannels:       integer range 1 to 1  := 1;   -- 1 to 1 channels
-         ptrwidth:         integer range 16 to 16 := 16);-- 16 to 64k messages
+         txchannels:       integer range 1 to 16 := 1;   -- 1 to 16 channels
+         rxchannels:       integer range 1 to 16 := 1;   -- 1 to 16 channels
+         ptrwidth:         integer range 4 to 16 := 16); -- 16 to 64k messages
                                                          -- 2k to 8M bits
-      port (
-         rstn:       in    std_ulogic;
-         clk:        in    std_ulogic;
-         apbi:       in    apb_slv_in_type;
-         apbo:       out   apb_slv_out_type;
-         ahbi:       in    ahb_mst_in_type;
-         ahbo:       out   ahb_mst_out_type;
-         cani:       in    can_in_type;
-         cano:       out   can_out_type);
-   end component;
-
-   -----------------------------------------------------------------------------
-   -- component declaration for grhcan controller
-   -----------------------------------------------------------------------------
-   component grhcan is
-      generic (
-         hindex:           integer := 0;
-         pindex:           integer := 0;
-         paddr:            integer := 0;
-         pmask:            integer := 16#ffc#;
-         pirq:             integer := 1;                 -- index of first irq
-         txchannels:       integer range 1 to 1 := 1;    -- 1 to 16 channels
-         rxchannels:       integer range 1 to 1 := 1;    -- 1 to 16 channels
-         ptrwidth:         integer range 16 to 16 := 16; -- 16 to 64k messages
-                                                         -- 2k to 8 m bits
-         singleirq:        Integer := 0;                 -- single irq output
-         version:          Integer := 0);                -- 0=516, 1=524
       port (
          rstn:       in    std_ulogic;
          clk:        in    std_ulogic;

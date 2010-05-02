@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -41,7 +40,6 @@ entity dmactrl is
     pindex    : integer := 0;
     paddr     : integer := 0;
     pmask     : integer := 16#fff#;
-    pirq      : integer := 0;
     blength   : integer := 4
   );
   port (
@@ -64,7 +62,7 @@ constant BURST_LENGTH : integer := blength;
 constant REVISION : integer := 0;
 
 constant pconfig : apb_config_type := (
-  0 => ahb_device_reg ( VENDOR_GAISLER, GAISLER_DMACTRL, 0, REVISION, pirq),
+  0 => ahb_device_reg ( VENDOR_GAISLER, GAISLER_DMACTRL, 0, REVISION, 0),
   1 => apb_iobar(paddr, pmask));
 
 type state_type is(idle, read1, read2, read3, read4, read5, write1, write2, writeb, write3, write4, turn); 
@@ -86,7 +84,6 @@ type dmactrl_reg_type is record
   no_ws     : std_logic; -- no wait states
   blimit    : std_logic; -- 1k limit
   dmao_start: std_logic; 
-  dmao_ready: std_logic; -- sets if ready responce in read4, not set two_in_buf if retry on second access in buf
   two_in_buf: std_logic; -- two words in rbuf to be stored
   burstl_p  : std_logic_vector(BURST_LENGTH - 1 downto 0); -- pci access counter
   burstl_a  : std_logic_vector(BURST_LENGTH - 1 downto 0); -- amba access counter
@@ -208,8 +205,7 @@ begin
       else bufloc := 2; end if; 
 
       if ahbso1.hready = '1' and ahbso1.hresp = HRESP_OKAY then
-         --if r.htrans = "11" then
-         if r.htrans(1) = '1' then
+         if r.htrans = "11" then
             v.first1 := '0';
             if pci_done = '1' then
                v.htrans := "00";
@@ -220,14 +216,6 @@ begin
                v.first0 := '1';
             end if;
          end if;
-      elsif ahbso1.hready = '0' and ahbso1.hresp = HRESP_RETRY then
-         v.htrans := "00";
-      else
-        if ahbso1.hresp = HRESP_RETRY then 
-          v.htrans := "10";
-        else
-          v.htrans := "11";
-        end if;
       end if;
    when read3 => -- write to AMBA and read from PCI
       vdmai.start := '1';
@@ -256,15 +244,10 @@ begin
          if dmao.active = '0' then v.two_in_buf := '1'; end if; -- two words in rbuf to store
          v.state := read4;
          v.htrans := "01";
-         if bufloc = 2 then v.dmao_ready := '0'; end if;
       end if;
    when read4 => -- PCI retry
       bufloc := 1;
-      --if dmao.ready = '1' then v.two_in_buf := '0'; end if;
-      if dmao.ready = '1' then v.two_in_buf := '0'; v.dmao_ready := '1'; end if;
-      
-      if dmao.retry = '1' and r.dmao_ready = '0' then v.two_in_buf := '1'; end if; -- two words in rbuf if retry/split
-      if dmao.retry = '1' then v.dmao_start := '0'; end if; -- retry last word
+      if dmao.ready = '1' then v.two_in_buf := '0'; end if;
 
       if dmao.start = '1' and r.two_in_buf = '0' then v.dmao_start := '1'; end if;
 
@@ -325,7 +308,7 @@ begin
          vdmai.start := '0';
          if v.no_ws = '1' then bufloc := 1; end if;
          if dmao.active = '0' then v.state := writeb; -- AMBA 1k limit
-         else v.state := write3; v.dmao_ready := '1'; end if; -- assume ready responce, change later of retry/split
+         else v.state := write3; end if;
       elsif dma_done = '0' or (r.first0 = '1' and dmao.start = '0') then
          vdmai.start := '1';
       end if;
@@ -334,20 +317,12 @@ begin
       if dmao.active = '1' then vdmai.start := '0';
       else vdmai.start := '1'; end if;
    
-      if dmao.ready = '1' then v.state := write3; v.dmao_ready := '1'; end if;
+      if dmao.ready = '1' then v.state := write3; end if;
    when write3 => -- Retry from PCI
       bufloc := 1;
       --if ahbso1.hready = '1' then v.htrans := "10"; -- wait for AMBA access to be done before retry 
-      --if (ahbso1.hready and (dmao.ready or not dmao.active)) = '1' then v.htrans := "10"; 
-      if (ahbso1.hready and (dmao.ready or (not dmao.active and r.dmao_ready))) = '1' then v.htrans := "10"; -- handle retry (don't start until ready)
+      if (ahbso1.hready and (dmao.ready or not dmao.active)) = '1' then v.htrans := "10"; 
       else v.htrans := "01"; end if;
-  
-      -- handle retry/split (restart access)
-      if dmao.retry = '1' then v.dmao_ready := '0';
-      elsif dmao.ready = '1' then v.dmao_ready := '1'; end if;
-      if r.dmao_ready = '0' and dmao.active = '0' then vdmai.start := '1';
-      else vdmai.start := '0'; end if;
-
       if r.htrans(1) = '1' and ahbso1.hready = '1' and ahbso1.hresp = HRESP_OKAY then
          if pci_done = '1' then
             v.htrans := "00";
@@ -369,7 +344,6 @@ begin
       elsif ahbso1.hready = '0' then 
          v.state := write3;
          v.htrans := "01";
-         v.dmao_ready := '1';
       end if;
    when turn =>
       v.htrans := "00";
@@ -408,8 +382,7 @@ begin
       end if;
    end if;
    
-   --if (ahbso1.hresp = HRESP_ERROR or (dmao.mexc or dmao.retry) = '1') then
-   if (ahbso1.hresp = HRESP_ERROR or dmao.mexc = '1') then
+   if (ahbso1.hresp = HRESP_ERROR or (dmao.mexc or dmao.retry) = '1') then
       v.err := '1'; v.state := turn; v.htrans := HTRANS_IDLE;
    end if;
    
@@ -466,7 +439,6 @@ begin
    apbo.pconfig <= pconfig;
    apbo.prdata <= pdata;
    apbo.pirq <= (others => '0');
-   apbo.pirq(pirq) <= v.ready and not r.ready;
    apbo.pindex <= pindex;
    ahbsi1.hirq <= (others => '0');
    ahbsi1.hprot <= (others => '0');

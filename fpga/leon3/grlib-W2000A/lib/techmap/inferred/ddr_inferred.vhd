@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -50,11 +49,31 @@ begin
     elsif rising_edge(C1) then Q1 <= D; Q2 <= preQ2; end if;
   end process;
 
-  ddrregn : process(R,C2)
+  ddrregn : process(R,C1)
   begin
     if R = '1' then preQ2 <= '0';
---    elsif falling_edge(C1) then preQ2 <= D; end if;
-    elsif rising_edge(C2) then preQ2 <= D; end if;
+    elsif falling_edge(C1) then preQ2 <= D; end if;
   end process;
 
 end;
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity gen_oddr_reg is
+  port
+    ( Q : out std_ulogic;
+      C1 : in std_ulogic;
+      C2 : in std_ulogic;
+      CE : in std_ulogic;
+      D1 : in std_ulogic;
+      D2 : in std_ulogic;
+      R : in std_ulogic;
+      S : in std_ulogic);
+end;
+
+architecture rtl of gen_oddr_reg is
+begin
+
+end;
+

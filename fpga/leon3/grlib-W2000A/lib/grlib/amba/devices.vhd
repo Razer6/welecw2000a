@@ -167,6 +167,7 @@ package devices is
 
   constant GAISLER_SATCAN    : amba_device_type := 16#080#;
   constant GAISLER_CANMUX    : amba_device_type := 16#081#;
+
   constant GAISLER_GRTMRX    : amba_device_type := 16#082#;
   constant GAISLER_GRTCTX    : amba_device_type := 16#083#;
   constant GAISLER_GRTMDESC  : amba_device_type := 16#084#;

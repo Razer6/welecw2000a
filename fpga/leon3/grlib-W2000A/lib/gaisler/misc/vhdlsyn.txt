@@ -2,12 +2,10 @@ misc.vhd
 rstgen.vhd
 gptimer.vhd
 ahbram.vhd
-ahbdpram.vhd
 ahbtrace.vhd
 ahbmst.vhd
 grgpio.vhd
 ftahbram.vhd
-ftahbram2.vhd
 ahbstat.vhd
 logan.vhd
 apbps2.vhd
@@ -21,11 +19,7 @@ svgactrl.vhd
 grfifo.vhd
 gradcdac.vhd
 i2cmst.vhd
-i2cmst_gen.vhd
 spictrl.vhd
 i2cslv.vhd
 wild.vhd
 wild2ahb.vhd
-grsysmon.vhd
-gracectrl.vhd
-grgpreg.vhd

@@ -61,8 +61,3 @@
 #ifndef CONFIG_DDR2SP_DELAY7
 #define CONFIG_DDR2SP_DELAY7 0
 #endif
-
-#ifndef CONFIG_DDR2SP_NOSYNC
-#define CONFIG_DDR2SP_NOSYNC 0
-#endif
-

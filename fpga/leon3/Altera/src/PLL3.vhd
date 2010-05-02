@@ -163,7 +163,7 @@ BEGIN
 		clk1_duty_cycle => 50,
 		clk1_multiply_by => 5,
 		clk1_phase_shift => "3000",
-		clk2_divide_by => 2,
+		clk2_divide_by => 4,
 		clk2_duty_cycle => 50,
 		clk2_multiply_by => 5,
 		clk2_phase_shift => "3000",

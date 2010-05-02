@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -48,7 +47,7 @@ entity grethm is
     enable_mdio    : integer range 0 to 1 := 0;
     fifosize       : integer range 4 to 64 := 8;
     nsync          : integer range 1 to 2 := 2;
-    edcl           : integer range 0 to 2 := 0;
+    edcl           : integer range 0 to 1 := 0;
     edclbufsz      : integer range 1 to 64 := 1;
     burstlength    : integer range 4 to 128 := 32;
     macaddrh       : integer := 16#00005E#;
@@ -60,11 +59,7 @@ entity grethm is
     sim            : integer range 0 to 1 := 0;
     giga           : integer range 0 to 1  := 0;
     oepol          : integer range 0 to 1  := 0;
-    scanen         : integer range 0 to 1  := 0;
-    ft             : integer range 0 to 2  := 0;
-    mdint_pol      : integer range 0 to 1  := 0;
-    enable_mdint   : integer range 0 to 1  := 0;
-    multicast      : integer range 0 to 1  := 0
+    scanen         : integer range 0 to 1  := 0
   ); 
   port(
     rst            : in  std_ulogic;
@@ -85,8 +80,7 @@ begin
     u0 : greth generic map ( hindex, pindex, paddr, pmask, pirq, 
     	memtech, ifg_gap, attempt_limit, backoff_limit, slot_time, mdcscaler, 
     	enable_mdio, fifosize, nsync, edcl, edclbufsz, macaddrh, macaddrl, 
-    	ipaddrh, ipaddrl, phyrstadr, rmii, oepol, scanen, ft, mdint_pol,
-        enable_mdint, multicast)
+    	ipaddrh, ipaddrl, phyrstadr, rmii, oepol, scanen)
     port map ( rst, clk, ahbmi, ahbmo, apbi, apbo, ethi, etho);
 
   end generate;
@@ -95,7 +89,7 @@ begin
     u0 : greth_gbit generic map ( hindex, pindex, paddr, pmask, pirq, 
     	memtech, ifg_gap, attempt_limit, backoff_limit, slot_time, mdcscaler, 
     	nsync, edcl, edclbufsz, burstlength, macaddrh, macaddrl, ipaddrh,
-	ipaddrl, phyrstadr, sim, oepol, scanen, mdint_pol, enable_mdint, multicast)
+	ipaddrl, phyrstadr, sim, oepol, scanen)
     port map ( rst, clk, ahbmi, ahbmo, apbi, apbo, ethi, etho);
   end generate;
 

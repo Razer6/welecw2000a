@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -46,7 +45,7 @@ end;
 architecture rtl of proasic3_ram4k9 is
   component RAM4K9
 -- pragma translate_off
---    generic (abits : integer range 9 to 12 := 9);
+    generic (abits : integer range 9 to 12 := 9);
 -- pragma translate_on
     port(
 	ADDRA0, ADDRA1, ADDRA2, ADDRA3, ADDRA4, ADDRA5, ADDRA6, ADDRA7,
@@ -88,7 +87,7 @@ begin
   ab(abits-1 downto 0) <= addrb; ab(13 downto abits) <= (others => '0');
     u0 : RAM4K9
 -- pragma translate_off
---    generic map (abits => abits) 
+    generic map (abits => abits) 
 -- pragma translate_on
     port map (
       ADDRA0 => aa(0), ADDRA1 => aa(1), ADDRA2 => aa(2), ADDRA3 => aa(3),

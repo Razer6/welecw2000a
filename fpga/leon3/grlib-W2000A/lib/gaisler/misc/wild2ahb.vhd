@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -132,8 +131,6 @@ architecture RTL of Wild2AHB is
    type ctrl_type is record
       warray:           memory_array;
       wsize:            Integer range 0 to depth;
-
-      hsize:            Std_Logic_Vector(1 downto 0);
 
       wdata:            Std_Logic_Vector(31 downto 0);
       waddr:            Std_Logic_Vector(31 downto 0);
@@ -304,8 +301,6 @@ begin
                vk.ctrl.wdata     := Addr_Data_In;
             elsif rk.ctrl.addr(9 downto 8)=cWData(9 downto 8) and (burst /= 0) then
                vk.ctrl.warray(Conv_Integer(rk.ctrl.addr(bits+1 downto 2))):= Addr_Data_In;
-            elsif rk.ctrl.addr(7 downto 0)=cCtrl then
-               vk.ctrl.hsize     := Addr_Data_In(1 downto 0);
             elsif rk.ctrl.addr(7 downto 0)=cStat then
                vk.ctrl.error     := '0';
                vk.ctrl.ready     := '0';
@@ -446,7 +441,6 @@ begin
       if rstfn = '0' then
          v.dmai.Request          := '0';
          v.dmai.Store            := '0';
-         v.dmai.lock             := '0';
 
          v.error                 := '0';
          v.ready                 := '0';
@@ -472,7 +466,6 @@ begin
          vk.ctrl.store           := '0';
          vk.ctrl.active          := '0';
          vk.ctrl.fetch           := '0';
-         vk.ctrl.hsize           := HSIZE32;
          if (burst /= 0) then
             vk.ctrl.wsize        := 0;
          end if;
@@ -530,7 +523,7 @@ begin
    dmai.Store              <= r.dmai.Store;
    dmai.Data               <= r.dmai.Data when (burst /= 0) else rk.ctrl.wdata;
    dmai.Address            <= rk.ctrl.waddr;
-   dmai.Size               <= rk.ctrl.hsize;
+   dmai.Size               <= HSIZE32;
 
    -----------------------------------------------------------------------------
    -- registers, Main clock domain, X MHz, Clk_F

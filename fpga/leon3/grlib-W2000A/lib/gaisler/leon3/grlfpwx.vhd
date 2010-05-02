@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -37,8 +36,7 @@ entity grlfpwx is
            dsu      : integer range 0 to 1 := 0;           
            disas    : integer range 0 to 2 := 0;
            pipe     : integer              := 0;
-           netlist  : integer              := 0;
-           index    : integer              := 0);
+           netlist  : integer              := 0);
   port (
     rst    : in  std_ulogic;			-- Reset
     clk    : in  std_ulogic;
@@ -58,8 +56,7 @@ architecture rtl of grlfpwx is
            pclow    : integer range 0 to 2 := 2;
            dsu      : integer range 0 to 1 := 1;           
            disas    : integer range 0 to 2 := 0;
-           pipe     : integer range 0 to 2 := 0;
-           index    : integer := 0
+           pipe     : integer range 0 to 2 := 0
            );
   port (
     rst    : in  std_ulogic;			-- Reset
@@ -139,7 +136,7 @@ architecture rtl of grlfpwx is
 begin
 
   x0 : if netlist = 0 generate
-   grlfpw0 : grlfpw generic map (tech, pclow, dsu, disas, pipe, index)
+   grlfpw0 : grlfpw generic map (tech, pclow, dsu, disas, pipe)
    port map (
     rst          ,
     clk          ,

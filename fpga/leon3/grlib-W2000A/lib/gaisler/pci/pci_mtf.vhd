@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------------
 --  This file is a part of the GRLIB VHDL IP LIBRARY
---  Copyright (C) 2003 - 2008, Gaisler Research
---  Copyright (C) 2008 - 2010, Aeroflex Gaisler
+--  Copyright (C) 2003, Gaisler Research
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -120,19 +119,19 @@ constant DMAMADDR_WIDTH : integer := dmaabits;
 constant FIFO_DEPTH : integer := fifodepth;
 constant FIFO_FULL : std_logic_vector(FIFO_DEPTH - 2 downto 0) := (others => '1');
 constant FIFO_DATA_BITS : integer := 32; -- One valid bit
-constant NO_CPU_REGS : integer := 6; -- Number of CPU sync registers (pci->ahb)
-constant NO_PCI_REGS : integer := 6; -- Number of PCI sync registers (ahb->pci)
+constant NO_CPU_REGS : integer := 6;
+constant NO_PCI_REGS : integer := 6;
 constant HMASK_WIDTH : integer := nr_of_1(hmask);
 
 constant pconfig : apb_config_type := (
-    0 => ahb_device_reg ( VENDOR_GAISLER, GAISLER_PCIFBRG, 0, REVISION, irq),
-    1 => apb_iobar(paddr, pmask));
+  0 => ahb_device_reg ( VENDOR_GAISLER, GAISLER_PCIFBRG, 0, REVISION, irq),
+  1 => apb_iobar(paddr, pmask));
 
 constant hconfig : ahb_config_type := (
-    0 => ahb_device_reg ( VENDOR_GAISLER, GAISLER_PCIFBRG, 0, REVISION, 0),
-    4 => ahb_membar(haddr, '0', '0', hmask),
-    5 => ahb_iobar (ioaddr, 16#E00#),
-    others => zero32);
+  0 => ahb_device_reg ( VENDOR_GAISLER, GAISLER_PCIFBRG, 0, REVISION, 0),
+  4 => ahb_membar(haddr, '0', '0', hmask),
+  5 => ahb_iobar (ioaddr, 16#E00#),
+  others => zero32);
 
 type pci_input_type is record
   ad       : std_logic_vector(31 downto 0);
@@ -192,9 +191,6 @@ type pci_target_type is record
   last     : std_logic;
   fifo     : fifo_type;
   trdy_del : std_logic; -- (delay trdy to send last word in fifo) bug fix *** 
-  thold    : std_logic; -- hold target while last word is transfered
-  thold2   : std_logic; -- hold target while last word is transfered
-  ready_del: std_logic; -- delayed ready
 end record;
 
 type pci_master_type is record
@@ -228,7 +224,6 @@ type pci_reg_type is record
   noe_irdy  : std_logic;
   noe_req   : std_logic;
   noe_perr  : std_logic;
-  noe_serr  : std_logic;
   m         : pci_master_type;
   t         : pci_target_type;
   comm      : pci_config_command_type; -- Command register
@@ -275,7 +270,6 @@ type cpu_slave_type is record
   fifos_write : std_logic;
   fifo        : fifo_type;
   last_side   : std_logic;
-  hold_retry  : std_logic_vector(1 downto 0); -- Used to detect non-burst accesses in r_hold state -- *** 
 end record;
 
 type cpu_sync_regs is array (0 to NO_CPU_REGS - 1) of std_logic_vector(csync downto 0);
@@ -293,10 +287,8 @@ type cpu_reg_type is record
   clscnt   : std_logic_vector(8 downto 0);
   dmapage  : std_logic_vector(31 downto DMAMADDR_WIDTH); -- DMA page
   ioba     : std_logic_vector(15 downto 0);
+  pciirq   : std_logic_vector(1 downto 0);
   bus_nr   : std_logic_vector(3 downto 0);
-  irq      : std_logic_vector(9 downto 0);
-  irq_en   : std_logic_vector(9 downto 0);
-  pirq     : std_logic_vector(0 to 1);
 end record;
 
 signal clk_int : std_logic;
@@ -307,7 +299,7 @@ signal dmai : ahb_dma_in_type;
 signal dmao : ahb_dma_out_type;
 signal fifo1i, fifo2i, fifo3i, fifo4i, cbe_fifoi : pci_fifo_in_type;
 signal fifo1o, fifo2o, fifo3o, fifo4o, cbe_fifoo : pci_fifo_out_type;
-signal roe_ad, rioe_ad, ad, adin : std_logic_vector(31 downto 0); 
+signal roe_ad, rioe_ad : std_logic_vector(31 downto 0); 
 signal pcirst  : std_logic;
 signal prrst  : std_logic;
 signal pcirstin : std_logic;
@@ -318,17 +310,13 @@ attribute async_set_reset of pcirst : signal is "true";
 
 attribute syn_preserve : boolean;
 attribute syn_preserve of roe_ad : signal is true; 
-attribute syn_ramstyle : string;
-attribute syn_ramstyle of ad : signal is "registers"; 
-attribute syn_preserve of ad : signal is true; 
 begin
 
 -----------------------------------------------
 -- Back-end state machine (AHB clock domain) --
 -----------------------------------------------
     
-    comb : process (rst, r2, r, dmao, ahbsi, fifo2o, fifo4o, apbi, pr,
-                    cbe_fifoo, dmai, pcii)
+    comb : process (rst, r2, r, dmao, ahbsi, fifo2o, fifo4o, apbi)
         
         variable vdmai : ahb_dma_in_type;
         variable v : cpu_reg_type;
@@ -347,6 +335,7 @@ begin
         variable start, single_access : std_logic;
         variable next_cbe : std_logic_vector(3 downto 0);
         variable byteaddr : std_logic_vector(1 downto 0);
+        
     begin
 
         
@@ -381,20 +370,11 @@ begin
         pcidc       := r2.syncs(3)(0);
         rtdone      := r2.syncs(4)(0);
         rmdone      := r2.syncs(5)(0);
-        
+
         p_done := pstart_ack or pabort;
 
-        -- Interrupts
-        if irq /= 0 then
-            if to_x01(pcii.host) = '0' then
-                v.irq(3 downto 0) := (not pcii.int);
-            end if;
-        end if;
-        v.irq(9 downto 4) := r.stat.dpe & r.stat.sse & r.stat.rma & r.stat.rta & r.stat.sta & r.stat.dped;
-        apbo.pirq <= (others => '0');
-        apbo.pirq(irq) <= orv(r2.irq and r2.irq_en);
-
         if r2.m.fifo.raddr = FIFO_FULL then fiform_limit := '1'; else fiform_limit := '0'; end if;
+        
         if r2.m.fifo.waddr = FIFO_FULL then fifowm_limit := '1'; else fifowm_limit := '0'; end if;
         if r2.s.fifo.raddr = FIFO_FULL then fifors_limit := '1'; else fifors_limit := '0'; end if;
         if r2.s.fifo.waddr = FIFO_FULL then fifows_limit := '1'; else fifows_limit := '0'; end if;
@@ -434,26 +414,11 @@ begin
                     end if;
                     prdata := r2.ioba & addzero(15 downto 4) & hstart & hstart_ack & pstart & pstart_ack;
                 when "110" =>
-                    prdata(1)  := r.comm.men;
-                    prdata(2)  := r.comm.msen;
-                    prdata(4)  := r.comm.mwie;
-                    prdata(6)  := r.comm.per;
-                    prdata(8)  := r.comm.ser;
-                    prdata(24) := r.stat.dped;
-                    prdata(26) := '1';
-                    prdata(27) := r.stat.sta;
-                    prdata(28) := r.stat.rta;
-                    prdata(29) := r.stat.rma;
-                    prdata(30) := r.stat.sse;
-                    prdata(31) := r.stat.dpe;
-                when "111" =>
-                     if apbi.pwrite = '1' then
-                        v.irq_en := apbi.pwdata(25 downto 16);
-                     end if;
-                     prdata(31 downto 26) := (others => '0');
-                     prdata(25 downto 16) := r2.irq_en;
-                     prdata(15 downto 10) := (others => '0');
-                     prdata(9 downto 0)   := r2.irq;
+                    prdata(1) := r.comm.men; prdata(2) := r.comm.msen;
+                    prdata(4) := r.comm.mwie; prdata(6) := r.comm.per;
+                    prdata(24) := r.stat.dped; prdata(26) := '1';
+                    prdata(27) := r.stat.sta; prdata(28) := r.stat.rta;
+                    prdata(29) := r.stat.rma; prdata(31) := r.stat.dpe;
                 when others =>
             end case;
         end if;
@@ -557,14 +522,11 @@ begin
 --                      else vdmai.start := '0'; v.m.state := stop; end if;
                         
                     else
-                        --vdmai.start := '1';
+                        vdmai.start := '1';
                         v.m.state := read_w;
-                        v.m.dmaddr := r.t.laddr;
                     end if;
                     
-                -- Latching dmaddr is now only done when hstart = 1 [nisse]
-                else --v.m.dmaddr := r.t.laddr; 
-                end if;
+                else v.m.dmaddr := r.t.laddr; end if;
 
             when cbe_prepare =>
                 v.m.cur_cbe := next_cbe;
@@ -585,9 +547,7 @@ begin
                 --if fiform_limit = '1' and dmao.start = '1' then  -- 1k bug fix (store last word in first 
                 --    v.m.read_half := '1';                        --             fifo half if addr = 0x400 ...)
                 --end if;
-                --if fiform_limit = '1' and dmao.start = '1' and dmao.ready = '1' then  -- 1k bug fix (store last word in first 
-                -- Need to check dmao active and ready to handle retry/split on last word (check dmao start instead of active result in lockup if waitstates on AHB)
-                if fiform_limit = '1' and dmao.active = '1' and dmao.ready = '1' then  -- 1k bug fix (store last word in first 
+                if fiform_limit = '1' and dmao.start = '1' and dmao.ready = '1' then  -- 1k bug fix (store last word in first 
                     v.m.read_half := '1';                        --             fifo half if addr = 0x400 ...)
                 end if;
                 
@@ -602,8 +562,6 @@ begin
 
                     start := ((rmvalid and not v.m.read_half) or (not dmao.active and not rmvalid));
                 end if;
-
-                if (fiform_limit and dmao.active) = '1' then start := '0'; end if; -- [nisse]
                                 
                 -- Burst CBE handling
                 if rtdone = '0' or conv_integer(r.t.fifo.waddr) /= 1 then 
@@ -860,8 +818,7 @@ begin
         -- FIFO address counters
 --      if (r2.s.state = t_data or r2.s.state = w_wait) then
         if (r2.s.state = t_data or r2.s.state = w_wait or  -- bug fix ***
-            --(r2.s.state = r_hold and fifors_limit = '0' and ((pstart_ack or pstart) = '0') and request = '1')) then -- (r_hold -> t_data) bug fix ***
-            (r2.s.state = r_hold and fifors_limit = '0' and ((pstart_ack or pstart) = '0') and request = '1' and rmdone = '1')) then -- (r_hold -> t_data) bug fix ***
+            (r2.s.state = r_hold and fifors_limit = '0' and ((pstart_ack or pstart) = '0') and request = '1')) then -- (r_hold -> t_data) bug fix ***
             v.s.fifos_write := r2.s.pcicomm(0) and r2.s.htrans(1);
             v.s.fifo.waddr := r2.s.fifo.waddr + r2.s.fifos_write;
             v.s.fifo.raddr := r2.s.fifo.raddr + ((ahbsi.htrans(1) and not r2.s.pcicomm(0) and not fifors_limit and rsvalid) or not ahbsi.hready);
@@ -882,7 +839,6 @@ begin
         case r2.s.state is
             
             when idle =>
-                v.s.hold_retry := "00"; 
                 
                 if request = '1' and p_done = '0' then
                     if ahbsi.hwrite = '1' then
@@ -903,7 +859,7 @@ begin
                 end if;
                 
             when t_data =>
-                if ahbsi.htrans(1) = '1' then v.s.hold_retry := "00"; end if;
+                
                 burst_read := ahbsi.htrans(1) and not fifors_limit;
                 
                 if (fifows_stop and r2.s.fifos_write) = '1' then
@@ -914,8 +870,7 @@ begin
                 elsif ((fifors_limit or not rsvalid) = '1' and v.s.htrans(1) = '1') then
                     if (r.m.fifo.side = '0') or (rsvalid = '0') then
                         v.s.state := t_done;
-                    --else v.s.state := r_hold; end if;
-                    else v.s.state := r_hold; v.s.hold_retry := "00"; end if;  -- reset hold_retry ***
+                    else v.s.state := r_hold; end if;
                 end if;
                 
                 if ((ahbsi.hready and not ahbsi.htrans(0)) = '1') then
@@ -932,35 +887,16 @@ begin
             when r_hold =>
                 
                 s_read_side := '1';
-
-                if r2.s.hold_retry(1) = '0' then -- only check this once (first access)
-                  if ahbsi.htrans = "11" then
-                    v.s.hold_retry := "11"; -- Seq Burst access 
-                  elsif ahbsi.htrans /= "01" then -- if busy, wait to decide
-                    v.s.hold_retry := "10"; -- New nonseq or idle
-                  end if;
-                end if;
-                
-                if v.s.hold_retry = "10" then 
-                  v.s.state := t_done;
-                --elsif fifors_limit = '0' and ((pstart_ack or pstart) = '0') and request = '1' and v.s.hold_retry = "11" then
-                elsif rmdone = '1' and fifors_limit = '0' and ((pstart_ack or pstart) = '0') and request = '1' and v.s.hold_retry = "11" then
-                  v.s.state := t_data;
-                  burst_read := ahbsi.htrans(1) and not fifors_limit; -- bug fix ***
-                else
-                  v.s.hold := '1';
-                end if;
-
-                --if fifors_limit = '0' and ((pstart_ack or pstart) = '0') and request = '1' then
-                --    --if rmdone = '0' then -- bug fix *** 
-                --        v.s.state := t_data;
-                --        burst_read := ahbsi.htrans(1) and not fifors_limit; -- bug fix ***
-                --    --else
-                --    --    v.s.state := t_done;  
-                --    --end if;
-                --elsif (ahbsi.hready = '1' and ahbsi.htrans = "00" and r2.s.hresp = HRESP_OKAY) then -- (idle -> t_done) bug fix *** 
-                --    v.s.state := t_done;
-                --else v.s.hold := '1'; end if;
+                if fifors_limit = '0' and ((pstart_ack or pstart) = '0') and request = '1' then
+                    if rmdone = '0' then -- bug fix *** 
+                        v.s.state := t_data;
+                        burst_read := ahbsi.htrans(1) and not fifors_limit; -- bug fix ***
+                    else
+                        v.s.state := t_done;  
+                    end if;
+                elsif (ahbsi.hready = '1' and ahbsi.htrans = "00" and r2.s.hresp = HRESP_OKAY) then -- (idle -> t_done) bug fix *** 
+                    v.s.state := t_done;
+                else v.s.hold := '1'; end if;
             when r_wait =>
                 
                 s_read_side := '0';
@@ -1004,9 +940,6 @@ begin
             else hresp := HRESP_RETRY; end if;
             v.s.perror := '0';
         else hresp := HRESP_RETRY; end if;
-        
-        -- added to provent read from unvalid fifo address
-        if r2.s.state = t_data and rsvalid = '0' and r2.s.hold_retry /= "00" then hresp := HRESP_RETRY; end if;
 
         if r.comm.msen = '0' then hresp := HRESP_ERROR; end if; -- Master disabled
         --if (v.s.htrans(1) and request) = '0' then hresp := HRESP_OKAY; end if; -- Response OK for BUSY and IDLE
@@ -1055,10 +988,18 @@ begin
         -- output data for read accesses
 --    if (ahbsi.htrans(1) and not r2.s.hold and not r2.s.pcicomm(0)) = '1' then v.s.mdata := fifo4o.rdata(31 downto 0); end if;
         if (ahbsi.htrans(1) and not r2.s.pcicomm(0)) = '1' then v.s.mdata := fifo4o.rdata(31 downto 0); end if; -- bug fix ***
+
+        -- irq
+        apbo.pirq <= (others => '0');
+        if irq /= 0 then
+            if to_x01(pcii.host) = '0' then
+                apbo.pirq(irq) <= orv((not pcii.int) and conv_std_logic_vector(irqmask,4));
+            end if;
+        end if;
         
         if rst = '0' then
-            v.s.state  := idle;
-            v.m.state  := idle;
+            v.s.state := idle;
+            v.m.state := idle;
             v.s.perror := '0';
             v.pciba := (others => '0');
             v.trans := (others => '0');
@@ -1068,17 +1009,16 @@ begin
             v.m.fifo.raddr := (others => '0');
             v.s.fifo.waddr := (others => '0');
             v.s.fifo.raddr := (others => '0');
-            v.m.fifo.side  := '0';
-            v.s.fifo.side  := '0';
-            v.wcomm   := '0';
-            v.rcomm   := '0';
-            v.werr    := '0';
-            v.cfto    := '0';
+            v.m.fifo.side := '0';
+            v.s.fifo.side := '0';
+            v.wcomm := '0';
+            v.rcomm := '0';
+            v.werr := '0';
+            v.cfto := '0';
             v.dmapage := (others => '0');
-            v.ioba    := (others => '0');
-            v.bus_nr  := (others => '0');
-            v.irq     := (others => '0');
-            v.irq_en  := (others => '0');
+            v.ioba := (others => '0');
+            v.pciirq := "11";
+            v.bus_nr := (others => '0');
         end if;
 
         apbo.prdata  <= prdata;
@@ -1120,8 +1060,7 @@ begin
 -- PCI core (PCI clock domain) --
 ---------------------------------
     
-    pcicomb : process(pr, pcii, r, r2, fifo1o, fifo3o, roe_ad, prrst, ahbmi,
-                      pcirstin)
+    pcicomb : process(pr, pcii, r, r2, fifo1o, fifo3o, roe_ad, prrst)
         
         variable v : pci_reg_type;
         variable chit, mhit0, mhit1, phit, hit, hosthit, ready, cwrite, retry : std_logic;
@@ -1147,7 +1086,6 @@ begin
         variable oe_irdy  : std_logic;
         variable oe_req   : std_logic;
         variable oe_perr  : std_logic;
-        variable oe_serr  : std_logic;
         
     begin
 
@@ -1163,7 +1101,7 @@ begin
         tad := r.pci.ad; mad := r.pci.ad; grant := pcii.gnt; d_ready := '0';
         m_read_side := not r2.s.fifo.side; t_read_side := not r2.m.fifo.side;
         v.m.rmdone := '0';
-        
+
         write_access := not r.t.read and not pr.irdy and not pr.trdy;
         memwrite := r.t.msel and r.t.lwrite and not r.t.read;
         memread := r.t.msel and not r.t.lwrite and r.t.read;
@@ -1209,7 +1147,7 @@ begin
 --    then ben_err := '0'; else ben_err := '1'; end if;
         ben_err := '0';
         
-        if r.stat.dpe = '0' then v.stat.dpe := not (r.pci.perr and r.pci.serr); end if;
+        if r.stat.dpe = '0' then v.stat.dpe := not r.pci.perr; end if;
 
 -------------------------
 ----- PCI TARGET --------
@@ -1221,12 +1159,10 @@ begin
 
         -- Step addresses
         if (r.t.state = s_data or r.t.state = turn_ar or r.t.state = backoff) then
-            --if (pcii.irdy or r.pci.trdy) = '0' then
-            if (pcii.irdy or r.t.trdy_del) = '0' then
+            if (pcii.irdy or r.pci.trdy) = '0' then
                 v.t.addr := r.t.addr + ((r.t.csel and r.t.read) & "00");
                 readt_dly := '1';
                 if r.t.msel = '1' then
-                    -- **** ???? **** Is r2.m.fifo.side really synced here ??? *** may need to be changed *** [nisse]
                     v.t.wdel := (fifort_limit and r2.m.fifo.side) or r.t.lwrite;
                     v.t.fifo.raddr := r.t.fifo.raddr + (r.t.read and not fifort_limit and t_valid);
                 end if;
@@ -1239,32 +1175,17 @@ begin
             tabort := habort;
         else v.t.wdel := '0'; end if;
 
-        -- signal to hold target while last word is transfered
-        if (fifort_limit and not (pcii.irdy or r.t.trdy_del) and not r.t.thold) = '1' then -- should be r.pci.trdy 
-          v.t.thold := '1';
-        elsif (r.t.thold and not (pcii.irdy or r.t.trdy_del)) = '1' then -- should be r.pci.trdy
-          v.t.thold := '0';
-        end if;
-
-
         -- Config space read access
         case r.t.addr(7 downto 2) is
             when "000000" =>      -- 0x00, device & vendor id
                 cdata := conv_std_logic_vector(DEVICE_ID, 16) &
                          conv_std_logic_vector(VENDOR_ID, 16);
             when "000001" =>      -- 0x04, status & command
-                cdata(1) := r.comm.men;
-                cdata(2) := r.comm.msen;
-                cdata(4) := r.comm.mwie;
-                cdata(6) := r.comm.per;
-                cdata(8) := r.comm.ser;
-                cdata(24) := r.stat.dped;
-                cdata(26) := '1';
-                cdata(27) := r.stat.sta;
-                cdata(28) := r.stat.rta;
-                cdata(29) := r.stat.rma;
-                cdata(30) := r.stat.sse;
-                cdata(31) := r.stat.dpe;
+                cdata(1) := r.comm.men; cdata(2) := r.comm.msen;
+                cdata(4) := r.comm.mwie; cdata(6) := r.comm.per;
+                cdata(24) := r.stat.dped; cdata(26) := '1';
+                cdata(27) := r.stat.sta; cdata(28) := r.stat.rta;
+                cdata(29) := r.stat.rma; cdata(31) := r.stat.dpe;
             when "000010" =>      -- 0x08, class code & revision
                 cdata(31 downto 0) := conv_std_logic_vector(CLASS_CODE,24) & conv_std_logic_vector(REV,8) ;
             when "000011" =>      -- 0x0C, latency & cacheline size
@@ -1289,36 +1210,25 @@ begin
         if pr.cbe(0) = '1' then cwdata( 7 downto  0) := cdata( 7 downto  0); end if;
         if (r.t.csel and write_access) = '1' then
             case r.t.addr(7 downto 2) is
-                
                 when "000001" =>      -- 0x04, status & command
-                    -- Command register
                     v.comm.men := cwdata(1);
                     if MASTER = 1 then v.comm.msen := cwdata(2); end if;
-                    v.comm.mwie := cwdata(4);
-                    v.comm.per := cwdata(6);
-                    v.comm.ser := cwdata(8);
-                    
-                    -- Status register, sticky bits
-                    v.stat.dped := r.stat.dped and not cwdata(24);
-                    v.stat.sta  := r.stat.sta  and not cwdata(27); 
-                    v.stat.rta  := r.stat.rta  and not cwdata(28); 
-                    v.stat.rma  := r.stat.rma  and not cwdata(29); 
-                    v.stat.sse  := r.stat.sse  and not cwdata(30); 
-                    v.stat.dpe  := r.stat.dpe  and not cwdata(31);
-                    
+                    v.comm.mwie := cwdata(4); v.comm.per := cwdata(6);
+                    v.stat.dped := r.stat.dped and not cwdata(24); -- Sticky bit
+                    v.stat.sta := r.stat.sta and not cwdata(27); -- Sticky bit
+                    v.stat.rta := r.stat.rta and not cwdata(28); -- Sticky bit
+                    v.stat.rma := r.stat.rma and not cwdata(29); -- Sticky bit
+                    v.stat.dpe := r.stat.dpe and not cwdata(31); -- Sticky bit
                 when "000011" =>      -- 0x0c, latency & cacheline size
                     if FIFO_DEPTH <= 7 then v.cline(FIFO_DEPTH - 1 downto 0) := cwdata(FIFO_DEPTH - 1 downto 0);
                     else v.cline := cwdata(7 downto 0); end if;
                     v.ltim := cwdata(15 downto 8);
-                    
                 when "000100" =>      -- 0x10, BAR0
                     v.bar0 := cwdata(31 downto MADDR_WIDTH);
                     if v.bar0 = zero(31 downto MADDR_WIDTH) then v.bar0_conf := '0'; else v.bar0_conf := '1'; end if;
-                    
                 when "000101" =>      -- 0x14, BAR1
                     v.bar1 := cwdata(31 downto DMAMADDR_WIDTH);
                     if v.bar1 = zero(31 downto DMAMADDR_WIDTH) then v.bar1_conf := '0'; else v.bar1_conf := '1'; end if;
-                    
                 when "001111" =>  -- 0x3C, Interrupts & Latency timer settings
                     v.intline := cwdata(7 downto 0); -- Interrupt line
                 when others =>
@@ -1351,20 +1261,6 @@ begin
             when others => phit := '0'; mhit0 := '0'; chit := '0'; mhit1 := '0';
         end case;
 
-        -- SERR, address phase parity error. Treat as non hit.
-        v.pci.serr    := '1';
-        v.pci.oe_serr := '1';
-        if pr.frame = '0' then
-            if ( (pcii.par xor xorv(pr.ad & pr.cbe)) = '1') then
-                v.pci.serr := '0';
-                chit := '0'; phit := '0'; mhit0 := '0'; mhit1 := '0'; 
-                if r.comm.ser = '1' then
-                    v.pci.oe_serr := '0';
-                    v.stat.sse := '1';
-                end if;
-            end if;
-        end if;
-        
         -- Hit detect
         hit := r.t.csel or r.t.msel or r.t.psel;
 
@@ -1378,12 +1274,8 @@ begin
         -- Ready to transfer data  
         if ((r.t.csel and not readt_dly) or r.t.psel) = '1'
             or ((((memwrite and not r.pci.devsel) = '1')
-                 -- Changed to transfer last word (instead of delaying trdy) [nisse]
-                 --or (memread = '1' and not (hstart_ack and v.t.wdel) = '1')) and ben_err = '0')
-                 or (memread = '1' and not (hstart_ack and r.t.wdel) = '1')) and ben_err = '0')
+                 or (memread = '1' and not (hstart_ack and v.t.wdel) = '1')) and ben_err = '0')
         then ready := '1'; else ready := '0'; t_read_side := r.t.read and not hstart; end if;
-
-        v.t.ready_del := ready;
 
         -- Target timeout counter
         --if (hit and pr.trdy and not (pr.frame and pr.irdy)) = '1' then 
@@ -1418,13 +1310,11 @@ begin
 	    end if;
         end if;
 
-        -- Target state machine
+        -- target state machine
         case r.t.state is
 
             when idle  =>
-                v.t.thold := '0';  
-                v.t.thold2 := '0';  
-
+                
                 if pr.frame = '0' then v.t.state := b_busy; end if; -- !HIT ?
                 v.t.addr := pr.ad;
                 if readpref = 1 then v.t.burst := '1';
@@ -1445,8 +1335,7 @@ begin
                 v.t.csel := (pr.idsel or hosthit) and chit; v.t.psel := phit;
                 v.t.msel := r.comm.men and (mhit0 or mhit1); v.t.barsel := mhit1;
             when b_busy  =>
-                v.t.thold := '0';
-                v.t.thold2 := '0';
+
                 if (pr.frame and pr.irdy) = '1' then
                     v.t.state := idle;
 
@@ -1482,19 +1371,15 @@ begin
         end case;
 
         -- #TRDY assert
-        --if (v.t.state = s_data and habort = '0' and ready = '1' and retry = '0') then v.pci.trdy := '0'; end if;
-        -- Changed to only deassert trdy when irdy is asserted [nisse] 
-        if (v.t.state = s_data and habort = '0' and (ready or (pcii.irdy and not r.pci.trdy)) = '1' and retry = '0') then v.pci.trdy := '0'; end if;
+        if (v.t.state = s_data and habort = '0' and ready = '1' and retry = '0') then v.pci.trdy := '0'; end if;
 
         -- #STOP assert
-        --if (v.t.state = backoff or (v.t.state = s_data and ((tabort or ((term or retry) and not habort)) = '1'))) then
-        -- Changed to only deassert stop when irdy is asserted [nisse]
-        if (v.t.state = backoff or (v.t.state = s_data and ((tabort or (((term and (not pcii.irdy or not r.pci.stop)) or retry) and not habort)) = '1'))) then
+        if (v.t.state = backoff or (v.t.state = s_data and ((tabort or ((term or retry) and not habort)) = '1'))) then
             v.pci.stop := '0'; end if;
-        
+
         -- #DEVSEL assert
         if (((v.t.state = backoff and r.pci.devsel = '0') or v.t.state = s_data) and (read_match and tabort) = '0') then v.pci.devsel := '0'; end if;
-        
+
         -- Enable #TRDY, #STOP and #DEVSEL
         if (v.t.state = s_data) or (v.t.state = backoff) or (v.t.state = turn_ar) then
             v.pci.oe_ctrl := not hit;
@@ -1503,19 +1388,12 @@ begin
         -- Signaled target abort
         if (r.pci.devsel and not (r.pci.stop or r.pci.oe_ctrl)) = '1' then v.stat.sta := '1'; end if;
 
-        if (fifort_limit and v.t.thold) = '1' then --v.pci.trdy := '0';
-        elsif (r.t.thold and not v.t.thold) = '1' then --v.pci.trdy := '1'; 
-        end if;
-        
-        -- Removed, (ready is delayed instead) [nisse]
-        --if r.t.state = s_data and v.t.state = s_data and r.pci.trdy = '0' 
-        --    and v.pci.trdy = '1' and v.t.wdel = '1' and pcii.frame = '0' then -- (send last word in fifo) bug fix *** 
-        --    v.t.trdy_del := '0';
-            --v.pci.trdy := '0';
-            --v.t.trdy_del := v.pci.trdy;
-        --else
+        if r.t.state = s_data and v.t.state = s_data and r.pci.trdy = '0' 
+            and v.pci.trdy = '1' and v.t.wdel = '1' and pcii.frame = '0' then -- (send last word in fifo) bug fix *** 
+            v.t.trdy_del := '0';
+        else
             v.t.trdy_del := v.pci.trdy;
-        --end if;
+        end if;
 
         if r.t.state = s_data and r.pci.trdy = '1' and v.pci.trdy = '0' and pcii.frame = '0' then -- bug fix *** 
             readt_dly := '1';
@@ -1561,18 +1439,11 @@ begin
             end if;
         end if;
 
-        -- Changed to only reset address counter when last word is transfered [nisse]
-        --if (fifort_limit and v.t.wdel) = '1' then
-        --    if hstart_ack = '1' then hstart := '0'; v.t.fifo.raddr := (others => '0');
-        --    else v.t.fifo.raddr := (others => '0'); end if;
-        --end if;
-         if hstart_ack = '1' and (fifort_limit and r.t.thold and not v.t.thold) = '1' then 
-           hstart := '0'; v.t.fifo.raddr := (others => '0');
-         end if;
+        if (fifort_limit and v.t.wdel) = '1' then
+            if hstart_ack = '1' then hstart := '0'; v.t.fifo.raddr := (others => '0');
+            else v.t.fifo.raddr := (others => '0'); end if;
+        end if;
 
-        -- Hold AD if irdy waitstates after fifo switch [nisse]
-        if r.t.state = s_data and pcii.irdy = '1' and r.pci.trdy = '1' and v.pci.trdy = '0' and r.t.thold2 = '0' then v.t.thold2 := '1';
-        elsif r.t.thold2 = '1' and pcii.irdy = '0' then v.t.thold2 := '0'; end if;
 ----------------------        
 --- PCI TARGET END ---
 ----------------------
@@ -1856,103 +1727,60 @@ begin
 --- SHARED SIGNALS ---
 ----------------------
 
-        
-        -- Drive PAR one clock after AD
-        v.pci.oe_par := r.pci.oe_ad; 
+        -- Default assertions
+        v.pci.oe_par := r.pci.oe_ad; --Delayed one clock
+        v.pci.oe_perr := not(r.comm.per and not r.pci.oe_par and not (pr.irdy and pr.trdy)) and (r.pci.oe_perr or r.pci.perr);
         v.pci.par := xorv(r.pci.ad & r.pci.cbe); -- Default asserted by master
-        
-        -- PERR error
-        v.pci.oe_perr := not(r.comm.per and r.pci.oe_par and not (pr.irdy and pr.trdy)) and (r.pci.oe_perr or r.pci.perr);
-        v.pci.perr    := not (pcii.par xor xorv(pr.ad & pr.cbe)) or pr.irdy or pr.trdy; -- Detect parity error
-        
         v.pci.ad := mad;  -- Default asserted by master
+        v.pci.perr := not (pcii.par xor xorv(pr.ad & pr.cbe)) or pr.irdy or pr.trdy; -- Detect parity error
 
-        -- Master drives AD
+        -- Drive AD
+        -- Master
         if (v.m.state = addr or (v.m.state = m_data and r.m.hwrite = '1') or v.m.state = dr_bus) then
             v.pci.oe_ad := '0';
         end if;
-        -- Target drives AD
+        -- Target
         if r.t.read = '1' then
             if v.t.state = s_data then
                 v.pci.oe_ad := '0';
-                --v.pci.ad := tad; end if;
-                -- Hold AD when master adds waitstates [nisse] 
-                if (v.t.thold = '0' or (v.t.trdy_del = '0' and r.t.trdy_del = '0')) and v.t.thold2 = '0' and (pcii.irdy and not r.pci.trdy) = '0' then v.pci.ad := tad; end if;
-            end if;
+                v.pci.ad := tad; end if;
             if r.t.state = s_data then
                 v.pci.par := xorv(r.pci.ad & pcii.cbe);
             end if;
         end if;
-        
-        adin <= v.pci.ad;
-        v.noe_ad    := not v.pci.oe_ad;
-        v.noe_ctrl  := not v.pci.oe_ctrl;
-        v.noe_par   := not v.pci.oe_par;
-        v.noe_req   := not v.pci.oe_req;
-        v.noe_frame := not v.pci.oe_frame;
-        v.noe_cbe   := not v.pci.oe_cbe;
-        v.noe_irdy  := not v.pci.oe_irdy;
-        v.noe_perr  := not v.pci.oe_perr;
-        v.noe_serr  := not v.pci.oe_serr;
+
+        v.noe_ad := not v.pci.oe_ad; v.noe_ctrl := not v.pci.oe_ctrl;
+        v.noe_par := not v.pci.oe_par; v.noe_req := not v.pci.oe_req;
+        v.noe_frame := not v.pci.oe_frame; v.noe_cbe := not v.pci.oe_cbe;
+        v.noe_irdy := not v.pci.oe_irdy; v.noe_perr := not v.pci.oe_perr;
         
 	if (scanen = 1) and (syncrst = 1) and (ahbmi.testen = '1') then
-            voe_ad   := (others => ahbmi.testoen);
-            oe_ad    := '1';
-            oe_ctrl  := '1';
-            oe_par   := '1';
-            oe_req   := '1';
-            oe_frame := '1';
-            oe_cbe   := '1';
-            oe_irdy  := '1';
-            oe_perr  := '1';
-            oe_serr  := '1';
-
+            voe_ad := (others => ahbmi.testoen); oe_ad := '1'; oe_ctrl := '1';
+            oe_par := '1'; oe_req := '1'; oe_frame := '1'; oe_cbe := '1';
+            oe_irdy := '1'; oe_perr := '1';
         elsif oepol  = 0 then
 	  if (syncrst = 1) and (pcirstin = '0') then
-            voe_ad   := (others => '1');
-            oe_ad    := '1';
-            oe_ctrl  := '1';
-            oe_par   := '1';
-            oe_req   := '1';
-            oe_frame := '1';
-            oe_cbe   := '1';
-            oe_irdy  := '1';
-            oe_perr  := '1';
+            voe_ad := (others => '1'); oe_ad := '1'; oe_ctrl := '1';
+            oe_par := '1'; oe_req := '1'; oe_frame := '1'; oe_cbe := '1';
+            oe_irdy := '1'; oe_perr := '1';
           else
-            voe_ad   := (others => v.pci.oe_ad);
-            oe_ad    := r.pci.oe_ad;
-            oe_ctrl  := r.pci.oe_ctrl;
-            oe_par   := r.pci.oe_par;
-            oe_req   := r.pci.oe_req;
-            oe_frame := r.pci.oe_frame;
-            oe_cbe   := r.pci.oe_cbe;
-            oe_irdy  := r.pci.oe_irdy;
-            oe_perr  := r.pci.oe_perr;
-            oe_serr  := r.pci.oe_serr;
+            voe_ad := (others => v.pci.oe_ad);
+            oe_ad := r.pci.oe_ad; oe_ctrl := r.pci.oe_ctrl;
+            oe_par := r.pci.oe_par; oe_req := r.pci.oe_req;
+            oe_frame := r.pci.oe_frame; oe_cbe := r.pci.oe_cbe;
+            oe_irdy := r.pci.oe_irdy; oe_perr := r.pci.oe_perr;
           end if;
-          
-        else -- oepol = 1
+        else
 	  if (syncrst = 1) and (pcirstin = '0') then
-            voe_ad   := (others => '0');
-            oe_ad    := '0';
-            oe_ctrl  := '0';
-            oe_par   := '0';
-            oe_req   := '0';
-            oe_frame := '0';
-            oe_cbe   := '0';
-            oe_irdy  := '0';
-            oe_perr  := '0';
+            voe_ad := (others => '0'); oe_ad := '0'; oe_ctrl := '0';
+            oe_par := '0'; oe_req := '0'; oe_frame := '0'; oe_cbe := '0';
+            oe_irdy := '0'; oe_perr := '0';
           else
-            voe_ad   := (others => v.noe_ad);
-            oe_ad    := r.noe_ad;
-            oe_ctrl  := r.noe_ctrl;
-            oe_par   := r.noe_par;
-            oe_req   := r.noe_req;
-            oe_frame := r.noe_frame;
-            oe_cbe   := r.noe_cbe;
-            oe_irdy  := r.noe_irdy;
-            oe_perr  := r.noe_perr;
-            oe_serr  := r.noe_serr;
+            voe_ad := (others => v.noe_ad);
+            oe_ad := r.noe_ad; oe_ctrl := r.noe_ctrl;
+            oe_par := r.noe_par; oe_req := r.noe_req;
+            oe_frame := r.noe_frame; oe_cbe := r.noe_cbe;
+            oe_irdy := r.noe_irdy; oe_perr := r.noe_perr;
           end if;
         end if;
 
@@ -1977,17 +1805,11 @@ begin
             v.page(31 downto 30) := "01";
             v.page(29 downto MADDR_WIDTH-1) := zero32(29 downto MADDR_WIDTH-1);
             v.pci.par := '0';
-            v.comm.msen := not pr.host;
-            v.comm.men := '0';
-            v.comm.mwie := '0';
-            v.comm.per := '0';
-            v.comm.ser := '0';
-            v.stat.rta := '0';
-            v.stat.rma := '0';
-            v.stat.sta := '0';
-            v.stat.dped := '0';
+            v.comm.msen := not pr.host; v.comm.men := '0';
+            v.comm.mwie := '0'; v.comm.per := '0';
+            v.stat.rta := '0'; v.stat.rma := '0';
+            v.stat.sta := '0'; v.stat.dped := '0';
             v.stat.dpe := '0';
-            v.stat.sse := '0';
             v.cline := (others => '0');
             v.ltim := (others => '0');
             v.intline := (others => '0');
@@ -2003,7 +1825,6 @@ begin
             v.m.valid := '1';
             v.m.split := '0';
             v.m.last := '0'; v.t.last := '0';
-            v.t.laddr := (others => '0'); -- to remove x problem in gate-simulation
         end if;
 
 
@@ -2034,7 +1855,7 @@ begin
 
         pcio.vaden    <= roe_ad; 
         pcio.aden     <= oe_ad;
-        pcio.ad       <= ad;
+        pcio.ad       <= r.pci.ad;
 
 --    pcio.trdy     <= r.pci.trdy;
         pcio.trdy     <= r.t.trdy_del; -- (send last word in fifo) bug fix *** 
@@ -2046,13 +1867,9 @@ begin
         pcio.devsel   <= r.pci.devsel;
         pcio.par      <= r.pci.par;
         pcio.paren    <= oe_par;
-
         pcio.perren   <= oe_perr;
         pcio.perr     <= r.pci.perr;
 
-        pcio.serr     <= r.pci.serr;
-        pcio.serren   <= oe_serr;
-        
         pcio.reqen    <= oe_req;
         pcio.req      <= r.pci.req;
         pcio.frameen  <= oe_frame;
@@ -2097,7 +1914,7 @@ begin
     regs : process (pciclk, pcirst)
     begin
       if rising_edge (pciclk) then
-        r <= rin; ad <= adin;
+        r <= rin;
       end if;
       if (syncrst = 0) and (pcirst = '0') then -- asynch reset required
         r.pci.oe_ad <= '1'; r.pci.oe_ctrl <= '1'; r.pci.oe_par <= '1';
@@ -2141,16 +1958,18 @@ begin
     end process;
 
     oe0 : if oepol = 0 generate 
+        pcio.serren   <= '1';
         pcio.inten    <= '1';
         pcio.locken   <= '1';
     end generate;
 
     oe1 : if oepol = 1 generate
+        pcio.serren   <= '0';
         pcio.inten    <= '0';
         pcio.locken   <= '0';
     end generate;
     
-
+    pcio.serr     <= '1';
     pcio.int      <= '1';
     pcio.lock     <= '1';
 
