@@ -142,15 +142,27 @@ bool UartInit(
 #ifdef B128000
     case 128000: baud = B128000;break;
 #endif
+#ifdef B230400
     case 230400: baud = B230400;break;
-#ifdef	B256000
+#endif
+#ifdef B256000
     case 256000: baud = B256000;break;
 #endif
+#ifdef B460800
     case 460800: baud = B460800;break;
+#endif
+#ifdef B500000
     case 500000: baud = B500000;break;
+#endif
+#ifdef B576000
     case 576000: baud = B576000;break;
+#endif
+#ifdef B921600
     case 921600: baud = B921600;break;
+#endif
+#ifdef B1000000
     case 1000000:baud = B1000000;break;
+#endif
     default:
       printf("Baud rate %d is not supported, ", BaudRate);
       printf("use 1200, 2400, 9600, ... 1000000!\n");
