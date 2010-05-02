@@ -40,7 +40,6 @@
 #include "Windows.h"
 #else
 #include <unistd.h>
-#include <syscall.h> 
 #endif
 #include "DSO_SFR.h"
 #include "LEON3_DSU.h"
