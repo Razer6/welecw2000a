@@ -36,12 +36,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
+
 #ifdef	WINNT
 #include "Windows.h"
 #else
 #include <unistd.h>
 #endif
 #include "DSO_SFR.h"
+#include "DSO_Main.h"
 #include "LEON3_DSU.h"
 #include "RemoteSignalCapture.h"
 #include "DSO_ADC_Control.h"
@@ -50,6 +53,7 @@
 #include "DSO_Remote.h"
 #include "DSO_Misc.h"
 #include "irqmp.h"
+
 
 RemoteSignalCapture::RemoteSignalCapture(DebugComm * Comm): mComm(Comm){}
 
@@ -532,9 +536,9 @@ uint32_t RemoteSignalCapture::Debug() {
 
 	printf("DSU_CTL:      0x%08x\n",data);
 
-	if ((data & (1 << DSU_PE)) != 0) {
+	if ((data & DSU_PE) != 0) {
 		printf("LEON3s are in error mode! \n");
-	} else if ((data & (1 << DSU_HL)) != 0) {
+	} else if ((data & DSU_HL) != 0) {
 		printf("LEON3s are in halt mode! \n");
 	} else {
 		printf("Stopping all Leon3s for the backtrace output!\n");
@@ -659,4 +663,124 @@ void RemoteSignalCapture::PrintBackTrace() {
 		}
 		addr = addr + ITRACE_ITEM_SIZE;
 	}
+}
+
+/*
+ * Converts a 16-bit pixel of the frambuffer
+ * to a 24-bit depth RGB Pixel
+*/
+
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+uint32_t HighColorToRGB(uint16_t pixel, ofstream &stream)
+{
+	uint8_t Blue = (uint8_t) (pixel & 0x7F)<<3;
+	uint8_t Green = (uint8_t) ((pixel & 0x7C0) >> 6)<<3;
+	uint8_t Red = (uint8_t) ((pixel & 0xF800) >> 11)<<3;
+
+	if(Blue & 0x20)
+	{
+		Blue |= 0x1C;
+	}
+	if(Green & 0x20)
+	{
+		Green |= 0x1C;
+	}
+	if(Red & 0x20)
+	{
+		Red |= 0x1C;
+	}
+
+	stream.put(Blue);
+	stream.put(Green);
+	stream.put(Red);
+
+	return 0;
+}
+
+// BMP Format: http://en.wikipedia.org/wiki/BMP_file_format
+typedef struct BMPFILEHEADER 
+{ 
+	uint16_t bfType; 
+	uint32_t bfSize;
+	uint16_t bfReserved1;
+	uint16_t bfReserved2;
+	uint32_t bfOffBits;
+} __attribute__((__packed__));
+
+struct BMPINFOHEADER 
+{ 
+	uint32_t biSize;
+	uint32_t biWidth;
+	uint32_t biHeight;
+	uint16_t biPlanes;
+	uint16_t biBitCount;
+	uint32_t biCompression;
+	uint32_t biSizeImage;
+	uint32_t biXPelsPerMeter;
+	uint32_t biYPelsPerMeter;
+	uint32_t biClrUsed;
+	uint32_t biClrImportant;
+}__attribute__((__packed__));
+
+
+uint32_t RemoteSignalCapture::Screenshot(const char *filename)
+{
+	uint32_t rec = 0;
+	uint32_t *data = new uint32_t[320];
+	uint32_t addr = 0;
+
+	BMPFILEHEADER fileheader; 
+	BMPINFOHEADER infoheader;
+
+	fileheader.bfType = 0x4D42;
+	fileheader.bfSize = sizeof(fileheader);
+	fileheader.bfReserved1 = 0;
+	fileheader.bfReserved2 = 0;
+	fileheader.bfOffBits =  sizeof(fileheader)+sizeof(infoheader);
+
+	infoheader.biSize =  sizeof(infoheader);
+	infoheader.biWidth = 640;
+	infoheader.biHeight = -480;
+	infoheader.biPlanes = 1;
+	infoheader.biBitCount = 24;  
+	infoheader.biCompression = 0;
+	infoheader.biSizeImage = 0;
+	infoheader.biXPelsPerMeter = 0;
+	infoheader.biYPelsPerMeter = 0;
+	infoheader.biClrUsed = 0;
+	infoheader.biClrImportant = 0;
+
+
+	mComm->Receive(VGA_CONFIG_BASE_ADDR + 20 ,&addr, 1);		//Get Startadress of Framebuffer
+
+	printf("Framebuffer Adress = 0x%X\n", addr);
+	
+	ofstream fScreenshot;
+	fScreenshot.open(filename,ios::out | ios::binary); //Ofstream erstelllen mit Namen : myfile
+
+	//Write BMP Header
+	fScreenshot.write ((char*) &fileheader,sizeof(fileheader)); 
+	fScreenshot.write ((char*) &infoheader,sizeof(infoheader));
+	
+	for(int i=0, cnt=0; i<480; i++, cnt+=1280)
+	{
+		rec = mComm->Receive(addr+cnt ,&data[0],320);
+		if (rec == 0 && rec != 320) return FALSE;
+
+		for(int j=0; j<640; j+=2)
+		{
+			uint16_t lowPixel = (uint16_t) (data[j/2] & 0x0000FFFF);
+			uint16_t highPixel = (uint16_t)((data[j/2] & 0xFFFF0000) >> 16);
+
+			HighColorToRGB(highPixel, fScreenshot);
+			HighColorToRGB(lowPixel, fScreenshot);
+		}
+	}
+	fScreenshot.close();
+	
+	delete data;
+	return TRUE;
 }

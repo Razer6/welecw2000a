@@ -188,5 +188,11 @@ uint32_t Request::Receive(
 	return FALSE;
 }
 
+uint32_t Request::Screenshot(const char *filename)
+{
+	return FALSE;
+}
+	
+
 
 

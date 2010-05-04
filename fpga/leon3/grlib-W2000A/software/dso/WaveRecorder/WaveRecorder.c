@@ -130,7 +130,8 @@ int main(int argc, char * argv[]) {
 	struct arg_int * StackAddr	= arg_int0(NULL,"Stack",	"<n>",	"Stack address of the CPU"); 
 	struct arg_int * CapWTime	= arg_int0(NULL,"CapWaitTime",	"<n>",	"Abourt time, before recording"); 
 	struct arg_int * CapSize	= arg_int0("s","CapSize",	"<n>",	"Capture data size in Dwords"); 
-        struct arg_int * Data		= arg_intn("d","Data",	        "<n>",0,64,	"Data Dword(s) for WriteAddr"); 
+    struct arg_file * ImageFile = arg_file0("f", "SFile", "<file.bmp>", "BMP File for screenshot");
+    struct arg_int * Data		= arg_intn("d","Data",	        "<n>",0,64,	"Data Dword(s) for WriteAddr"); 
 	struct arg_int * WavForceFS	= arg_int0(NULL,"WavForcefs",	"<n>",	"Set sampling fs to x istead of Fs");
 	struct arg_lit * AnAC_Ch0	= arg_lit0(NULL,"ACModeCh1",		"AC Mode, if not set AC=off"); 
 	struct arg_lit * AnAC_Ch1	= arg_lit0(NULL,"ACModeCh2",		"AC Mode, if not set AC=off"); 
@@ -142,7 +143,8 @@ int main(int argc, char * argv[]) {
 	struct arg_lit * help		= arg_lit0("hH","help",			"Displays this help information");
 	struct arg_lit * version    = arg_lit0("vV","version",		"Version");
 	struct arg_end * end = arg_end(20);
-	void * argtable[] = {
+	
+    void * argtable[] = {
 	Command,Protocol,Channels,SampleSize,SampleFS,AACFilterStart,
 	AACFilterEnd,Ch0Src,Ch1Src,Ch2Src,Ch3Src,
 	Trigger,ExtTrigger,TrPrefetch,TriggerChannel,TriggerLowRef,TriggerHighRef,
@@ -150,7 +152,7 @@ int main(int argc, char * argv[]) {
 	AnGainCh3,AnAC_Ch0,AnAC_Ch1,AnAC_Ch2,AnAC_Ch3,
 	AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,
 	AnPWM,AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3,ForceAddr,
-	StackAddr,ForceFile,CapWTime,CapSize,Data,WavForceFS,
+	StackAddr,ForceFile,CapWTime,CapSize,ImageFile,Data,WavForceFS,
 	WaveFile,UartAddr,BaudRate,help,version,end};
 
 	SampleFS->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
@@ -252,6 +254,32 @@ int main(int argc, char * argv[]) {
 		int32_t Ret = DSOInterface->Debug();
 		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
+
+    if (strcmp("Screenshot",Command->sval[0]) == 0) 
+	{
+		struct arg_int * IsOnce[] = {(arg_int*)ImageFile};
+		char *extension = new char[strlen(ImageFile->extension[0])];
+		strcpy(extension, ImageFile->extension[0]);
+
+		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
+		if (Ret != TRUE) 
+		{
+			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		}
+		for(int i = 0; i < strlen(extension); i++)
+			extension[i] = tolower(extension[i]); 
+
+		if(strcmp(".bmp", extension) != 0)
+		{
+			delete extension;
+			printf("Wrong Extenstion, use '*.bmp'\n");
+			ExitWaveRecorder(SYNTAX_ERROR,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+		}
+		delete extension;
+		Ret = DSOInterface ->Screenshot(ImageFile->filename[0]);
+		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
+	}
+
 	if (strcmp("ReadAddr",Command->sval[0]) == 0) {
 		struct arg_int * IsOnce[] = {(arg_int*)ForceAddr, CapSize};
 		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));

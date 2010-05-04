@@ -110,6 +110,9 @@ public:
 		uint32_t Addr, 
 		uint32_t *Data, 
 		uint32_t & Length);
+	
+	virtual uint32_t Screenshot(
+		const char *filename);
 
 
 private:

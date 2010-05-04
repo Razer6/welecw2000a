@@ -105,6 +105,9 @@ public:
 		uint32_t Addr, 
 		uint32_t *Data, 
 		uint32_t & Length) = 0;
+	
+	virtual uint32_t Screenshot(
+		const char *filename) = 0;
 
 protected:
 	Protocoll(){};
