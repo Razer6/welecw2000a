@@ -34,8 +34,9 @@
 ****************************************************************************/
 
 
-#include "stdio.h"
-#include "string.h"
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include "WaveFilePackage.h"
 #include "DSO_Remote_Master.h"
 #include "argtable2.h"
