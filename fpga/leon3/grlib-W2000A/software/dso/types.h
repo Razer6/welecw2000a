@@ -35,6 +35,10 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#ifdef MINGW
+#error "GUGugugu"
+#endif
+
 #ifndef __cplusplus
 
 #define bool    int
@@ -50,7 +54,7 @@
 
 // Fix the following to use a portable stdint.h on Windows; all C99 conforming platforms should have stdint.h
 // Several can be found here: http://en.wikipedia.org/wiki/Stdint.h (under External Links)
-#if defined WIN32 || defined W2000A
+#if defined WIN32 && !(defined __MINGW32__) || defined W2000A
 typedef unsigned char  uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int   uint32_t;
