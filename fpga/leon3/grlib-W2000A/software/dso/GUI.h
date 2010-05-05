@@ -119,8 +119,8 @@ typedef struct ValueField
 	sRect bounds;
 
 	int32_t value;
-	int32_t maxValue;
 	int32_t minValue;
+	int32_t maxValue;
 
 	void (*vfFunct)(uint32_t value);
 }
