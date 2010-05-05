@@ -483,10 +483,10 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	printf("Starting Leon3 with DSU_CTL = 0x%08x!\n",data);
 	Send(DSU_CTL,data);
 	printf("Disable all IRQs\n");
-	Send((uint32_t)&lr->irqmask,0);	/* mask all interrupts */
-	Send((uint32_t)&lr->irqlevel,0);	/* clear level reg */
-	Send((uint32_t)&lr->irqforce,0);
-	Send((uint32_t)&lr->irqclear,-1);	/* clear all pending interrupts */
+	Send((uintptr_t)&lr->irqmask,0);	/* mask all interrupts */
+	Send((uintptr_t)&lr->irqlevel,0);	/* clear level reg */
+	Send((uintptr_t)&lr->irqforce,0);
+	Send((uintptr_t)&lr->irqclear,-1);	/* clear all pending interrupts */
 	printf("Setting the console uart in loop back mode\n");
 	Send(GENERIC_UART_BASE_ADDR+0x8,0xa3);
 	printf("Release Leon3 from single step debugging\n");

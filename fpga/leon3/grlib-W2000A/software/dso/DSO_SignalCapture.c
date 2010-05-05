@@ -517,7 +517,7 @@ uint32_t * RawData)
 	StopAddr = (uint32_t *)(TRIGGER_MEM_BASE_ADDR + StopOffset);
 
 	StopAddr++; /* matching 0 to end-1 */
-	if((uint32_t)StopAddr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE))
+	if((uintptr_t)StopAddr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE))
 	{
 		StopAddr = (uint32_t *)TRIGGER_MEM_BASE_ADDR;
 	}
@@ -664,7 +664,7 @@ uint32_t * RawData)
 			return i;
 		}
 		Frame = READ_INT(TRIGGERCURRENTADDR); /* stoppoint of readable DWORDS */
-		Frame = Frame - (uint32_t)Addr;
+		Frame = Frame - (uintptr_t)Addr;
 		Frame &= (TRIGGER_MEM_SIZE - 1); /* number of readable DWORDS */
 		Frame = i + Frame;
 		if(Frame > CaptureSize)
@@ -678,13 +678,13 @@ uint32_t * RawData)
 			RawData[i] = *Addr;
 			i++;
 			Addr++;
-			if((uint32_t)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE))
+			if((uintptr_t)Addr == (TRIGGER_MEM_BASE_ADDR + TRIGGER_MEM_SIZE))
 			{
 				Addr = (uint32_t *)TRIGGER_MEM_BASE_ADDR;
 				WRITE_INT(DEVICEADDR,i);
 			}
 		}
-		WRITE_INT(TRIGGERREADOFFSETADDR, (uint32_t)Addr-1);
+		WRITE_INT(TRIGGERREADOFFSETADDR, (uintptr_t)Addr-1);
 		/* & (TRIGGER_MEM_SIZE-1); hw SFR mod 2^bits */
 		/*	puts("."); */
 
