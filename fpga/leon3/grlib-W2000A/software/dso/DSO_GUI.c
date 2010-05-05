@@ -366,10 +366,16 @@ sSubMenu smCoublingCh0 = {SUBMENU_LIST, &smlCoublingCh0};
 sSubMenu smCoublingCh1 = {SUBMENU_LIST, &smlCoublingCh1};
 sSubMenu smHWFilter = {SUBMENU_LIST, &smlHWFilter};
 
+/* Value Field Test */
+sValueField vfTest0 = {"vfTest0", DEFAULT_BOUNDS_F5, 0, 0, 10, NULL};
+sValueField vfTest1 = {"vfTest1", DEFAULT_BOUNDS_F6, 0, 0, 10, NULL};
+sSubMenu smVfTest0 = {VALUE_FIELD, &vfTest0};
+sSubMenu smVfTest1 = {VALUE_FIELD, &vfTest1};
+
 /*
  * Menus for all channels
  */
-sMenu men_ch[] = {{{&smCoublingCh0, &smBwLimitCh0, /*&smInvertCh0,*/ &smHWFilter, NULL, NULL, NULL}, onChannel0},
+sMenu men_ch[] = {{{&smCoublingCh0, &smBwLimitCh0, /*&smInvertCh0,*/ &smHWFilter, NULL, &smVfTest0, &smVfTest1}, onChannel0},
                   {{&smCoublingCh1, &smBwLimitCh1, /*&smInvertCh1,*/ &smHWFilter, NULL, NULL, NULL}, onChannel1}};
 
 /*

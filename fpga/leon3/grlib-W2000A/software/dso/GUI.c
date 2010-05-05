@@ -246,7 +246,7 @@ void closeSubMenuTime(void)
 
 	if(clipping != NULL)
 	{
-		if(++closingTime > 2000)
+		if(++closingTime > SUB_MENU_CLOSETIME)
 		{
 			closingTime = 0;
 			closeSubMenu();
@@ -274,8 +274,6 @@ void resetClosingTime(void)
  * the "user"-encoder (under timbase encoder). Before changing the value,
  * the valuefield must be selected. The value is limited by a minimal and
  * a maximum value.
- *
- * The implementation of this submenu item is currently not finished!!
  */
 
 sValueField *selectedValueField = NULL;
@@ -292,6 +290,11 @@ void drawValueField(sValueField *valueField)
 	printStr_lcd(&font_arial_18, valueField->bounds.x+CENTER(104, getTextWidth(&font_arial_18, valueField->title)), valueField->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, valueField->title);
 	itoa(valueField->value, str);
 	printStr_lcdi(&font_arial_18, valueField->bounds.x+CENTER(104, getTextWidthi(&font_arial_18, str)), valueField->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, str);
+
+	if (selectedValueField == valueField)
+	{
+		DrawRect32(MENU_COLOR_FG, valueField->bounds.x+5, valueField->bounds.y+5, valueField->bounds.width-10, valueField->bounds.height-10, false);
+	}
 }
 
 /*
@@ -335,12 +338,12 @@ void onValueField(sValueField *valueField)
 	if(selectedValueField != NULL)
 	{
 		//Deselect the current valuefield
-		DrawRect32(MENU_COLOR_BG, valueField->bounds.x+5, valueField->bounds.y+5, valueField->bounds.width-5, valueField->bounds.height-5, false);
+		DrawRect32(MENU_COLOR_BG, selectedValueField->bounds.x+5, selectedValueField->bounds.y+5, selectedValueField->bounds.width-10, selectedValueField->bounds.height-10, false);
 	}
 
 	//Select the new valuefield
 	selectedValueField = valueField;
-	DrawRect32(MENU_COLOR_FG, valueField->bounds.x+5, valueField->bounds.y+5, valueField->bounds.width-5, valueField->bounds.height-5, false);
+	DrawRect32(MENU_COLOR_FG, valueField->bounds.x+5, valueField->bounds.y+5, valueField->bounds.width-10, valueField->bounds.height-10, false);
 
 	//Turn on the led for the encoder
 	WRITE_INT(LEDADDR, READ_INT(LEDADDR) | 1<<LED_WHEEL);
