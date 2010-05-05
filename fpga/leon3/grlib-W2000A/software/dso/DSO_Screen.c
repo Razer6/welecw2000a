@@ -392,43 +392,6 @@ sRect* getClippingRect(void)
 	return clippingRect;
 }
 
-static uint8_t erroricon_glcd_bmp[]={
-                                     0x00, 0x1f, 0xe0, 0x00,
-                                     0x00, 0xff, 0xfc, 0x00,
-                                     0x01, 0xff, 0xfe, 0x00,
-                                     0x07, 0xff, 0xff, 0x80,
-                                     0x0f, 0xff, 0xff, 0xc0,
-                                     0x1f, 0xff, 0xff, 0xe0,
-                                     0x1f, 0xff, 0xff, 0xe0,
-                                     0x3f, 0xff, 0xff, 0xf0,
-                                     0x7f, 0xcf, 0xcf, 0xf8,
-                                     0x7f, 0x87, 0x87, 0xf8,
-                                     0x7f, 0x03, 0x03, 0xf8,
-                                     0xff, 0x00, 0x03, 0xfc,
-                                     0xff, 0x80, 0x07, 0xfc,
-                                     0xff, 0xc0, 0x0f, 0xfc,
-                                     0xff, 0xe0, 0x1f, 0xfc,
-                                     0xff, 0xe0, 0x1f, 0xfc,
-                                     0xff, 0xc0, 0x0f, 0xfc,
-                                     0xff, 0x80, 0x07, 0xfc,
-                                     0xff, 0x00, 0x03, 0xfc,
-                                     0x7f, 0x03, 0x03, 0xf8,
-                                     0x7f, 0x87, 0x87, 0xf8,
-                                     0x7f, 0xcf, 0xcf, 0xf8,
-                                     0x3f, 0xff, 0xff, 0xf0,
-                                     0x1f, 0xff, 0xff, 0xe0,
-                                     0x1f, 0xff, 0xff, 0xe0,
-                                     0x0f, 0xff, 0xff, 0xc0,
-                                     0x07, 0xff, 0xff, 0x80,
-                                     0x01, 0xff, 0xfe, 0x00,
-                                     0x00, 0xff, 0xfc, 0x00,
-                                     0x00, 0x1f, 0xe0, 0x00,
-};
-
-#define errorIconWIDTH 	30	//Width in pixels
-#define errorIconHEIGHT 	30	//Height in pixels
-#define errorIconBYTEWIDTH 	4	//Width in bytes
-
 
 void LoadBitmap(unsigned const char *bitmap, uint16_t xpos , uint16_t ypos, uint16_t width, uint16_t height, color_t color_bg, color_t color_fg)
 {
@@ -468,9 +431,5 @@ void LoadBitmap(unsigned const char *bitmap, uint16_t xpos , uint16_t ypos, uint
 	}
 }
 
-void DrawBmpTest(void)
-{
-	LoadBitmap(erroricon_glcd_bmp, 50, 50, errorIconWIDTH, errorIconHEIGHT, COLOR_R3G3B3(7,0,0), COLOR_R3G3B3(0,0,7));
-}
 
 #endif	  	 
