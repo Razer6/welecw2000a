@@ -72,7 +72,7 @@ rprintf(const char *fmt, ...)
 		p = va_arg(ap, char *);
 		if (width == 0)
 		    width = UINT_MAX;
-		for (i = 0; i < width && *p; )
+		for (i = 0; i < (int)width && *p; )
 		    rprintc(*p++ & 0xFF);
 		break;
 

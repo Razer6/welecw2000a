@@ -91,7 +91,7 @@ void WaitMs(const uint32_t ms){
 
 /* This functions are written as a work around for volatile compiler bugs.
  * TODO: They must be prooven for each compiler version to work! */
-volatile uint32_t WaitUntilMaskedAndZero(volatile uint32_t addr, uint32_t mask){
+uint32_t WaitUntilMaskedAndZero(volatile uint32_t addr, uint32_t mask){
 	volatile uint32_t temp;
 	volatile uint32_t i = 0;	
 	while(1) {
@@ -104,7 +104,7 @@ volatile uint32_t WaitUntilMaskedAndZero(volatile uint32_t addr, uint32_t mask){
 	return i;
 }
 
-volatile uint32_t WaitUntilMaskedAndNotZero(volatile uint32_t addr, uint32_t mask){
+uint32_t WaitUntilMaskedAndNotZero(volatile uint32_t addr, uint32_t mask){
 	volatile uint32_t temp;
 	volatile uint32_t i = 0;	
 	while(1) {
@@ -117,7 +117,7 @@ volatile uint32_t WaitUntilMaskedAndNotZero(volatile uint32_t addr, uint32_t mas
 	return i;
 }
 
-volatile uint32_t WaitTimeoutAndZero(volatile uint32_t addr, uint32_t mask, uint32_t timeout){
+uint32_t WaitTimeoutAndZero(volatile uint32_t addr, uint32_t mask, uint32_t timeout){
 	volatile uint32_t temp;
 	volatile uint32_t i = 0;	
 	for(i = 0; i < timeout; ++i) {
@@ -130,7 +130,7 @@ volatile uint32_t WaitTimeoutAndZero(volatile uint32_t addr, uint32_t mask, uint
 	return false;
 }
 
-volatile uint32_t WaitTimeoutAndNotZero(volatile uint32_t addr, uint32_t mask, uint32_t timeout){
+uint32_t WaitTimeoutAndNotZero(volatile uint32_t addr, uint32_t mask, uint32_t timeout){
 	volatile uint32_t temp;
 	volatile uint32_t i = 0;	
 	for(i = 0; i < timeout; ++i) {

@@ -336,7 +336,7 @@ void changeCouplingCh0(uint32_t selection);
 void changeCouplingCh1(uint32_t selection);
 void toggleBWLimitCh0(uint32_t selection);
 void toggleBWLimitCh1(uint32_t selection);
-void changeHWFilters(int32_t x);
+void changeHWFilters(uint32_t x);
 void onChannel0(void);
 void onChannel1(void);
 
@@ -792,7 +792,7 @@ void changeTriggerLevel(int32_t diff)
 		"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
 		"1 GS/s"};
 
-	static int32_t selectedTimebase = 0;
+	/*static int32_t selectedTimebase = 0;*/
 
 
 /*
@@ -829,7 +829,7 @@ void setTimebase(int32_t diff)
 	{
 		selectedTimebase = 0;
 	}
-	else if(selectedTimebase >= sizeof(timebase)/sizeof(timebase[0]))
+	else if((uint32_t)selectedTimebase >= sizeof(timebase)/sizeof(timebase[0]))
 	{
 		selectedTimebase = sizeof(timebase)/sizeof(timebase[0])-1;
 	}
@@ -838,7 +838,7 @@ void setTimebase(int32_t diff)
 	SetTriggerInput(4,8,timebase[(uint32_t)selectedTimebase],FIXED_CPU_FREQUENCY,0,AACFilterStop,0,1,2,3);
 }
 
-void changeHWFilters(int32_t x){
+void changeHWFilters(uint32_t x){
 	AACFilterStop = x;
 	setTimebase(0);
 }
@@ -862,7 +862,7 @@ void setVoltagePerDiv(uint32_t ch, int32_t diff)
 	{
 		channel[ch].selectedVoltagePerDiv = 0;
 	}
-	else if(channel[ch].selectedVoltagePerDiv >= (sizeof(voltagePerDiv)/sizeof(voltagePerDiv[0])))
+	else if((uint32_t)channel[ch].selectedVoltagePerDiv >= (sizeof(voltagePerDiv)/sizeof(voltagePerDiv[0])))
 	{
 		channel[ch].selectedVoltagePerDiv = sizeof(voltagePerDiv)/sizeof(voltagePerDiv[0])-1;
 	}
@@ -913,7 +913,7 @@ void setFramePosition(uint32_t diff){
 	if (triggerSettings.prefetch < (8+(FRAMESIZE/2))) {
 		triggerSettings.prefetch = (8+(FRAMESIZE/2));
 	}
-	if (triggerSettings.prefetch > (Captured - (FRAMESIZE/2))) {
+	if ((uint32_t)triggerSettings.prefetch > (Captured - (FRAMESIZE/2))) {
 		triggerSettings.prefetch = Captured - (FRAMESIZE/2);	
 	}
 
@@ -984,7 +984,7 @@ void GUI_Main(void)
 	 * Doesn't work right for now
 	 */
 	int32_t tmp = 0;
-	int32_t tmp2 = 0;
+	uint32_t tmp2 = 0;
 
 	read_encoders();
 
@@ -1072,7 +1072,7 @@ void GUI_Main(void)
 			ReadData = 0;
 		}*/
 
-		if ((ReadData >= (FRAMESIZE+triggerSettings.prefetch)) || (Run == FALSE) )
+		if (((int32_t)ReadData >= (FRAMESIZE+triggerSettings.prefetch)) || (Run == FALSE) )
 		{
 			if (Single == TRUE) {
 				Run = FALSE;

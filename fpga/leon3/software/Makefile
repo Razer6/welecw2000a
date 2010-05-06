@@ -26,14 +26,15 @@ DEFINES    = -D$(CPU) -D$(DSO_TARGET) -D$(DSO_BOARD)
 
 # Flags
 CFLAGS  = $(DEFINES)
-CFLAGS += --std=c99    # We code Standard C
-CFLAGS += -msoft-float # Use functions in libgcc.a to perform floating point operations
+CFLAGS += --std=c99             # We code Standard C
+CFLAGS += -msoft-float          # Use functions in libgcc.a to perform floating point operations
 CFLAGS += -qsvt
-CFLAGS += -mv8         # Use V8 ISA
-CFLAGS += -O2          # Optimize some
-CFLAGS += -Wall        # Enable many warnings
-CFLAGS += -Wextra      # Enable even more warnings
-#CFLAGS += -Werror      # Error out on warnings
+CFLAGS += -mv8                  # Use V8 ISA
+CFLAGS += -O2                   # Optimize some
+CFLAGS += -Wall                 # Enable many warnings
+CFLAGS += -Wextra               # Enable even more warnings
+CFLAGS += -Werror               # Error out on warnings
+CFLAGS += -Wno-unused-parameter # Do not warn about unused function parameters
 
 # Target variables
 SOURCE_DIRS   = . thirdparty fonts
