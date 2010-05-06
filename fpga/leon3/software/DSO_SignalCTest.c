@@ -48,7 +48,6 @@
 #include "Filter_I8.h"
 #include "../leon3/irqmp.h"
 #include "DSO_Misc.h"
-#include "DSO_FrontPanel.h"
 #include "DSO_GUI.h"
 #include "rprintf.h"
 
