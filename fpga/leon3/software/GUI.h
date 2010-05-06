@@ -44,6 +44,10 @@
 #include "DSO_SFR.h"
 #include "DSO_FrontPanel.h"
 
+
+ #define FONT_TITLEBAR	font_arial_bold_14
+ #define FONT_MENU		font_arial_18
+
 #define SUB_MENU_CLOSETIME	3000
 
 #define MENU_START_X	0

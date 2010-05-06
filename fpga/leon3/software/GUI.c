@@ -153,13 +153,15 @@ void initSubMenu(sSubMenu *subMenu)
  * Every time when the dedicated button is pressed, the function pointer will be called.
  *
  */
+ 
+
 
 void drawCheckBox(sCheckBox *box)
 {
 	DrawRect32(MENU_COLOR_FG, box->bounds.x+45, box->bounds.y+35, 14, 13, false);
 	DrawRect32(MENU_COLOR_FG, box->bounds.x+46, box->bounds.y+36, 12, 11, false);
 	DrawRect32(box->selected?MENU_COLOR_FG:MENU_COLOR_BG, box->bounds.x+49, box->bounds.y+39, 6, 6, true);
-	printStr_lcd(&font_arial_18, box->bounds.x+CENTER(104, getTextWidth(&font_arial_18, box->title)), box->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, box->title);
+	printStr_lcd(&FONT_MENU, box->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, box->title)), box->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, box->title);
 }
 
 void onCheckBox(sCheckBox *box)
@@ -192,8 +194,8 @@ void onCheckBox(sCheckBox *box)
 void drawSubMenuList(sSubMenuList *subMenuList)
 {
 	DrawRect32(MENU_COLOR_BG, subMenuList->bounds.x, subMenuList->bounds.y, subMenuList->bounds.width, subMenuList->bounds.height, true);
-	printStr_lcd(&font_arial_18, subMenuList->bounds.x+CENTER(104, getTextWidth(&font_arial_18, subMenuList->title)), subMenuList->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
-	printStr_lcd(&font_arial_18, subMenuList->bounds.x+CENTER(104, getTextWidth(&font_arial_18, subMenuList->entrys[subMenuList->selectedIndex])), subMenuList->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->entrys[subMenuList->selectedIndex]);
+	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->title)), subMenuList->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
+	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->entrys[subMenuList->selectedIndex])), subMenuList->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->entrys[subMenuList->selectedIndex]);
 }
 
 #define SML_SEL_WIDTH		5
@@ -236,7 +238,7 @@ void onSubMenuList(sSubMenuList *subMenuList)
 
 		DrawRect32(MENU_COLOR_BG, clipping->x, clipping->y, clipping->width, clipping->height, true);
 
-		printStr_lcd(&font_arial_18, subMenuList->popup.x+CENTER(104,getTextWidth(&font_arial_18, subMenuList->title)), subMenuList->popup.y+2, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
+		printStr_lcd(&FONT_MENU, subMenuList->popup.x+CENTER(104,getTextWidth(&FONT_MENU, subMenuList->title)), subMenuList->popup.y+2, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
 		DrawRect32(MENU_COLOR_FG, subMenuList->popup.x+5, subMenuList->popup.y+font_arial_18.height+5,subMenuList->popup.width-10, 3, true);
 
 		for(uint32_t i=0, y=30; i<subMenuList->size; i++, y+=25)
@@ -245,7 +247,7 @@ void onSubMenuList(sSubMenuList *subMenuList)
 			{
 				DrawRect32(MENU_COLOR_FG, subMenuList->popup.x+5, subMenuList->popup.y+40+subMenuList->selectedIndex*25, SML_SEL_WIDTH, SML_SEL_HEIGHT, true);
 			}
-			printStr_lcd(&font_arial_18, subMenuList->popup.x+20, subMenuList->popup.y+y, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->entrys[i]);
+			printStr_lcd(&FONT_MENU, subMenuList->popup.x+20, subMenuList->popup.y+y, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->entrys[i]);
 		}
 	}
 }
@@ -316,9 +318,9 @@ void drawValueField(sValueField *valueField)
 	int str[20];
 	DrawRect32(MENU_COLOR_BG, valueField->bounds.x, valueField->bounds.y, valueField->bounds.width, valueField->bounds.height, true);
 
-	printStr_lcd(&font_arial_18, valueField->bounds.x+CENTER(104, getTextWidth(&font_arial_18, valueField->title)), valueField->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, valueField->title);
+	printStr_lcd(&FONT_MENU, valueField->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, valueField->title)), valueField->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, valueField->title);
 	itoa(valueField->value, str);
-	printStr_lcdi(&font_arial_18, valueField->bounds.x+CENTER(104, getTextWidthi(&font_arial_18, str)), valueField->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, str);
+	printStr_lcdi(&FONT_MENU, valueField->bounds.x+CENTER(104, getTextWidthi(&FONT_MENU, str)), valueField->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, str);
 
 	if (selectedValueField == valueField)
 	{
@@ -427,10 +429,10 @@ void titleBarInit(void)
 {
 	DrawBox(TITLE_BAR_COLOR_BG, TITLE_BAR_START_X, TITLE_BAR_START_Y, TITLE_BAR_END_X, TITLE_BAR_END_Y);
 
-	printStr_lcd(&font_arial_bold_14, VOLTAGE_CH0-35, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "CH1:");
-	printStr_lcd(&font_arial_bold_14, VOLTAGE_CH1-35, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "CH2:");
+	printStr_lcd(&FONT_TITLEBAR, VOLTAGE_CH0-35, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "CH1:");
+	printStr_lcd(&FONT_TITLEBAR, VOLTAGE_CH1-35, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "CH2:");
 
-	printStr_lcd(&font_arial_bold_14, TIMEBASE-15, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "T:");
+	printStr_lcd(&FONT_TITLEBAR, TIMEBASE-15, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "T:");
 }
 
 /*
@@ -441,7 +443,7 @@ void titleBarInit(void)
 void updateTitleBar(enum TITLEMENU type, const char *text)
 {
 	DrawBox(TITLE_BAR_COLOR_BG, type, TITLE_BAR_START_Y, type+80, TITLE_BAR_END_Y);
-	printStr_lcd(&font_arial_bold_14, type,2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, text);
+	printStr_lcd(&FONT_TITLEBAR, type,2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, text);
 }
 
 
