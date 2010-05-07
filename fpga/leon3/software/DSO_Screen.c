@@ -393,31 +393,32 @@ sRect* getClippingRect(void)
 }
 
 
-void LoadBitmap(unsigned const char *bitmap, uint16_t xpos , uint16_t ypos, uint16_t width, uint16_t height, color_t color_bg, color_t color_fg)
+void LoadBitmap(sSymbol *symbol, uint16_t xpos , uint16_t ypos, color_t color_fg)
 {
 	uint32_t bwidth, xp, xend;
 	uint8_t byte, mask;
+	uint8_t *imageData = symbol->data;
 
-	xend = xpos +  width;
+	xend = xpos +  symbol->width;
 	if(xend>HLEN-1)
 	{
 		xend=HLEN-1;
 	}
 
-	bwidth = width / 8; //Anzahl Bytes horizontal
+	bwidth = symbol->width / 8; //Anzahl Bytes horizontal
 
-	if((width % 8) != 0)
+	if((symbol->width % 8) != 0)
 	{
 		bwidth++; //Bei Rest noch ein Byte mehr
 	}
 
-	for(uint32_t i=0; i<height; i++, ypos++)
+	for(uint32_t i=0; i<symbol->height; i++, ypos++)
 	{
 		xp=xpos;
 
 		for(uint32_t j=0; j<bwidth; j++)
 		{
-			byte = *bitmap++;
+			byte = *imageData++;
 			mask=0x80;
 
 			for(uint32_t k=0; k<8; k++, mask >>=1, xp++)

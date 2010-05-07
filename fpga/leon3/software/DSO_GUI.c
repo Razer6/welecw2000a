@@ -48,6 +48,7 @@
 #include "DSO_FrontPanel.h"
 
 #include "GUI.h"
+#include "symbols.h"
 
 #define SIGNAL_HSTART 20
 #define SIGNAL_HSTOP  HLEN-20
@@ -76,24 +77,7 @@ void setTimebase(int32_t diff);
 void setAnalogOffset(uint32_t ch, int32_t diff);
 void setVoltagePerDiv(uint32_t ch, int32_t diff);
 
-/* Picture for Trigger Level */
 
-#define TRIGGERARROW_GLCD_HEIGHT 12
-#define TRIGGERARROW_GLCD_WIDTH  18
-static uint8_t triggerarrow_glcd_bmp[]= {
-					0x00, 0x08, 0x00,
-					0x00, 0x0c, 0x00,
-					0x00, 0x0e, 0x00,
-					0x00, 0x0f, 0x00,
-					0x00, 0x0f, 0x80,
-					0xff, 0xff, 0xc0,
-					0xff, 0xff, 0xc0,
-					0x00, 0x0f, 0x80,
-					0x00, 0x0f, 0x00,
-					0x00, 0x0e, 0x00,
-					0x00, 0x0c, 0x00,
-					0x00, 0x08, 0x00
-};
 
 /* Colors for Signaldrawing
  * signalcolors[0] = Channel 0
@@ -682,8 +666,16 @@ void changeTriggerEdge(uint32_t selection)
 {
 	switch(selection)
 	{
-		case 0: triggerSettings.edge = 0; break; //Rising Edge
-		case 1: triggerSettings.edge = 1; break; //Falling Edge
+		case 0: 
+			triggerSettings.edge = 0; 		//Rising Edge
+			LoadBitmap(&sym_fallingEdge, TRIGGERLEVEL, TITLE_BAR_START_Y+2, TITLE_BAR_COLOR_BG);	//Clear other symbol
+			LoadBitmap(&sym_risingEdge, TRIGGERLEVEL, TITLE_BAR_START_Y+2, TITLE_BAR_COLOR_FG);
+		break; 
+		case 1: 
+			triggerSettings.edge = 1; 		//Falling Edge
+			LoadBitmap(&sym_risingEdge, TRIGGERLEVEL, TITLE_BAR_START_Y+2, TITLE_BAR_COLOR_BG);		//Clear other symbol
+			LoadBitmap(&sym_fallingEdge, TRIGGERLEVEL, TITLE_BAR_START_Y+2, TITLE_BAR_COLOR_FG);
+		break; 
 		default: break;
 	}
 
@@ -738,9 +730,7 @@ void changeTriggerChannel(uint32_t selection)
 			triggerSettings.prefetch ,triggerSettings.level - triggerSettings.schmitt, triggerSettings.pulse,
 			triggerSettings.level + triggerSettings.schmitt, triggerSettings.pulse);
 
-	LoadBitmap(triggerarrow_glcd_bmp, 1 , -triggerSettings.level+Offset[triggerSettings.channel].V, TRIGGERARROW_GLCD_WIDTH, TRIGGERARROW_GLCD_HEIGHT, BG_COLOR, signalcolors[triggerSettings.channel]);
-
-
+	LoadBitmap(&sym_triggerMark, 1 , -triggerSettings.level+Offset[triggerSettings.channel].V, signalcolors[triggerSettings.channel]);
 }
 
 /*
@@ -748,7 +738,7 @@ void changeTriggerChannel(uint32_t selection)
  */
 void clearTriggerMark(void)
 {
-	LoadBitmap(triggerarrow_glcd_bmp, 1 , -triggerSettings.level+Offset[triggerSettings.channel].V, TRIGGERARROW_GLCD_WIDTH, TRIGGERARROW_GLCD_HEIGHT, BG_COLOR, BG_COLOR);
+	LoadBitmap(&sym_triggerMark, 1 , -triggerSettings.level+Offset[triggerSettings.channel].V, BG_COLOR);
 }
 
 /*
@@ -766,33 +756,37 @@ void changeTriggerLevel(int32_t diff)
 	if (triggerSettings.level > 127) triggerSettings.level = 127;
 	if (triggerSettings.level < -127) triggerSettings.level = -127;
 
-	LoadBitmap(triggerarrow_glcd_bmp, 1 , -triggerSettings.level+Offset[triggerSettings.channel].V, TRIGGERARROW_GLCD_WIDTH, TRIGGERARROW_GLCD_HEIGHT, BG_COLOR, signalcolors[triggerSettings.channel]);
-
+	LoadBitmap(&sym_triggerMark, 1 , -triggerSettings.level+Offset[triggerSettings.channel].V, signalcolors[triggerSettings.channel]);
+	
 	SetTrigger(triggerSettings.type+triggerSettings.edge,0,triggerSettings.channel,
 			triggerSettings.prefetch ,triggerSettings.level - triggerSettings.schmitt, triggerSettings.pulse,
 			triggerSettings.level + triggerSettings.schmitt, triggerSettings.pulse);
 
 }
 
-	/* Some timebases are disabled, they might not work with all filter settings
-         * AACFilterStart <= 1 and AACFilterStop >= 1! (not a bug) */ 
-	const uint32_t timebase[] = {
-		10000, /*12500,*/ 25000, /*31250,*/ 50000, /*62500,*/
-		100000, /*125000,*/ 250000, /*312500,*/ 500000, /*625000,*/ // 100ks/s - 500ks/s
-		1000000, /*1250000,*/ 2500000, /*3125000,*/ 5000000, /*6250000,*/ // 1Ms/s - 5Ms/s
-		10000000, /*15000000,*/ 25000000, /*31250000,*/ 50000000, /*62500000,*/ // 10Ms/s - 50Ms/s
-		100000000, 125000000, 250000000, 500000000, // 100Ms/s - 500Ms/s
-		1000000000}; // 1Gs/s
+/* Some timebases are disabled, they might not work with all filter settings
+ * AACFilterStart <= 1 and AACFilterStop >= 1! (not a bug) */ 
+const uint32_t timebase[] = {
+	10000, /*12500,*/ 25000, /*31250,*/ 50000, /*62500,*/
+	100000, /*125000,*/ 250000, /*312500,*/ 500000, /*625000,*/ // 100ks/s - 500ks/s
+	1000000, /*1250000,*/ 2500000, /*3125000,*/ 5000000, /*6250000,*/ // 1Ms/s - 5Ms/s
+	10000000, /*15000000,*/ 25000000, /*31250000,*/ 50000000, /*62500000,*/ // 10Ms/s - 50Ms/s
+	100000000, 125000000, 250000000, 500000000, // 100Ms/s - 500Ms/s
+	1000000000}; // 1Gs/s
 
-	char *timebase_str[] = {
-		"10 kS/s", /*"12.5 kS/s",*/ "25 kS/s", /*"31.25 kS/s",*/ "50 kS/s", /*"62.5 kS/s",*/
-		"100 kS/s", /*"125 kS/s",*/ "250 kS/s", /*"312.5 kS/s",*/ "500 kS/s", /*"625 kS/s",*/
-		"1 MS/s", /*"1.25 MS/s",*/ "2.5 MS/s", /*"3.125 MS/s",*/ "5 MS/s", /*"6.25 MS/s",*/
-		"10 MS/s", /*"12.5 MS/s",*/ "25 MS/s", /*"31.25 MS/s",*/ "50 MS/s", /*"62.5 MS/s",*/
-		"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
-		"1 GS/s"};
+char *timebase_str[] = {
+	"10 kS/s", /*"12.5 kS/s",*/ "25 kS/s", /*"31.25 kS/s",*/ "50 kS/s", /*"62.5 kS/s",*/
+	"100 kS/s", /*"125 kS/s",*/ "250 kS/s", /*"312.5 kS/s",*/ "500 kS/s", /*"625 kS/s",*/
+	"1 MS/s", /*"1.25 MS/s",*/ "2.5 MS/s", /*"3.125 MS/s",*/ "5 MS/s", /*"6.25 MS/s",*/
+	"10 MS/s", /*"12.5 MS/s",*/ "25 MS/s", /*"31.25 MS/s",*/ "50 MS/s", /*"62.5 MS/s",*/
+	"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
+	"1 GS/s"};
 
+<<<<<<< .mine
+static int32_t selectedTimebase = 0;
+=======
 	/*static int32_t selectedTimebase = 0;*/
+>>>>>>> .r358
 
 
 /*
@@ -803,26 +797,6 @@ static int AACFilterStop = 0;
 
 void setTimebase(int32_t diff)
 {
-	/* Some timebases are disabled, they might not work with all filter settings
-         * AACFilterStart <= 1 and AACFilterStop >= 1! (not a bug) */ 
-	const uint32_t timebase[] = {
-		10000, /*12500,*/ 25000, /*31250,*/ 50000, /*62500,*/
-		100000, /*125000,*/ 250000, /*312500,*/ 500000, /*625000,*/ // 100ks/s - 500ks/s
-		1000000, /*1250000,*/ 2500000, /*3125000,*/ 5000000, /*6250000,*/ // 1Ms/s - 5Ms/s
-		10000000, /*15000000,*/ 25000000, /*31250000,*/ 50000000, /*62500000,*/ // 10Ms/s - 50Ms/s
-		100000000, 125000000, 250000000, 500000000, // 100Ms/s - 500Ms/s
-		1000000000}; // 1Gs/s
-
-	char *timebase_str[] = {
-		"10 kS/s", /*"12.5 kS/s",*/ "25 kS/s", /*"31.25 kS/s",*/ "50 kS/s", /*"62.5 kS/s",*/
-		"100 kS/s", /*"125 kS/s",*/ "250 kS/s", /*"312.5 kS/s",*/ "500 kS/s", /*"625 kS/s",*/
-		"1 MS/s", /*"1.25 MS/s",*/ "2.5 MS/s", /*"3.125 MS/s",*/ "5 MS/s", /*"6.25 MS/s",*/
-		"10 MS/s", /*"12.5 MS/s",*/ "25 MS/s", /*"31.25 MS/s",*/ "50 MS/s", /*"62.5 MS/s",*/
-		"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
-		"1 GS/s"};
-
-	static int32_t selectedTimebase = 0;
-
 	selectedTimebase += diff;
 
 	if(selectedTimebase < 0)
@@ -1006,14 +980,16 @@ void GUI_Main(void)
 
 	titleBarInit();
 
-	/* Set timbase and voltage per div
+	/* Set timbase, trigger and voltage per div
 	 * Also updates titlebar.
 	 */
 	setTimebase(0);
+	changeTriggerEdge(0);
 	setVoltagePerDiv(CH0,0);
 	setVoltagePerDiv(CH1,0);
 
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
+
 	SET_LED(RUN_GREEN);
 	/*
 	 * Main loop

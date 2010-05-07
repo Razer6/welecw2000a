@@ -49,6 +49,13 @@ typedef struct Rect
 }
 sRect;
 
+typedef struct Symbol
+{
+	uint8_t width;
+	uint8_t height;
+	uint8_t data[];
+} sSymbol;
+
 uint32_t * InitDisplay (uint32_t Target);
 
 void DrawPoint(uint16_t Color, uint32_t H, uint32_t V);
@@ -67,9 +74,7 @@ void DrawPixel32Clipped(color_t color, uint32_t x, uint32_t y);
 
 void DrawRect32(uint16_t color, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t filled);
 
-void LoadBitmap(unsigned const char *bitmap, uint16_t xpos , uint16_t ypos, uint16_t width, uint16_t height, color_t color_bg, color_t color_fg);
-
-void DrawBmpTest(void);
+void LoadBitmap(sSymbol *symbol, uint16_t xpos , uint16_t ypos, color_t color_fg);
 
 void generategrid(void);
 
@@ -78,6 +83,7 @@ void drawGrid(void);
 void ClearVLineClipped(uint16_t Color, uint32_t H, uint32_t V1, uint32_t V2);
 
 void setClippingRect(sRect *clipping);
+
 sRect* getClippingRect(void);
 
 
@@ -90,6 +96,8 @@ sRect* getClippingRect(void);
 /* VGA Resulotion */
 #define HLEN 640
 #define VLEN 480
+
+
 
 
 

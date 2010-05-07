@@ -42,6 +42,7 @@
 #include "DSO_Main.h"
 #include "DSO_SFR.h"
 #include "DSO_Misc.h"
+#include "symbols.h"
 
 
 sSubMenuList *openSubMenuList = NULL;
@@ -196,6 +197,7 @@ void drawSubMenuList(sSubMenuList *subMenuList)
 	DrawRect32(MENU_COLOR_BG, subMenuList->bounds.x, subMenuList->bounds.y, subMenuList->bounds.width, subMenuList->bounds.height, true);
 	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->title)), subMenuList->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
 	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->entrys[subMenuList->selectedIndex])), subMenuList->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->entrys[subMenuList->selectedIndex]);
+	LoadBitmap(&sym_up, subMenuList->bounds.x+subMenuList->bounds.width-sym_up.width-5, subMenuList->bounds.y+5, MENU_COLOR_FG);
 }
 
 #define SML_SEL_WIDTH		5
@@ -431,8 +433,8 @@ void titleBarInit(void)
 
 	printStr_lcd(&FONT_TITLEBAR, VOLTAGE_CH0-35, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "CH1:");
 	printStr_lcd(&FONT_TITLEBAR, VOLTAGE_CH1-35, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "CH2:");
-
-	printStr_lcd(&FONT_TITLEBAR, TIMEBASE-15, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "T:");
+	printStr_lcd(&FONT_TITLEBAR, TIMEBASE-23, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "TB:");
+	printStr_lcd(&FONT_TITLEBAR, TRIGGERLEVEL-27, 2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, "TR:");
 }
 
 /*
@@ -442,8 +444,8 @@ void titleBarInit(void)
 
 void updateTitleBar(enum TITLEMENU type, const char *text)
 {
-	DrawBox(TITLE_BAR_COLOR_BG, type, TITLE_BAR_START_Y, type+80, TITLE_BAR_END_Y);
-	printStr_lcd(&FONT_TITLEBAR, type,2, TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, text);
+	DrawBox(TITLE_BAR_COLOR_BG, type, TITLE_BAR_START_Y, type+50, TITLE_BAR_END_Y);
+	printStr_lcd(&FONT_TITLEBAR, type, 2 , TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, text);
 }
 
 
