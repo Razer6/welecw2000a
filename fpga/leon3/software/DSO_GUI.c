@@ -782,12 +782,7 @@ char *timebase_str[] = {
 	"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
 	"1 GS/s"};
 
-<<<<<<< .mine
 static int32_t selectedTimebase = 0;
-=======
-	/*static int32_t selectedTimebase = 0;*/
->>>>>>> .r358
-
 
 /*
  * This function changes the timebase. It also updates the titlebar.
