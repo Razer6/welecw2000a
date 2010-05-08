@@ -45,8 +45,8 @@
 #include "DSO_FrontPanel.h"
 
 
- #define FONT_TITLEBAR	font_arial_bold_14
- #define FONT_MENU		font_arial_18
+ #define FONT_TITLEBAR	font_liberation_sans_bold_14
+ #define FONT_MENU		font_liberation_sans_bold_17
 
 #define SUB_MENU_CLOSETIME	3000
 

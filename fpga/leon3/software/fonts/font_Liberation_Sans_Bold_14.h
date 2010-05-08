@@ -1,11 +1,12 @@
+
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : font_Arial_18.h
+* File           : font_Liberation_Sans_Bold_14.h
 * Author         : Robert Schilling <robert.schilling at gmx.at>
-* Date           : 12.02.2010
+* Date           : 08.05.2010
 *****************************************************************************
-* Description	 : Font Arial 18
+* Description	 : Font Liberation Sans 14 bold
 *****************************************************************************
 
 *  Copyright (c) 2010, Schilling Robert
@@ -33,13 +34,11 @@
 * Revision		: 0
 ****************************************************************************/
 
-#ifndef FONT_ARIAL_H
-#define FONT_ARIAL_H
-
+#ifndef FONT_LIBERATION_SANS_BOLD_14_H
+#define FONT_LIBERATION_SANS_BOLD_14_H
 
 #include "DSO_Font.h"
 
-extern sFont font_arial_18;
-
+extern sFont font_liberation_sans_bold_14;
 
 #endif

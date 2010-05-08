@@ -241,7 +241,7 @@ void onSubMenuList(sSubMenuList *subMenuList)
 		DrawRect32(MENU_COLOR_BG, clipping->x, clipping->y, clipping->width, clipping->height, true);
 
 		printStr_lcd(&FONT_MENU, subMenuList->popup.x+CENTER(104,getTextWidth(&FONT_MENU, subMenuList->title)), subMenuList->popup.y+2, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
-		DrawRect32(MENU_COLOR_FG, subMenuList->popup.x+5, subMenuList->popup.y+font_arial_18.height+5,subMenuList->popup.width-10, 3, true);
+		DrawRect32(MENU_COLOR_FG, subMenuList->popup.x+5, subMenuList->popup.y+FONT_MENU.height+5,subMenuList->popup.width-10, 3, true);
 
 		for(uint32_t i=0, y=30; i<subMenuList->size; i++, y+=25)
 		{

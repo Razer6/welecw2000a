@@ -51,8 +51,9 @@ typedef struct Font
 	uint8_t *dataTable;
 }sFont;
 
-#include "font_Arial_Bold_14.h"
-#include "font_Arial_18.h"
+
+#include "font_liberation_sans_bold_14.h"
+#include "font_liberation_sans_bold_17.h"
 
 /*
  * Prints a single character in the framebuffer
