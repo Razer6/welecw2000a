@@ -45,15 +45,15 @@
 #include "DSO_FrontPanel.h"
 
 
- #define FONT_TITLEBAR	font_liberation_sans_bold_14
- #define FONT_MENU		font_liberation_sans_bold_17
+#define FONT_TITLEBAR	font_liberation_sans_bold_14
+#define FONT_MENU		font_liberation_sans_bold_14
 
 #define SUB_MENU_CLOSETIME	3000
 
 #define MENU_START_X	0
 #define MENU_WIDTH		(HLEN)
 
-#define MENU_HEIGHT		(58)
+#define MENU_HEIGHT		(35)
 #define MENU_START_Y	(VLEN-MENU_HEIGHT)
 
 #define MENU_LINE_WIDTH		3
@@ -83,7 +83,6 @@
 #define MENU_COLOR_FG	COLOR_R3G3B3(0,0,0)
 #define BG_COLOR 		COLOR_R3G3B3(0,0,0)
 
-
 #define TITLE_BAR_START_X			0
 #define TITLE_BAR_END_X				(HLEN)
 #define TITLE_BAR_START_Y			0
@@ -92,6 +91,16 @@
 #define TITLE_BAR_COLOR_BG		COLOR_R3G3B3(3,3,3)
 #define TITLE_BAR_COLOR_FG		COLOR_R3G3B3(0,0,0)
 
+#define FONT_STATUS_BAR		font_liberation_sans_bold_14
+
+#define STATUS_BAR_START_X			0
+#define STATUS_BAR_END_X				(HLEN)
+#define STATUS_BAR_START_Y			423
+#define STATUS_BAR_END_Y			441
+
+#define STATUS_BAR_COLOR_BG		COLOR_R3G3B3(2,2,2)
+#define STATUS_BAR_COLOR_FG		COLOR_R3G3B3(0,0,0)
+
 /* Grid defines */
 #define GRIDCOLOR COLOR_R3G3B3(3,3,3)
 
@@ -99,7 +108,8 @@ extern uint32_t gridbuffer[VLEN][HLEN/32];
 
 #define GRID_RECT_START_Y	(TITLE_BAR_END_Y+2)
 #define GRID_RECT_START_X	(20)
-#define GRID_RECT_END_Y		(MENU_START_Y-2)
+//#define GRID_RECT_END_Y		(MENU_START_Y-2)
+#define GRID_RECT_END_Y		(GRID_RECT_START_Y+400)
 #define GRID_RECT_END_X		(HLEN-20)
 
 /*
@@ -198,6 +208,8 @@ void updateMenu(sMenu *menu);
 void titleBarInit(void);
 
 void updateTitleBar(enum TITLEMENU type, const char *text);
+
+void status_bar_init(void);
 
 void onSubMenu(sSubMenu *subMenu);
 

@@ -974,6 +974,7 @@ void GUI_Main(void)
 	WRITE_INT(LEDADDR,0); //Clear leds
 
 	titleBarInit();
+	status_bar_init();
 
 	/* Set timbase, trigger and voltage per div
 	 * Also updates titlebar.

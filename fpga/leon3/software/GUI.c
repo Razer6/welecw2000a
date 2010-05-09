@@ -159,10 +159,10 @@ void initSubMenu(sSubMenu *subMenu)
 
 void drawCheckBox(sCheckBox *box)
 {
-	DrawRect32(MENU_COLOR_FG, box->bounds.x+45, box->bounds.y+35, 14, 13, false);
-	DrawRect32(MENU_COLOR_FG, box->bounds.x+46, box->bounds.y+36, 12, 11, false);
-	DrawRect32(box->selected?MENU_COLOR_FG:MENU_COLOR_BG, box->bounds.x+49, box->bounds.y+39, 6, 6, true);
-	printStr_lcd(&FONT_MENU, box->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, box->title)), box->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, box->title);
+	DrawRect32(MENU_COLOR_FG, box->bounds.x+45, box->bounds.y+19, 14, 13, false);
+	DrawRect32(MENU_COLOR_FG, box->bounds.x+46, box->bounds.y+20, 12, 11, false);
+	DrawRect32(box->selected?MENU_COLOR_FG:MENU_COLOR_BG, box->bounds.x+49, box->bounds.y+23, 6, 6, true);
+	printStr_lcd(&FONT_MENU, box->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, box->title)), box->bounds.y, MENU_COLOR_FG, MENU_COLOR_BG, box->title);
 }
 
 void onCheckBox(sCheckBox *box)
@@ -176,7 +176,8 @@ void onCheckBox(sCheckBox *box)
 		box->selected = 1;
 	}
 
-	DrawRect32(box->selected?MENU_COLOR_FG:MENU_COLOR_BG, box->bounds.x+49, box->bounds.y+39, 6, 6, true);
+	DrawRect32(box->selected?MENU_COLOR_FG:MENU_COLOR_BG, box->bounds.x+49, box->bounds.y+23, 6, 6, true);
+	printStr_lcd(&FONT_MENU, box->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, box->title)), box->bounds.y, MENU_COLOR_FG, MENU_COLOR_BG, box->title);
 
 	if(box->cbFunct != NULL)
 	{
@@ -195,8 +196,8 @@ void onCheckBox(sCheckBox *box)
 void drawSubMenuList(sSubMenuList *subMenuList)
 {
 	DrawRect32(MENU_COLOR_BG, subMenuList->bounds.x, subMenuList->bounds.y, subMenuList->bounds.width, subMenuList->bounds.height, true);
-	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->title)), subMenuList->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
-	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->entrys[subMenuList->selectedIndex])), subMenuList->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->entrys[subMenuList->selectedIndex]);
+	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->title)), subMenuList->bounds.y, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->title);
+	printStr_lcd(&FONT_MENU, subMenuList->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, subMenuList->entrys[subMenuList->selectedIndex])), subMenuList->bounds.y+17, MENU_COLOR_FG, MENU_COLOR_BG, subMenuList->entrys[subMenuList->selectedIndex]);
 	LoadBitmap(&sym_up, subMenuList->bounds.x+subMenuList->bounds.width-sym_up.width-5, subMenuList->bounds.y+5, MENU_COLOR_FG);
 }
 
@@ -232,6 +233,7 @@ void onSubMenuList(sSubMenuList *subMenuList)
 		{
 			DrawRect32(BG_COLOR, clipping->x, clipping->y, clipping->width, clipping->height, true);
 			drawGrid();
+			status_bar_init();
 		}
 
 		openSubMenuList = subMenuList;
@@ -264,6 +266,7 @@ void closeSubMenu(void)
 	{
 		DrawRect32(BG_COLOR, clipping->x, clipping->y, clipping->width, clipping->height, true);
 		drawGrid();
+		status_bar_init();
 		setClippingRect(NULL);
 		openSubMenuList = NULL;
 	}
@@ -320,9 +323,9 @@ void drawValueField(sValueField *valueField)
 	int str[20];
 	DrawRect32(MENU_COLOR_BG, valueField->bounds.x, valueField->bounds.y, valueField->bounds.width, valueField->bounds.height, true);
 
-	printStr_lcd(&FONT_MENU, valueField->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, valueField->title)), valueField->bounds.y+5, MENU_COLOR_FG, MENU_COLOR_BG, valueField->title);
+	printStr_lcd(&FONT_MENU, valueField->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, valueField->title)), valueField->bounds.y, MENU_COLOR_FG, MENU_COLOR_BG, valueField->title);
 	itoa(valueField->value, str);
-	printStr_lcdi(&FONT_MENU, valueField->bounds.x+CENTER(104, getTextWidthi(&FONT_MENU, str)), valueField->bounds.y+30, MENU_COLOR_FG, MENU_COLOR_BG, str);
+	printStr_lcdi(&FONT_MENU, valueField->bounds.x+CENTER(104, getTextWidthi(&FONT_MENU, str)), valueField->bounds.y+17, MENU_COLOR_FG, MENU_COLOR_BG, str);
 
 	if (selectedValueField == valueField)
 	{
@@ -371,12 +374,12 @@ void onValueField(sValueField *valueField)
 	if(selectedValueField != NULL)
 	{
 		//Deselect the current valuefield
-		DrawRect32(MENU_COLOR_BG, selectedValueField->bounds.x+5, selectedValueField->bounds.y+5, selectedValueField->bounds.width-10, selectedValueField->bounds.height-10, false);
+		DrawRect32(MENU_COLOR_BG, selectedValueField->bounds.x+2, selectedValueField->bounds.y+2, selectedValueField->bounds.width-4, selectedValueField->bounds.height-4, false);
 	}
 
 	//Select the new valuefield
 	selectedValueField = valueField;
-	DrawRect32(MENU_COLOR_FG, valueField->bounds.x+5, valueField->bounds.y+5, valueField->bounds.width-10, valueField->bounds.height-10, false);
+	DrawRect32(MENU_COLOR_FG, valueField->bounds.x+2, valueField->bounds.y+2, valueField->bounds.width-4, valueField->bounds.height-4, false);
 
 	//Turn on the led for the encoder
 	WRITE_INT(LEDADDR, READ_INT(LEDADDR) | 1<<LED_WHEEL);
@@ -448,6 +451,20 @@ void updateTitleBar(enum TITLEMENU type, const char *text)
 	printStr_lcd(&FONT_TITLEBAR, type, 2 , TITLE_BAR_COLOR_FG, TITLE_BAR_COLOR_BG, text);
 }
 
+/*
+ * Draws the naked Statusbar. This function doesn't draw
+ * any values like the actual timbase or voltage per div.
+ */
+
+void status_bar_init(void)
+{
+	DrawBox(STATUS_BAR_COLOR_BG, STATUS_BAR_START_X, STATUS_BAR_START_Y, STATUS_BAR_END_X, STATUS_BAR_END_Y);
+
+	printStr_lcd(&FONT_STATUS_BAR, VOLTAGE_CH0-35, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, "CH1:");
+	printStr_lcd(&FONT_STATUS_BAR, VOLTAGE_CH1-35, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, "CH2:");
+
+	printStr_lcd(&FONT_STATUS_BAR, TIMEBASE-15, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, "T:");
+}
 
 uint32_t gridbuffer[VLEN][HLEN/32];
 
