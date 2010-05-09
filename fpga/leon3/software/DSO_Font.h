@@ -52,8 +52,8 @@ typedef struct Font
 }sFont;
 
 
-#include "font_liberation_sans_bold_14.h"
-#include "font_liberation_sans_bold_17.h"
+#include "font_Liberation_Sans_Bold_14.h"
+#include "font_Liberation_Sans_Bold_17.h"
 
 /*
  * Prints a single character in the framebuffer
