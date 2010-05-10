@@ -1,7 +1,7 @@
 # Programs to use
 TOUCH      = @touch
 ECHO       = @echo
-ECHO       = echo    # Uncomment this line to see the commands run.
+#ECHO       = echo    # Uncomment this line to see the commands run.
 
 # Some fancy echoing
 CC           := $(ECHO) " [COMPILE] $<"; g++ # should really be compiled with gcc
