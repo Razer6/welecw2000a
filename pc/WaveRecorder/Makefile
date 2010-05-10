@@ -7,8 +7,10 @@ ECHO       = @echo
 CC           := $(ECHO) " [COMPILE] $<"; g++ # should really be compiled with gcc
 LD           := $(ECHO) " [LINK   ] $<"; $(LD)
 MAKEDEPEND   := $(ECHO) " [DEPEND ]"; makedepend
-#
+
 # Flags
+DEFINES:= LITTLE_ENDIAN
+CFLAGS += $(patsubst %,-D%,$(DEFINES))
 CFLAGS += --std=c99             # We code Standard C
 CFLAGS += -Wall                 # Enable many warnings
 CFLAGS += -Wextra               # Enable even more warnings
