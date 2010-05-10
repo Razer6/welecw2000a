@@ -1,30 +1,33 @@
 # Programs to use
 TOUCH      = @touch
 ECHO       = @echo
-#ECHO       = echo    # Uncomment this line to see the commands run.
+ECHO       = echo    # Uncomment this line to see the commands run.
 
 # Some fancy echoing
 CC           := $(ECHO) " [COMPILE] $<"; g++ # should really be compiled with gcc
 LD           := $(ECHO) " [LINK   ] $<"; $(LD)
 MAKEDEPEND   := $(ECHO) " [DEPEND ]"; makedepend
 
+# Defines
+DEFINES  := LITTLE_ENDIAN
+CFLAGS   += $(patsubst %,-D%,$(DEFINES))
+CPPFLAGS += $(patsubst %,-D%,$(DEFINES))
+
 # Flags
-DEFINES:= LITTLE_ENDIAN
-CFLAGS += $(patsubst %,-D%,$(DEFINES))
 CFLAGS += --std=c99             # We code Standard C
 CFLAGS += -Wall                 # Enable many warnings
 CFLAGS += -Wextra               # Enable even more warnings
 #CFLAGS += -Werror               # Error out on warnings
 CFLAGS += -Wno-unused-parameter # Do not warn about unused function parameters
 
-LDFLAGS += -largtable2 --enable-auto-import -L/usr/lib
+LDFLAGS += --enable-auto-import -L/usr/lib -L. -largtable2
 
 SOURCE_DIRS  := . thirdparty
 VPATH        := $(SOURCE_DIRS)
 INCLUDE_DIRS := $(VPATH)
 INCLUDE_DIRS += ../../fpga/leon3/software ../../fpga/leon3/grlib-W2000A/software/leon3 /usr/include
 CFLAGS       += $(patsubst %,-I%,$(subst :, ,$(INCLUDE_DIRS)))
-CPPFLAGS       += $(patsubst %,-I%,$(subst :, ,$(INCLUDE_DIRS)))
+CPPFLAGS     += $(patsubst %,-I%,$(subst :, ,$(INCLUDE_DIRS)))
 
 SOURCES      := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.c))
 SOURCES      += $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.cpp))
