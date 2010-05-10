@@ -37,22 +37,22 @@ CFLAGS += -Werror               # Error out on warnings
 CFLAGS += -Wno-unused-parameter # Do not warn about unused function parameters
 
 # Target variables
-SOURCE_DIRS   = . thirdparty fonts
+SOURCE_DIRS  := . thirdparty fonts
 VPATH	     := $(SOURCE_DIRS)
 INCLUDE_DIRS := $(patsubst %,-I%,$(subst :, ,$(VPATH)))
 INCLUDE_DIRS += -I../grlib-W2000A/software/leon3
 CFLAGS       += $(INCLUDE_DIRS)
 
-SOURCES := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.c))
-HEADERS := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.h))
-OBJS	:= $(SOURCES:.c=.o)
-ASMS	:= $(SOURCES:.c=.s)
+SOURCES      := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.c))
+HEADERS      := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.h))
+OBJS	     := $(SOURCES:.c=.o)
+ASMS	     := $(SOURCES:.c=.s)
 
-DEPENDFILE := depend
-TARGET     := w2000a.bin
+DEPENDFILE   := depend
+TARGET       := w2000a.bin
 
 # Files to be cleaned
-CLEAN = $(OBJS) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET)
+CLEAN := $(OBJS) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET)
 
 # Rules
 .PHONY: all
