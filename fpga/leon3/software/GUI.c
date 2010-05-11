@@ -44,6 +44,8 @@
 #include "DSO_Misc.h"
 #include "symbols.h"
 
+#include "timer.h"
+
 
 sSubMenuList *openSubMenuList = NULL;
 sMenu *activeMenu;
@@ -458,12 +460,22 @@ void updateTitleBar(enum TITLEMENU type, const char *text)
 
 void status_bar_init(void)
 {
+	int str1[10];
+	int str2[10];
+	int str3[10];
+	int str4[10];
+
 	DrawBox(STATUS_BAR_COLOR_BG, STATUS_BAR_START_X, STATUS_BAR_START_Y, STATUS_BAR_END_X, STATUS_BAR_END_Y);
 
-	printStr_lcd(&FONT_STATUS_BAR, VOLTAGE_CH0-35, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, "CH1:");
-	printStr_lcd(&FONT_STATUS_BAR, VOLTAGE_CH1-35, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, "CH2:");
+	itoa(debug1(), str1);
+	itoa(debug2(), str2);
+	itoa(debug3(), str3);
+	itoa(debug4(), str4);
 
-	printStr_lcd(&FONT_STATUS_BAR, TIMEBASE-15, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, "T:");
+	printStr_lcdi(&FONT_STATUS_BAR, 0, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, str1);
+	printStr_lcdi(&FONT_STATUS_BAR, 120, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, str2);
+	printStr_lcdi(&FONT_STATUS_BAR, 240, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, str3);
+	printStr_lcdi(&FONT_STATUS_BAR, 360, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, str4);
 }
 
 uint32_t gridbuffer[VLEN][HLEN/32];

@@ -46,10 +46,13 @@
 #include "DSO_Screen.h"
 #include "DSO_FrontPanel.h"
 #include "Filter_I8.h"
-#include "../leon3/irqmp.h"
+#include "irqmp.h"
 #include "DSO_Misc.h"
 #include "DSO_GUI.h"
 #include "rprintf.h"
+#include "timer.h"
+
+extern int catch_interrupt (int func, int irq);
 
 #ifdef SIM_COMPILATION
 #define SendStringBlock(A,B) 
@@ -114,10 +117,14 @@ void rprintc(unsigned data){
 
 
 void IsrDSO(int irq){
-	if (irq == 5) {
-		WRITE_INT(INTERRUPTADDR,0);
-	} else {
-		WRITE_INT(DSO_SFR_BASE_ADDR,16);
+	switch (irq)
+	{
+		case 5:
+			WRITE_INT(INTERRUPTADDR,0);
+		case 8:
+			timer_interrupt();
+		default:
+			WRITE_INT(DSO_SFR_BASE_ADDR,16);
 	}
 }
 
@@ -128,9 +135,9 @@ void InitIRQ(){
 	WRITE_INT(DSO_SFR_BASE_ADDR,15);
 	lr->irqlevel = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));	/* clear level reg */
 	lr->irqclear = -1;	/* clear all pending interrupts */
-	lr->irqmask  = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));	/* mask all interrupts */
+	lr->irqmask  = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_TIMER) | (1 << INT_DSO));	/* mask all interrupts */
 	IRQMask = lr->irqmask;
-	lr->irqforce = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));
+	//lr->irqforce = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));
 }
 
 void DisableIRQ(){
@@ -233,7 +240,6 @@ int main () {
 #endif
 
 /* This is a basic function test of the SignalCapture part */
-#ifdef SIM_COMPILATION
 	/* turning all DSO interrupts off (RESET) */
 	
 	WRITE_INT(INTERRUPTADDR,0);
@@ -241,8 +247,9 @@ int main () {
 	WRITE_INT(INTERRUPTMASKADDR,0xf);
 	/* Enable the interrupt the interrupt controller */
 	InitIRQ();
-	catch_interrupt(IsrDSO, INT_DSO);
+	catch_interrupt((uint32_t)IsrDSO, INT_DSO);
 
+#ifdef SIM_COMPILATION
 	printf("DSO Test programm: \nstart testing SetTriggerInput \n");
 	if (SetTriggerInput(2,8,FASTFS,FIXED_CPU_FREQUENCY,0,0,0,1,2,3) == true){
 		printf(ack);
@@ -330,6 +337,9 @@ int main () {
 //	printf("\nStartFrontPanelTest\n");
 //	FrontPanelTest(uart);
 //	printf("\nSignalTest\n");
+
+	timer_init();
+
     	GUI_Main();	
 #endif	
 #endif
