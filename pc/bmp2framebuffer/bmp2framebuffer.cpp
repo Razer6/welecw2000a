@@ -85,115 +85,74 @@ string licencetext
 * Revision		: 0																\n \
 ****************************************************************************/  \n\n");
 
-int main( int argc, char* argv[] )
+
+/* Returns true if file exits else false */
+bool check_file(char *name)
 {
-	BMP image;
-	int width, height;
 	ifstream chkfile;
-
-	if (argc<2)
-	{
-		cout << "Synopsys: bmp2framebuffer <image.bmp>";
-		return -1;
-	}
-
-	//Check if bitmap file exists
-	chkfile.open(argv[1]);
+	chkfile.open(name);
 	if(!chkfile.is_open())
 	{
-		cout << "Couldn't open file: '" << argv[1] << "'";
-		return -1;
-	}
-	chkfile.close();
-
-	string filename(argv[1]);	//Get name of BMP File
-
-	SetEasyBMPwarningsOff();
-
-	try 
-	{
-		//Read BMP Image
-		image.ReadFromFile(filename.c_str());    
-	}
-	catch(...)
-	{
-		cout << "Couldn't open file " << argv[1] << endl;
-		return -1;
-	}    
-
-	//Get BMP Size
-	height = image.TellHeight();
-	width = image.TellWidth();
-
-	filename.erase(filename.find(".bmp", 0), filename.length());	//delete *.bmp extension of filename
-
-	if (!createCodeFile(filename, image))
-	{
-		cout << "Could'nt create code file" << endl;
-		return -1;
-	}
-
-	if (!createHeaderFile(filename))
-	{
-		cout << "Could'nt create header file" << endl;
-		return -1;
-	}
-	return 0;
-}
-
-/* Create C Header File */
-bool createHeaderFile(std::string name)
-{
-	ofstream out((name+".h").c_str());	//Open File
-
-	if (!out)
-	{
-		cout << "Couldn't open file\n";
+		cout << "Couldn't open file: '" << name << "'";
 		return false;
 	}
-
-	out << licencetext;
-
-	string upper;
-	upper.resize(name.length());
-
-	for(unsigned int i=0; i<name.length(); i++)
-	{
-		upper[i] = toupper(name[i]);
-	}
-
-	out << "#ifndef SYM_" << upper << endl;
-	out << "#define SYM_" << upper << endl << endl;
-
-	out << "#include \"symbol.h\"" << endl << endl;
-	out << "extern sSymbol sym_" << name << ";" << endl << endl;
-
-	out << "#endif" << endl;
-
-	out.close();
+	chkfile.close();
 	return true;
 }
 
-/* Create C Code File */
-bool createCodeFile(string name, BMP &image)
+string get_sym_name(char *filename)
 {
-	ofstream out((name+".c").c_str());	//Open File
+	string name(filename);
+	name.erase(name.find(".bmp", 0), name.length());	//delete *.bmp extension of filename
+	return name;
+}
 
-	if (!out)
+/* Reads an bitmap into a bitmap structure */
+bool read_bmp(char *name, BMP &image)
+{
+	try 
 	{
-		cout << "Couldn't open file\n";
-		return false;
+		//Read BMP Image
+		image.ReadFromFile(name);    
 	}
+	catch(...)
+	{
+		cout << "Couldn't open file " << name << endl;
+		return false;
+	}    
+	return true;
+}
+
+/* Creates a C-Header file */
+void create_header(ofstream &out, string sym_name)
+{
+	string upper;
+	upper.resize(sym_name.length());
 
 	out << licencetext;
-	out << "#include \"symbol.h\"" << endl << endl;
 
+	for(unsigned int i=0; i<sym_name.length(); i++)
+	{
+		upper[i] = toupper(sym_name[i]);
+	}
+
+	out << "#ifndef __SYM_" << upper << "__" << endl;
+	out << "#define __SYM_" << upper << "__" << endl << endl;
+
+	out << "#include \"symbol.h\"" << endl << endl;
+}
+
+/* Create C Code File */
+void write_to_src_file(ofstream &out, BMP &image, string name)
+{
 	//Write structure
-	out << "sSymbol sym_" << name << " = {" << endl;
-	out << "\t\t" << ".width = " << image.TellWidth() << "," << endl;
-	out << "\t\t" << ".height = " << image.TellHeight() << "," << endl;
-	out << "\t\t" << ".data = {";
-	out << endl << "\t\t\t";
+	out << "sSymbol sym_" << name << " =" << endl;
+	out << "{" << endl;
+	out << "\t\t" << ".width = " << dec << image.TellWidth() << "," << endl;
+	out << "\t\t" << ".height = " << dec <<image.TellHeight() << "," << endl;
+	out << "\t\t" << ".data =" << endl;
+	out << "\t\t" << "{" << endl;
+	out << "\t\t\t";
 
 	int count = (image.TellWidth()/8 + (image.TellWidth()%8==0?0:1))*image.TellHeight();
 	int set = 0;
@@ -236,8 +195,104 @@ bool createCodeFile(string name, BMP &image)
 		out << endl << "\t\t\t";
 	}
 
-  out << "}" << endl << "};";
-  out.close();
-
-  return true;
+  out << "}" << endl << "};" << endl << endl << endl;
 }
+
+int main( int argc, char* argv[] )
+{
+	SetEasyBMPwarningsOff();
+
+	if (argc < 2)
+	{
+		cout << "Synopsys: bmp2framebuffer <image.bmp>" << endl;
+		cout << "          bmp2framebuffer -n <Name of Symbolfile> <image1.bmp> <image2.bmp> ...";
+		return -1;
+	}
+
+	if(argc == 2)	//single image without command
+	{
+		BMP image;
+
+		if(check_file(argv[1]) == false)
+		{
+			return -1;
+		}
+		read_bmp(argv[1], image);
+
+		string name = get_sym_name(argv[1]);
+
+		ofstream src_file((name+".c").c_str());
+		ofstream header_file((name+".h").c_str());
+
+		if (!src_file || !header_file)	//Couldn't open files
+		{
+			cout << "Couldn't open header or source file\n";
+			return -1;
+		}
+
+		create_header(header_file, name);
+		header_file << "extern sSymbol sym_" << name << ";" << endl << endl;
+		header_file << "#endif" << endl;
+
+		src_file << licencetext;
+		src_file << "#include \"symbol.h\"" << endl << endl;
+		write_to_src_file(src_file, image, name);
+
+		header_file.close();
+		src_file.close();
+	}
+	else		//More Bitmap files to convert in one module
+	{
+		if(strcmp(argv[1], "-n"))
+		{
+			cout << "Wrong synopsis!" << endl << endl;
+			cout << "Synopsys: bmp2framebuffer <image.bmp>" << endl;
+			cout << "          bmp2framebuffer -n <Name of Symbolfile> <image1.bmp> <image2.bmp> ...";
+			return -1;
+		}
+
+		string name(argv[2]);
+		ofstream src_file((name + ".c").c_str());
+		ofstream header_file((name + ".h").c_str());
+
+		if (!src_file || !header_file)	//Couldn't open files
+		{
+			cout << "Couldn't open header or source file\n";
+			return -1;
+		}
+
+		/* Initialize header and source file */
+		src_file << licencetext;
+		src_file << "#include \"symbol.h\"" << endl << endl;
+
+		create_header(header_file, name);
+
+		for(int i=3; i<argc; i++)
+		{
+			BMP image;
+			string name;
+
+			if(check_file(argv[i]) == false)
+			{
+				break;
+			}
+			read_bmp(argv[i], image);
+
+			name = get_sym_name(argv[i]);
+
+			write_to_src_file(src_file, image, name);
+			header_file << "extern sSymbol sym_" << name << ";" << endl << endl;
+		}
+
+		header_file << "#endif" << endl;
+
+		src_file.close();
+		header_file.close();
+	}
+
+	return 0;
+}
+
+
+
+

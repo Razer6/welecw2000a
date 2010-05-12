@@ -1,6 +1,7 @@
 
 Synopis: bmp2framebuffer <image.bmp>
+	    bmp2framebuffer -n <Name of Symbolfile> <image1.bmp> <image2.bmp> ...
 
-bmp2framebuffer converts a bitmap to a binary file. Datawidth is 8 bit.
+bmp2framebuffer converts one ore more bitmap filesto a binary file. Datawidth is 8 bit.
 The structure in the output header is for the drawing routine of DSO_Screen.c
 from the Leon Design.
