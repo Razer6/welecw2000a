@@ -139,7 +139,7 @@ typedef struct SubMenuList
 	uint32_t size;
 	uint32_t selectedIndex;
 
-	void (*smlFunct)(uint32_t selection);
+	void (*smlFunct)(int32_t selection);
 	char *entrys[];
 }
 sSubMenuList;
@@ -151,7 +151,7 @@ typedef struct CheckBox
 	sRect bounds;
 
 	uint32_t selected;
-	void (*cbFunct)(uint32_t selection);
+	void (*cbFunct)(int32_t selection);
 }
 sCheckBox;
 
@@ -164,7 +164,7 @@ typedef struct ValueField
 	int32_t minValue;
 	int32_t maxValue;
 
-	void (*vfFunct)(uint32_t value);
+	void (*vfFunct)(int32_t value);
 }
 sValueField;
 

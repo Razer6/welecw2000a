@@ -215,6 +215,7 @@ uint32_t getKeyPressed(uint32_t keymask)
 	return keymask;
 }
 
+#if 0
 uint32_t encoder_changed0;
 uint32_t encoder_changed1;
 uint32_t encoder_state0;
@@ -268,7 +269,7 @@ uint32_t get_encoder_diff(uint32_t *reg, uint32_t *change_t, uint32_t *old, int3
 	}
 	return 0;
 }
-
+#endif
 
 
 

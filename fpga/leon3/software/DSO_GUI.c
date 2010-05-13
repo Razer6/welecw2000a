@@ -311,16 +311,16 @@ sTriggerSettings triggerSettings =
 
 void clearTriggerMark(void);
 
-void changeTriggerEdge(uint32_t selection);
-void changeTriggerType(uint32_t selection);
-void changeTriggerChannel(uint32_t selection);
+void changeTriggerEdge(int32_t selection);
+void changeTriggerType(int32_t selection);
+void changeTriggerChannel(int32_t selection);
 void changeTriggerLevel(int32_t diff);
-void setFramePosition(uint32_t diff);
-void changeCouplingCh0(uint32_t selection);
-void changeCouplingCh1(uint32_t selection);
-void toggleBWLimitCh0(uint32_t selection);
-void toggleBWLimitCh1(uint32_t selection);
-void changeHWFilters(uint32_t x);
+void setFramePosition(int32_t diff);
+void changeCouplingCh0(int32_t selection);
+void changeCouplingCh1(int32_t selection);
+void toggleBWLimitCh0(int32_t selection);
+void toggleBWLimitCh1(int32_t selection);
+void changeHWFilters(int32_t x);
 void onChannel0(void);
 void onChannel1(void);
 
@@ -390,53 +390,100 @@ sMenu menTriggerTypes = {{&smTriggerTypes, &smTriggerEdge, &smTriggerChannel, NU
  * of the encoders happens in a timer interrupt routine (in future).
  */
 
+#define ENCODERMAX 12
+
+typedef struct  {
+	int32_t diff;
+	int32_t old;
+        int32_t new;
+	uint32_t address;
+	uint32_t offset;
+        void (*callback)(int32_t diff);
+
+} struct_encoder;
+
+void dummy (int32_t diff){
+}
+void setVDIV0 (int32_t diff){
+	setVoltagePerDiv(0, diff);
+}
+void setVDIV1 (int32_t diff){
+	setVoltagePerDiv(1, diff);
+}
+
 void encoder_handler(void)
 {
-	int32_t diff = 0;
-	static uint32_t old0 = 0, old1 = 0;
+	static struct_encoder en[ENCODERMAX];
+	static int32_t init = TRUE;
+	uint32_t i = 0;
 
-	switch(get_encoder_diff(&encoder_changed0, &encoder_state0, &old0, &diff))
-	{
-		case 0x07<<EN_TIME_DIV:
-		setTimebase(diff);
-		break;
-		case 0x07<<EN_LEFT_RIGHT:
-		setFramePosition(diff);
-		break;
-		case 0x07<<EN_LEVEL:
-		changeTriggerLevel(diff);
-		break;
-		case 0x07<<EN_F:
-		vfValueChanged(diff);
-		break;
-		default:
-		break;
-	}
+	if (init == TRUE) {
+		init = FALSE;
+		en[0].address  = LEDADDR;
+		en[0].offset   = EN_TIME_DIV;
+		en[0].callback = setTimebase;
+		en[1].address  = LEDADDR;
+		en[1].offset   = EN_LEFT_RIGHT;
+		en[1].callback = setFramePosition;
+		en[2].address  = LEDADDR;
+		en[2].offset   = EN_LEVEL;
+		en[2].callback = changeTriggerLevel;
+		en[3].address  = LEDADDR;
+		en[3].offset   = EN_F;
+		en[3].callback = vfValueChanged;
 
-	diff = 0;
+		en[4].address  = KEYADDR0;
+		en[4].offset   = EN_CH0_UPDN;
+		en[4].callback = dummy;
+		en[5].address  = KEYADDR0;
+		en[5].offset   = EN_CH1_UPDN;
+		en[5].callback = dummy;
+		en[6].address  = KEYADDR0;
+		en[6].offset   = EN_CH2_UPDN;
+		en[6].callback = dummy;
+		en[7].address  = KEYADDR0;
+		en[7].offset   = EN_CH3_UPDN;
+		en[7].callback = dummy;
 
-	switch(get_encoder_diff(&encoder_changed1, &encoder_state1, &old1, &diff))
-	{
-		case 0x07<<EN_CH0_UPDN:
-		break;
-		case 0x07<<EN_CH1_UPDN:
-		break;
-		case 0x07<<EN_CH2_UPDN:
-		break;
-		case 0x07<<EN_CH3_UPDN:
-		break;
-		case 0x07<<EN_CH0_VDIV:
-			setVoltagePerDiv(CH0, diff);
-		break;
-		case 0x07<<EN_CH1_VDIV:
-			setVoltagePerDiv(CH1, diff);
-		break;
-		case 0x07<<EN_CH2_VDIV:
-		break;
-		case 0x07<<EN_CH3_VDIV:
-		break;
-		default:
-		break;
+		en[8].address   = KEYADDR0;
+		en[8].offset    = EN_CH0_VDIV;
+		en[8].callback  = setVDIV0;
+		en[9].address   = KEYADDR0;
+		en[9].offset    = EN_CH1_VDIV;
+		en[9].callback  = setVDIV1;
+		en[10].address  = KEYADDR0;
+		en[10].offset   = EN_CH2_VDIV;
+		en[10].callback = dummy;
+		en[11].address  = KEYADDR0;
+		en[11].offset   = EN_CH3_VDIV;
+		en[11].callback = dummy;
+	/*
+	* The hardware encoder counters do not have an initial value,
+        * so the first access of the get_encoder_diff does return a wrong result!
+        * (This is not at all a bug!) 
+	*/
+
+		for(;i < ENCODERMAX;++i){
+			en[i].diff = 0;
+			en[i].new = (READ_INT(en[i].address) >> en[i].offset) & 7;
+			en[i].old = en[i].new;
+		}
+	
+	} else {
+	//	SET_LED(LED_CH2);
+		for(;i < ENCODERMAX;++i){
+			en[i].new = (READ_INT(en[i].address) >> en[i].offset) & 7;
+			ROTARYMOVE(en[i].diff,en[i].new,en[i].old);
+			if (en[i].diff != 0) {
+			//	SET_LED(LED_CH3);
+				en[i].callback(en[i].diff);
+			}
+		}
+/* 
+ * for encoders which have different callbacks set the en[x].callback = dummy 
+ * and write the condition here with the correct current callback!
+ */
+
 	}
 }
 
@@ -532,7 +579,7 @@ void buttonHandler(void)
  * selection = 0: AC Coupling
  * selection = 1: DC Coupling
  */
-void changeCouplingCh0(uint32_t selection)
+void changeCouplingCh0(int32_t selection)
 {
 	switch(selection)
 	{
@@ -551,7 +598,7 @@ void changeCouplingCh0(uint32_t selection)
  * selection = 1: DC Coupling
  */
 
-void changeCouplingCh1(uint32_t selection)
+void changeCouplingCh1(int32_t selection)
 {
 	switch(selection)
 	{
@@ -570,7 +617,7 @@ void changeCouplingCh1(uint32_t selection)
  * selection = 1: Enables BW-Limit
  */
 
-void toggleBWLimitCh0(uint32_t selection)
+void toggleBWLimitCh0(int32_t selection)
 {
 	if(selection)
 	{
@@ -591,7 +638,7 @@ void toggleBWLimitCh0(uint32_t selection)
  * selection = 1: Enables BW-Limit
  */
 
-void toggleBWLimitCh1(uint32_t selection)
+void toggleBWLimitCh1(int32_t selection)
 {
 	if(selection)
 	{
@@ -662,7 +709,7 @@ void onChannel1(void)
  * selection = 1: Falling Edge
  */
 
-void changeTriggerEdge(uint32_t selection)
+void changeTriggerEdge(int32_t selection)
 {
 	switch(selection)
 	{
@@ -693,7 +740,7 @@ void changeTriggerEdge(uint32_t selection)
  * selection = 2: External Trigger
  */
 
-void changeTriggerType(uint32_t selection)
+void changeTriggerType(int32_t selection)
 {
 	switch(selection)
 	{
@@ -716,7 +763,7 @@ void changeTriggerType(uint32_t selection)
  * selection = 1: CH1
  */
 
-void changeTriggerChannel(uint32_t selection)
+void changeTriggerChannel(int32_t selection)
 {
 	clearTriggerMark();
 	switch(selection)
@@ -807,7 +854,7 @@ void setTimebase(int32_t diff)
 	SetTriggerInput(4,8,timebase[(uint32_t)selectedTimebase],FIXED_CPU_FREQUENCY,0,AACFilterStop,0,1,2,3);
 }
 
-void changeHWFilters(uint32_t x){
+void changeHWFilters(int32_t x){
 	AACFilterStop = x;
 	setTimebase(0);
 }
@@ -865,7 +912,7 @@ void DrawFramePos(uint16_t Color, uint32_t ViewedStart, uint32_t ViewedStop){
 
 }
  
-void setFramePosition(uint32_t diff){
+void setFramePosition(int32_t diff){
 /* Zoom = 0 ... error
  * Zoom > 1 ... Timerange multiplied by Zoom
  * Zoom < 1 ... Timerange divided   by -Zoom
@@ -948,29 +995,8 @@ void GUI_Main(void)
 
 	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1); //Draw ba	lck background
 	drawGrid();						     //Draws
-	/*
-	 * Init Encoder
-	 * Doesn't work right for now
-	 */
-	int32_t tmp = 0;
-	uint32_t tmp2 = 0;
 
-	read_encoders();
-
-/*	for(uint8_t i=0; i<100; i++)
-	{*/
-	/*
-	* The hardware encoder counters do not have an initial value,
-        * so the first access of the get_encoder_diff does return a wrong result!
-        * (This is not at all a bug!) 
-	*/
-		get_encoder_diff(&encoder_changed0, &encoder_state0, &tmp2, &tmp);
-/*	}
-	for(uint8_t i=0; i<100; i++)
-	{*/
-		get_encoder_diff(&encoder_changed1, &encoder_state1, &tmp2, &tmp);
-/*	}*/
-
+	encoder_handler();
 	WRITE_INT(LEDADDR,0); //Clear leds
 
 	titleBarInit();
@@ -994,8 +1020,6 @@ void GUI_Main(void)
 	{
 		readkeys();
 		buttonHandler();
-
-		read_encoders();
 		encoder_handler();
 
 		closeSubMenuTime();
