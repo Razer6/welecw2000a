@@ -224,31 +224,37 @@ void GetCh(
 		uint32_t size,
 		uSample * dst,
 		uSample * src,
-		uint32_t srcSamples)
+		uint32_t srcSamples,
+		sHWFilterGain AnalogGain,
+		sHWFilterGain FilterGain)
 {
 
 	register uint32_t i = 0;
 	register int32_t data = 0;
+	sHWFilterGain Gain;
+	Gain.num = -AnalogGain.num * FilterGain.num;
+	Gain.den =  AnalogGain.den * FilterGain.den;
 	switch (size)
 	{
 		case 8:
 		for (; i < srcSamples; ++i)
 		{
 			data = (int32_t)src[i].c[ch];
-			dst[i].i = -data;
+			dst[i].i = (data*Gain.num)/Gain.den;
 		}
 		break;
 		case 16:
+		Gain.den *= 256;
 		for (; i < srcSamples; ++i)
-		{
-			data = (int32_t)src[i].s[ch];
-			dst[i].i = -data;
+		{	
+			data = (int32_t)((src[i].c[ch] << 8) | src[i].c[ch+2]);
+			dst[i].i = (data*Gain.num)/Gain.den;
 		}
 		break;
 		default:
 		for (; i < srcSamples; ++i)
 		{
-			dst[i].i = -src[i].i;
+			dst[i].i = src[i].i;
 		}
 		break;
 	}
@@ -258,13 +264,20 @@ extern uSample Data[CAPTURESIZE];
 
 static DispOffset Offset[2];
 
+typedef struct {
+	uint32_t analog;
+	sHWFilterGain Gain;
+	const char str[12];
+} sVoltagePerDiv;
+
 /*
  * All settings which are associated to a channel
  */
 typedef struct ChannelSettings
 {
 	uint32_t state; 				//On=1, Off=0
-	int32_t selectedVoltagePerDiv; //Index for Table voltagePerDiv
+	uint32_t BitMode;
+	int32_t selectedVoltagePerDiv; 			//Index for Table voltagePerDiv
 	SetAnalog analog;				//Analog Settings
 }
 sChannelSettings;
@@ -274,9 +287,8 @@ sChannelSettings;
  */
 sChannelSettings channel[2];
 
-/*
- * Selectable Voltage per div for Analog settings
- */
+
+#if 0
 const uint32_t voltagePerDiv[] =
 {
  	5000000, 2000000, 1000000, //5V - 1V
@@ -292,7 +304,7 @@ const char *voltagePerDiv_str[] =
 	"500mV/div", "200mV/div","100mV/div",
 	"50mV/div", "20mV/div","10mV/div"};
 
-
+#endif
 
 /**
  * Default Trigger Settings
@@ -811,6 +823,44 @@ void changeTriggerLevel(int32_t diff)
 
 }
 
+typedef struct {
+	uint32_t Timebase;
+	uint32_t AllowedByFilter;
+	char const str[12];
+} sTimebase;
+
+sTimebase Timebase[] ={
+{	     10000,  TRUE, {"   10 kS/s"}},
+{	     12500, FALSE, {" 12.5 kS/s"}},
+{	     25000,  TRUE, {"   25 kS/s"}}, 
+{	     31250, FALSE, {"31.25 kS/s"}},
+{	     50000,  TRUE, {"   50 kS/s"}}, 
+{	     62500, FALSE, {" 62.5 kS/s"}},
+{	    100000,  TRUE, {"  100 kS/s"}},
+{	    125000, FALSE, {"  125 kS/s"}},
+{	    250000,  TRUE, {"  250 kS/s"}}, 
+{	    312500, FALSE, {"312.5 kS/s"}}, 
+{	    500000,  TRUE, {"  500 kS/s"}}, 
+{	    625000, FALSE, {"  625 kS/s"}}, 
+{	   1000000,  TRUE, {"    1 MS/s"}}, 
+{	   1250000, FALSE, {" 1.25 MS/s"}},
+{	   2500000,  TRUE, {"  2.5 MS/s"}}, 
+{	   3125000, FALSE, {"3.125 MS/s"}},
+{	   5000000,  TRUE, {"    5 MS/s"}}, 
+{	   6250000, FALSE, {" 6.25 MS/s"}},
+{	  10000000,  TRUE, {"   10 MS/s"}},
+{	  12500000, FALSE, {" 12.5 MS/s"}},
+{	  25000000,  TRUE, {"   25 MS/s"}}, 
+{	  31250000, FALSE, {"31.25 MS/s"}},
+{	  50000000,  TRUE, {"   50 MS/s"}}, 
+{	  62500000, FALSE, {" 62.5 MS/s"}},
+{	 100000000,  TRUE, {"  100 MS/s"}}, 
+{	 125000000,  TRUE, {"  125 MS/s"}}, 
+{	 250000000,  TRUE, {"  250 MS/s"}}, 
+{	 500000000,  TRUE, {"  500 MS/s"}}, 
+{	1000000000,  TRUE, {"    1 GS/s"}}};
+
+#if 0
 /* Some timebases are disabled, they might not work with all filter settings
  * AACFilterStart <= 1 and AACFilterStop >= 1! (not a bug) */ 
 const uint32_t timebase[] = {
@@ -829,33 +879,66 @@ char *timebase_str[] = {
 	"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
 	"1 GS/s"};
 
+#endif
+
 static int32_t selectedTimebase = 0;
 
-/*
- * This function changes the timebase. It also updates the titlebar.
- */
+// TODO Correct this after the hw filter change for 10 MS/s -> 1 MS/s and lower 
+#define NUMF 2
+#define DENF 1
+const sHWFilterGain HWFilterGain[] = {
+{  1,  1}, {  1,  1}, {  1,  1},   {1,  1}, // 1GS    -> 100 MS
+{  1,  1}, {  1,  1}, {NUMF,DENF}, {NUMF,DENF}, // 100 MS ->  10 MS
+{  1,  1}, {  1,  1}, {NUMF,DENF}, {NUMF*NUMF, DENF*DENF}};// 10 MS  ->   1 MS
 
-static int AACFilterStop = 0;
+
+typedef struct {
+	uint32_t      Stop;
+	sHWFilterGain Gain;
+} sHWFilters;
+
+static sHWFilters HWFilters = {0,{1,1}};
+
+/*
+ * This function changes the timebase. It also updates the titlebar and the filter regain.
+ */
 
 void setTimebase(int32_t diff)
 {
+	uint32_t decimation_stages = 0; // hw filter regain
+
 	selectedTimebase += diff;
+	if ((HWFilters.Stop > 1) || (Timebase[selectedTimebase].AllowedByFilter == FALSE)){
+		selectedTimebase += diff;
+	}
 
 	if(selectedTimebase < 0)
 	{
 		selectedTimebase = 0;
 	}
-	else if((uint32_t)selectedTimebase >= sizeof(timebase)/sizeof(timebase[0]))
+	else if((uint32_t)selectedTimebase >= sizeof(Timebase)/sizeof(Timebase[0]))
 	{
-		selectedTimebase = sizeof(timebase)/sizeof(timebase[0])-1;
+		selectedTimebase = sizeof(Timebase)/sizeof(Timebase[0])-1;
 	}
+	HWFilters.Gain = HWFilterGain[0];
 
-	updateTitleBar(TIMEBASE, timebase_str[selectedTimebase]);
-	SetTriggerInput(4,8,timebase[(uint32_t)selectedTimebase],FIXED_CPU_FREQUENCY,0,AACFilterStop,0,1,2,3);
+	decimation_stages = 0;
+   	if (Timebase[selectedTimebase].Timebase < 10000000) {
+		decimation_stages = 2;			
+	} else if (Timebase[selectedTimebase].Timebase < 100000000) {
+		decimation_stages = 1;			
+	}
+	HWFilters.Gain = HWFilterGain[(decimation_stages*4)+HWFilters.Stop];
+
+	updateTitleBar(TIMEBASE, &Timebase[selectedTimebase].str[0]);
+	SetTriggerInput(4,channel[0].BitMode,Timebase[selectedTimebase].Timebase,FIXED_CPU_FREQUENCY,0,HWFilters.Stop,0,1,2,3);
 }
 
 void changeHWFilters(int32_t x){
-	AACFilterStop = x;
+	HWFilters.Stop = x;
+	if (HWFilters.Stop > 3) {
+		HWFilters.Stop = 3;
+	}
 	setTimebase(0);
 }
 
@@ -867,9 +950,35 @@ void setAnalogOffset(uint32_t ch, int32_t diff)
 }
 
 /*
+ * Selectable Voltage per div for Analog settings
+ * TODO: correct num and den voltage range scaler
+ */
+
+const sVoltagePerDiv VoltagePerDiv[] = {
+{5000000,{   1,1},"   5V/div"},
+{2000000,{   1,1},"   2V/div"},
+{1000000,{   1,1},"   1V/div"},
+{ 500000,{   1,1},"500mV/div"},
+{ 200000,{   1,1},"200mV/div"},
+{ 100000,{   1,1},"100mV/div"},
+{  50000,{   1,1}," 50mV/div"},
+{  20000,{   1,1}," 20mV/div"},
+{  10000,{   1,1}," 10mV/div"},
+{  10000,{   2,1},"  5mV/div"},
+{  10000,{   4,1},"  2mV/div"},
+{  10000,{  10,1},"  1mV/div"},
+{  10000,{  20,1},"500uV/div"},
+{  10000,{  40,1},"200uV/div"},
+{  10000,{ 100,1},"100uV/div"},
+{  10000,{ 200,1}," 50uV/div"},
+{  10000,{ 400,1}," 20uV/div"},
+{  10000,{1000,1}," 10uV/div"}};
+
+/*
  * This function changes the voltage per div of the selected channel.
  * The titlebar will also be changed.
  */
+
 void setVoltagePerDiv(uint32_t ch, int32_t diff)
 {
 	channel[ch].selectedVoltagePerDiv += diff;
@@ -878,13 +987,14 @@ void setVoltagePerDiv(uint32_t ch, int32_t diff)
 	{
 		channel[ch].selectedVoltagePerDiv = 0;
 	}
-	else if((uint32_t)channel[ch].selectedVoltagePerDiv >= (sizeof(voltagePerDiv)/sizeof(voltagePerDiv[0])))
+	else if((uint32_t)channel[ch].selectedVoltagePerDiv >= (sizeof(VoltagePerDiv)/sizeof(VoltagePerDiv[0])))
 	{
-		channel[ch].selectedVoltagePerDiv = sizeof(voltagePerDiv)/sizeof(voltagePerDiv[0])-1;
+		channel[ch].selectedVoltagePerDiv = sizeof(VoltagePerDiv)/sizeof(VoltagePerDiv[0])-1;
 	}
 
-	updateTitleBar(ch==0?VOLTAGE_CH0:VOLTAGE_CH1, voltagePerDiv_str[(uint8_t)channel[ch].selectedVoltagePerDiv]);
-	channel[ch].analog.myVperDiv = voltagePerDiv[(uint32_t)channel[ch].selectedVoltagePerDiv];
+	updateTitleBar(ch==0?VOLTAGE_CH0:VOLTAGE_CH1, 
+		&VoltagePerDiv[(uint8_t)channel[ch].selectedVoltagePerDiv].str[0]);
+	channel[ch].analog.myVperDiv = VoltagePerDiv[(uint32_t)channel[ch].selectedVoltagePerDiv].analog;
 	SetAnalogInputRange(ch, &channel[ch].analog);
 }
 
@@ -967,6 +1077,7 @@ void GUI_Main(void)
 	//	Analog[0].DA_Offset = 16384;
 	channel[0].analog.DA_Offset = 0;
 	channel[0].analog.BW_Limit = 0;
+	channel[0].BitMode = 16;
 
 	channel[1].analog.myVperDiv = 5000000;
 	channel[1].analog.AC = 0;
@@ -974,6 +1085,8 @@ void GUI_Main(void)
 	//	Analog[1].DA_Offset = 16384;
 	channel[1].analog.DA_Offset = 0;
 	channel[1].analog.BW_Limit = 0;
+	channel[1].BitMode = 8;
+
 
 	Offset[0].V = 128;
 	Offset[1].V = VLEN-128;
@@ -998,21 +1111,28 @@ void GUI_Main(void)
 
 	encoder_handler();
 	WRITE_INT(LEDADDR,0); //Clear leds
-
+	WRITE_INT(CONFIGADCENABLE,1); 
 	titleBarInit();
+	WRITE_INT(LEDADDR,1); 
 	status_bar_init();
-
+	WRITE_INT(LEDADDR,2);
 	/* Set timbase, trigger and voltage per div
 	 * Also updates titlebar.
 	 */
 	setTimebase(0);
+	WRITE_INT(LEDADDR,3);
 	changeTriggerEdge(0);
+	WRITE_INT(LEDADDR,7);
+
 	setVoltagePerDiv(CH0,0);
 	setVoltagePerDiv(CH1,0);
+	WRITE_INT(LEDADDR,15);
 
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
-
+	WRITE_INT(LEDADDR,31);
 	SET_LED(RUN_GREEN);
+	CLR_LED(RUN_RED);
+	Run = TRUE;
 	/*
 	 * Main loop
 	 */
@@ -1022,7 +1142,7 @@ void GUI_Main(void)
 		buttonHandler();
 		encoder_handler();
 
-		closeSubMenuTime();
+	//	closeSubMenuTime();
 
 		if ((READ_INT(KEYADDR1) & (1 << BTN_F1)) != 0)
 		{
@@ -1094,13 +1214,17 @@ void GUI_Main(void)
 
 			if(channel[0].state == CHANNEL_ON)
 			{
-				GetCh(0,8, &Ch1[CurrBuffer][0],&Data[Offset[0].H], HLEN+100);
+				GetCh(0,channel[0].BitMode, &Ch1[CurrBuffer][0],&Data[Offset[0].H], HLEN+100, 
+						VoltagePerDiv[channel[0].selectedVoltagePerDiv].Gain,
+						HWFilters.Gain);
 				DrawSignal(Offset[0].V,&Ch1[PrevBuffer][0], &Ch1[CurrBuffer][0],COLOR_R3G3B3(0,0,0), signalcolors[0]);
 			}
 
 			if(channel[1].state == CHANNEL_ON)
 			{
-				GetCh(1,8, &Ch2[CurrBuffer][0],&Data[Offset[1].H], HLEN+100);
+				GetCh(1,channel[0/*no bug*/].BitMode, &Ch2[CurrBuffer][0],&Data[Offset[1].H], HLEN+100,	
+						VoltagePerDiv[channel[1].selectedVoltagePerDiv].Gain,
+						HWFilters.Gain);
 				DrawSignal(Offset[1].V,&Ch2[PrevBuffer][0], &Ch2[CurrBuffer][0],COLOR_R3G3B3(0,0,0), signalcolors[1]);
 
 			}

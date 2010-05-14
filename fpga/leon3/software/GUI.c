@@ -460,10 +460,10 @@ void updateTitleBar(enum TITLEMENU type, const char *text)
 
 void status_bar_init(void)
 {
-	int str1[10];
-	int str2[10];
-	int str3[10];
-	int str4[10];
+	int str1[12];
+	int str2[12];
+	int str3[12];
+	int str4[12];
 
 	DrawBox(STATUS_BAR_COLOR_BG, STATUS_BAR_START_X, STATUS_BAR_START_Y, STATUS_BAR_END_X, STATUS_BAR_END_Y);
 

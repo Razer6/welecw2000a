@@ -35,6 +35,11 @@
 
 void GUI_Main();
 
+typedef struct {
+	int32_t num;
+	int32_t den;
+} sHWFilterGain;
+
 void DrawSignal(
 		uint32_t Voffset, 
 		uSample * PrevData,
@@ -53,7 +58,9 @@ void GetCh(
 		uint32_t size,
 		uSample * dst, 
 		uSample * src, 
-		uint32_t srcSamples);
+		uint32_t srcSamples,
+		sHWFilterGain AnalogGain,
+		sHWFilterGain FilterGain);
 
 #define CHANNEL_ON	1
 #define CHANNEL_OFF	0

@@ -48,7 +48,7 @@
 #define FONT_TITLEBAR	font_liberation_sans_bold_14
 #define FONT_MENU		font_liberation_sans_bold_14
 
-#define SUB_MENU_CLOSETIME	3000
+#define SUB_MENU_CLOSETIME	300000
 
 #define MENU_START_X	0
 #define MENU_WIDTH		(HLEN)

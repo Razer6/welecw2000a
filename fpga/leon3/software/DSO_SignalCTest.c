@@ -338,7 +338,7 @@ int main () {
 //	FrontPanelTest(uart);
 //	printf("\nSignalTest\n");
 
-	timer_init();
+//	timer_init();
 
     	GUI_Main();	
 #endif	
