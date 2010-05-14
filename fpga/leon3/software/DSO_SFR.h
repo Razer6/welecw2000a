@@ -229,8 +229,8 @@ eTriggerTypes;
 #define LED_EDGE       9
 #define RUN_RED       10
 #define RUN_GREEN     11
-#define SINGLE_GREEN  12
-#define SINGLE_RED    13
+#define SINGLE_RED    12
+#define SINGLE_GREEN  13
 
 #define SET_LED(Led) WRITE_INT(LEDADDR, (READ_INT(LEDADDR) |  (1 << Led)))
 #define CLR_LED(Led) WRITE_INT(LEDADDR, (READ_INT(LEDADDR) & ~(1 << Led)))

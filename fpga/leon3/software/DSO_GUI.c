@@ -1110,28 +1110,20 @@ void GUI_Main(void)
 	drawGrid();						     //Draws
 
 	encoder_handler();
-	WRITE_INT(LEDADDR,0); //Clear leds
-	WRITE_INT(CONFIGADCENABLE,1); 
+	WRITE_INT(LEDADDR,(1 << RUN_GREEN));
+//	WRITE_INT(CONFIGADCENABLE,1); // set to debug uart
 	titleBarInit();
-	WRITE_INT(LEDADDR,1); 
+
 	status_bar_init();
-	WRITE_INT(LEDADDR,2);
 	/* Set timbase, trigger and voltage per div
 	 * Also updates titlebar.
 	 */
 	setTimebase(0);
-	WRITE_INT(LEDADDR,3);
 	changeTriggerEdge(0);
-	WRITE_INT(LEDADDR,7);
-
 	setVoltagePerDiv(CH0,0);
 	setVoltagePerDiv(CH1,0);
-	WRITE_INT(LEDADDR,15);
-
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
-	WRITE_INT(LEDADDR,31);
-	SET_LED(RUN_GREEN);
-	CLR_LED(RUN_RED);
+
 	Run = TRUE;
 	/*
 	 * Main loop
@@ -1158,7 +1150,7 @@ void GUI_Main(void)
 			Run^= TRUE; // Toogle Run Stop	for TRUE = 1 or TRUE = -1
 			CLR_LED(SINGLE_GREEN);
 			CLR_LED(SINGLE_RED);
-
+		
 			if (Run == TRUE){
 				SET_LED(RUN_GREEN);
 				CLR_LED(RUN_RED);
@@ -1176,7 +1168,6 @@ void GUI_Main(void)
 			CLR_LED(SINGLE_RED);
 			CLR_LED(RUN_GREEN);
 			CLR_LED(RUN_RED);
-
 		}
 
 		if (Run == TRUE)
