@@ -7,16 +7,15 @@ ECHO       = @echo
 CC         = $(ECHO) " [COMPILE] $<"; sparc-elf-gcc
 LD         = $(ECHO) " [LINK   ] $<"; sparc-elf-gcc
 OBJCOPY    = $(ECHO) " [OBJCOPY] $<"; sparc-elf-objcopy
+OBJDUMP    = $(ECHO) " [DUMP   ] $<"; sparc-elf-objdump
 SIZE       = $(ECHO) " [SIZE   ] $<"; sparc-elf-size
 MAKEDEPEND = $(ECHO) " [DEPEND ]"; makedepend
 WAVEREC    = $(ECHO) " [WAVEREC] "; WaveRecorder
 
 # WaveRecorder settings
-UART = /dev/ttyS0
 BAUD = 115200
 CHANNELS = 2
 PROTOCOL = Debugger
-COMMAND  = LoadRun
 
 # Defines for conditional compilation
 DSO_TARGET = W2000A
@@ -50,6 +49,8 @@ ASMS	     := $(SOURCES:.c=.s)
 
 DEPENDFILE   := depend
 TARGET       := w2000a.bin
+DUMP         := w2000a.S
+LEONADDR     :=0x80000500
 
 # Files to be cleaned
 CLEAN := $(OBJS) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET)
@@ -60,10 +61,19 @@ all: $(TARGET)
 
 .PHONY: upload
 upload: w2000a.bin
-	$(WAVEREC) -p $(PROTOCOL) -u $(UART) -b $(BAUD) -n $(CHANNELS) -c $(COMMAND) --Ffile=$<
+	$(WAVEREC) -p Debugger -u $(UART) -b $(BAUD) -n $(CHANNELS) -c LoadRun --Ffile=$<
+
+.PHONY: backtrace
+backtrace: 
+	$(WAVEREC) -p Debugger -u $(UART) -b $(BAUD) -n $(CHANNELS) -c Debug 
+
+.PHONY: readaddr
+readaddr:
+	$(WAVEREC) -p Debugger -u $(UART) -b $(BAUD) -n $(CHANNELS) -c Debug --CapSize=64 --Faddr=$(LEONADDR)
 
 %.bin: %.elf
 	$(OBJCOPY) -O binary $^ $@
+	$(OBJDUMP) -S $^ > $(DUMP)
 
 %.elf: $(OBJS)
 	$(LD) $(LDFLAGS) $^ -o $@
