@@ -64,6 +64,30 @@ void drawValueField(sValueField *valueField);
 void onSubMenuList(sSubMenuList *subMenuList);
 void drawSubMenuList(sSubMenuList *subMenuList);
 
+void onButton(sButton *button);
+void drawButton(sButton *button);
+
+/* Following Submenu items are currently implemented:
+ * 		* Submenulist
+ * 		* Checkbox
+ * 		* Valuefield (currently not yet implemented at all)
+ *
+ * The implemented elements are shown in the enum MENU_TYPE in GUI.h.
+ * If you are adding a new submenu element you have add the type to this enum.
+ * This enum is the base to recognize which element should be drawn.
+ *
+ * Every submenu element must implement following functions
+ *
+ * /SubMenuElement/ is standing for the corresponding Element
+ *
+ * void draw/SubMenuElement/(/subMenuElement/ *element);
+ * 		This function draws the Element on the screen if there is a menu update.
+ *
+ * void on/SubMenuElement/(/subMenuElement/ *element);
+ * 		This function will be called when the button to the dedicated element is
+ * 		pressed. This function also calls the user function.
+ *
+ */
 
 
 /*
@@ -90,6 +114,10 @@ void onSubMenu(sSubMenu *subMenu)
 
 		case VALUE_FIELD:
 			onValueField((sValueField*)subMenu->menuItem);
+		break;
+		
+		case BUTTON:
+			onButton((sButton*)subMenu->menuItem);
 		break;
 
 		default:
@@ -118,6 +146,10 @@ void initSubMenu(sSubMenu *subMenu)
 		case VALUE_FIELD:
 			drawValueField((sValueField*)subMenu->menuItem);
 		break;
+		
+		case BUTTON:
+			drawButton((sButton*)subMenu->menuItem);
+		break;
 
 		default:
 		break;
@@ -125,27 +157,7 @@ void initSubMenu(sSubMenu *subMenu)
 }
 
 
-/* Following Submenu items are currently implemented:
- * 		* Submenulist
- * 		* Checkbox
- * 		* Valuefield (currently not yet implemented at all)
- *
- * The implemented elements are shown in the enum MENU_TYPE in GUI.h.
- * If you are adding a new submenu element you have add the type to this enum.
- * This enum is the base to recognize which element should be drawn.
- *
- * Every submenu element must implement following functions
- *
- * /SubMenuElement/ is standing for the corresponding Element
- *
- * void draw/SubMenuElement/(/subMenuElement/ *element);
- * 		This function draws the Element on the screen if there is a menu update.
- *
- * void on/SubMenuElement/(/subMenuElement/ *element);
- * 		This function will be called when the button to the dedicated element is
- * 		pressed. This function also calls the user function.
- *
- */
+
 
 
 
@@ -385,6 +397,29 @@ void onValueField(sValueField *valueField)
 
 	//Turn on the led for the encoder
 	WRITE_INT(LEDADDR, READ_INT(LEDADDR) | 1<<LED_WHEEL);
+}
+
+/*
+ * BUTTON
+ *
+ * A valuefield contains a title and a function. If the button is pressed
+ * the user function will be called.
+ */
+
+/*
+ * This functin calls the user function of a button
+ */
+void onButton(sButton *button)
+{
+	button->btFunct();
+}
+
+/*
+ * This function draws a single buttn 
+ */
+void drawButton(sButton *button)
+{
+	printStr_lcd(&FONT_MENU, button->bounds.x+CENTER(104, getTextWidth(&FONT_MENU, button->title)), button->bounds.y+8, MENU_COLOR_FG, MENU_COLOR_BG, button->title);
 }
 
 

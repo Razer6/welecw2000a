@@ -168,6 +168,14 @@ typedef struct ValueField
 }
 sValueField;
 
+typedef struct Button
+{
+	char *title;
+	sRect bounds;
+	void (*btFunct)(void);
+}
+sButton;
+
 /*
  * Enum to identify a submenu.
  */
@@ -175,7 +183,8 @@ enum MENU_TYPE
 {
 	SUBMENU_LIST,
 	CHECKBOX,
-	VALUE_FIELD
+	VALUE_FIELD,
+	BUTTON
 };
 
 /*
