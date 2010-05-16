@@ -4,6 +4,10 @@
 #include "GUI.h"
 #include "util.h"
 
+#include "DSO_Misc.h"
+#include "string.h"
+#include "asm-leon/leon.h"
+
 #define CONFIG_DF_BIT			9
 #define CONFIG_SI_BIT			8
 #define CONFIG_IRQ_BIT			3
@@ -19,6 +23,8 @@
 #define TIMER_LOAD_BIT			2
 #define TIMER_RESTART_BIT		1
 #define TIMER_ENABLE_BIT		0
+
+extern int catch_interrupt (int func, int irq);
 
 typedef struct
 {
@@ -41,7 +47,7 @@ void timer_init()
 	timer_setup(1, 0xFFFF);
 }
 
-void timer_interrupt()
+void timer_interrupt(int irq)
 {
 	static uint32_t count = 0;
 	int str[10];
@@ -70,6 +76,7 @@ void timer_setup(uint8_t timer, uint32_t reload)
 	timer_sfr->timer1_control &= ~(1 << TIMER_ENABLE_BIT);
 	timer_sfr->timer1_reload = reload;
 	timer_sfr->timer1_control |= (1 << TIMER_INT_ENABLE_BIT) | (1 << TIMER_LOAD_BIT) | (1 << TIMER_RESTART_BIT) | (1 << TIMER_ENABLE_BIT);
+	catch_interrupt((uint32_t)timer_interrupt, 8);
 }
 
 void timer_clear_interrupt(uint8_t timer)

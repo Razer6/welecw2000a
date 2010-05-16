@@ -121,10 +121,10 @@ void IsrDSO(int irq){
 	{
 		case 5:
 			WRITE_INT(INTERRUPTADDR,0);
-		case 8:
-			timer_interrupt();
+		break;
 		default:
 			WRITE_INT(DSO_SFR_BASE_ADDR,16);
+		break;
 	}
 }
 
