@@ -40,6 +40,8 @@
 
 typedef uint16_t color_t;
 
+
+
 typedef struct Rect
 {
 	uint16_t x;
@@ -98,8 +100,7 @@ sRect* getClippingRect(void);
 #define VLEN 480
 
 
-
-
+extern color_t Framebuffer[HLEN*VLEN];
 
 #endif
 
