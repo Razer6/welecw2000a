@@ -44,7 +44,7 @@
 #include "Leon3Uart.h"
 #include "rprintf.h"
 #include "DSO_Misc.h"
-
+#include "DSO_Remote.h"
 #include "DSO_FrontPanel.h"
 
 #include "GUI.h"
@@ -335,6 +335,10 @@ void toggleBWLimitCh1(int32_t selection);
 void changeHWFilters(int32_t x);
 void onChannel0(void);
 void onChannel1(void);
+void screenshot_color(void);
+void screenshot_sw(void);
+void screenshot_csv(void);
+void change_uart(int32_t selection);
 
 /*
  * Submenu items for menu for channel 0 and channel 1
@@ -395,6 +399,31 @@ sSubMenu smTrigger = {VALUE_FIELD, &vfTrigger};
  * Trigger menu
  */
 sMenu menTriggerTypes = {{&smTriggerTypes, &smTriggerEdge, &smTriggerChannel, NULL, NULL, NULL}, NULL};
+
+/*
+ * Buttons for Quick Print menu 
+ */
+
+sButton btScrShotColor = {"Color", DEFAULT_BOUNDS_F1, screenshot_color};
+sButton btScrShotSW= {"S/W", DEFAULT_BOUNDS_F2, screenshot_sw};
+sButton btScrShotCSV = {"CSV", DEFAULT_BOUNDS_F3, screenshot_csv};
+sSubMenu smScrShotColor = {BUTTON, &btScrShotColor}; 
+sSubMenu smScrShotSW = {BUTTON, &btScrShotSW}; 
+sSubMenu smScrShotCSV = {BUTTON, &btScrShotCSV}; 
+/*
+ * Quck Print menu 
+ */
+sMenu menQuickPrint = {{&smScrShotColor, &smScrShotSW, &smScrShotCSV, NULL , NULL, NULL}, NULL};
+
+/* 
+ * Menu Items for utility menu 
+ */
+sSubMenuList smlUartSelection = {"UART", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 0, change_uart, {"LEON", "FPGA"}};
+sSubMenu smUartSelection = {SUBMENU_LIST, &smlUartSelection};
+/*
+ * Uitilty menu 
+ */
+sMenu menUtility = {{&smUartSelection, NULL, NULL, NULL, NULL, NULL}, NULL};
 
 /*
  * The encoder handler  must be called in the main loop.
@@ -572,8 +601,10 @@ void buttonHandler(void)
 		case 1<<BTN_SAVERECALL:
 		break;
 		case 1<<BTN_QUICKPRINT:
+			updateMenu(&menQuickPrint);
 		break;
 		case 1<<BTN_UTILITY:
+			updateMenu(&menUtility);
 		break;
 		case 1<<BTN_PULSEWIDTH:
 		break;
@@ -1055,7 +1086,39 @@ void setFramePosition(int32_t diff){
 	if (triggerSettings.prefetch > (CAPTURESIZE - (FRAMESIZE/2))) {
 		triggerSettings.prefetch = CAPTURESIZE - (FRAMESIZE/2);	
 	}
+}
 
+void screenshot_color(void)
+{
+	SendData((uart_regs *)GENERIC_UART_BASE_ADDR, 5, (uint32_t*)"Screenshot Color\n\r");
+}
+
+void screenshot_sw(void)
+{
+	SendData((uart_regs *)GENERIC_UART_BASE_ADDR, 4, (uint32_t*)"Screenshot S/W\n\r");
+}
+
+void screenshot_csv(void)
+{
+	SendData((uart_regs *)GENERIC_UART_BASE_ADDR, 4, (uint32_t*)"Screenshot CSV\n\r");
+}
+
+/** Changes Uart Selection
+ *
+ * @param selection  UART Channel
+ *
+ * selection = 0: UART going to LEON
+ * selection = 1: UART going to  FPGA
+ */
+
+void change_uart(int32_t selection)
+{
+	switch(selection)
+	{
+		case 0: WRITE_INT(CONFIGADCENABLE,0);  break; // Set to generic uart
+		case 1: WRITE_INT(CONFIGADCENABLE,1);  break; // Set to debug uart
+		default: break;
+	}
 }
 
 void GUI_Main(void)
@@ -1136,15 +1199,6 @@ void GUI_Main(void)
 
 	//	closeSubMenuTime();
 
-		if ((READ_INT(KEYADDR1) & (1 << BTN_F1)) != 0)
-		{
-			WRITE_INT(CONFIGADCENABLE,1); // Set back to debug uart
-		}
-		if ((READ_INT(KEYADDR1) & (1 << BTN_F2)) != 0)
-		{
-			//		WRITE_INT(CONFIGADCENABLE,0); // Set back to generic uart
-		}
-		
 		if ((READ_INT(KEYADDR1) & (1 << BTN_RUNSTOP)) != 0)
 		{
 			Run^= TRUE; // Toogle Run Stop	for TRUE = 1 or TRUE = -1
