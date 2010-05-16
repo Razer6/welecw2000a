@@ -53,6 +53,7 @@
 #include "DSO_Remote.h"
 #include "DSO_Misc.h"
 #include "irqmp.h"
+#include "ImageTypes.h"
 
 
 RemoteSignalCapture::RemoteSignalCapture(DebugComm * Comm): mComm(Comm){}
@@ -700,40 +701,14 @@ uint32_t HighColorToRGB(uint16_t pixel, ofstream &stream)
 	return 0;
 }
 
-// BMP Format: http://en.wikipedia.org/wiki/BMP_file_format
-typedef struct BMPFILEHEADER 
-{ 
-	uint16_t bfType; 
-	uint32_t bfSize;
-	uint16_t bfReserved1;
-	uint16_t bfReserved2;
-	uint32_t bfOffBits;
-} __attribute__((__packed__));
-
-struct BMPINFOHEADER 
-{ 
-	uint32_t biSize;
-	uint32_t biWidth;
-	uint32_t biHeight;
-	uint16_t biPlanes;
-	uint16_t biBitCount;
-	uint32_t biCompression;
-	uint32_t biSizeImage;
-	uint32_t biXPelsPerMeter;
-	uint32_t biYPelsPerMeter;
-	uint32_t biClrUsed;
-	uint32_t biClrImportant;
-}__attribute__((__packed__));
-
-
 uint32_t RemoteSignalCapture::Screenshot(const char *filename)
 {
 	uint32_t rec = 0;
 	uint32_t *data = new uint32_t[320];
 	uint32_t addr = 0;
 
-	BMPFILEHEADER fileheader; 
-	BMPINFOHEADER infoheader;
+	sBMP_file_header fileheader; 
+	sBMP_info_header infoheader;
 
 	fileheader.bfType = 0x4D42;
 	fileheader.bfSize = sizeof(fileheader);

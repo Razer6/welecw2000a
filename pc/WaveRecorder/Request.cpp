@@ -34,6 +34,7 @@
 ****************************************************************************/
 #include "Request.h"
 #include "DSO_Remote.h"
+#include "ImageTypes.h"
 
 Request::Request(CPUComm * Comm) : mComm(Comm){}
 Request::~Request(){
@@ -194,19 +195,40 @@ using namespace std;
 
 void Request::make_bmp(const char *filename)
 {
-	uint8_t field[]={'B','M',0,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,128,2,0,0,32,254,255,
-					255,1,0,24,0,0,0,0,0,0,16,14,0,19,11,0,0,19,11,0,0,0,0,0,0,0,0,0,0};
 	uint16_t c=0;
 	uint16_t incount=0, i;			//Anzahl verarbeiteter Zeichen
 	uint16_t llength=0;				//Lauflänge
-	unsigned char red,green,blue;	//Farbkomponenten
+	uint8_t red,green,blue;	//Farbkomponenten
+		
+	sBMP_file_header fileheader; 
+	sBMP_info_header infoheader;
+
+	fileheader.bfType = 0x4D42;
+	fileheader.bfSize = sizeof(fileheader);
+	fileheader.bfReserved1 = 0;
+	fileheader.bfReserved2 = 0;
+	fileheader.bfOffBits =  sizeof(fileheader)+sizeof(infoheader);
+
+	infoheader.biSize =  sizeof(infoheader);
+	infoheader.biWidth = 640;
+	infoheader.biHeight = -480;
+	infoheader.biPlanes = 1;
+	infoheader.biBitCount = 24;  
+	infoheader.biCompression = 0;
+	infoheader.biSizeImage = 0;
+	infoheader.biXPelsPerMeter = 0;
+	infoheader.biYPelsPerMeter = 0;
+	infoheader.biClrUsed = 0;
+	infoheader.biClrImportant = 0;
 		
 	ofstream fScreenshot;
 	string f_name(filename);
 	f_name += ".bmp";
 	fScreenshot.open(f_name.c_str(),ios::out | ios::binary);  
 		
-	fScreenshot.write ((char*)field,sizeof(field)); 
+	//Write BMP Header
+	fScreenshot.write ((char*) &fileheader,sizeof(fileheader)); 
+	fScreenshot.write ((char*) &infoheader,sizeof(infoheader));
 
 	while (1)
 	{
@@ -218,9 +240,9 @@ void Request::make_bmp(const char *filename)
 		llength = mComm->ReceiveByte();
 		
 		//Farben decodieren
-		blue = (unsigned char) (c & 0x7F)<<3;
-		green = (unsigned char) ((c & 0x7C0) >> 6)<<3;
-		red = (unsigned char) ((c & 0xF800) >> 11)<<3;
+		blue = (uint8_t) (c & 0x7F)<<3;
+		green = (uint8_t) ((c & 0x7C0) >> 6)<<3;
+		red = (uint8_t) ((c & 0xF800) >> 11)<<3;
 		if(blue & 0x20)
 		{
 			blue |= 0x1C;
