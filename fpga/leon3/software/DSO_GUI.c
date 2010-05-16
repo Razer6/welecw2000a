@@ -335,10 +335,12 @@ void toggleBWLimitCh1(int32_t selection);
 void changeHWFilters(int32_t x);
 void onChannel0(void);
 void onChannel1(void);
-void screenshot_color(void);
-void screenshot_sw(void);
-void screenshot_csv(void);
 void change_uart(int32_t selection);
+void screenshot_color_bmp(void);
+void screenshot_sw_bmp(void);
+void screenshot_color_ppm(void);
+void screenshot_sw_pbm(void);
+
 
 /*
  * Submenu items for menu for channel 0 and channel 1
@@ -404,16 +406,19 @@ sMenu menTriggerTypes = {{&smTriggerTypes, &smTriggerEdge, &smTriggerChannel, NU
  * Buttons for Quick Print menu 
  */
 
-sButton btScrShotColor = {"Color", DEFAULT_BOUNDS_F1, screenshot_color};
-sButton btScrShotSW= {"S/W", DEFAULT_BOUNDS_F2, screenshot_sw};
-sButton btScrShotCSV = {"CSV", DEFAULT_BOUNDS_F3, screenshot_csv};
-sSubMenu smScrShotColor = {BUTTON, &btScrShotColor}; 
-sSubMenu smScrShotSW = {BUTTON, &btScrShotSW}; 
-sSubMenu smScrShotCSV = {BUTTON, &btScrShotCSV}; 
+sButton btScrShotColorBMP = {"Color BMP", DEFAULT_BOUNDS_F1, screenshot_color_bmp};
+sButton btScrShotSwBMP= {"S/W BMP", DEFAULT_BOUNDS_F2, screenshot_sw_bmp};
+sButton btScrShotColorPPM = {"Color PPM", DEFAULT_BOUNDS_F3, screenshot_color_ppm};
+sButton btScrShotSwPBM= {"S/W PBM", DEFAULT_BOUNDS_F4, screenshot_sw_pbm};
+
+sSubMenu smScrShotColorBMP = {BUTTON, &btScrShotColorBMP}; 
+sSubMenu smScrShotSwBMP= {BUTTON, &btScrShotSwBMP}; 
+sSubMenu smScrShotColorPPM = {BUTTON, &btScrShotColorPPM}; 
+sSubMenu smScrShotSwPBM = {BUTTON, &btScrShotSwPBM}; 
 /*
  * Quck Print menu 
  */
-sMenu menQuickPrint = {{&smScrShotColor, &smScrShotSW, &smScrShotCSV, NULL , NULL, NULL}, NULL};
+sMenu menQuickPrint = {{&smScrShotColorBMP, &smScrShotSwBMP, &smScrShotColorPPM, &smScrShotSwPBM , NULL, NULL}, NULL};
 
 /* 
  * Menu Items for utility menu 
@@ -1088,20 +1093,87 @@ void setFramePosition(int32_t diff){
 	}
 }
 
-void screenshot_color(void)
+void writeword(unsigned pix,char llength)		//3 Byte auf UART schreiben
 {
-	SendData((uart_regs *)GENERIC_UART_BASE_ADDR, 5, (uint32_t*)"Screenshot Color\n\r");
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR,  pix>>8);    	//Farbe MSB
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, pix);       	//Farbe LSB
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, llength);	//Lauflänge
 }
 
-void screenshot_sw(void)
+void rle_enc(unsigned int pixel, int init) //44922 Byte = 4,6s
 {
-	SendData((uart_regs *)GENERIC_UART_BASE_ADDR, 4, (uint32_t*)"Screenshot S/W\n\r");
+    static unsigned int llength;		//Anzahl gleicher Pixel hintereinander
+    static unsigned int lastpixel;		//Das zuletzt geprüfte Pixel
+    static unsigned int maxlen=254;		//Maximale Anzahl gleicher Pixel hintereinander
+
+    if (init==1)						//Bei neuem Screenshot
+	{
+        llength=0; lastpixel=1;			//Lauflänge auf 0,
+        return;							//lastbyte=1 -> Farbe mit dem Wert 1 existiert nicht
+	}
+
+	if ((pixel==lastpixel) && (init != 2))	//Wenn Pixel die selbe Farbe wie vorher hat
+	{
+		llength++;							//Läuflänge erhöhen
+        if (llength>=maxlen)				//Wenn maximallänge erreicht ist
+        {
+        	writeword(pixel,llength);		//Pixel und Anzahl ausgeben
+        	llength=0;						//Lauflänge wieder auf 0
+            lastpixel=1;					//Letztes Pixel auf ungültigen Wert setzen
+        }
+    }
+
+	else	//pixel!=lastpixel
+	{
+        if (llength > 0)					//Wenn noch Lauflänge von altem Pixel vorhanden
+		{
+        	writeword(lastpixel,llength);	//Altes Pixel und Lauflänge ausgeben
+		}
+        lastpixel=pixel;					//Letzes Pixel = aktuelles Pixel
+        llength=1;							//Mindestens 1 Pixel
+	}
 }
 
-void screenshot_csv(void)
+void make_shot(unsigned char type)
 {
-	SendData((uart_regs *)GENERIC_UART_BASE_ADDR, 4, (uint32_t*)"Screenshot CSV\n\r");
+	int i;					//Zählvariable
+
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 'S');			//"Jetzt kommt
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 0xFF);			//ein Screenshot"
+
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, type);			//Dumptype (PPM, BMP, PBM, CSV...)
+
+	rle_enc(0,1);			//RLE initialisieren
+	for(i=0;i<640*480;i++)			//Für jeden Pixel:
+	{
+		rle_enc(Framebuffer[i],0);						//Pixel in RLE schicken
+	}
+	rle_enc(0,2);					//RLE beenden
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 0x73);			//Stopp Kennung
+	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 0xaa);			//Muss evtl geändert werden
+
 }
+
+void screenshot_color_bmp(void)
+{
+	make_shot(1);
+}
+
+void screenshot_sw_bmp(void)
+{
+	make_shot(2);
+}
+
+void screenshot_color_ppm(void)
+{
+	make_shot(0);
+}
+
+void screenshot_sw_pbm(void)
+{
+	make_shot(3);
+}
+
 
 /** Changes Uart Selection
  *

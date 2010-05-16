@@ -117,6 +117,11 @@ public:
 protected:
 	void PrintDesc(uint32_t *Data, uint32_t Length);
 private:
+	void make_bmp(const char *filename);
+	void make_ppm(const char *filename);
+	void make_bw_bmp(const char *filename);
+	void make_pbm(const char *filename);
+
 	CPUComm * mComm;
 };
 

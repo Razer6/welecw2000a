@@ -759,7 +759,7 @@ uint32_t RemoteSignalCapture::Screenshot(const char *filename)
 	printf("Framebuffer Adress = 0x%X\n", addr);
 	
 	ofstream fScreenshot;
-	fScreenshot.open(filename,ios::out | ios::binary); //Ofstream erstelllen mit Namen : myfile
+	fScreenshot.open(filename,ios::out | ios::binary); 
 
 	//Write BMP Header
 	fScreenshot.write ((char*) &fileheader,sizeof(fileheader)); 

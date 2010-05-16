@@ -66,6 +66,9 @@ public:
 	virtual uint32_t Receive(uint32_t * Data, uint32_t Length){
 		return 0;
 	}
+	virtual uint8_t ReceiveByte(){
+		return 0;
+	}
 	virtual uint32_t GetACK(){
 		return TRUE;
 	}

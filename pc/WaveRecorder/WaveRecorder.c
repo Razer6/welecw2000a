@@ -131,8 +131,8 @@ int main(int argc, char * argv[]) {
 	struct arg_int * StackAddr	= arg_int0(NULL,"Stack",	"<n>",	"Stack address of the CPU"); 
 	struct arg_int * CapWTime	= arg_int0(NULL,"CapWaitTime",	"<n>",	"Abourt time, before recording"); 
 	struct arg_int * CapSize	= arg_int0("s","CapSize",	"<n>",	"Capture data size in Dwords"); 
-    struct arg_file * ImageFile = arg_file0("f", "SFile", "<file.bmp>", "BMP File for screenshot");
-    struct arg_int * Data		= arg_intn("d","Data",	        "<n>",0,64,	"Data Dword(s) for WriteAddr"); 
+	struct arg_file * ImageFile = arg_file0("f", "SFile", "<file>", "Filename for screenshot");
+	struct arg_int * Data		= arg_intn("d","Data",	        "<n>",0,64,	"Data Dword(s) for WriteAddr"); 
 	struct arg_int * WavForceFS	= arg_int0(NULL,"WavForcefs",	"<n>",	"Set sampling fs to x istead of Fs");
 	struct arg_lit * AnAC_Ch0	= arg_lit0(NULL,"ACModeCh1",		"AC Mode, if not set AC=off"); 
 	struct arg_lit * AnAC_Ch1	= arg_lit0(NULL,"ACModeCh2",		"AC Mode, if not set AC=off"); 
@@ -259,24 +259,13 @@ int main(int argc, char * argv[]) {
     if (strcmp("Screenshot",Command->sval[0]) == 0) 
 	{
 		struct arg_int * IsOnce[] = {(arg_int*)ImageFile};
-		char *extension = new char[strlen(ImageFile->extension[0])];
-		strcpy(extension, ImageFile->extension[0]);
 
 		uint32_t Ret = CheckArgCount((void*)IsOnce,Command,1,sizeof(IsOnce)/sizeof(IsOnce[0]));
 		if (Ret != TRUE) 
 		{
 			ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 		}
-		for(int i = 0; i < strlen(extension); i++)
-			extension[i] = tolower(extension[i]); 
-
-		if(strcmp(".bmp", extension) != 0)
-		{
-			delete extension;
-			printf("Wrong Extenstion, use '*.bmp'\n");
-			ExitWaveRecorder(SYNTAX_ERROR,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
-		}
-		delete extension;
+		
 		Ret = DSOInterface ->Screenshot(ImageFile->filename[0]);
 		ExitWaveRecorder(Ret,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}

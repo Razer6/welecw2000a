@@ -188,9 +188,116 @@ uint32_t Request::Receive(
 	return FALSE;
 }
 
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+void Request::make_bmp(const char *filename)
+{
+	uint8_t field[]={'B','M',0,0,0,0,0,0,0,0,54,0,0,0,40,0,0,0,128,2,0,0,32,254,255,
+					255,1,0,24,0,0,0,0,0,0,16,14,0,19,11,0,0,19,11,0,0,0,0,0,0,0,0,0,0};
+	uint16_t c=0;
+	uint16_t incount=0, i;			//Anzahl verarbeiteter Zeichen
+	uint16_t llength=0;				//Lauflänge
+	unsigned char red,green,blue;	//Farbkomponenten
+		
+	ofstream fScreenshot;
+	string f_name(filename);
+	f_name += ".bmp";
+	fScreenshot.open(f_name.c_str(),ios::out | ios::binary);  
+		
+	fScreenshot.write ((char*)field,sizeof(field)); 
+
+	while (1)
+	{
+		c = mComm->ReceiveByte() << 8;	//Farbwert des Pixels zusammensetzen
+		c |= mComm->ReceiveByte();
+
+		if(c==0x73aa) break;				//Abbrechen wenn Stoppmarker erkannt wurde
+
+		llength = mComm->ReceiveByte();
+		
+		//Farben decodieren
+		blue = (unsigned char) (c & 0x7F)<<3;
+		green = (unsigned char) ((c & 0x7C0) >> 6)<<3;
+		red = (unsigned char) ((c & 0xF800) >> 11)<<3;
+		if(blue & 0x20)
+		{
+			blue |= 0x1C;
+		}
+		if(green & 0x20)
+		{
+			green |= 0x1C;
+		}
+		if(red & 0x20)
+		{
+			red |= 0x1C;
+		}
+		
+		for(i=0;i<llength;i++)			//Pixel schreiben x-mal schreiben
+		{
+			fScreenshot << blue;
+			fScreenshot << green;
+			fScreenshot << red;
+		}
+	}
+		
+	fScreenshot.close();
+}
+
+void Request::make_ppm(const char *filename)
+{
+	printf("PPM not yet supported yet\n");
+}
+
+void Request::make_bw_bmp(const char *filename)
+{
+	printf("BW BMP not yet supported yet\n");
+}
+
+void Request::make_pbm(const char *filename)
+{
+	printf("PBM not yet supported yet\n");
+}
+
+
+
 uint32_t Request::Screenshot(const char *filename)
 {
-	return FALSE;
+	uint8_t  c = 0, type;
+	uint8_t l = 0;
+	
+	printf("Screenshot from Leon\n");
+
+	while (1)	//wait for data header
+	{
+		c = mComm->ReceiveByte();
+		if (c == 255 && l == 'S') break;
+		l = c;	
+	}
+	
+	type = mComm->ReceiveByte();
+	printf("Receiving image Type %d\n", type);
+
+	switch (type)
+	{
+		case 0:
+			make_ppm(filename);	//colour screenshot
+		break;
+
+		case 1:	
+			make_bmp(filename);	//color screenshot
+		break;
+
+		case 2:
+			make_bw_bmp(filename); //S/W screenshot
+		break;
+
+		case 3:
+			make_pbm(filename); //S/W screenshot
+		break;
+	}
+	return 1;
 }
 	
 

@@ -86,6 +86,12 @@ uint32_t NormalUart::Receive(uint32_t *Data,
 	return ReceiveAll(&mH,Length,Data,&Data[2]);
 }
 
+uint8_t NormalUart::ReceiveByte()
+{
+	uint32_t error;
+	return ReceiveChar(&mH, &error);
+}
+
 uint32_t NormalUart::GetACK(){
 	return ReceiveAll(&mH,0,0,0);
 }

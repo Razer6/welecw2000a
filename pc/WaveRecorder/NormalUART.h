@@ -54,6 +54,7 @@ public:
 	virtual uint32_t Receive(
 		uint32_t * Data, 
 		uint32_t Length);
+	virtual uint8_t ReceiveByte();
 	virtual uint32_t GetACK();
 private:
 };
