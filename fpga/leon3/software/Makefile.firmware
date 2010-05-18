@@ -50,7 +50,12 @@ ASMS	     := $(SOURCES:.c=.s)
 DEPENDFILE   := depend
 TARGET       := w2000a.bin
 DUMP         := w2000a.S
-LEONADDR     :=0x80000500
+LEONADDR     := 0x80000500
+
+CABLE        := -c "Nios II Evaluation Board"
+MODE         := -m JTAG
+SOF          := ../Scope/synW2000A/W2000A.sof
+PROGRAM      := -o p\;$(SOF)
 
 # Files to be cleaned
 CLEAN := $(OBJS) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET)
@@ -62,6 +67,10 @@ all: $(TARGET)
 .PHONY: upload
 upload: w2000a.bin
 	$(WAVEREC) -p Debugger -u $(UART) -b $(BAUD) -n $(CHANNELS) -c LoadRun --Ffile=$<
+
+.PHONY: program
+program: $(SOF)
+	quartus_pgm $(CABLE) $(MODE) $(PROGRAM)
 
 .PHONY: backtrace
 backtrace: 
