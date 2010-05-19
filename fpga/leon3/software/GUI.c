@@ -95,8 +95,10 @@ void drawButton(sButton *button);
  * The method calls the corresponding function of the submenu.
  */
 
-void onSubMenu(sSubMenu *subMenu)
+void onSubMenu(void *subMenu_context)
 {
+	sSubMenu *subMenu = (sMenu*) subMenu_context;
+	
 	if(subMenu == NULL)
 	{
 		return;
@@ -427,8 +429,10 @@ void drawButton(sButton *button)
  * Must be called in the DSO GUI to update the screen
  */
 
-void updateMenu(sMenu *menu)
+void updateMenu(void *menu_context)
 {
+	sMenu *menu = (sMenu*) menu_context;
+	
 	closeSubMenu();
 	resetClosingTime();
 
