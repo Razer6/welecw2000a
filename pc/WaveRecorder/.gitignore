@@ -1,0 +1,7 @@
+*.o
+WaveRecorder
+WaveRecorder.exe
+depend
+depend.bak
+libargtable2.a
+argtable2.h
