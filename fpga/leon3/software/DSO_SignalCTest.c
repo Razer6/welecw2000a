@@ -207,7 +207,7 @@ int main (void)
 	/* turning all DSO interrupts off (RESET) */
 	/* switching all DSO interrupts on */
 	/* Enable the interrupt the interrupt controller */
-	InitIRQ();
+	init_irq();
 
 #ifdef SIM_COMPILATION
 	printf("DSO Test programm: \nstart testing SetTriggerInput \n");

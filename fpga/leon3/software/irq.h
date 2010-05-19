@@ -41,16 +41,16 @@
  */
 extern int catch_interrupt (int func, int irq);
 
-void InitIRQ(void);
+void init_irq(void);
 
 /*
  * Disables all interrupts
  */
-void DisableIRQ(void);
+void disable_irq(void);
 
 /*
  * Enables all interrupts
  */
-void ReleaseIRQ(void);
+void release_irq(void);
 
 #endif
