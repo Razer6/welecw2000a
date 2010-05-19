@@ -1,0 +1,6 @@
+depend
+*.swp
+*.bak
+*.o
+*.S
+*.bin
