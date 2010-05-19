@@ -16,7 +16,8 @@ PROTOCOL   := Debugger
 DSO_TARGET := W2000A
 DSO_BOARD  := BOARD_COMPILATION
 CPU        := LEON3
-DEFINES    := -D$(CPU) -D$(DSO_TARGET) -D$(DSO_BOARD)
+DEFINES    := $(CPU) $(DSO_TARGET) $(DSO_BOARD)
+DEFINES    := $(patsubst %,-D%,$(DEFINES))
 
 # Flags
 CFLAGS  := $(DEFINES)
