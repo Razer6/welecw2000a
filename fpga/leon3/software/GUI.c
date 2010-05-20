@@ -455,7 +455,6 @@ void updateMenu(void *menu_context)
 		for(uint32_t i=0; i<6; i++)
 		{
 			initSubMenu(menu->subMenu[i]);
-			active_sub_menu[i] = menu->subMenu[i];
 		}
 	}
 
