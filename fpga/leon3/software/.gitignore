@@ -4,3 +4,4 @@ depend
 *.o
 *.S
 *.bin
+Makefile
