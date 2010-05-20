@@ -17,7 +17,7 @@ DSO_TARGET := W2000A
 DSO_BOARD  := BOARD_COMPILATION
 CPU        := LEON3
 DEFINES    := $(CPU) $(DSO_TARGET) $(DSO_BOARD)
-DEFINES    := $(patsubst %,-D%,$(DEFINES))
+DEFINES    := $(addprefix -D,$(DEFINES))
 
 # Flags
 CFLAGS  := $(DEFINES)
@@ -33,16 +33,17 @@ CFLAGS += -Wno-unused-parameter # Do not warn about unused function parameters
 
 # Target variables
 SOURCE_DIRS  := . thirdparty fonts
-VPATH	     := $(SOURCE_DIRS)
-INCLUDE_DIRS := $(patsubst %,-I%,$(subst :, ,$(VPATH)))
+INCLUDE_DIRS := $(addprefix -I,$(SOURCE_DIRS))
 INCLUDE_DIRS += -I../grlib-W2000A/software/leon3
 CFLAGS       += $(INCLUDE_DIRS)
 
-SOURCES      := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.c))
-HEADERS      := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.h))
+SOURCES      := $(foreach DIR, $(SOURCE_DIRS), $(wildcard $(DIR)/*.c))
+HEADERS      := $(foreach DIR, $(SOURCE_DIRS), $(wildcard $(DIR)/*.h))
 OBJS	     := $(SOURCES:.c=.o)
 ASMS	     := $(SOURCES:.c=.s)
 OBJDIR       := objs
+
+vpath %.c $(SOURCE_DIRS)
 
 DEPENDFILE   := depend
 TARGET       := w2000a.bin
@@ -55,11 +56,22 @@ SOF          := ../Scope/synW2000A/W2000A.sof
 PROGRAM      := -o p\;$(SOF)
 
 # Files to be cleaned
-CLEAN := $(OBJDIR) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET)
+CLEAN := $(OBJDIR) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET) $(TARGET:.bin=.elf)
 
-# Rules
+# Force make to forget all its builtin rules
+.SUFFIXES:
+
+# Force make to keep all intermediate files
+.SECONDARY:
+
+# Rules for maintenance
 .PHONY: all
 all: $(TARGET)
+
+.PHONY: clean
+clean:
+	@echo " [CLEAN  ]"
+	@$(RM) -r $(CLEAN)
 
 .PHONY: upload
 upload: w2000a.bin
@@ -81,27 +93,20 @@ readaddr:
 dump:
 	@$(OBJDUMP) -S $^ > $(DUMP)
 
+# Rules for building
 %.bin: %.elf
 	@echo " [OBJCOPY] $^"
 	@$(OBJCOPY) -O binary $^ $@
 
-%.elf: $(OBJS)
+%.elf: $(addprefix $(OBJDIR)/,$(OBJS))
 	@echo " [LINK   ] $^"
-	@$(LINK.o) $(patsubst %,$(OBJDIR)/%,$^) $(LOADLIBES) $(LDLIBS) -o $@
+	@$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
 	@$(SIZE) $@
 
-.PHONY: clean
-clean:
-	@echo " [CLEAN  ]"
-	@$(RM) -r $(CLEAN)
-
-.PHONY: $(OBJDIR)
-$(OBJDIR):
-	@mkdir -p $(patsubst %,$(OBJDIR)/%,$(SOURCE_DIRS)) 
-
-%.o: %.c $(OBJDIR)
+$(OBJDIR)/%.o: %.c
 	@echo " [COMPILE] $<"
-	@$(COMPILE.c) -o $(OBJDIR)/$@ $<
+	@mkdir -p $(addprefix $(OBJDIR)/,$(SOURCE_DIRS))
+	@$(COMPILE.c) -o $@ $<
 
 # Dependencies
 
