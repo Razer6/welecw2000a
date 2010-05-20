@@ -1,7 +1,7 @@
 /****************************************************************************
 * Project        : Welec W2000A
 *****************************************************************************
-* File           : DSO_FrontPanel.c
+* File            : DSO_FrontPanel.c
 * Author         : Alexander Lindert <alexander_lindert at gmx.at>
 * Date           : 20.04.2009
 *****************************************************************************
@@ -9,7 +9,7 @@
 *****************************************************************************
 
 *  Copyright (c) 2009, Alexander Lindert
-*  				 2010,  Robert Schilling
+*  		  2010,  Robert Schilling
 
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -33,12 +33,14 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
+
 #ifdef BOARD_COMPILATION
+
+#include "DSO_Frontpanel.h"
 #include "DSO_SFR.h"
 #include "DSO_Misc.h"
 #include "Leon3Uart.h"
-#include "stdio.h"
-#include "string.h"
+
 
 #define CLEN 40
 void TestKeys(uart_regs * uart, int value , int change, char ** M, int size);
@@ -189,6 +191,10 @@ void TestKeys(uart_regs * uart, int value, int change, char ** M, int size) {
 static uint32_t keystate = 0;
 static uint32_t keypress = 0;
 
+/* 
+ * Debounces all keys. Keys must be 4 calls (2-bit vertical counter) at same state for a 
+ * changing recognition. Should be called in a timer interrupt routine.
+ */
 void readkeys(void)
 {
 	static uint32_t ct0 = 0, ct1 = 0;
@@ -204,22 +210,237 @@ void readkeys(void)
 	keypress |= keystate & i;
 }
 
-
-
-uint32_t getKeyPressed(uint32_t keymask)
+/* 
+ * Reads out the pressed keys. Every pressed button is signaled by a '1'-bit
+ * in return value
+ */
+uint32_t get_key_pressed(uint32_t keymask)
 {
-//	DisableIRQ();			//Must be atomic
+//	disable_irq();			//Must be atomic
 	keymask &= keypress;
 	keypress ^= keymask;
-//	ReleaseIRQ();
+//	release_irq();
 	return keymask;
 }
+
+void default_button_handler(void *args)
+{
+	/* Do nothing */
+}
+
+
+/*
+ * A button handler for every button. Default button handler does nothing.
+ */
+bt_handler bt_handler_f1 = {default_button_handler, 0};
+bt_handler bt_handler_f2 = {default_button_handler, 0};
+bt_handler bt_handler_f3 = {default_button_handler, 0};
+bt_handler bt_handler_f4 = {default_button_handler, 0};
+bt_handler bt_handler_f5 = {default_button_handler, 0};
+bt_handler bt_handler_f6 = {default_button_handler, 0};
+bt_handler bt_handler_math = {default_button_handler, 0};
+bt_handler bt_handler_ch0 = {default_button_handler, 0};
+bt_handler bt_handler_ch1 = {default_button_handler, 0};
+bt_handler bt_handler_ch2 = {default_button_handler, 0};
+bt_handler bt_handler_ch3 = {default_button_handler, 0};
+bt_handler bt_handler_maindel = {default_button_handler, 0};
+bt_handler bt_handler_runstop = {default_button_handler, 0};
+bt_handler bt_handler_single = {default_button_handler, 0};
+bt_handler bt_handler_cursors= {default_button_handler, 0};
+bt_handler bt_handler_quickmeas = {default_button_handler, 0};
+bt_handler bt_handler_acquire = {default_button_handler, 0};
+bt_handler bt_handler_display = {default_button_handler, 0};
+bt_handler bt_handler_edge = {default_button_handler, 0};
+bt_handler bt_handler_modecoupling = {default_button_handler, 0};
+bt_handler bt_handler_autoscale = {default_button_handler, 0};
+bt_handler bt_handler_saverecall = {default_button_handler, 0};
+bt_handler bt_handler_quickprint = {default_button_handler, 0};
+bt_handler bt_handler_utility = {default_button_handler, 0};
+bt_handler bt_handler_pulsewidth = {default_button_handler, 0};
+
+
+/*
+ * Adds a button handler for a button.
+ */
+void init_bt_handler(bt_handler *handler, void (*callback)(void *args), void *args)
+{
+	handler->callback = callback;
+	handler->args = args;
+}
+
+/*
+ * The button handler  must be called in the main loop.
+ * This function handles the action of all keys. The key debouncing happens
+ * in a seperate function called in the timer interrupt routine (in future).
+ */
+void button_handler(void)
+{
+	uint32_t keys = get_key_pressed(KEYMASK);
+
+	if(!keys)
+	{
+		return;
+	}
+
+	switch(keys)
+	{
+		case 1<<BTN_F1:
+			bt_handler_f1.callback(bt_handler_f1.args);
+		break;
+		case 1<<BTN_F2:
+			bt_handler_f2.callback(bt_handler_f2.args);
+		break;
+		case 1<<BTN_F3:
+			bt_handler_f3.callback(bt_handler_f3.args);
+		break;
+		case 1<<BTN_F4:
+			bt_handler_f4.callback(bt_handler_f4.args);
+		break;
+		case 1<<BTN_F5:
+			bt_handler_f5.callback(bt_handler_f5.args);
+		break;
+		case 1<<BTN_F6:
+			bt_handler_f6.callback(bt_handler_f6.args);
+		break;
+		case 1<<BTN_MATH:
+			bt_handler_f1.callback(bt_handler_f1.args);
+		break;
+		case 1<<BTN_CH0:
+			bt_handler_ch0.callback(bt_handler_ch0.args);
+		break;
+		case 1<<BTN_CH1:
+			bt_handler_ch1.callback(bt_handler_ch1.args);
+		break;
+		case 1<<BTN_CH2:
+			bt_handler_ch2.callback(bt_handler_ch2.args);
+		break;
+		case 1<<BTN_CH3:
+			bt_handler_ch3.callback(bt_handler_ch3.args);
+		break;
+		case 1<<BTN_MAINDEL:
+			bt_handler_maindel.callback(bt_handler_maindel.args);
+		break;
+		case 1<<BTN_RUNSTOP:
+			bt_handler_runstop.callback(bt_handler_runstop.args);
+		break;
+		case 1<<BTN_SINGLE:
+			bt_handler_single.callback(bt_handler_single.args);
+		break;
+		case 1<<BTN_CURSORS:
+			bt_handler_cursors.callback(bt_handler_cursors.args);
+		break;
+		case 1<<BTN_QUICKMEAS:
+			bt_handler_quickmeas.callback(bt_handler_quickmeas.args);
+		break;
+		case 1<<BTN_ACQUIRE:
+			bt_handler_acquire.callback(bt_handler_acquire.args);
+		break;
+		case 1<<BTN_DISPLAY:
+			bt_handler_display.callback(bt_handler_display.args);
+		break;
+		case 1<<BTN_EDGE:
+			bt_handler_edge.callback(bt_handler_edge.args);
+		break;
+		case 1<<BTN_MODECOUPLING:
+			bt_handler_modecoupling.callback(bt_handler_modecoupling.args);
+		break;
+		case 1<<BTN_AUTOSCALE:
+			bt_handler_autoscale.callback(bt_handler_autoscale.args);
+		break;
+		case 1<<BTN_SAVERECALL:
+			bt_handler_saverecall.callback(bt_handler_saverecall.args);
+		break;
+		case 1<<BTN_QUICKPRINT:
+			bt_handler_quickprint.callback(bt_handler_quickprint.args);
+		break;
+		case 1<<BTN_UTILITY:
+			bt_handler_utility.callback(bt_handler_utility.args);
+		break;
+		case 1<<BTN_PULSEWIDTH:
+			bt_handler_pulsewidth.callback(bt_handler_pulsewidth.args);
+		break;
+
+		default:
+		break;
+	}
+}
+
+/*
+ * An encoder handler for every button. Default encoder handler does nothing.
+ */
+enc_handler enc[ENCODERMAX] ;
+
+void init_enc_handler(enc_handler *handler, uint32_t address, uint32_t offset, void (*callback)(int32_t diff))
+{
+	handler->address = address;
+	handler->offset = offset;
+	handler->callback = callback;
+	
+	/*
+	* The hardware encoder counters do not have an initial value,
+          * so the first access of the get_encoder_diff does return a wrong result!
+          * (This is not at all a bug!) 
+	*/
+	handler->diff = 0;
+	handler->new_value = (READ_INT(handler->address) >> handler->offset) & 7;
+	handler->old_value = handler->new_value;
+}
+
+void default_encoder_handler (int32_t diff)
+{
+	/* Do nothing */
+}
+
+
+/* 
+ * Set default encoder handler for every encoder
+ */
+void init_default_enc_handlers(void)
+{
+	for(uint32_t i=0; i<ENCODERMAX; i++)
+	{
+		/* EN_CH0_UPDN is default handler */
+		enc[i].address  = KEYADDR0;
+		enc[i].offset   = EN_CH0_UPDN;
+		enc[i].callback = default_encoder_handler;
+		
+		enc[i].diff = 0;
+		enc[i].new_value = (READ_INT(enc[i].address) >> enc[i].offset) & 7;
+		enc[i].old_value = enc[i].new_value;
+	}
+}
+
+/*
+  * Reads out the encoders. Do not call this in an interrupt because it's calling the user encoder handler.
+  * This can last a long time and will block other routines.
+  */
+void encoder_handler(void)
+{
+	for(uint32_t i=0; i<ENCODERMAX; ++i)
+	{
+		enc[i].new_value = (READ_INT(enc[i].address) >> enc[i].offset) & 7;
+		ROTARYMOVE(enc[i].diff, enc[i].new_value, enc[i].old_value);
+		
+		if (enc[i].diff != 0)
+		{
+			enc[i].callback(enc[i].diff);
+		}
+	}
+}
+
+
 
 #if 0
 uint32_t encoder_changed0;
 uint32_t encoder_changed1;
 uint32_t encoder_state0;
 uint32_t encoder_state1;
+
+/*
+ * The encoder handler  must be called in the main loop.
+ * This function handles the action encoders. The reading
+ * of the encoders happens in a timer interrupt routine (in future).
+ */
 
 void read_encoders(void)
 {
@@ -247,7 +468,6 @@ uint32_t get_encoder_diff(uint32_t *reg, uint32_t *change_t, uint32_t *old, int3
 	while(enc)
 	{
 		if(enc & 0x07) //Encoder changed?
-
 		{
 			*diff = (change & 0x07) - (old_t & 0x07);
 
@@ -270,12 +490,5 @@ uint32_t get_encoder_diff(uint32_t *reg, uint32_t *change_t, uint32_t *old, int3
 	return 0;
 }
 #endif
-
-
-
-
-
-
-
 
 #endif

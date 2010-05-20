@@ -211,6 +211,7 @@ typedef struct Menu
 sMenu;
 
 extern sMenu *activeMenu;
+extern sSubMenu *active_sub_menu[6];
 
 void updateMenu(void *menu_context);
 

@@ -430,196 +430,6 @@ sSubMenu smUartSelection = {SUBMENU_LIST, &smlUartSelection};
  */
 sMenu menUtility = {{&smUartSelection, NULL, NULL, NULL, NULL, NULL}, NULL};
 
-/*
- * The encoder handler  must be called in the main loop.
- * This function handles the action encoders. The reading
- * of the encoders happens in a timer interrupt routine (in future).
- */
-
-#define ENCODERMAX 12
-
-typedef struct  {
-	int32_t diff;
-	int32_t old;
-        int32_t new;
-	uint32_t address;
-	uint32_t offset;
-        void (*callback)(int32_t diff);
-
-} struct_encoder;
-
-void dummy (int32_t diff){
-}
-void setVDIV0 (int32_t diff){
-	setVoltagePerDiv(0, diff);
-}
-void setVDIV1 (int32_t diff){
-	setVoltagePerDiv(1, diff);
-}
-
-void encoder_handler(void)
-{
-	static struct_encoder en[ENCODERMAX];
-	static int32_t init = TRUE;
-	uint32_t i = 0;
-
-	if (init == TRUE) {
-		init = FALSE;
-		en[0].address  = LEDADDR;
-		en[0].offset   = EN_TIME_DIV;
-		en[0].callback = setTimebase;
-		en[1].address  = LEDADDR;
-		en[1].offset   = EN_LEFT_RIGHT;
-		en[1].callback = setFramePosition;
-		en[2].address  = LEDADDR;
-		en[2].offset   = EN_LEVEL;
-		en[2].callback = changeTriggerLevel;
-		en[3].address  = LEDADDR;
-		en[3].offset   = EN_F;
-		en[3].callback = vfValueChanged;
-
-		en[4].address  = KEYADDR0;
-		en[4].offset   = EN_CH0_UPDN;
-		en[4].callback = dummy;
-		en[5].address  = KEYADDR0;
-		en[5].offset   = EN_CH1_UPDN;
-		en[5].callback = dummy;
-		en[6].address  = KEYADDR0;
-		en[6].offset   = EN_CH2_UPDN;
-		en[6].callback = dummy;
-		en[7].address  = KEYADDR0;
-		en[7].offset   = EN_CH3_UPDN;
-		en[7].callback = dummy;
-
-		en[8].address   = KEYADDR0;
-		en[8].offset    = EN_CH0_VDIV;
-		en[8].callback  = setVDIV0;
-		en[9].address   = KEYADDR0;
-		en[9].offset    = EN_CH1_VDIV;
-		en[9].callback  = setVDIV1;
-		en[10].address  = KEYADDR0;
-		en[10].offset   = EN_CH2_VDIV;
-		en[10].callback = dummy;
-		en[11].address  = KEYADDR0;
-		en[11].offset   = EN_CH3_VDIV;
-		en[11].callback = dummy;
-	/*
-	* The hardware encoder counters do not have an initial value,
-        * so the first access of the get_encoder_diff does return a wrong result!
-        * (This is not at all a bug!) 
-	*/
-
-		for(;i < ENCODERMAX;++i){
-			en[i].diff = 0;
-			en[i].new = (READ_INT(en[i].address) >> en[i].offset) & 7;
-			en[i].old = en[i].new;
-		}
-	
-	} else {
-	//	SET_LED(LED_CH2);
-		for(;i < ENCODERMAX;++i){
-			en[i].new = (READ_INT(en[i].address) >> en[i].offset) & 7;
-			ROTARYMOVE(en[i].diff,en[i].new,en[i].old);
-			if (en[i].diff != 0) {
-			//	SET_LED(LED_CH3);
-				en[i].callback(en[i].diff);
-			}
-		}
-/* 
- * for encoders which have different callbacks set the en[x].callback = dummy 
- * and write the condition here with the correct current callback!
- */
-
-	}
-}
-
-/*
- * The button handler  must be called in the main loop.
- * This function handles the action of all keys. The key debouncing happens
- * in a seperate function called in the timer interrupt routine (in future).
- */
-
-void buttonHandler(void)
-{
-	uint32_t keys = getKeyPressed(KEYMASK);
-
-	if(!keys)
-	{
-		return;
-	}
-
-	switch(keys)
-	{
-		case 1<<BTN_F1:
-		onSubMenu(activeMenu->subMenu[0]);
-		break;
-		case 1<<BTN_F2:
-		onSubMenu(activeMenu->subMenu[1]);
-		break;
-		case 1<<BTN_F3:
-		onSubMenu(activeMenu->subMenu[2]);
-		break;
-		case 1<<BTN_F4:
-		onSubMenu(activeMenu->subMenu[3]);
-		break;
-		case 1<<BTN_F5:
-		onSubMenu(activeMenu->subMenu[4]);
-		break;
-		case 1<<BTN_F6:
-		onSubMenu(activeMenu->subMenu[5]);
-		break;
-		case 1<<BTN_MATH:
-		break;
-		case 1<<BTN_CH0:
-			updateMenu(&men_ch[0]);
-		break;
-		case 1<<BTN_CH1:
-			updateMenu(&men_ch[1]);
-		break;
-		case 1<<BTN_CH2:
-		break;
-		case 1<<BTN_CH3:
-
-		break;
-		case 1<<BTN_MAINDEL:
-		break;
-		case 1<<BTN_RUNSTOP:
-		//	CaptureData(1000, true, true, 32768, (uint32_t*)Data);
-		break;
-		case 1<<BTN_SINGLE:
-		break;
-		case 1<<BTN_CURSORS:
-		break;
-		case 1<<BTN_QUICKMEAS:
-		break;
-		case 1<<BTN_ACQUIRE:
-		break;
-		case 1<<BTN_DISPLAY:
-		break;
-		case 1<<BTN_EDGE:
-		break;
-		case 1<<BTN_MODECOUPLING:
-			updateMenu(&menTriggerTypes);
-		break;
-		case 1<<BTN_AUTOSCALE:
-		break;
-		case 1<<BTN_SAVERECALL:
-		break;
-		case 1<<BTN_QUICKPRINT:
-			updateMenu(&menQuickPrint);
-		break;
-		case 1<<BTN_UTILITY:
-			updateMenu(&menUtility);
-		break;
-		case 1<<BTN_PULSEWIDTH:
-		break;
-
-		default:
-		break;
-	}
-}
-
-
 /** Changes Coupling of Channel 0
  *
  * @param selection  Trigger Type
@@ -859,7 +669,8 @@ void changeTriggerLevel(int32_t diff)
 
 }
 
-typedef struct {
+typedef struct 
+{
 	uint32_t Timebase;
 	uint32_t AllowedByFilter;
 	char const str[12];
@@ -944,7 +755,8 @@ void setTimebase(int32_t diff)
 	uint32_t decimation_stages = 0; // hw filter regain
 
 	selectedTimebase += diff;
-	if ((HWFilters.Stop > 1) || (Timebase[selectedTimebase].AllowedByFilter == FALSE)){
+	if ((HWFilters.Stop > 1) || (Timebase[selectedTimebase].AllowedByFilter == FALSE))
+	{
 		selectedTimebase += diff;
 	}
 
@@ -959,9 +771,12 @@ void setTimebase(int32_t diff)
 	HWFilters.Gain = HWFilterGain[0];
 
 	decimation_stages = 0;
-   	if (Timebase[selectedTimebase].Timebase < 10000000) {
+   	if (Timebase[selectedTimebase].Timebase < 10000000) 
+	{
 		decimation_stages = 2;			
-	} else if (Timebase[selectedTimebase].Timebase < 100000000) {
+	}
+	else if (Timebase[selectedTimebase].Timebase < 100000000) 
+	{
 		decimation_stages = 1;			
 	}
 	HWFilters.Gain = HWFilterGain[(decimation_stages*4)+HWFilters.Stop];
@@ -970,9 +785,11 @@ void setTimebase(int32_t diff)
 	SetTriggerInput(4,channel[0].BitMode,Timebase[selectedTimebase].Timebase,FIXED_CPU_FREQUENCY,0,HWFilters.Stop,0,1,2,3);
 }
 
-void changeHWFilters(int32_t x){
+void changeHWFilters(int32_t x)
+{
 	HWFilters.Stop = x;
-	if (HWFilters.Stop > 3) {
+	if (HWFilters.Stop > 3) 
+	{
 		HWFilters.Stop = 3;
 	}
 	setTimebase(0);
@@ -1034,6 +851,17 @@ void setVoltagePerDiv(uint32_t ch, int32_t diff)
 	SetAnalogInputRange(ch, &channel[ch].analog);
 }
 
+/* Wrapper functions for encoder handlers */
+
+void set_vdiv_ch0 (int32_t diff)
+{
+	setVoltagePerDiv(CH0, diff);
+}
+void set_vdiv_ch1 (int32_t diff)
+{
+	setVoltagePerDiv(CH1, diff);
+}
+
 #define FRAMESIZE 600
 #define FRAMEPOS_HEIGHT 8
 #define FRAMEPOS_RES    518
@@ -1042,7 +870,8 @@ void setVoltagePerDiv(uint32_t ch, int32_t diff)
 int32_t Zoom = 1; 
 uint32_t Captured = 32786;
 
-void DrawFramePos(uint16_t Color, uint32_t ViewedStart, uint32_t ViewedStop){
+void DrawFramePos(uint16_t Color, uint32_t ViewedStart, uint32_t ViewedStop)
+{
 	static int32_t Start = 320 + (FRAMESIZE/2); 
 	static int32_t Stop  = 320 - (FRAMESIZE/2);
 	DrawVLineClipped(BG_COLOR,Start+FRAMEPOS_HSTART,FRAMEPOS_VSTART, FRAMEPOS_VSTART + FRAMEPOS_HEIGHT);
@@ -1058,7 +887,8 @@ void DrawFramePos(uint16_t Color, uint32_t ViewedStart, uint32_t ViewedStop){
 
 }
  
-void setFramePosition(int32_t diff){
+void setFramePosition(int32_t diff)
+{
 /* Zoom = 0 ... error
  * Zoom > 1 ... Timerange multiplied by Zoom
  * Zoom < 1 ... Timerange divided   by -Zoom
@@ -1066,16 +896,21 @@ void setFramePosition(int32_t diff){
 	int32_t ViewedOffset = 0;
 	int32_t ViewedStart = 0; 
 	int32_t ViewedStop  = 0; 
-	if (((1 << BTN_MAINDEL) & READ_INT(KEYADDR1)) != 0){
+	if (((1 << BTN_MAINDEL) & READ_INT(KEYADDR1)) != 0)
+	{
 		Zoom = 1; // Zoom is now only used for a faster navigation
-	} else {
+	} 
+	else 
+	{
 		Zoom = 40;
 	} 
 	triggerSettings.prefetch += diff*Zoom;
-	if (triggerSettings.prefetch < (8+(FRAMESIZE/2))) {
+	if (triggerSettings.prefetch < (8+(FRAMESIZE/2))) 
+	{
 		triggerSettings.prefetch = (8+(FRAMESIZE/2));
 	}
-	if ((uint32_t)triggerSettings.prefetch > (Captured - (FRAMESIZE/2))) {
+	if ((uint32_t)triggerSettings.prefetch > (Captured - (FRAMESIZE/2))) 
+	{
 		triggerSettings.prefetch = Captured - (FRAMESIZE/2);	
 	}
 
@@ -1088,7 +923,8 @@ void setFramePosition(int32_t diff){
 	DrawFramePos(COLOR_R3G3B3(3,2,2), ViewedStart, ViewedStop);
 
 	/* The hardware trigger does only support the non roll mode prefetch size */
-	if (triggerSettings.prefetch > (CAPTURESIZE - (FRAMESIZE/2))) {
+	if (triggerSettings.prefetch > (CAPTURESIZE - (FRAMESIZE/2))) 
+	{
 		triggerSettings.prefetch = CAPTURESIZE - (FRAMESIZE/2);	
 	}
 }
@@ -1100,54 +936,53 @@ void writeword(unsigned pix,char llength)		//3 Byte auf UART schreiben
 	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, llength);	//Lauflänge
 }
 
-void rle_enc(unsigned int pixel, int init) //44922 Byte = 4,6s
+void rle_enc(uint16_t pixel, uint32_t init) //44922 Byte = 4,6s
 {
-    static unsigned int llength;		//Anzahl gleicher Pixel hintereinander
-    static unsigned int lastpixel;		//Das zuletzt geprüfte Pixel
-    static unsigned int maxlen=254;		//Maximale Anzahl gleicher Pixel hintereinander
+	static uint32_t llength;				//Anzahl gleicher Pixel hintereinander
+	static uint32_t lastpixel;			//Das zuletzt geprüfte Pixel
+	const uint32_t maxlen = 254;		//Maximale Anzahl gleicher Pixel hintereinander
 
-    if (init==1)						//Bei neuem Screenshot
+	if (init == 1)					//Bei neuem Screenshot
 	{
-        llength=0; lastpixel=1;			//Lauflänge auf 0,
-        return;							//lastbyte=1 -> Farbe mit dem Wert 1 existiert nicht
+		llength=0;
+		lastpixel=1;					//Lauflänge auf 0,
+		return;					//lastbyte=1 -> Farbe mit dem Wert 1 existiert nicht
 	}
 
 	if ((pixel==lastpixel) && (init != 2))	//Wenn Pixel die selbe Farbe wie vorher hat
 	{
 		llength++;							//Läuflänge erhöhen
-        if (llength>=maxlen)				//Wenn maximallänge erreicht ist
-        {
-        	writeword(pixel,llength);		//Pixel und Anzahl ausgeben
-        	llength=0;						//Lauflänge wieder auf 0
-            lastpixel=1;					//Letztes Pixel auf ungültigen Wert setzen
-        }
-    }
+		if (llength>=maxlen)				//Wenn maximallänge erreicht ist
+		{
+			writeword(pixel,llength);		//Pixel und Anzahl ausgeben
+			llength=0;						//Lauflänge wieder auf 0
+			lastpixel=1;					//Letztes Pixel auf ungültigen Wert setzen
+		}
+	}
 
 	else	//pixel!=lastpixel
 	{
-        if (llength > 0)					//Wenn noch Lauflänge von altem Pixel vorhanden
+		if (llength > 0)					//Wenn noch Lauflänge von altem Pixel vorhanden
 		{
-        	writeword(lastpixel,llength);	//Altes Pixel und Lauflänge ausgeben
+			writeword(lastpixel,llength);	//Altes Pixel und Lauflänge ausgeben
 		}
-        lastpixel=pixel;					//Letzes Pixel = aktuelles Pixel
-        llength=1;							//Mindestens 1 Pixel
+		lastpixel=pixel;					//Letzes Pixel = aktuelles Pixel
+		llength=1;							//Mindestens 1 Pixel
 	}
 }
 
 void make_shot(unsigned char type)
 {
-	int i;					//Zählvariable
-
 	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 'S');			//"Jetzt kommt
 	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 0xFF);			//ein Screenshot"
-
 	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, type);			//Dumptype (PPM, BMP, PBM, CSV...)
 
 	rle_enc(0,1);			//RLE initialisieren
-	for(i=0;i<640*480;i++)			//Für jeden Pixel:
+	for(uint32_t i=0; i<HLEN*VLEN; i++)			//Für jeden Pixel:
 	{
-		rle_enc(Framebuffer[i],0);						//Pixel in RLE schicken
+		rle_enc(Framebuffer[i], 0);						//Pixel in RLE schicken
 	}
+	
 	rle_enc(0,2);					//RLE beenden
 	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 0x73);			//Stopp Kennung
 	SendCharBlock((uart_regs *)GENERIC_UART_BASE_ADDR, 0xaa);			//Muss evtl geändert werden
@@ -1191,6 +1026,51 @@ void change_uart(int32_t selection)
 		case 1: WRITE_INT(CONFIGADCENABLE,1);  break; // Set to debug uart
 		default: break;
 	}
+}
+
+/*
+  * Init buttons. Add for every button a button handler
+  */
+void init_buttons(void)
+{
+	/* Button handlers for submenus, Argument is index of array for submenu */
+	init_bt_handler(&bt_handler_f1, onSubMenu, (void*)0);	
+	init_bt_handler(&bt_handler_f2, onSubMenu, (void*)1);
+	init_bt_handler(&bt_handler_f3, onSubMenu, (void*)2);
+	init_bt_handler(&bt_handler_f4, onSubMenu, (void*)3);
+	init_bt_handler(&bt_handler_f5, onSubMenu, (void*)4);
+	init_bt_handler(&bt_handler_f6, onSubMenu, (void*)5);
+	
+	/* Button handlers for channels */
+	init_bt_handler(&bt_handler_ch0, updateMenu, &men_ch[0]);
+	init_bt_handler(&bt_handler_ch1, updateMenu, &men_ch[1]);
+	
+	/* Button handlers for other menus */
+	init_bt_handler(&bt_handler_modecoupling, updateMenu, &menTriggerTypes);
+	init_bt_handler(&bt_handler_utility, updateMenu, &menUtility);
+	init_bt_handler(&bt_handler_quickprint, updateMenu, &menQuickPrint);
+}
+
+
+/*
+  * Init encoders. Add for every encoder an encoder handler
+  */
+void init_encoders(void)
+{
+	//Call this before encoder_handler()
+	init_default_enc_handlers();
+	
+	/* Voltage encoders */
+	init_enc_handler(&enc[0], KEYADDR0, EN_CH0_VDIV, set_vdiv_ch0);
+	init_enc_handler(&enc[1], KEYADDR0, EN_CH1_VDIV, set_vdiv_ch1);
+	
+	/* Position encoders */
+	
+	/* other encoders */
+	init_enc_handler(&enc[2],  LEDADDR, EN_LEVEL, changeTriggerLevel);
+	init_enc_handler(&enc[3],  LEDADDR, EN_TIME_DIV, setTimebase);
+	init_enc_handler(&enc[4],  LEDADDR, EN_LEFT_RIGHT, setFramePosition);
+	init_enc_handler(&enc[5],  LEDADDR, EN_F, vfValueChanged);
 }
 
 void GUI_Main(void)
@@ -1241,15 +1121,18 @@ void GUI_Main(void)
 	memset(&Ch1[1],0,HLEN*sizeof(uSample));
 	memset(&Ch2[1],0,HLEN*sizeof(uSample));
 
-	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1); //Draw ba	lck background
-	drawGrid();						     //Draws
+	DrawBox(BG_COLOR,0,0,HLEN-1,VLEN-1); //Draw black background
+	drawGrid();					
+	
+	/* Init frontpanel */
+	init_buttons();
+	init_encoders();
 
-	encoder_handler();
 	WRITE_INT(LEDADDR,(1 << RUN_GREEN));
-//	WRITE_INT(CONFIGADCENABLE,1); // set to debug uart
-	titleBarInit();
 
+	titleBarInit();
 	status_bar_init();
+	
 	/* Set timbase, trigger and voltage per div
 	 * Also updates titlebar.
 	 */
@@ -1257,6 +1140,7 @@ void GUI_Main(void)
 	changeTriggerEdge(0);
 	setVoltagePerDiv(CH0,0);
 	setVoltagePerDiv(CH1,0);
+	
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
 
 	Run = TRUE;
@@ -1266,7 +1150,7 @@ void GUI_Main(void)
 	while(1)
 	{
 		readkeys();
-		buttonHandler();
+		button_handler();
 		encoder_handler();
 
 	//	closeSubMenuTime();
@@ -1277,10 +1161,13 @@ void GUI_Main(void)
 			CLR_LED(SINGLE_GREEN);
 			CLR_LED(SINGLE_RED);
 		
-			if (Run == TRUE){
+			if (Run == TRUE)
+			{
 				SET_LED(RUN_GREEN);
 				CLR_LED(RUN_RED);
-			} else {
+			} 
+			else 
+			{
 				SET_LED(RUN_RED);
 				CLR_LED(RUN_GREEN);
 			}
@@ -1307,7 +1194,8 @@ void GUI_Main(void)
 
 		if (((int32_t)ReadData >= (FRAMESIZE+triggerSettings.prefetch)) || (Run == FALSE) )
 		{
-			if (Single == TRUE) {
+			if (Single == TRUE) 
+			{
 				Run = FALSE;
 				Single = FALSE;
 				SET_LED(SINGLE_RED);
