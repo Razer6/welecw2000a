@@ -211,8 +211,9 @@ typedef struct Menu
 sMenu;
 
 extern sMenu *activeMenu;
+extern sSubMenu *active_sub_menu[6];
 
-void updateMenu(sMenu *menu);
+void updateMenu(void *menu_context);
 
 void titleBarInit(void);
 
@@ -220,7 +221,7 @@ void updateTitleBar(enum TITLEMENU type, const char *text);
 
 void status_bar_init(void);
 
-void onSubMenu(sSubMenu *subMenu);
+void onSubMenu(void *subMenu_context);
 
 void actionhandler(void);
 

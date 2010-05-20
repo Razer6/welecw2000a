@@ -37,14 +37,14 @@
 #include "DSO_SFR.h"
 #include "irqmp.h"
 
-static volatile uint32_t IRQMask;
+static volatile uint32_t irq_mask;
 
 /*
  * IRQ Routine for DSO Interrupt which is End of Signalcapturing, Encoder IRQ, Key IRQ 
  */
-void IsrDSO(int irq);
+void isr_dso(int irq);
 
-void InitIRQ(void)
+void init_irq(void)
 {
 	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
 	
@@ -59,11 +59,11 @@ void InitIRQ(void)
 	lr->irqlevel = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));	/* clear level reg */
 	lr->irqclear = -1;	/* clear all pending interrupts */
 	lr->irqmask  = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_TIMER) | (1 << INT_DSO));	/* mask all interrupts */
-	IRQMask = lr->irqmask;
+	irq_mask = lr->irqmask;
 	//lr->irqforce = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));
 	
 	/* Enable DSO Interrupt which is End of Signalcapturing, Encoder IRQ, Key IRQ */
-	catch_interrupt((uint32_t)IsrDSO, INT_DSO);
+	catch_interrupt((uint32_t)isr_dso, INT_DSO);
 
 //	timer_init();
 }
@@ -71,26 +71,26 @@ void InitIRQ(void)
 /*
  * Disables all interrupts
  */
-void DisableIRQ(void)
+void disable_irq(void)
 {
 	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
-	IRQMask = lr->irqmask;
+	irq_mask = lr->irqmask;
 	lr->irqmask = 0;
 }
 
 /*
  * Enables all interrupts
  */
-void ReleaseIRQ(void)
+void release_irq(void)
 {
 	struct irqmp *lr =(struct irqmp*) INTERRUPT_CTL_BASE_ADDR;
-	lr->irqmask = IRQMask;
+	lr->irqmask = irq_mask;
 }
 
 /*
  * IRQ Routine for DSO Interrupt which is End of Signalcapturing, Encoder IRQ, Key IRQ 
  */
-void IsrDSO(int irq)
+void isr_dso(int irq)
 {
 	switch (irq)
 	{

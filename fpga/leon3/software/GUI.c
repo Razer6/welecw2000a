@@ -49,6 +49,7 @@
 
 sSubMenuList *openSubMenuList = NULL;
 sMenu *activeMenu;
+sSubMenu *active_sub_menu[6];
 volatile uint32_t closingTime = 0;
 
 #define CENTER(width, textlen)		((width-textlen)/2)
@@ -95,8 +96,10 @@ void drawButton(sButton *button);
  * The method calls the corresponding function of the submenu.
  */
 
-void onSubMenu(sSubMenu *subMenu)
+void onSubMenu(void *subMenu_context)
 {
+	sSubMenu *subMenu = activeMenu->subMenu[(uint32_t) subMenu_context];
+	
 	if(subMenu == NULL)
 	{
 		return;
@@ -427,8 +430,10 @@ void drawButton(sButton *button)
  * Must be called in the DSO GUI to update the screen
  */
 
-void updateMenu(sMenu *menu)
+void updateMenu(void *menu_context)
 {
+	sMenu *menu = (sMenu*) menu_context;
+	
 	closeSubMenu();
 	resetClosingTime();
 
@@ -451,6 +456,7 @@ void updateMenu(sMenu *menu)
 		for(uint32_t i=0; i<6; i++)
 		{
 			initSubMenu(menu->subMenu[i]);
+			active_sub_menu[i] = menu->subMenu[i];
 		}
 	}
 
