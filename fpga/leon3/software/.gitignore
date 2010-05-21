@@ -5,3 +5,4 @@ depend
 *.S
 *.bin
 Makefile
+*.elf

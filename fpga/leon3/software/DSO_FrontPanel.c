@@ -36,7 +36,7 @@
 
 #ifdef BOARD_COMPILATION
 
-#include "DSO_Frontpanel.h"
+#include "DSO_FrontPanel.h"
 #include "DSO_SFR.h"
 #include "DSO_Misc.h"
 #include "Leon3Uart.h"
