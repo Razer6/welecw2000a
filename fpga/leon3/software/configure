@@ -40,10 +40,10 @@ echo "Default: 1"
 read TX
 case "${TX}" in
 	3)
-	TARGET=SBXX
+	DSO_TARGET=SBXX
 	;;
 	*)
-	TARGET=W2000A
+	DSO_TARGET=W2000A
 	;;
 esac
 
@@ -53,7 +53,7 @@ echo "#Open Source Digital Storage Oscilloscope user compile configurations gene
 echo "DSOPATH=$DSOPATH" >> Makefile
 echo "UART=$UART" >> Makefile
 echo "DSO_BOARD=$DSO_BOARD" >> Makefile
-echo "TARGET=$TARGET" >> Makefile
+echo "DSO_TARGET=$DSO_TARGET" >> Makefile
 echo "include ${DSOPATH}/Makefile.firmware" >> Makefile
 
 cat Makefile
