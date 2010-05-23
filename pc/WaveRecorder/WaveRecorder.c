@@ -48,6 +48,14 @@
 #include "NormalUART.h"
 #include "DebugUart.h"
 
+#include <iostream>
+#include <fstream> 
+#include <string> 
+#include <vector>
+using namespace std;
+
+
+
 
 #define SYNTAX_ERROR 2
 
@@ -79,7 +87,7 @@ void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Pro
 		printf("Success!\n");
 		exit(0);
 	 } else if (Ret == FALSE) {
-		printf("Error in communication!\n"); 
+		printf("Ergbror in communication!\n"); 
 		exit(3);
 	 } else {
 		printf("Syntax error!\n"); 
@@ -87,8 +95,142 @@ void ExitWaveRecorder (uint32_t Ret, void * argtable[], uint32_t TableItems, Pro
 	}	
 }
 
-int main(int argc, char * argv[]) {
-	struct arg_str * UartAddr	= arg_str1("u", "UART", NULL, "Path of serial device, always necessary!");
+const string defaut_interface = "Com4";
+const int default_baudrate = 115200;
+const int default_channels = 2;
+
+string serial_interface = "";
+int baudrate = -1;
+int channels = -1;
+
+const string interface_identifier = "SERIAL_INTERFACE";
+const string baudrate_Iidentifier = "BAUD";
+const string channel_identifier = "CHANNELS";
+
+const string configfile_name = "waverecorder.cfg";
+
+void split(string& str, vector<string>& tokens, string delimiters)
+{
+	string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+	string::size_type pos = str.find_first_of(delimiters, lastPos);
+
+	while (string::npos != pos || string::npos != lastPos)
+	{
+		// Found a token, add it to the vector.
+		tokens.push_back(str.substr(lastPos, pos - lastPos));
+		// Skip delimiters.  Note the "not_of"
+		lastPos = str.find_first_not_of(delimiters, pos);
+		// Find next "non-delimiter"
+		pos = str.find_first_of(delimiters, lastPos);
+	}
+}
+
+
+void parse_config_line(string line)
+{
+	string identifier;
+	string data;
+	vector<string> token;
+	
+	split(line, token, "=");
+	
+	if(token.size() != 2) 	//No valid configuration command
+	{
+		return;
+	}
+	
+	identifier = token[0];
+	data = token[1];
+
+	/*
+	 * Add additional configuration parameters here
+	 */
+	if(identifier.compare(interface_identifier) == 0)
+	{
+		serial_interface = data;
+	} 
+	else if(identifier.compare(baudrate_Iidentifier) == 0)
+	{
+		baudrate = atoi(data.c_str());
+	}
+	else if(identifier.compare(channel_identifier) == 0)
+	{
+		channels = atoi(data.c_str());
+	}
+	else
+	{
+		cout << "Unrecognized argument: " << identifier;
+	}
+}
+	
+	
+
+bool read_configuration(void)
+{
+	ifstream config (configfile_name.c_str());
+	
+	if(config.is_open() == false)
+	{
+		cout << "Couldn't read configuration!" << endl;
+		return false;
+	}
+	
+	string token;
+	while(!config.eof())
+	{
+		getline(config, token);
+		parse_config_line(token);
+	}
+	
+	config.close();
+	
+	if(serial_interface.compare("") == 0 || baudrate == -1 || channels == -1)
+	{
+		cout << "Wrong configuration. Try again." << endl;
+		return false;
+	}
+
+	return true;
+}
+
+void write_configuration(void)
+{
+	ofstream config (configfile_name.c_str());
+	
+	if(config.is_open() == false)
+	{
+		cout << "Couldn't open configfile '" << configfile_name <<"'" << endl;
+		exit(-1);
+	}
+	
+	config << interface_identifier << "=" << serial_interface << endl;
+	config << baudrate_Iidentifier << "=" << baudrate << endl;
+	config << channel_identifier << "=" << channels << endl;
+	
+	config.close();
+}
+
+void init_configuration(void)
+{
+	cout << "Waverecorder Configuration" << endl;
+	
+	cout << "Enter Interface. Default: <" << defaut_interface << ">" << endl;
+	cin >> serial_interface;
+	cout << endl;
+	
+	cout << "Enter Baudrate. Default: <" << default_baudrate << ">" << endl;
+	cin >> baudrate;
+	cout << endl;
+	
+	cout << "Enter Channels. Default: <" << default_channels << ">" << endl;
+	cin >> channels;
+	cout << endl;
+	
+	write_configuration();
+}
+
+int main(int argc, char * argv[]) 
+{
 	struct arg_str * Protocol   = arg_str1("p", "protocol", "[CPU | Debugger]", "Debugger is for devices without a CPU, always necessary!");
 	struct arg_str * Command	= arg_str1("c", "Command",
 			"[TriggerInput | Trigger | AnalogSettings | Capture | ReadAddr | WriteAddr | LoadRun | DumpPC | Message]", 
@@ -103,7 +245,7 @@ int main(int argc, char * argv[]) {
 					"Normal operating mode, PWM offset, GND, lowpass");
 	struct arg_str * AnSrc2Ch3		= arg_str0(NULL,"AnSrc2Ch4","[none | pwm | gnd | lowpass]", 
 					"Normal operating mode, PWM offset, GND, lowpass");
-	struct arg_int * Channels	= arg_int1("n","Channels",	"<n>",	"Number of channels");
+	struct arg_int * Channels	= arg_int0("n","Channels",	"<n>",	"Number of channels");
 	struct arg_int * SampleSize	= arg_int0(NULL,"SampleSize",	"<n>",	"Bits per sample"); 
 	struct arg_int * SampleFS	= arg_int0(NULL,"Fs",		"<n>",	"Sampling frequency"); 
 	struct arg_int * AACFilterStart	= arg_int0(NULL,"AACStart",	"<n>",	"Polyphase decimator start"); 
@@ -140,7 +282,6 @@ int main(int argc, char * argv[]) {
 	struct arg_lit * AnAC_Ch3	= arg_lit0(NULL,"ACModeCh4",		"AC Mode, if not set AC=off");
 	struct arg_file * ForceFile	= arg_file0(NULL,"Ffile","<file>",	"Binary file for the direct DSO CPU access (binary software file)");
 	struct arg_file * WaveFile	= arg_file0("o","WFile","<file>",	"Record data to this file");
-	struct arg_int * BaudRate	= arg_int1("b", "BAUD",		"<n>",	"serial device baudrate, always necessary!");
 	struct arg_lit * help		= arg_lit0("hH","help",			"Displays this help information");
 	struct arg_lit * version    = arg_lit0("vV","version",		"Version");
 	struct arg_end * end = arg_end(20);
@@ -154,7 +295,7 @@ int main(int argc, char * argv[]) {
 	AnDA_OffsetCh0,AnDA_OffsetCh1,AnDA_OffsetCh2,AnDA_OffsetCh3,
 	AnPWM,AnSrc2Ch0,AnSrc2Ch1,AnSrc2Ch2,AnSrc2Ch3,ForceAddr,
 	StackAddr,ForceFile,CapWTime,CapSize,ImageFile,Data,WavForceFS,
-	WaveFile,UartAddr,BaudRate,help,version,end};
+	WaveFile,help,version,end};
 
 	SampleFS->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
 	TriggerLowRef->hdr.scanfn   = (arg_scanfn*)arg_exp_scanfn;
@@ -172,7 +313,11 @@ int main(int argc, char * argv[]) {
 	CapWTime->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
 	CapSize->hdr.scanfn         = (arg_scanfn*)arg_exp_scanfn;
 	Data->hdr.scanfn            = (arg_scanfn*)arg_exp_scanfn;
-	BaudRate->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
+	
+	if(read_configuration() == false) 	//Couldn't read configuration file
+	{
+		init_configuration();
+	}
 
 	int Retry = 0;
     
@@ -190,6 +335,7 @@ int main(int argc, char * argv[]) {
 		printf("WriteAddr \t... Writes -d or --Ffile data to start address Faddr \n"); 
 		printf("LoadRun \t... Loads the software into the FPGA.\n"); 
 		printf("DumpPC \t\t... Generates a backtrace output\n"); 
+		printf("Screenshot \t... Generates a screenshot\n");
 		printf("\nCommand line arguments\n\n");
 		arg_print_glossary(stdout,argtable,0);
 		printf("\n");
@@ -213,18 +359,21 @@ int main(int argc, char * argv[]) {
 
 
 	Protocoll * DSOInterface = 0;
-	if ((strcmp("Debugger",Protocol->sval[0]) == 0) && (UartAddr->count == 1)) {
+	if (strcmp("Debugger",Protocol->sval[0]) == 0) 
+	{
 		DSOInterface = new RemoteSignalCapture(new DebugUart);
-	} else {
+	} else 
+	{
 		DSOInterface = new Request(new NormalUart);
 	}
-	if (DSOInterface == 0) {
+	if (DSOInterface == 0) 
+	{
 		arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 		return 2;
 	}
 
-	if (!DSOInterface->InitComm((char*)UartAddr->sval[0],5000,BaudRate->ival[0])){
-	//	printf("%s:%d\n",__FILE__,__LINE__);
+	if (!DSOInterface->InitComm((char*)serial_interface.c_str(),5000,baudrate))
+	{
 		ExitWaveRecorder(FALSE,argtable,sizeof(argtable)/sizeof(argtable[0]),DSOInterface);
 	}
 
