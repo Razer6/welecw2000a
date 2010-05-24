@@ -62,12 +62,6 @@ struct arg_file * screenshot_filename = arg_file0("f", "File", "<file>", "Filena
 struct arg_end * end_screenshot = arg_end(20);
 void *argtable_screenshot[] = {screenshot, screenshot_filename, end_screenshot}; 
 
-struct arg_lit  * config = arg_lit1(NULL,"config", "Initializes the configuration file");
-struct arg_str * uart = arg_str1("u", "UART", NULL, "UART adress for communication");
-struct arg_int * arg_baudrate = arg_int1("b","Baudrate",NULL,"Baudrate for UART communication");
-struct arg_end * end_config = arg_end(20);
-void *argtable_config[] = {config, uart, arg_baudrate, end_config};
-
 struct arg_lit  * loadrun = arg_lit1(NULL,"loadrun", "Loads a firmware to the Leon3 processor");
 struct arg_file * loadrun_filename = arg_file1("f", "File", "<file>", "Binary file for the direct DSO CPU access (binary software file)");
 struct arg_int * stack_addr = arg_int0("a", "Address", NULL, "Address where stack starts"); 
@@ -165,8 +159,9 @@ void *argtable_capture[]  = {capture, capture_size, capture_wait_time, capture_s
 					
 struct arg_lit * help = arg_lit0("hH","help", "Displays this help information");
 struct arg_lit * version  = arg_lit0("vV","version", "Version");
+struct arg_lit  * config = arg_lit0(NULL,"config", "Initializes the configuration file");
 struct arg_end * end_help = arg_end(20);	
-void *argtable_help[] = {help, version, end_help};
+void *argtable_misc[] = {help, version, config, end_help};
 
 #define SYNTAX_ERROR 2
 
@@ -178,7 +173,6 @@ void exit_waverecorder (uint32_t ret, Protocoll **dso)
 	}
 	
 	/* free all argtables */
-	arg_freetable(argtable_config, sizeof(argtable_config)/sizeof(argtable_config[0]));
 	arg_freetable(argtable_screenshot, sizeof(argtable_screenshot)/sizeof(argtable_screenshot[0]));
 	arg_freetable(argtable_loadrun, sizeof(argtable_loadrun)/sizeof(argtable_loadrun[0]));
 	arg_freetable(argtable_read_addr, sizeof(argtable_read_addr)/sizeof(argtable_read_addr[0]));
@@ -189,7 +183,7 @@ void exit_waverecorder (uint32_t ret, Protocoll **dso)
 	arg_freetable(argtable_analog_input, sizeof(argtable_analog_input)/sizeof(argtable_analog_input[0]));
 	arg_freetable(argtable_message, sizeof(argtable_message)/sizeof(argtable_message[0]));
 	arg_freetable(argtable_capture, sizeof(argtable_capture)/sizeof(argtable_capture[0]));
-	arg_freetable(argtable_help, sizeof(argtable_help)/sizeof(argtable_help[0]));
+	arg_freetable(argtable_misc, sizeof(argtable_misc)/sizeof(argtable_misc[0]));
 	
 	if (ret == true)
 	{
@@ -367,8 +361,6 @@ void init_configuration(void)
 		channels = atoi(line.c_str());
 	}
 	
-	cout << "Config:" << serial_interface <<" " << baudrate << " " << channels;
-	
 	write_configuration();
 }
 
@@ -408,6 +400,7 @@ void open_interface(int type, Protocoll **dso)
 	}
 }
 
+
 int main(int argc, char * argv[]) 
 {
 	/* Override parsing function with a custom one */
@@ -432,7 +425,6 @@ int main(int argc, char * argv[])
 
 	
 	/* Parse all argument tables */
-	int nerrors_config = arg_parse(argc,argv,argtable_config);
 	int nerrors_screenshot = arg_parse(argc,argv,argtable_screenshot);
 	int nerrors_loadrun = arg_parse(argc,argv,argtable_loadrun);
 	int nerrors_read_adress = arg_parse(argc,argv,argtable_read_addr);
@@ -443,7 +435,7 @@ int main(int argc, char * argv[])
 	int nerrors_analog_input = arg_parse(argc,argv, argtable_analog_input); 
 	int nerrors_message = arg_parse(argc,argv, argtable_message); 
 	int nerrors_capture = arg_parse(argc,argv, argtable_capture); 
-	int nerrors_help = arg_parse(argc,argv, argtable_help); 
+	int nerrors_misc = arg_parse(argc,argv, argtable_misc); 
 	
 	Protocoll * DSOInterface = NULL;
 	
@@ -452,43 +444,39 @@ int main(int argc, char * argv[])
 		init_configuration();
 	}
 	
-	if(nerrors_help == 0)
+	if(nerrors_misc == 0)
 	{
 		if(help->count != 0)
 		{
-			printf("\nDSO specific commands:\n\n");
+			cout << "DSO specific commands:" << endl <<endl;
 
 			arg_print_glossary(stdout,argtable_trigger_input,0);
 			cout << endl;
-			
 			arg_print_glossary(stdout,argtable_trigger, 0);
 			cout << endl << endl;
-			
 			arg_print_glossary(stdout,argtable_analog_input,0);
 			cout << endl << endl;
-			
 			arg_print_glossary(stdout,argtable_capture,0);
 			cout << endl << endl;
-			
 			arg_print_glossary(stdout,argtable_message,0);
 			cout << endl << endl;
-			
 			arg_print_glossary(stdout,argtable_screenshot,0);
 			cout << endl << endl;
 			
-			
-			printf("\nLEON3 Debugging commands:\n\n");
+			cout << "LEON3 Debugging commands:" << endl << endl;
 			
 			arg_print_glossary(stdout,argtable_read_addr,0);
 			cout << endl << endl;
-			
 			arg_print_glossary(stdout,argtable_write_addr,0);
 			cout << endl << endl;
-			
 			arg_print_glossary(stdout,argtable_loadrun,0);
 			cout << endl << endl;
-			
 			arg_print_glossary(stdout,argtable_debug,0);
+			cout << endl << endl;
+			
+			cout << "Miscellaneous commands:" << endl << endl;
+			
+			arg_print_glossary(stdout,argtable_misc,0);
 			cout << endl << endl;
 		}
 		
@@ -499,12 +487,12 @@ int main(int argc, char * argv[])
 			cout << "\tRobert Schilling" << endl;
 			cout << "Remote control for Open Source Digital Storage Scopes" << endl;
 		}
+		
+		if(config->count != 0)
+		{
+			init_configuration();
+		}
 		exit_waverecorder(true, &DSOInterface);
-	}
-	
-	if(nerrors_config == 0)
-	{
-		cout << "Config" << endl;
 	}
 	
 	if(nerrors_loadrun == 0)
@@ -517,7 +505,7 @@ int main(int argc, char * argv[])
 		
 		if(stack_addr->count != 0)
 		{
-			stack = stack_addr->->ival[0];
+			stack = stack_addr->ival[0];
 		}
 
 		ret = DSOInterface->LoadProgram(loadrun_filename->filename[0], base_addr, stack);
