@@ -70,8 +70,9 @@ void *argtable_config[] = {config, uart, arg_baudrate, end_config};
 
 struct arg_lit  * loadrun = arg_lit1(NULL,"loadrun", "Loads a firmware to the Leon3 processor");
 struct arg_file * loadrun_filename = arg_file1("f", "File", "<file>", "Binary file for the direct DSO CPU access (binary software file)");
+struct arg_int * stack_addr = arg_int0("a", "Address", NULL, "Address where stack starts"); 
 struct arg_end * end_loadrun = arg_end(20);
-void *argtable_loadrun[] = {loadrun, loadrun_filename, end_loadrun};
+void *argtable_loadrun[] = {loadrun, loadrun_filename, stack_addr, end_loadrun};
 
 struct arg_lit  * read_addr = arg_lit1(NULL,"readaddr", "Reads <Size> Dwords from memory");
 struct arg_int * address_read = arg_int1("a", "Address", NULL, "Address to start from"); 	
@@ -204,7 +205,7 @@ void exit_waverecorder (uint32_t ret, Protocoll **dso)
 	}	
 }
 
-const string defaut_interface = "Com4";
+const string defaut_serial_interface = "Com4";
 const int default_baudrate = 115200;
 const int default_channels = 2;
 
@@ -323,19 +324,47 @@ void write_configuration(void)
 
 void init_configuration(void)
 {
+	string line;
+	
 	cout << "Waverecorder Configuration" << endl;
 	
-	cout << "Enter Interface. Default: <" << defaut_interface << ">" << endl;
-	cin >> serial_interface;
-	cout << endl;
+	cout << "Enter Interface. Default: <" << defaut_serial_interface << ">" << endl;
+	getline(cin, line);
 	
+	if(line.compare("") == 0)
+	{
+		serial_interface = defaut_serial_interface;
+	}
+	else
+	{
+		serial_interface = line;
+	}
+
 	cout << "Enter Baudrate. Default: <" << default_baudrate << ">" << endl;
-	cin >> baudrate;
-	cout << endl;
+	getline(cin, line);
+	
+	if(line.compare("") == 0)
+	{
+		baudrate = default_baudrate;
+	}
+	else
+	{
+		baudrate = atoi(line.c_str());
+	}
 	
 	cout << "Enter Channels. Default: <" << default_channels << ">" << endl;
-	cin >> channels;
-	cout << endl;
+	getline(cin, line);
+	
+	if(line.compare("") == 0)
+	{
+		channels = default_channels;
+	}
+	else
+	{
+		channels = atoi(line.c_str());
+	}
+	
+	cout << "Config:" << serial_interface <<" " << baudrate << " " << channels;
 	
 	write_configuration();
 }
@@ -482,6 +511,11 @@ int main(int argc, char * argv[])
 		uint32_t ret;
 		
 		open_interface(DEBUG_INTERFACE, &DSOInterface);
+		
+		if(stack_addr->count != 0)
+		{
+			stack = stack_addr->->ival[0];
+		}
 
 		ret = DSOInterface->LoadProgram(loadrun_filename->filename[0], base_addr, stack);
 		
