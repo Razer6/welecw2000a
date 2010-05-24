@@ -1,16 +1,11 @@
-##!/bin/bash
+#!/bin/bash
 # Author: Alexander Lindert <alexander_lindert@gmx.at>
+#         Crazor <crazor@gmail.com>
 # Copyright 2010
 # License GPLv2
 
 echo "Open Source Digital Storage Oscilloscope configure script"
-echo "Enter software the folder location if this file was moved to an external location!"
-echo "     (eg. ../../../fpga/software)"
-echo "Default: ."
-read DSOPATH
-if [ -z "${DSOPATH}" ]; then
-	DSOPATH="."
-fi
+DSOPATH=$(dirname "${BASH_SOURCE[0]}")
 
 echo "Enter your (serial) connection to program the oscilloscope"
 echo "Some suggestions available on your system:"
@@ -40,10 +35,10 @@ echo "Default: 1"
 read TX
 case "${TX}" in
 	3)
-	TARGET=SBXX
+	DSO_TARGET=SBXX
 	;;
 	*)
-	TARGET=W2000A
+	DSO_TARGET=W2000A
 	;;
 esac
 
@@ -53,7 +48,7 @@ echo "#Open Source Digital Storage Oscilloscope user compile configurations gene
 echo "DSOPATH=$DSOPATH" >> Makefile
 echo "UART=$UART" >> Makefile
 echo "DSO_BOARD=$DSO_BOARD" >> Makefile
-echo "TARGET=$TARGET" >> Makefile
+echo "DSO_TARGET=$DSO_TARGET" >> Makefile
 echo "include ${DSOPATH}/Makefile.firmware" >> Makefile
 
 cat Makefile

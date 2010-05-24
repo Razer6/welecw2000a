@@ -13,8 +13,6 @@ CHANNELS   := 2
 PROTOCOL   := Debugger
 
 # Defines for conditional compilation
-DSO_TARGET := W2000A
-DSO_BOARD  := BOARD_COMPILATION
 CPU        := LEON3
 DEFINES    := $(CPU) $(DSO_TARGET) $(DSO_BOARD)
 DEFINES    := $(addprefix -D,$(DEFINES))
@@ -32,15 +30,17 @@ CFLAGS += -Werror               # Error out on warnings
 CFLAGS += -Wno-unused-parameter # Do not warn about unused function parameters
 
 # Target variables
-SOURCE_DIRS  := . thirdparty fonts
+
+SOURCE_DIRS  := $(DSOPATH) $(DSOPATH)/thirdparty $(DSOPATH)/fonts
 INCLUDE_DIRS := $(addprefix -I,$(SOURCE_DIRS))
-INCLUDE_DIRS += -I../grlib-W2000A/software/leon3
+INCLUDE_DIRS += -I$(DSOPATH)/../grlib-W2000A/software/leon3
 CFLAGS       += $(INCLUDE_DIRS)
 
 SOURCES      := $(foreach DIR, $(SOURCE_DIRS), $(wildcard $(DIR)/*.c))
 HEADERS      := $(foreach DIR, $(SOURCE_DIRS), $(wildcard $(DIR)/*.h))
-OBJS	     := $(SOURCES:.c=.o)
-ASMS	     := $(SOURCES:.c=.s)
+OBJ_TEMP     := $(notdir $(SOURCES)) 
+OBJS	     := $(OBJ_TEMP:%.c=%.o)
+ASMS	     := $(OBJ_TEMP:%.c=%.s)
 OBJDIR       := objs
 
 vpath %.c $(SOURCE_DIRS)
@@ -52,11 +52,11 @@ LEONADDR     := 0x80000500
 
 CABLE        := -c "Nios II Evaluation Board"
 MODE         := -m JTAG
-SOF          := ../Scope/synW2000A/W2000A.sof
+SOF          := $(DSOPATH)/../Scope/synW2000A/W2000A.sof
 PROGRAM      := -o p\;$(SOF)
 
 # Files to be cleaned
-CLEAN := $(OBJDIR) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET) $(TARGET:.bin=.elf)
+CLEAN := $(OBJDIR) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET) $(TARGET:.bin=.elf) $(DUMP)
 
 # Force make to forget all its builtin rules
 .SUFFIXES:
