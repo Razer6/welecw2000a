@@ -172,7 +172,10 @@ void *argtable_help[] = {help, version, end_help};
 
 void exit_waverecorder (uint32_t ret, Protocoll **dso)
 {
-	delete *dso;
+	if(*dso != NULL)
+	{
+		delete *dso;
+	}
 	
 	/* free all argtables */
 	arg_freetable(argtable_config, sizeof(argtable_config)/sizeof(argtable_config[0]));
