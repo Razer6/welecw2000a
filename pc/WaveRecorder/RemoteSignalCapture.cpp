@@ -221,8 +221,8 @@ uint32_t RemoteSignalCapture::Send(
 		uint32_t *Data, 
 		uint32_t & Length){
 	uint32_t Retrys = SendRetry(Addr,Data,Length);
-	if (Retrys == cMaxRetrys) return FALSE;
-	return FALSE;
+	if (Retrys == cMaxRetrys) return false;
+	return true;
 }
 
 
