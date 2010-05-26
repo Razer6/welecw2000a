@@ -710,7 +710,7 @@ int main(int argc, char * argv[])
 		parse_optional_arguments();
 		open_interface(DEBUG_INTERFACE, &DSOInterface);
 		
-		ret = DSOInterface->ReceiveSamples(-1, 1, 0, &fastMode, &buffer);
+		ret = DSOInterface->ReceiveSamples((uint32_t)-1, 1, 0, &fastMode, &buffer);
 		exit_waverecorder(ret, &DSOInterface);
 	}
 	
