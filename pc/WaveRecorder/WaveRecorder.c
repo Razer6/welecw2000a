@@ -353,11 +353,12 @@ void init_configuration(void)
 		config_baudrate = atoi(line.c_str());
 	}
 	
-	cout << "Plattform, Default: <" << config_default_plattform << ">, Possible Values: W2012, W2022, W20x2, W2014, W2024, W20x4" << endl;
+	cout << "Plattform, Default: <" << config_default_plattform << ">, Possible Values: W2012, W2022, W20x2, W2014, W2024, W20x4, SBX" << endl;
 	cout << "Enter Plattform: ";
 	getline(cin, line);
+	config_plattform = line;
 	
-	if(line.compare("") == 0)
+	if(config_plattform.compare("") == 0)
 	{
 		config_plattform = config_default_plattform;
 		config_channels = config_default_channels;
@@ -368,14 +369,12 @@ void init_configuration(void)
 	{
 		if((config_plattform.compare("W2012")==0) || (config_plattform.compare("W2022")==0) || (config_plattform.compare("W20x2")==0))
 		{
-			config_plattform = config_default_plattform;
 			config_channels = config_default_channels;
 			config_base_addr = config_default_base_addr;
 			config_stack_addr = config_default_stack_addr;
 		}
 		else if((config_plattform.compare("W2014")==0) || (config_plattform.compare("W2024")==0) || (config_plattform.compare("W20x4")==0))
 		{
-			config_plattform = "W2014";
 			config_channels = 4;
 			config_base_addr = config_default_base_addr;
 			config_stack_addr = config_default_stack_addr;
@@ -427,27 +426,6 @@ void open_interface(int type, Protocoll **dso)
 		break;
 	}
 }
-
-#if 0
-void ram_check(Protocoll **dso, uint32_t start_address)
-{
-	uint32_t address = start_address;
-	uint32_t value = 1;
-	uint32_t read;
-	
-	while(1)
-	{
-		*dso->Send(address, (uint32_t*)&value, 1);
-		*dso->Receive(address, (uint32_t*)&read, 1);
-		
-		start_address += 4;
-	}
-	while(read == value);
-	
-	cout << "Wrong comapare at " << address-4 << endl;
-	
-}
-#endif
 
 void parse_optional_arguments(void)
 {
@@ -524,10 +502,8 @@ int main(int argc, char * argv[])
 	
 	Protocoll * DSOInterface = NULL;
 	
-	if(read_configuration() == false) 	//Couldn't read configuration file
-	{
-		init_configuration();
-	}
+	
+	/* Firstly parse all arguments which don't need options out of the configuration file */
 
 	if(nerrors_misc == 0)
 	{
@@ -578,6 +554,12 @@ int main(int argc, char * argv[])
 			init_configuration();
 		}
 		exit_waverecorder(true, &DSOInterface);
+	}
+	
+	/* Parse configuration file and inititialize configuration if neccesary */
+	if(read_configuration() == false) 
+	{
+		init_configuration();
 	}
 	
 	if(nerrors_loadrun == 0)
