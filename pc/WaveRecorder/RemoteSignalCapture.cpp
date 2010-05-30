@@ -221,8 +221,8 @@ uint32_t RemoteSignalCapture::Send(
 		uint32_t *Data, 
 		uint32_t & Length){
 	uint32_t Retrys = SendRetry(Addr,Data,Length);
-	if (Retrys == cMaxRetrys) return FALSE;
-	return FALSE;
+	if (Retrys == cMaxRetrys) return false;
+	return true;
 }
 
 
@@ -487,7 +487,7 @@ uint32_t RemoteSignalCapture::LoadProgram(
 	Send((uintptr_t)&lr->irqmask,0);	/* mask all interrupts */
 	Send((uintptr_t)&lr->irqlevel,0);	/* clear level reg */
 	Send((uintptr_t)&lr->irqforce,0);
-	Send((uintptr_t)&lr->irqclear,-1);	/* clear all pending interrupts */
+	Send((uintptr_t)&lr->irqclear,0xFFFFFFFF);	/* clear all pending interrupts */
 	printf("Setting the console uart in loop back mode\n");
 	Send(GENERIC_UART_BASE_ADDR+0x8,0xa3);
 	printf("Release Leon3 from single step debugging\n");
