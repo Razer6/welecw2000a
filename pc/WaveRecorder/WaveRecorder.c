@@ -498,61 +498,60 @@ int main(int argc, char * argv[])
 	int nerrors_analog_input = arg_parse(argc,argv, argtable_analog_input); 
 	int nerrors_message = arg_parse(argc,argv, argtable_message); 
 	int nerrors_capture = arg_parse(argc,argv, argtable_capture); 
-	int nerrors_misc = arg_parse(argc,argv, argtable_misc); 
+	arg_parse(argc,argv, argtable_misc); 
 	
 	Protocoll * DSOInterface = NULL;
 	
 	
 	/* Firstly parse all arguments which don't need options out of the configuration file */
-
-	if(nerrors_misc == 0)
+	if(help->count != 0)
 	{
-		if(help->count != 0)
-		{
-			cout << "DSO specific commands:" << endl <<endl;
+		cout << "Waverecorder Help" << endl;
+		cout << "DSO specific commands:" << endl <<endl;
 
-			arg_print_glossary(stdout,argtable_trigger_input,0);
-			cout << endl;
-			arg_print_glossary(stdout,argtable_trigger, 0);
-			cout << endl << endl;
-			arg_print_glossary(stdout,argtable_analog_input,0);
-			cout << endl << endl;
-			arg_print_glossary(stdout,argtable_capture,0);
-			cout << endl << endl;
-			arg_print_glossary(stdout,argtable_message,0);
-			cout << endl << endl;
-			arg_print_glossary(stdout,argtable_screenshot,0);
-			cout << endl << endl;
-			
-			cout << "LEON3 Debugging commands:" << endl << endl;
-			
-			arg_print_glossary(stdout,argtable_read_addr,0);
-			cout << endl << endl;
-			arg_print_glossary(stdout,argtable_write_addr,0);
-			cout << endl << endl;
-			arg_print_glossary(stdout,argtable_loadrun,0);
-			cout << endl << endl;
-			arg_print_glossary(stdout,argtable_debug,0);
-			cout << endl << endl;
-			
-			cout << "Miscellaneous commands:" << endl << endl;
-			
-			arg_print_glossary(stdout,argtable_misc,0);
-			cout << endl << endl;
-		}
+		arg_print_glossary(stdout,argtable_trigger_input,0);
+		cout << endl;
+		arg_print_glossary(stdout,argtable_trigger, 0);
+		cout << endl << endl;
+		arg_print_glossary(stdout,argtable_analog_input,0);
+		cout << endl << endl;
+		arg_print_glossary(stdout,argtable_capture,0);
+		cout << endl << endl;
+		arg_print_glossary(stdout,argtable_message,0);
+		cout << endl << endl;
+		arg_print_glossary(stdout,argtable_screenshot,0);
+		cout << endl << endl;
 		
-		if(version->count != 0)
-		{
-			cout << "Version 0.2, compile time: " << __DATE__ << " " << __TIME__ << " (development stage)" << endl;
-			cout << "Author: Alexander Lindert" << endl;
-			cout << "\tRobert Schilling" << endl;
-			cout << "Remote control for Open Source Digital Storage Scopes" << endl;
-		}
+		cout << "LEON3 Debugging commands:" << endl << endl;
 		
-		if(config->count != 0)
-		{
-			init_configuration();
-		}
+		arg_print_glossary(stdout,argtable_read_addr,0);
+		cout << endl << endl;
+		arg_print_glossary(stdout,argtable_write_addr,0);
+		cout << endl << endl;
+		arg_print_glossary(stdout,argtable_loadrun,0);
+		cout << endl << endl;
+		arg_print_glossary(stdout,argtable_debug,0);
+		cout << endl << endl;
+		
+		cout << "Miscellaneous commands:" << endl << endl;
+		
+		arg_print_glossary(stdout,argtable_misc,0);
+		cout << endl << endl;
+		exit_waverecorder(true, &DSOInterface);
+	}
+	
+	if(version->count != 0)
+	{
+		cout << "Version 0.2, compile time: " << __DATE__ << " " << __TIME__ << " (development stage)" << endl;
+		cout << "Author: Alexander Lindert" << endl;
+		cout << "\tRobert Schilling" << endl;
+		cout << "Remote control for Open Source Digital Storage Scopes" << endl;
+		exit_waverecorder(true, &DSOInterface);
+	}
+	
+	if(config->count != 0)
+	{
+		init_configuration();
 		exit_waverecorder(true, &DSOInterface);
 	}
 	
