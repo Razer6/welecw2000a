@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : LedsKeys-p.vhd
+-- File	      : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-11-18
+-- Last update: 2010-05-16
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -30,8 +30,8 @@
 --  Please contact me per mail.
 -------------------------------------------------------------------------------
 -- Revisions  :
--- Date        Version 
--- 2009-02-14  1.0      
+-- Date	       Version 
+-- 2009-02-14  1.0	
 -------------------------------------------------------------------------------
 
 
@@ -43,100 +43,90 @@ library DSO;
 use DSO.Global.all;
 
 package pLedsKeysAnalogSettings is
-  constant cNobCounterSize    : natural := 3;
-  constant cAnalogAddrLength  : natural := 3;
-  constant cAnalogShiftLength : natural := 24;
+  constant cNobCounterSize : natural := 3;
 
   type aShiftOut is record
-                      SerialClk     : std_ulogic;
-                      nResetSync    : std_ulogic;
-                      Data          : std_ulogic;
-                      ValidStrobe   : std_ulogic;
-                      nOutputEnable : std_ulogic;
-                    end record;
-  
+    SerialClk	  : std_ulogic;
+    nResetSync	  : std_ulogic;
+    Data	  : std_ulogic;
+    ValidStrobe	  : std_ulogic;
+    nOutputEnable : std_ulogic;
+  end record;
+
   type aShiftIn is record
-                     SerialClk    : std_ulogic;
-                     nFetchStrobe : std_ulogic;
-                     nChipEnable  : std_ulogic;
-                   end record;
-  
+    SerialClk	 : std_ulogic;
+    nFetchStrobe : std_ulogic;
+    nChipEnable	 : std_ulogic;
+  end record;
+
   type aKeys is record
-                  BTN_F1           : std_ulogic;
-                  BTN_F2           : std_ulogic;
-                  BTN_F3           : std_ulogic;
-                  BTN_F4           : std_ulogic;
-                  BTN_F5           : std_ulogic;
-                  BTN_F6           : std_ulogic;
-                  BTN_MATH         : std_ulogic;
-                  BTN_CH0          : std_ulogic;
-                  BTN_CH1          : std_ulogic;
-                  BTN_CH2          : std_ulogic;
-                  BTN_CH3          : std_ulogic;
-                  BTN_MAINDEL      : std_ulogic;
-                  BTN_RUNSTOP      : std_ulogic;
-                  BTN_SINGLE       : std_ulogic;
-                  BTN_CURSORS      : std_ulogic;
-                  BTN_QUICKMEAS    : std_ulogic;
-                  BTN_ACQUIRE      : std_ulogic;
-                  BTN_DISPLAY      : std_ulogic;
-                  BTN_EDGE         : std_ulogic;
-                  BTN_MODECOUPLING : std_ulogic;
-                  BTN_AUTOSCALE    : std_ulogic;
-                  BTN_SAVERECALL   : std_ulogic;
-                  BTN_QUICKPRINT   : std_ulogic;
-                  BTN_UTILITY      : std_ulogic;
-                  BTN_PULSEWIDTH   : std_ulogic;
-                  BTN_X1           : std_ulogic;
-                  BTN_X2           : std_ulogic;
-                  EN_TIME_DIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_F             : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_LEFT_RIGHT    : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_LEVEL         : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH0_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH1_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH2_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH3_UPDN      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH0_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH1_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH2_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                  EN_CH3_VDIV      : std_ulogic_vector(cNobCounterSize-1 downto 0);
-                end record;
-  
+    BTN_F1	     : std_ulogic;
+    BTN_F2	     : std_ulogic;
+    BTN_F3	     : std_ulogic;
+    BTN_F4	     : std_ulogic;
+    BTN_F5	     : std_ulogic;
+    BTN_F6	     : std_ulogic;
+    BTN_MATH	     : std_ulogic;
+    BTN_CH0	     : std_ulogic;
+    BTN_CH1	     : std_ulogic;
+    BTN_CH2	     : std_ulogic;
+    BTN_CH3	     : std_ulogic;
+    BTN_MAINDEL	     : std_ulogic;
+    BTN_RUNSTOP	     : std_ulogic;
+    BTN_SINGLE	     : std_ulogic;
+    BTN_CURSORS	     : std_ulogic;
+    BTN_QUICKMEAS    : std_ulogic;
+    BTN_ACQUIRE	     : std_ulogic;
+    BTN_DISPLAY	     : std_ulogic;
+    BTN_EDGE	     : std_ulogic;
+    BTN_MODECOUPLING : std_ulogic;
+    BTN_AUTOSCALE    : std_ulogic;
+    BTN_SAVERECALL   : std_ulogic;
+    BTN_QUICKPRINT   : std_ulogic;
+    BTN_UTILITY	     : std_ulogic;
+    BTN_PULSEWIDTH   : std_ulogic;
+    BTN_X1	     : std_ulogic;
+    BTN_X2	     : std_ulogic;
+    EN_TIME_DIV	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_F	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_LEFT_RIGHT    : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_LEVEL	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH0_UPDN	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH1_UPDN	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH2_UPDN	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH3_UPDN	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH0_VDIV	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH1_VDIV	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH2_VDIV	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+    EN_CH3_VDIV	     : std_ulogic_vector(cNobCounterSize-1 downto 0);
+  end record;
+
   type aLeds is record
-                  SetLeds        : std_ulogic;
-                  LED_CH0        : std_ulogic;  -- Button [Channel 1]
-                  LED_CH1        : std_ulogic;  -- Button [Channel 2]
-                  LED_CH2        : std_ulogic;  -- Button [Channel 3]
-                  LED_CH3        : std_ulogic;  -- Button [Channel 4]
-                  LED_MATH       : std_ulogic;  -- Button [Math]       
-                  LED_QUICKMEAS  : std_ulogic;  -- Button [Quick Meass]
-                  LED_CURSORS    : std_ulogic;  -- Button [Cursors]
-                  LED_WHEEL      : std_ulogic;  -- Function Knob
-                  LED_PULSEWIDTH : std_ulogic;  -- Button [Pulse Width]
-                  LED_EDGE       : std_ulogic;  -- Button [Edge]
-                  RUN_GREEN      : std_ulogic;  -- Button [Run/Stop] Red Led
-                  RUN_RED        : std_ulogic;  -- Button [Run/Stop] Green Led
-                  SINGLE_GREEN   : std_ulogic;  -- Button [Single] Green Led
-                  SINGLE_RED     : std_ulogic;  -- Button [Single] Red Led
-                end record;
-  
-  type aAnalogSettings is record
-                            Set_PWM_Offset    : std_ulogic;
-                            EnableKeyClock    : std_ulogic;
-                            EnableProbeClock  : std_ulogic;
-                            EnableProbeStrobe : std_ulogic;
-                            Set               : std_ulogic;
-                            Addr              : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
-                            Data              : std_ulogic_vector(cAnalogShiftLength-1 downto 0);
-                          end record;
-  
+    EnableKeyClock : std_ulogic;
+    SetLeds	   : std_ulogic;
+    LED_CH0	   : std_ulogic;	-- Button [Channel 1]
+    LED_CH1	   : std_ulogic;	-- Button [Channel 2]
+    LED_CH2	   : std_ulogic;	-- Button [Channel 3]
+    LED_CH3	   : std_ulogic;	-- Button [Channel 4]
+    LED_MATH	   : std_ulogic;	-- Button [Math]       
+    LED_QUICKMEAS  : std_ulogic;	-- Button [Quick Meass]
+    LED_CURSORS	   : std_ulogic;	-- Button [Cursors]
+    LED_WHEEL	   : std_ulogic;	-- Function Knob
+    LED_PULSEWIDTH : std_ulogic;	-- Button [Pulse Width]
+    LED_EDGE	   : std_ulogic;	-- Button [Edge]
+    RUN_GREEN	   : std_ulogic;	-- Button [Run/Stop] Red Led
+    RUN_RED	   : std_ulogic;	-- Button [Run/Stop] Green Led
+    SINGLE_GREEN   : std_ulogic;	-- Button [Single] Green Led
+    SINGLE_RED	   : std_ulogic;	-- Button [Single] Red Led
+  end record;
+
   type aAnalogSettingsOut is record
-                               SerialClk : std_ulogic;
-                               Addr      : std_ulogic_vector(cAnalogAddrLength-1 downto 0);
-                               Enable    : std_ulogic;
-                               Data      : std_ulogic;
-                               PWM       : std_ulogic;
-                             end record;
+    PWM_Offset	     : aByte;
+    SerialClk	     : std_ulogic;
+    EnableProbeClock : std_ulogic;
+    Addr	     : std_ulogic_vector(2 downto 0);
+    Enable	     : std_ulogic;
+    Data	     : std_ulogic;
+  end record;
   
 end;

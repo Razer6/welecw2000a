@@ -305,29 +305,105 @@ uint32_t CalibrateDAC(uint32_t Ch)
 	return 0;
 }
 
-uint32_t SetDACOffset(uint32_t Ch, uint32_t Offset)
-{
-	int32_t temp;
+void DisableDACs(){
+	volatile uint32_t RegValue = READ_INT(ANALOGSETTINGSADDR);
+	uint32_t i = 0;
+	uint32_t data = 0x00800000;
+	RegValue |= (7 << ANALOGSETTINGS_MUXADDR_OFFSET);
+	RegValue &= ~(ANC_DAC0 << ANALOGSETTINGS_MUXADDR_OFFSET);
+	RegValue |= (1 << ANALOGSETTINGS_SERIALCLK); 
+	WaitMs(1);
+	RegValue &= ~(1 << ANALOGSETTINGS_ENABLE); //low active chip select double inverted
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitMs(1);
+
+// Write data
+	for (i = 0;i < 24; ++i)
+	{
+		RegValue |= (1 << ANALOGSETTINGS_SERIALCLK);
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+		if ((data & (1 << 23)) != 0 ){
+			RegValue &= ~(1 << ANALOGSETTINGS_DATA);
+		} else {	 	 
+			RegValue |= (1 << ANALOGSETTINGS_DATA);
+		}
+		data = data << 1;
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+
+		RegValue &= ~(1 << ANALOGSETTINGS_SERIALCLK);
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+	}
+// output strobe
+	RegValue |= (1 << ANALOGSETTINGS_ENABLE);
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitMs(1);
+}
+
+uint32_t SetDACOffset(uint32_t Ch, int32_t Offset){
+	volatile uint32_t RegValue = READ_INT(ANALOGSETTINGSADDR);
+	uint32_t i = 0;
+	int32_t data = 0;
+	switch(Offset) {
+	case  2: Offset =   10; break;
+	case  3: Offset =  100; break;
+	case -2: Offset =  -10; break;
+	case -3:
+	case -4: Offset = -100; break;
+	default:
+		Offset = Offset;
+	}	
 	switch(Ch)
 	{
 		case 0:
-			temp = SET_OFFSET_CH0(Offset);
+			data = SET_OFFSET_CH0(Offset);
 			break;
 		case 1:
-			temp = SET_OFFSET_CH1(Offset);
+			data = SET_OFFSET_CH1(Offset);
 			break;
 		default:
 			return FALSE;
 	}
-/*	WRITE_INT(ANALOGSETTINGSADDR,temp);
-	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));*/
+// All signals are inversed by transistors
+	RegValue |= (7 << ANALOGSETTINGS_MUXADDR_OFFSET);
+	RegValue &= ~(ANC_DAC0 << ANALOGSETTINGS_MUXADDR_OFFSET);
+	RegValue |= (1 << ANALOGSETTINGS_SERIALCLK); 
+	WaitMs(1);
+	RegValue |= (1 << ANALOGSETTINGS_ENABLE); //low active chip select double inverted
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitMs(1);
+// Write data
+	for (i = 0;i < 24; ++i)
+	{
+		RegValue |= (1 << ANALOGSETTINGS_SERIALCLK);
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+		if ((data & (1 << 23)) != 0 ){
+			RegValue &= ~(1 << ANALOGSETTINGS_DATA);
+		} else {	 	 
+			RegValue |= (1 << ANALOGSETTINGS_DATA);
+		}
+		data = data << 1;
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+	//	RegValue &= ~(1 << ANALOGSETTINGS_SERIALCLK);
+		RegValue |= (7 << ANALOGSETTINGS_MUXADDR_OFFSET);
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+	}
+// output strobe
+	RegValue &= ~(1 << ANALOGSETTINGS_ENABLE);
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitMs(1);
 	return TRUE;
 }
 
 /* 12 bit DAC compability with the 16 bit DACs of this family */
 #define MIN_DAC_COUNT 16
 
-void AddDACOffset(uint32_t Ch, uint32_t Offset)
+void AddDACOffset(uint32_t Ch, int32_t Offset)
 {
 	static int32_t dac[4] = {16384, 16384, 16384, 16384};
 	if((Ch < 4) && (Offset != 0))
@@ -339,9 +415,47 @@ void AddDACOffset(uint32_t Ch, uint32_t Offset)
 			dac[Ch] = 0;
 		SetDACOffset(Ch, dac[Ch]);
 	}
+//	DisableDACs();
 }
 
 
+// All signals are inversed by transistors
+void SetExternalAnalogRegister(uint32_t addr, uint32_t data){
+	volatile uint32_t RegValue = READ_INT(ANALOGSETTINGSADDR);
+	uint32_t i = 0;
+// Setting Mux addr
+	RegValue |= (7 << ANALOGSETTINGS_MUXADDR_OFFSET);
+	RegValue &= ~(addr << ANALOGSETTINGS_MUXADDR_OFFSET);
+	RegValue |= (1 << ANALOGSETTINGS_ENABLE); // disabling output strobe
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitMs(1);
+// Write data
+	for (i = 0;i < 16; ++i){
+		RegValue |= (1 << ANALOGSETTINGS_SERIALCLK);
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+		if ((data & (1 << 15)) != 0 ){
+			RegValue &= ~(1 << ANALOGSETTINGS_DATA);
+		} else {	 	 
+			RegValue |= (1 << ANALOGSETTINGS_DATA);
+		}
+		data = data << 1;
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+		RegValue &= ~(1 << ANALOGSETTINGS_SERIALCLK);
+		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+		WaitMs(1);
+	}
+// output strobe
+	RegValue &= ~(1 << ANALOGSETTINGS_ENABLE);
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitMs(1);
+	RegValue |= (1 << ANALOGSETTINGS_ENABLE);
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitMs(1);
+
+
+}
 
 
 
@@ -354,7 +468,7 @@ void AddDACOffset(uint32_t Ch, uint32_t Offset)
 
 uint32_t SetAnalogInputRange(uint32_t ch, SetAnalog *settings)
 {
-	uint32_t bank = 0, temp = 0;
+	uint32_t temp = 0;
 	uint32_t analogRegister;
 
 	if(ch > CH1)
@@ -408,10 +522,10 @@ uint32_t SetAnalogInputRange(uint32_t ch, SetAnalog *settings)
 		analogRegister = ANC_CH1;
 	}
 
-	bank = SET_ANALOG(analogRegister) | temp;
+/*	bank = SET_ANALOG(analogRegister) | temp;
 	WRITE_INT(ANALOGSETTINGSADDR, bank);
-	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));
-
+	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));*/
+	SetExternalAnalogRegister(analogRegister, temp);
 	return TRUE;
 }
 

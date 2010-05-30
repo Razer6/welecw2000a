@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Project    : Welec W2000A 
 -------------------------------------------------------------------------------
--- File       : SpecialFunctionRegister-p.vhd
+-- File	      : SpecialFunctionRegister-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-11-15
+-- Last update: 2010-05-16
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
@@ -30,8 +30,8 @@
 --  Please contact me per mail.
 -------------------------------------------------------------------------------
 -- Revisions  :
--- Date        Version 
--- 2009-02-14  1.0      
+-- Date	       Version 
+-- 2009-02-14  1.0	
 -------------------------------------------------------------------------------
 
 
@@ -49,50 +49,49 @@ use DSO.pLedsKeysAnalogSettings.all;
 package pSpecialFunctionRegister is
   
   type aSFR_in is record
-                    Trigger        : aTriggerOutput;
-                    --                  Uart           : aUarttoCPU;
-                    Keys           : aKeys;
-                    AnalogBusy     : std_ulogic;
-                  end record;
+    Trigger    : aTriggerOutput;
+    Keys       : aKeys;
+    AnalogBusy : std_ulogic;
+  end record;
   type aSFR_out is record
-                     Decimator      : aDownSampler;
-                     SignalSelector : aSignalSelector;
-                     ExtTriggerSrc  : aExtTriggerInput;
-                     Trigger        : aTriggerInput;
-                     --                  Uart            : aCPUtoUart;
-                     Leds           : aLeds;
-                     nConfigADC     : std_ulogic_vector(cChannels-1 downto 0);
-                     AnalogSettings : aAnalogSettings;
-                   end record;
+    Decimator	   : aDownSampler;
+    SignalSelector : aSignalSelector;
+    ExtTriggerSrc  : aExtTriggerInput;
+    Trigger	   : aTriggerInput;
+    Leds	   : aLeds;
+    nConfigADC	   : std_ulogic_vector(cChannels-1 downto 0);
+    AnalogSettings : aAnalogSettingsOut;
+  end record;
+
   -- addresses
-  constant cDeviceAddr             : natural := 0;
-  constant cInterruptAddr          : natural := 1;
-  constant cInterruptMaskAddr      : natural := 2;
-  constant cSamplingFreqAddr       : natural := 4;
-  constant cFilterEnableAddr       : natural := 5;
-  constant cExtTriggerSrcAddr      : natural := 6;
-  constant cExtTriggerPWMAddr      : natural := 7;
-  constant cInputCh0Addr           : natural := 8;
-  constant cInputCh1Addr           : natural := 9;
-  constant cInputCh2Addr           : natural := 10;
-  constant cInputCh3Addr           : natural := 11;
-  constant cTriggerOnChAddr        : natural := 12;
-  constant cTriggerOnceAddr        : natural := 13;
-  constant cTriggerPrefetchAddr    : natural := 14;
+  constant cDeviceAddr		   : natural := 0;
+  constant cInterruptAddr	   : natural := 1;
+  constant cInterruptMaskAddr	   : natural := 2;
+  constant cAnalogSettingsAddr	   : natural := 3;
+  constant cSamplingFreqAddr	   : natural := 4;
+  constant cFilterEnableAddr	   : natural := 5;
+  constant cExtTriggerSrcAddr	   : natural := 6;
+  constant cExtTriggerPWMAddr	   : natural := 7;
+  constant cInputCh0Addr	   : natural := 8;
+  constant cInputCh1Addr	   : natural := 9;
+  constant cInputCh2Addr	   : natural := 10;
+  constant cInputCh3Addr	   : natural := 11;
+  constant cTriggerOnChAddr	   : natural := 12;
+  constant cTriggerOnceAddr	   : natural := 13;
+  constant cTriggerPrefetchAddr	   : natural := 14;
   constant cTriggerStorageModeAddr : natural := 15;
   constant cTriggerReadOffSetAddr  : natural := 16;
-  constant cTriggerTypeAddr        : natural := 17;
-  constant cTriggerLowValueAddr    : natural := 18;
-  constant cTriggerLowTimeAddr     : natural := 19;
+  constant cTriggerTypeAddr	   : natural := 17;
+  constant cTriggerLowValueAddr	   : natural := 18;
+  constant cTriggerLowTimeAddr	   : natural := 19;
   constant cTriggerHighValueAddr   : natural := 20;
-  constant cTriggerHighTimeAddr    : natural := 21;
+  constant cTriggerHighTimeAddr	   : natural := 21;
   constant cTriggerStatusRegister  : natural := 22;
-  constant cTriggerCurrentAddr     : natural := 23;
-  constant cConfigADCEnable        : natural := 24;
-  constant cLedAddr                : natural := 25;
-  constant cKeyAddr0               : natural := 26;
-  constant cKeyAddr1               : natural := 27;
-  constant cAnalogSettingsAddr  : natural := 28;
-  constant cLastAddr               : natural := 29;
+  constant cTriggerCurrentAddr	   : natural := 23;
+  constant cConfigADCEnable	   : natural := 24;
+  constant cLedAddr		   : natural := 25;
+  constant cKeyAddr0		   : natural := 26;
+  constant cKeyAddr1		   : natural := 27;
+  constant cLastAddr		   : natural := 28;
   
 end package;

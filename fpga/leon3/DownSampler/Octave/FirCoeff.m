@@ -66,8 +66,8 @@ system('del FastRampCoeff-p.vhd');
 system('ren FastFirCoeff-p.vhd FastRampCoeff-p.vhd');
 
 Firs = [M2 M4 M10];
-NormalFirs = Firs.*2^(16-1);
+NormalFirs = Firs.*1.98*2^(16-1); % Gain = 0,99
 CreatePackage('aInputValues','FirCoeff',NormalFirs);
-FastFirs = Firs.*2^(10-1);
+FastFirs = Firs.*2^(10-1); % Gain = 0.5
 plot(FastFirs);
 CreatePackage('aInputValues','FastFirCoeff',FastFirs);

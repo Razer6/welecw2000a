@@ -32,6 +32,7 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/
+#ifdef BOARD_COMPILATION
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -617,5 +618,5 @@ void drawGrid(void)
 }
 
 
-
+#endif
 

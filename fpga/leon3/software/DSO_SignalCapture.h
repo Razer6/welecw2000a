@@ -95,7 +95,8 @@ uint32_t SetTrigger(const uint32_t Trigger, const uint32_t ExtTrigger,
 #define COIL_SWITCH_TIME     0
 #endif
 
-uint32_t SetDACOffset(uint32_t Ch, uint32_t Offset);
+uint32_t SetDACOffset(uint32_t Ch, int32_t Offset);
+void AddDACOffset(uint32_t Ch, int32_t Offset);
 
 /*
  uint32_t SetAnalogInputRange(

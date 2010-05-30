@@ -127,13 +127,13 @@ int main (void)
 #ifdef SIM_COMPILATION
 	SetAnalog Analog[2];
 	
-	uint32_t i = 0;
-	uint32_t Prefetch = 64;
+//	uint32_t i = 0;
+//	uint32_t Prefetch = 64;
 	uint32_t ReadData = 0;
-	char x = 0;
+//	char x = 0;
 
-	char ack[] = "success!\n";
-	char nak[] = "failed!\n";
+//	char ack[] = "success!\n";
+//	char nak[] = "failed!\n";
 
 	Analog[0].myVperDiv = 10000;
 	Analog[0].AC = 0;

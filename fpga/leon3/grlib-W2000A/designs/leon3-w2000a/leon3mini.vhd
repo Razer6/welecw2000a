@@ -198,12 +198,14 @@ architecture rtl of leon3mini is
   -- signal KeystoCPU	   : aKeys;
   signal KeysFromPanel	: aShiftIn;
   signal AnalogSettings : aAnalogSettingsOut;
+  signal SyncPWM	: std_ulogic;
   signal SerialClk	: std_ulogic;
   -- internal ROM
   signal BootRomRd	: std_ulogic;
   signal BootACK	: std_ulogic;
   signal BootCS		: std_ulogic;
   signal BootOE		: std_ulogic;
+  signal PWM_Offset	: aByte;
 --  signal RamtoVGA	  : aSharedRamReturn;
 --  signal VGAtoRam	  : aSharedRamAccess;
   -- signal CPUIn	   : aSharedRamAccess;
@@ -396,17 +398,15 @@ begin
 
   FrontPanel : entity DSO.LedsKeysAnalogSettings
     port map (
-      iClk	      => ClkCPU,
-      iResetAsync     => ResetAsync,
-      iLeds	      => SFRControlfromCPU.Leds,
-      oLeds	      => LedstoPanel,
-      iKeysData	      => iFPSW_DOUT,
-      onFetchKeys     => KeysfromPanel,
-      oKeys	      => SFRControltoCPU.Keys,
-      iCPUtoAnalog    => SFRControlfromCPU.AnalogSettings,
-      oAnalogBusy     => SFRControltoCPU.AnalogBusy,
-      oAnalogSettings => AnalogSettings,
-      oSerialClk      => SerialClk);
+      iClk		=> ClkCPU,
+      iResetAsync	=> ResetAsync,
+      iLeds		=> SFRControlfromCPU.Leds,
+      oLeds		=> LedstoPanel,
+      iKeysData		=> iFPSW_DOUT,
+      onFetchKeys	=> KeysfromPanel,
+      oKeys		=> SFRControltoCPU.Keys,
+      iEnableProbeClock => SFRControlfromCPU.AnalogSettings.EnableProbeClock,
+      oSerialClk	=> SerialClk);
 
   oFPSW_PE    <= KeysFromPanel.nFetchStrobe;
   oFPSW_CLK   <= KeysFromPanel.SerialClk;
@@ -418,10 +418,22 @@ begin
   oFPLED_CLK  <= LedstoPanel.SerialClk;
   oCalibrator <= SerialClk;		-- 1 KHz Clk
 
-  oDesh	   <= AnalogSettings.Addr;	--demux. write strob for 4094
-  oDeshENA <= AnalogSettings.Enable;
-  oRegCLK  <= AnalogSettings.SerialClk;
-  oRegData <= AnalogSettings.Data;
+  oDesh	   <= SFRControlfromCPU.AnalogSettings.Addr;  --demux. write strob for 4094
+  oDeshENA <= SFRControlfromCPU.AnalogSettings.Enable;
+  oRegCLK  <= SFRControlfromCPU.AnalogSettings.SerialClk;
+  oRegData <= SFRControlfromCPU.AnalogSettings.Data;
+
+
+--  pPWM : entity DSO.PWM
+--    generic map (
+--      gBitWidth => aByte'length)
+--    port map (
+--      iClk	  => ClkCPU,
+--      iResetAsync => ResetAsync,
+--      iRefON	  => SFRControlfromCPU.AnalogSettings.PWM_Offset,
+--      iRefOff	  => (others => '0'),
+--      oPWM	  => oPWMout);
+
 
   -- pragma translate_off
 
@@ -482,7 +494,7 @@ begin
     port map (ResetAsync, clkm, cgo.clklock, rstn);
   clkm <= ClkCPU;
 --  sdclkl <= clk;
-  -- rstn   <= resetn;
+  -- rstn	<= resetn;
   cgo  <= (others => '1') after 1 ns,
 	  (others => '1') after 100 ns;
 ---------------------------------------------------------------------- 
@@ -522,7 +534,7 @@ begin
 		     ncpu   => CFG_NCPU, tbits => 30, tech => memtech, irq => 0, kbytes => CFG_ATBSZ)
 	port map (rstn, clkm, ahbmi, ahbsi, ahbso(2), dbgo, dbgi, dsui, dsuo);
       dsuen_pad	 : inpad generic map (tech  => padtech) port map (dsuen, dsui.enable);
-      --    **** tame: do not use inversion
+      --	**** tame: do not use inversion
       dsubre_pad : inpad generic map (tech  => padtech) port map (dsubre, dsui.break);
       dsuact_pad : outpad generic map (tech => padtech) port map (dsuact, dsuo.active);
     end generate;
@@ -803,7 +815,7 @@ begin
       msg1 => "Open Source Digital Storage Oscilloscope FPGA-Design by Alexander Lindert",
       msg2 => "GRLIB Version " & tost(LIBVHDL_VERSION/1000) & "." & tost((LIBVHDL_VERSION mod 1000)/100)
       & "." & tost(LIBVHDL_VERSION mod 100) & ", build " & tost(LIBVHDL_BUILD),
-      --    msg3 => "Target technology: " & tech_table(fabtech) & ",	memory library: " & tech_table(memtech),
+      --	msg3 => "Target technology: " & tech_table(fabtech) & ",	memory library: " & tech_table(memtech),
       mdel => 1
       );
 -- pragma translate_on

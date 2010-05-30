@@ -33,7 +33,7 @@
 * Revision		: 0
 ****************************************************************************/
  
-
+#ifdef BOARD_COMPILATION
 #include "types.h"
 #include "DSO_Font.h"
 #include "DSO_Screen.h"
@@ -110,3 +110,4 @@ uint32_t getTextWidthi(sFont *font, int *text)
 	}
 	return textwidth;
 }
+#endif

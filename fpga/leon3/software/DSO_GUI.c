@@ -288,23 +288,6 @@ sChannelSettings;
 sChannelSettings channel[2];
 
 
-#if 0
-const uint32_t voltagePerDiv[] =
-{
- 	5000000, 2000000, 1000000, //5V - 1V
-	500000, 200000, 100000, //500mV - 100mV
-	50000, 20000, 10000}; //50mV - 10mV
-
-/*
- * Display Strings for voltage per div.
- * Must match voltagePerDiv[]
- */
-const char *voltagePerDiv_str[] =
-{	"5V/div", "2V/div","1V/div",
-	"500mV/div", "200mV/div","100mV/div",
-	"50mV/div", "20mV/div","10mV/div"};
-
-#endif
 
 /**
  * Default Trigger Settings
@@ -312,7 +295,7 @@ const char *voltagePerDiv_str[] =
 
 sTriggerSettings triggerSettings =
 {
-	.type = NORMAL_TRIGGER,
+	.type = EXTERNAL_TRIGGER,
 	.edge = 0,
 	.channel = 0,
 	.level = 0,
@@ -349,8 +332,8 @@ sCheckBox cbBwLimitCh0 = {"BW Limit", DEFAULT_BOUNDS_F2, 0, toggleBWLimitCh0};
 sCheckBox cbBwLimitCh1 = {"BW Limit", DEFAULT_BOUNDS_F2, 0, toggleBWLimitCh1};
 /*sCheckBox cbInvertCh0 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};
 sCheckBox cbInvertCh1 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};*/
-sSubMenuList smlHWFilter = {"HW-Filters", DEFAULT_BOUNDS_F3, {213, SML_START_POS_Y(4), 103, SML_HEIGHT(4)}, 4, 0, changeHWFilters, 
-{"None", "1G>100M", "1G>10MS", "1G>1MS"}};
+sSubMenuList smlHWFilter = {"HW-Filters", DEFAULT_BOUNDS_F3, {213, SML_START_POS_Y(4), 103, SML_HEIGHT(5)}, 5, 0, changeHWFilters, 
+{"None", "1G>100M", "1G>10MS", "1G>1MS", "1G>100k"}};
 
 sSubMenuList smlCoublingCh0 = {"Coupling", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 0, changeCouplingCh0, {"AC", "DC"}};
 sSubMenuList smlCoublingCh1 = {"Coupling", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 0, changeCouplingCh1,	{"AC", "DC"}};
@@ -707,26 +690,6 @@ sTimebase Timebase[] ={
 {	 500000000,  TRUE, {"  500 MS/s"}}, 
 {	1000000000,  TRUE, {"    1 GS/s"}}};
 
-#if 0
-/* Some timebases are disabled, they might not work with all filter settings
- * AACFilterStart <= 1 and AACFilterStop >= 1! (not a bug) */ 
-const uint32_t timebase[] = {
-	10000, /*12500,*/ 25000, /*31250,*/ 50000, /*62500,*/
-	100000, /*125000,*/ 250000, /*312500,*/ 500000, /*625000,*/ // 100ks/s - 500ks/s
-	1000000, /*1250000,*/ 2500000, /*3125000,*/ 5000000, /*6250000,*/ // 1Ms/s - 5Ms/s
-	10000000, /*15000000,*/ 25000000, /*31250000,*/ 50000000, /*62500000,*/ // 10Ms/s - 50Ms/s
-	100000000, 125000000, 250000000, 500000000, // 100Ms/s - 500Ms/s
-	1000000000}; // 1Gs/s
-
-char *timebase_str[] = {
-	"10 kS/s", /*"12.5 kS/s",*/ "25 kS/s", /*"31.25 kS/s",*/ "50 kS/s", /*"62.5 kS/s",*/
-	"100 kS/s", /*"125 kS/s",*/ "250 kS/s", /*"312.5 kS/s",*/ "500 kS/s", /*"625 kS/s",*/
-	"1 MS/s", /*"1.25 MS/s",*/ "2.5 MS/s", /*"3.125 MS/s",*/ "5 MS/s", /*"6.25 MS/s",*/
-	"10 MS/s", /*"12.5 MS/s",*/ "25 MS/s", /*"31.25 MS/s",*/ "50 MS/s", /*"62.5 MS/s",*/
-	"100 MS/s", "125 MS/s", "250 MS/s", "500 MS/s",
-	"1 GS/s"};
-
-#endif
 
 static int32_t selectedTimebase = 0;
 
@@ -736,7 +699,7 @@ static int32_t selectedTimebase = 0;
 const sHWFilterGain HWFilterGain[] = {
 {  1,  1}, {  1,  1}, {  1,  1},   {1,  1}, // 1GS    -> 100 MS
 {  1,  1}, {  1,  1}, {NUMF,DENF}, {NUMF,DENF}, // 100 MS ->  10 MS
-{  1,  1}, {  1,  1}, {NUMF,DENF}, {NUMF*NUMF, DENF*DENF}};// 10 MS  ->   1 MS
+{  1,  1}, {  1,  1}, {NUMF,DENF}, {NUMF,DENF}};// 10 MS  ->   1 MS
 
 
 typedef struct {
@@ -1028,6 +991,13 @@ void change_uart(int32_t selection)
 	}
 }
 
+void add_dac0_offset(int32_t diff){
+	AddDACOffset(0,diff);
+}
+void add_dac1_offset(int32_t diff){
+	AddDACOffset(1,diff);
+}
+
 /*
   * Init buttons. Add for every button a button handler
   */
@@ -1065,7 +1035,9 @@ void init_encoders(void)
 	init_enc_handler(&enc[1], KEYADDR0, EN_CH1_VDIV, set_vdiv_ch1);
 	
 	/* Position encoders */
-	
+	init_enc_handler(&enc[6], KEYADDR0, EN_CH0_UPDN, add_dac0_offset);
+	init_enc_handler(&enc[7], KEYADDR0, EN_CH1_UPDN, add_dac1_offset);
+
 	/* other encoders */
 	init_enc_handler(&enc[2],  LEDADDR, EN_LEVEL, changeTriggerLevel);
 	init_enc_handler(&enc[3],  LEDADDR, EN_TIME_DIV, setTimebase);
@@ -1102,7 +1074,7 @@ void GUI_Main(void)
 	channel[1].analog.BW_Limit = 0;
 	channel[1].BitMode = 8;
 
-
+	WRITE_INT(CONFIGADCENABLE,1); 
 	Offset[0].V = 128;
 	Offset[1].V = VLEN-128;
 	for (x = 0; x < 2; ++x)
@@ -1128,7 +1100,7 @@ void GUI_Main(void)
 	init_buttons();
 	init_encoders();
 
-	WRITE_INT(LEDADDR,(1 << RUN_GREEN));
+	WRITE_INT(LEDADDR,(1 << RUN_RED));
 
 	titleBarInit();
 	status_bar_init();
@@ -1140,8 +1112,10 @@ void GUI_Main(void)
 	changeTriggerEdge(0);
 	setVoltagePerDiv(CH0,0);
 	setVoltagePerDiv(CH1,0);
-	
+	WRITE_INT(LEDADDR,(1 << LED_CH2));
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
+	WRITE_INT(LEDADDR,(1 << LED_CH3));
+	WRITE_INT(ANALOGSETTINGSADDR,(1 << ENABLEKEYCLOCK));
 
 	Run = TRUE;
 	/*

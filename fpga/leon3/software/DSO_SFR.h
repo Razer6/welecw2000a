@@ -41,6 +41,7 @@
 #define DEVICEADDR               (DSO_SFR_BASE_ADDR+ 4*0)
 #define INTERRUPTADDR            (DSO_SFR_BASE_ADDR+ 4*1)
 #define INTERRUPTMASKADDR        (DSO_SFR_BASE_ADDR+ 4*2)
+#define ANALOGSETTINGSADDR       (DSO_SFR_BASE_ADDR+ 4*3)
 #define SAMPLINGFREQADDR         (DSO_SFR_BASE_ADDR+ 4*4)
 #define FILTERENABLEADDR         (DSO_SFR_BASE_ADDR+ 4*5)
 #define EXTTRIGGERSRCADDR        (DSO_SFR_BASE_ADDR+ 4*6)
@@ -65,9 +66,8 @@
 #define LEDADDR                  (DSO_SFR_BASE_ADDR+ 4*25)
 #define KEYADDR0                 (DSO_SFR_BASE_ADDR+ 4*26)
 #define KEYADDR1                 (DSO_SFR_BASE_ADDR+ 4*27)
-#define ANALOGSETTINGSADDR       (DSO_SFR_BASE_ADDR+ 4*28)
-#define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*28)
-#define DSO_REG_SIZE             (4*28)
+#define LASTADDR                 (DSO_SFR_BASE_ADDR+ 4*27)
+#define DSO_REG_SIZE             (4*27)
 
 /* DEVICEADDR*/
 #define WELEC2012   (2012)
@@ -88,6 +88,64 @@
 #define CAPTUREDATA_TRIGGERED    1
 #define ANALOGSETTINGS_FINISHED  2
 #define KEYCHANGE                3 
+
+/*ANALOGSETTINGSADDR*/
+#define PWM_OFFSET_OFFSET               16
+#define PWM_OFFSET_SIZE                 8
+#define ANALOGSETTINGS_MUXADDR_OFFSET   8
+#define ANALOGSETTINGS_MUXADDR_SIZE     3
+#define ANALOGSETTINGS_DATA             0
+#define ANALOGSETTINGS_SERIALCLK        1
+#define ANALOGSETTINGS_ENABLE           2
+#define ANALOGSETTINGS_ENABLEPROBECLOCK 3
+#define ENABLEKEYCLOCK                  4
+
+
+/* ANALOGSETTINGSADDR external shiftreg entry offsets from data*/
+
+#define ANC_CH0       7 
+/* subset of ANC_CH0 */
+#define CH0_K1_10     0
+#define CH0_K1_1      1
+#define CH0_K2_10     2
+#define CH0_K2_1      3
+#define CH0_OPA656    4
+#define CH0_BW_Limit  5
+#define CH0_U14       6
+#define CH0_U13       7
+#define CH0_DC        8
+#define CH1_DC        9
+#define CH2_DC       10
+#define CH3_DC       11
+
+#define ANC_DAC0       6 
+/* subset of ANC_DAC0 */
+#define DAC_OFFSET 0
+#define DAC_CH_OFFSET 16
+#define DAC_SETT_OFFSET 20
+#define SET_OFFSET_CH0(offset) ((0x3 << DAC_CH_OFFSET) | (1 << DAC_CH_OFFSET) | (offset & 0xffff))
+#define SET_OFFSET_CH1(offset) ((0x3 << DAC_CH_OFFSET) | (offset & 0xffff))
+
+#define ANC_CH1       5 
+/* subset of ANC_CH1 */
+#define CH1_K1_10      0
+#define CH1_K1_1       1
+#define CH1_K2_10      2
+#define CH1_K2_1       3
+#define CH1_OPA656     4
+#define CH1_BW_Limit   5
+#define CH1_U14        6
+#define CH1_U13        7
+#define CH0_SRC2_ADDR  8
+#define CH1_SRC2_ADDR 10
+#define CH2_SRC2_ADDR 12
+#define CH3_SRC2_ADDR 14
+
+/* CHX_SRC2_ADDR*/
+#define SRC2_NONE    0
+#define SRC2_PWM     1
+#define SRC2_GND     2
+#define SRC2_LOWPASS 3
 
 
 /* SAMPLINGFREQADDR*/
@@ -298,76 +356,6 @@ eTriggerTypes;
 		case -7: m = 1; break;\
 	}\
         p = k
-
-
-
-
-/* ANALOGSETTINGSADDR */
-#define SET_PWM_OFFSET     31
-#define PWM_OFFSET_SIZE     8
-#define ANALOGDATA_START    0
-#define ENABLEKEYCLOCK     30 
-#define ENABLEPROBECLOCK   29 
-#define ENABLEPROBESTROBE  28
-
-
-#define	ANALOGSETTINGSBUSY 27
-#define ANC_ADDR_OFFSET    24 
-#define	SET_ANALOG(addr)   ((1 << ENABLEKEYCLOCK) | (1 << ENABLEPROBECLOCK) | (1 << 27) | ((addr & 0x7) << ANC_ADDR_OFFSET))
-
-#define ANC_CH0       7 
-/* subset of ANC_CH0 */
-#define CH0_K1_10     0
-#define CH0_K1_1      1
-#define CH0_K2_10     2
-#define CH0_K2_1      3
-#define CH0_OPA656    4
-#define CH0_BW_Limit  5
-#define CH0_U14       6
-#define CH0_U13       7
-#define CH0_DC        8
-#define CH1_DC        9
-#define CH2_DC       10
-#define CH3_DC       11
-
-
-
-
-#define ANC_DAC0       6 
-/* subset of ANC_DAC0 */
-#define DAC_OFFSET 0
-#define DAC_CH_OFFSET 16
-#define DAC_SETT_OFFSET 17
-#define SET_OFFSET_CH0(offset) (SET_ANALOG(ANC_DAC0) | (0x30 << DAC_CH_OFFSET) | (1 << DAC_CH_OFFSET) | (offset & 0xffff))
-#define SET_OFFSET_CH1(offset) (SET_ANALOG(ANC_DAC0) | (0x30 << DAC_CH_OFFSET) | (offset & 0xffff))
-
-
-#define ANC_CH1       5 
-/* subset of ANC_CH1 */
-#define CH1_K1_10      0
-#define CH1_K1_1       1
-#define CH1_K2_10      2
-#define CH1_K2_1       3
-#define CH1_OPA656     4
-#define CH1_BW_Limit   5
-#define CH1_U14        6
-#define CH1_U13        7
-#define CH0_SRC2_ADDR  8
-#define CH1_SRC2_ADDR 10
-#define CH2_SRC2_ADDR 12
-#define CH3_SRC2_ADDR 14
-
-
-/* CHX_SRC2_ADDR*/
-#define SRC2_NONE    0
-#define SRC2_PWM     1
-#define SRC2_GND     2
-#define SRC2_LOWPASS 3
-
-
-/*int Uart16550Addr          40;*/
-/*int Uart16550Data          41;*/
-
 
 #define CH0		0
 #define CH1		1
