@@ -468,24 +468,40 @@ void parse_optional_arguments(void)
 int main(int argc, char * argv[]) 
 {
 	/* Override parsing function with a custom one */
-	sampling_freq->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
-	trigger_low_level->hdr.scanfn   = (arg_scanfn*)arg_exp_scanfn;
-	trigger_high_level->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
-	trigger_low_time->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	trigger_low_level->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	trigger_high_level->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	trigger_low_time->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
 	trigger_high_time->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
-	analog_gain_ch0->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
-	analog_gain_ch1->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
-	analog_gain_ch2->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
-	analog_gain_ch3->hdr.scanfn       = (arg_scanfn*)arg_exp_scanfn;
-	analog_offset_ch0->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
-	analog_offset_ch1->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
-	analog_offset_ch2->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
-	analog_offset_ch3->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
-	capture_wait_time->hdr.scanfn        = (arg_scanfn*)arg_exp_scanfn;
-	capture_size->hdr.scanfn         = (arg_scanfn*)arg_exp_scanfn;
+	analog_gain_ch0->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_gain_ch1->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_gain_ch2->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_gain_ch3->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_offset_ch0->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_offset_ch1->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_offset_ch2->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_offset_ch3->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	capture_wait_time->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	capture_size->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
 	capture_sampling_freq->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
-	data_write->hdr.scanfn            = (arg_scanfn*)arg_exp_scanfn;
-	cap_size_read->hdr.scanfn            = (arg_scanfn*)arg_exp_scanfn;
+	data_write->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	address_read->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	cap_size_read->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	stack_addr->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	address_write->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	data_write->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	sampling_freq->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	sample_size->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	sampling_freq->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	trigger_prefetch->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	trigger_low_level->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	trigger_high_level->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	trigger_high_time->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	trigger_low_time->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	analog_pwm->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	capture_size->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	capture_wait_time->hdr.scanfn  = (arg_scanfn*)arg_exp_scanfn;
+	capture_sampling_freq->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
+	capture_sample_size->hdr.scanfn = (arg_scanfn*)arg_exp_scanfn;
 	
 	/* Parse all argument tables */
 	int nerrors_screenshot = arg_parse(argc,argv,argtable_screenshot);
@@ -635,6 +651,7 @@ int main(int argc, char * argv[])
 		
 		ret = DSOInterface->Receive(address_read->ival[0], cap_size_read->ival[0]);
 		exit_waverecorder(ret, &DSOInterface);	
+		printf("adress: 0x%X\n", address_read->ival[0]);
 	}
 	
 	if(nerrors_write_adress == 0)
