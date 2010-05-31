@@ -406,7 +406,8 @@ begin
       iCPUtoAnalog    => SFRControlfromCPU.AnalogSettings,
       oAnalogBusy     => SFRControltoCPU.AnalogBusy,
       oAnalogSettings => AnalogSettings,
-      oSerialClk      => SerialClk);
+      oSerialClk      => SerialClk,
+      iResetEnc => SFRControlfromCPU.iResetEnc);
 
   oFPSW_PE    <= KeysFromPanel.nFetchStrobe;
   oFPSW_CLK   <= KeysFromPanel.SerialClk;

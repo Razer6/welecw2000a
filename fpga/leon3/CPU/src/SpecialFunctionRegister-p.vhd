@@ -63,6 +63,7 @@ package pSpecialFunctionRegister is
                      Leds           : aLeds;
                      nConfigADC     : std_ulogic_vector(cChannels-1 downto 0);
                      AnalogSettings : aAnalogSettings;
+                     iResetEnc		: std_ulogic_vector(1 downto 0);
                    end record;
   -- addresses
   constant cDeviceAddr             : natural := 0;

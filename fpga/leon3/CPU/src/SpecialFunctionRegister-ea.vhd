@@ -375,6 +375,21 @@ begin
     end if;
   end process;
   
+  pResetEnc  : process (iClkCPU, iResetAsync)
+  begin
+    if rising_edge(iCLKCPU) then
+	   oSFRControl.iResetEnc <= (others => '0'); 
+		if(iRd = '1') then
+			if(Addr = cLedAddr) then
+				oSFRControl.iResetEnc(0) <= '1';
+			elsif(Addr = cKeyAddr0) then
+				oSFRControl.iResetEnc(1) <= '1';
+			end if;
+		end if;
+	end if;
+   end process;
+
+  
   pRead : process (Addr, SFRIn, InterruptVector,
                    InterruptMask, Decimator, nConfigADC,
                    SignalSelector, Trigger, Leds, ExtTriggerSrc, AnalogSettings)

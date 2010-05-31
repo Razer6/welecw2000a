@@ -53,113 +53,70 @@ entity NobDecoder is
     --   signal iStrobe     : in  std_ulogic;
     signal iA          : in  std_ulogic;
     signal iB          : in  std_ulogic;
-    signal oCounter    : out std_ulogic_vector(cNobCounterSize-1 downto 0));
+    signal oCounter    : out std_ulogic_vector(cNobCounterSize-1 downto 0);
+    signal iResetCounter : in std_logic);
 end entity;
 
 architecture RTL of NobDecoder is
-  signal c    : signed(cNobCounterSize-1 downto 0);
-  signal dir  : signed(cNobCounterSize-1 downto 0);
+signal a_in, b_in, a_old, b_old: std_ulogic;
+signal cnt : signed(cNobCounterSize downto 0);
+signal up_down, ce : std_ulogic;
 begin
-  
-  dir <= to_signed(-1, cNobCounterSize) when gReverseDir /= 0 else to_signed(1, cNobCounterSize);
 
-  P360 : if g360 /= 0 generate
-    FSM: block
-      type   aFSM360 is (l, lA, Ah, hB, lB, Bh, hA);
-      signal s360 : aFSM360;
-    begin
-      process (iClk, iResetAsync)
-      begin
-        if iResetAsync = cResetActive then
-          c    <= (others => '0');
-          s360 <= l;
-        elsif rising_edge(iClk) then
-          --    if iStrobe = '1' then
-          case s360 is
-            when l =>                   -- "00"
-              if iA = '1' then s360 <= lA; end if;
-              if iB = '1' then s360 <= lB; end if;
-            when lA =>                  -- "10"
-              if iB = '1' then s360 <= Ah; end if;
-              if iA = '0' then s360 <= l; end if;
-            when Ah =>                  -- "11"
-              if iA = '0' then s360 <= hB; end if;
-              if iB = '0' then s360 <= lA; end if;
-            when hB =>                  -- "01"
-              if iB = '0' and iA = '0' then
-                s360 <= l;
-                c    <= c + dir;
-              end if;
-              if iA = '1' then s360 <= Ah; end if;
-            when lB =>                  -- "01"
-              if iA = '1' then s360 <= Bh; end if;
-              if iB = '0' then s360 <= l; end if;
-            when Bh =>                  -- "11"
-              if iB = '0' then s360 <= hA; end if;
-              if iA = '0' then s360 <= lB; end if;
-            when hA =>                  -- "10"
-              if iA = '0' and iB = '0' then
-                s360 <= l;
-                c    <= c - dir;
-              end if;
-              if iB = '1' then s360 <= Bh; end if;
-          end case;
-          --   end if;
-        end if;
-      end process;
-    end block;
-  end generate;
+	INPUT:process(iClk, iResetAsync)
+	begin
+		if(iResetAsync = cResetActive) then
+			a_in <= '0';
+			b_in <= '0';
+			a_old <= '0';
+			b_old <= '0';
+		elsif(rising_edge(iClk)) then
+			a_in  <= iA;
+			a_old <= a_in;
+			b_in  <= iB;
+			b_old <= b_in;
+		end if;
+	end process;
+ 
+	DECODE:process(a_in, b_in, a_old, b_old)
+	variable state: std_ulogic_vector(3 downto 0);
+	begin
+		state := a_in & b_in & a_old & b_old;
+		case state is
+			when "0001" => up_down <= '1'; ce <= '1';
+			when "0010" => up_down <= '0'; ce <= '1';
+			when "0100" => up_down <= '0'; ce <= '1'; 
+			when "0111" => up_down <= '1'; ce <= '1'; 
+			when "1000" => up_down <= '1'; ce <= '1'; 
+			when "1011" => up_down <= '0'; ce <= '1'; 
+			when "1101" => up_down <= '0'; ce <= '1'; 
+			when "1110" => up_down <= '1'; ce <= '1'; 
+			when others => ce <= '0'; up_down <= '0';
+		end case;
+	end process;
 
-  P180 : if g360 = 0 generate
-    FSM:block
-      type   aFSM180 is (l, lA, lB, h, hA, hB);
-      signal s180 : aFSM180;
-    begin
-      process (iClk, iResetAsync)
-      begin
-        if iResetAsync = cResetActive then
-          c    <= (others => '0');
-          s180 <= l;
-        elsif rising_edge(iClk) then
-          --    if iStrobe = '1' then
-          case s180 is
-            when l =>                   -- "00"
-              if iA = '1' then s180 <= lA; end if;
-              if iB = '1' then s180 <= lB; end if;
-            when lA =>                  -- "10"
-              if iB = '1' and iA = '1' then
-                s180 <= h;
-                c    <= c + dir;
-              end if;
-              if iA = '0' then s180 <= l; end if;
-            when h =>                   -- "11"
-              if iA = '0' then s180 <= hB; end if;
-              if iB = '0' then s180 <= hA; end if;
-            when hB =>                  -- "01"
-              if iB = '0' and iA = '0' then
-                s180 <= l;
-                c    <= c + dir;
-              end if;
-              if iA = '1' then s180 <= h; end if;
-            when lB =>                  -- "01"
-              if iA = '1' and iB = '1' then
-                s180 <= h;
-                c    <= c - dir;
-              end if;
-              if iB = '0' then s180 <= l; end if;
-            when hA =>                  -- "10"
-              if iA = '0' and iB = '0' then
-                s180 <= l;
-                c    <= c - dir;
-              end if;
-              if iB = '1' then s180 <= h; end if;
-          end case;
-          --   end if;
-        end if;
-      end process;
-    end block;
-  end generate;
+	COUNT:process(iClk, iResetAsync)
+	begin
+		if(iResetAsync = cResetActive) then
+			cnt <= (others => '0');
+		elsif(rising_edge(iClk)) then
+			
+			if(ce = '1') then
+				if(up_down = '1' and cnt /= ('0' & (cnt'left-1 downto 0 => '1'))) then
+					cnt <= cnt + 1;
+				elsif(up_down = '0' and cnt /= ('1' & (cnt'left-1 downto 0 => '0'))) then
+					cnt <= cnt - 1;
+				end if;
+			end if;
+			
+			if(iResetCounter = '1') then
+				cnt <= (others => '0');
+			end if;
+		end if;
+	end process;
 
-  oCounter <= std_ulogic_vector(c);
+
+oCounter <= std_ulogic_vector(cnt(cnt'left downto 1));
+
 end architecture;
 
