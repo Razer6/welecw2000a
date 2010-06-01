@@ -268,7 +268,27 @@ void parse_config_line(string line)
 	}
 	else if(identifier.compare(config_plattform_identifier) == 0)
 	{
-		config_channels = atoi(data.c_str());
+		config_plattform = data;
+		if((config_plattform.compare("W2012")==0) || (config_plattform.compare("W2022")==0) || (config_plattform.compare("W20x2")==0))
+		{
+			config_channels = config_default_channels;
+			config_base_addr = config_default_base_addr;
+			config_stack_addr = config_default_stack_addr;
+		}
+		else if((config_plattform.compare("W2014")==0) || (config_plattform.compare("W2024")==0) || (config_plattform.compare("W20x4")==0))
+		{
+			config_channels = 4;
+			config_base_addr = config_default_base_addr;
+			config_stack_addr = config_default_stack_addr;
+		}
+		else if(config_plattform.compare("SBX") == 0)
+		{
+			cout << "Values not yet implemented!" << endl;
+		}
+		else
+		{
+			cout << "Unsupported plattform chosen!" << endl;
+		}
 	}
 	else
 	{
@@ -651,7 +671,6 @@ int main(int argc, char * argv[])
 		
 		ret = DSOInterface->Receive(address_read->ival[0], cap_size_read->ival[0]);
 		exit_waverecorder(ret, &DSOInterface);	
-		printf("adress: 0x%X\n", address_read->ival[0]);
 	}
 	
 	if(nerrors_write_adress == 0)
