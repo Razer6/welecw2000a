@@ -379,15 +379,37 @@ begin
   begin
     if rising_edge(iCLKCPU) then
 	   oSFRControl.iResetEnc <= (others => '0'); 
-		if(iRd = '1') then
-			if(Addr = cLedAddr) then
-				oSFRControl.iResetEnc(0) <= '1';
-			elsif(Addr = cKeyAddr0) then
-				oSFRControl.iResetEnc(1) <= '1';
+			if(iRd = '1') then
+				case Addr is
+					when cEncAddrTimbase =>
+						oSFRControl.iResetEnc(0) <= '1';
+					when cEncAddrLeftRight =>
+						oSFRControl.iResetEnc(1) <= '1';
+					when cEncAddrTriggerLevel =>
+						oSFRControl.iResetEnc(2) <= '1';
+					when cEncAddrF =>
+						oSFRControl.iResetEnc(3) <= '1';
+					when cEncAddrVoltageCH0 =>
+						oSFRControl.iResetEnc(4) <= '1';
+					when cEncAddrVoltageCH1 =>
+						oSFRControl.iResetEnc(5) <= '1';
+					when cEncAddrVoltageCH2 =>
+						oSFRControl.iResetEnc(6) <= '1';
+					when cEncAddrVoltageCH3 =>
+						oSFRControl.iResetEnc(7) <= '1';
+					when cEncAddrUpDownCH0 =>
+						oSFRControl.iResetEnc(8) <= '1';
+					when cEncAddrUpDownCH1 =>
+						oSFRControl.iResetEnc(9) <= '1';
+					when cEncAddrUpDownCH2 =>
+						oSFRControl.iResetEnc(10) <= '1';
+					when cEncAddrUpDownCH3 =>
+						oSFRControl.iResetEnc(11) <= '1';
+					when others => null;
+				end case;
 			end if;
 		end if;
-	end if;
-   end process;
+  end process;
 
   
   pRead : process (Addr, SFRIn, InterruptVector,
@@ -472,22 +494,22 @@ begin
         oData(12) <= Leds.SINGLE_GREEN;
         oData(13) <= Leds.SINGLE_RED;
 
-        oData(18 downto 16) <= SFRIn.Keys.EN_TIME_DIV;
-        oData(22 downto 20) <= SFRIn.Keys.EN_LEFT_RIGHT;
-        oData(26 downto 24) <= SFRIn.Keys.EN_LEVEL;
-        oData(30 downto 28) <= SFRIn.Keys.EN_F;
+--        oData(18 downto 16) <= SFRIn.Keys.EN_TIME_DIV;
+--        oData(22 downto 20) <= SFRIn.Keys.EN_LEFT_RIGHT;
+--        oData(26 downto 24) <= SFRIn.Keys.EN_LEVEL;
+--        oData(30 downto 28) <= SFRIn.Keys.EN_F;
+--        
+--      when cKeyAddr =>
+--        oData(2 downto 0)   <= SFRIn.Keys.EN_CH0_UPDN;
+--        oData(6 downto 4)   <= SFRIn.Keys.EN_CH1_UPDN;
+--        oData(10 downto 8)  <= SFRIn.Keys.EN_CH2_UPDN;
+--        oData(14 downto 12) <= SFRIn.Keys.EN_CH3_UPDN;
+--        oData(18 downto 16) <= SFRIn.Keys.EN_CH0_VDIV;
+--        oData(22 downto 20) <= SFRIn.Keys.EN_CH1_VDIV;
+--        oData(26 downto 24) <= SFRIn.Keys.EN_CH2_VDIV;
+--        oData(30 downto 28) <= SFRIn.Keys.EN_CH3_VDIV;
         
-      when cKeyAddr0 =>
-        oData(2 downto 0)   <= SFRIn.Keys.EN_CH0_UPDN;
-        oData(6 downto 4)   <= SFRIn.Keys.EN_CH1_UPDN;
-        oData(10 downto 8)  <= SFRIn.Keys.EN_CH2_UPDN;
-        oData(14 downto 12) <= SFRIn.Keys.EN_CH3_UPDN;
-        oData(18 downto 16) <= SFRIn.Keys.EN_CH0_VDIV;
-        oData(22 downto 20) <= SFRIn.Keys.EN_CH1_VDIV;
-        oData(26 downto 24) <= SFRIn.Keys.EN_CH2_VDIV;
-        oData(30 downto 28) <= SFRIn.Keys.EN_CH3_VDIV;
-        
-      when cKeyAddr1 =>
+      when cKeyAddr =>
         oData(0)  <= SFRIn.Keys.BTN_F1;
         oData(1)  <= SFRIn.Keys.BTN_F2;
         oData(2)  <= SFRIn.Keys.BTN_F3;
@@ -515,6 +537,31 @@ begin
         oData(24) <= SFRIn.Keys.BTN_PULSEWIDTH;
         oData(25) <= SFRIn.Keys.BTN_X1;
         oData(26) <= SFRIn.Keys.BTN_X2;
+        
+      when cEncAddrTimbase =>
+				oData(SFRIn.Keys.EN_TIME_DIV'range) <= SFRIn.Keys.EN_TIME_DIV;
+			when cEncAddrLeftRight =>
+				oData(SFRIn.Keys.EN_LEFT_RIGHT'range) <= SFRIn.Keys.EN_LEFT_RIGHT;
+			when cEncAddrTriggerLevel =>
+				oData(SFRIn.Keys.EN_LEVEL'range) <= SFRIn.Keys.EN_LEVEL;
+			when cEncAddrF =>
+				oData(SFRIn.Keys.EN_F'range) <= SFRIn.Keys.EN_F;
+			when cEncAddrVoltageCH0 =>
+				oData(SFRIn.Keys.EN_CH0_VDIV'range) <= SFRIn.Keys.EN_CH0_VDIV;
+			when cEncAddrVoltageCH1 =>
+				oData(SFRIn.Keys.EN_CH1_VDIV'range) <= SFRIn.Keys.EN_CH1_VDIV;
+			when cEncAddrVoltageCH2 =>
+				oData(SFRIn.Keys.EN_CH2_VDIV'range) <= SFRIn.Keys.EN_CH2_VDIV;
+			when cEncAddrVoltageCH3 =>
+				oData(SFRIn.Keys.EN_CH3_VDIV'range) <= SFRIn.Keys.EN_CH3_VDIV;
+			when cEncAddrUpDownCH0 =>
+				oData(SFRIn.Keys.EN_CH0_UPDN'range) <= SFRIn.Keys.EN_CH0_UPDN;
+			when cEncAddrUpDownCH1 =>
+				oData(SFRIn.Keys.EN_CH1_UPDN'range) <= SFRIn.Keys.EN_CH1_UPDN;
+			when cEncAddrUpDownCH2 =>
+				oData(SFRIn.Keys.EN_CH2_UPDN'range) <= SFRIn.Keys.EN_CH2_UPDN;
+			when cEncAddrUpDownCH3 =>
+				oData(SFRIn.Keys.EN_CH3_UPDN'range) <= SFRIn.Keys.EN_CH3_UPDN;
         
 
       when cAnalogSettingsAddr =>

@@ -199,7 +199,7 @@ void readkeys(void)
 {
 	static uint32_t ct0 = 0, ct1 = 0;
 
-	register uint32_t i = keystate^READ_INT(KEYADDR1);
+	register uint32_t i = keystate^READ_INT(KEYADDR);
 
 	/* 2 Bit vertical counter */
 	ct0 = ~(ct0 & i);
@@ -391,12 +391,13 @@ void default_encoder_handler (int32_t diff)
 	/* Do nothing */
 }
 
-
+#if 0
 /* 
  * Set default encoder handler for every encoder
  */
 void init_default_enc_handlers(void)
 {
+
 	for(uint32_t i=0; i<ENCODERMAX; i++)
 	{
 		/* EN_CH0_UPDN is default handler */
@@ -428,7 +429,7 @@ void encoder_handler(void)
 	}
 }
 
-
+#endif
 
 #if 0
 uint32_t encoder_changed0;

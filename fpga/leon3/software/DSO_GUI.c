@@ -896,7 +896,7 @@ void setFramePosition(int32_t diff)
 	int32_t ViewedOffset = 0;
 	int32_t ViewedStart = 0; 
 	int32_t ViewedStop  = 0; 
-	if (((1 << BTN_MAINDEL) & READ_INT(KEYADDR1)) != 0)
+	if (((1 << BTN_MAINDEL) & READ_INT(KEYADDR)) != 0)
 	{
 		Zoom = 1; // Zoom is now only used for a faster navigation
 	} 
@@ -1055,6 +1055,7 @@ void init_buttons(void)
 /*
   * Init encoders. Add for every encoder an encoder handler
   */
+#if 0
 void init_encoders(void)
 {
 	//Call this before encoder_handler()
@@ -1072,7 +1073,7 @@ void init_encoders(void)
 	init_enc_handler(&enc[4],  LEDADDR, EN_LEFT_RIGHT, setFramePosition);
 	init_enc_handler(&enc[5],  LEDADDR, EN_F, vfValueChanged);
 }
-
+#endif
 void GUI_Main(void)
 {
 	generategrid();
@@ -1126,7 +1127,7 @@ void GUI_Main(void)
 	
 	/* Init frontpanel */
 	init_buttons();
-	init_encoders();
+//	init_encoders();
 
 	WRITE_INT(LEDADDR,(1 << RUN_GREEN));
 
@@ -1151,11 +1152,11 @@ void GUI_Main(void)
 	{
 		readkeys();
 		button_handler();
-		encoder_handler();
+	//	encoder_handler();
 
 	//	closeSubMenuTime();
 
-		if ((READ_INT(KEYADDR1) & (1 << BTN_RUNSTOP)) != 0)
+		if ((READ_INT(KEYADDR) & (1 << BTN_RUNSTOP)) != 0)
 		{
 			Run^= TRUE; // Toogle Run Stop	for TRUE = 1 or TRUE = -1
 			CLR_LED(SINGLE_GREEN);
@@ -1173,7 +1174,7 @@ void GUI_Main(void)
 			}
 			WaitMs(100);
 		}
-		if ((READ_INT(KEYADDR1) & (1 << BTN_SINGLE)) != 0)
+		if ((READ_INT(KEYADDR) & (1 << BTN_SINGLE)) != 0)
 		{
 			Run    = TRUE; 
 			Single = TRUE;	
