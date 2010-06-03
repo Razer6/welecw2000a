@@ -78,7 +78,7 @@ void *argtable_loadrun[] = {loadrun, loadrun_filename, stack_addr, uart_opt, bau
 
 struct arg_lit  * read_addr = arg_lit1(NULL,"readaddr", "Reads <Size> Dwords from memory");
 struct arg_int * address_read = arg_int1("a", "Address", NULL, "Address to start from"); 	
-struct arg_int * cap_size_read = arg_int1("s", "size", "<n>", "Read data size in Dwords"); 	
+struct arg_int * cap_size_read = arg_int0("s", "size", "<n>", "Read data size in Dwords"); 	
 struct arg_end * end_read_addr = arg_end(20);
 void *argtable_read_addr[] = {read_addr, address_read, cap_size_read, uart_opt, baudrate_opt, end_read_addr};
 
@@ -664,12 +664,17 @@ int main(int argc, char * argv[])
 		
 	if(nerrors_read_adress == 0)
 	{
-		uint32_t ret;
+		uint32_t ret, size = 1;
+		
+		if(cap_size_read->count != 0)
+		{
+			size = cap_size_read->ival[0];
+		}
 		
 		parse_optional_arguments();
 		open_interface(DEBUG_INTERFACE, &DSOInterface);
 		
-		ret = DSOInterface->Receive(address_read->ival[0], cap_size_read->ival[0]);
+		ret = DSOInterface->Receive(address_read->ival[0], size);
 		exit_waverecorder(ret, &DSOInterface);	
 	}
 	
