@@ -43,6 +43,7 @@ static volatile uint32_t irq_mask;
  * IRQ Routine for DSO Interrupt which is End of Signalcapturing, Encoder IRQ, Key IRQ 
  */
 void isr_dso(int irq);
+void isr_frontpanel(int irq);
 
 void init_irq(void)
 {
@@ -58,13 +59,14 @@ void init_irq(void)
 	WRITE_INT(DSO_SFR_BASE_ADDR,15);
 	lr->irqlevel = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));	/* clear level reg */
 	lr->irqclear = -1;	/* clear all pending interrupts */
-	lr->irqmask  = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_TIMER) | (1 << INT_DSO));	/* mask all interrupts */
+	lr->irqmask  = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_TIMER) | (1 << INT_DSO) | (1<<INT_FRONTPANEL));
 	irq_mask = lr->irqmask;
 	//lr->irqforce = (/*(1 << INT_GENERIC_UART) | (1 << INT_DEBUG_UART) |*/ (1 << INT_DSO));
 	
 	/* Enable DSO Interrupt which is End of Signalcapturing, Encoder IRQ, Key IRQ */
 	catch_interrupt((uint32_t)isr_dso, INT_DSO);
 
+	catch_interrupt((uint32_t)isr_frontpanel, INT_FRONTPANEL);
 //	timer_init();
 }
 
@@ -101,4 +103,11 @@ void isr_dso(int irq)
 			WRITE_INT(DSO_SFR_BASE_ADDR,16);
 		break;
 	}
+}
+
+void isr_frontpanel(int irq)
+{
+	static uint32_t led = 0;
+	led ^= 0xFFFFFFFF;
+	WRITE_INT(LEDADDR, led);
 }

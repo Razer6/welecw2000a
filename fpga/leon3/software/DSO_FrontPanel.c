@@ -368,7 +368,7 @@ void button_handler(void)
 /*
  * An encoder handler for every button. Default encoder handler does nothing.
  */
-enc_handler enc[ENCODERMAX] ;
+enc_handler enc[ENCODERMAX];
 
 void init_enc_handler(enc_handler *handler, uint32_t address, uint32_t offset, void (*callback)(int32_t diff))
 {
@@ -382,7 +382,7 @@ void init_enc_handler(enc_handler *handler, uint32_t address, uint32_t offset, v
           * (This is not at all a bug!) 
 	*/
 	handler->diff = 0;
-	handler->new_value = (READ_INT(handler->address) >> handler->offset) & 7;
+	//handler->new_value = (READ_INT(handler->address) >> handler->offset) & 7;
 	handler->old_value = handler->new_value;
 }
 
@@ -391,7 +391,6 @@ void default_encoder_handler (int32_t diff)
 	/* Do nothing */
 }
 
-#if 0
 /* 
  * Set default encoder handler for every encoder
  */
@@ -401,8 +400,8 @@ void init_default_enc_handlers(void)
 	for(uint32_t i=0; i<ENCODERMAX; i++)
 	{
 		/* EN_CH0_UPDN is default handler */
-		enc[i].address  = KEYADDR0;
-		enc[i].offset   = EN_CH0_UPDN;
+		enc[i].address  = ENCADDR_MISC;
+		enc[i].offset   = 0;
 		enc[i].callback = default_encoder_handler;
 		
 		enc[i].diff = 0;
@@ -417,7 +416,7 @@ void init_default_enc_handlers(void)
   */
 void encoder_handler(void)
 {
-	for(uint32_t i=0; i<ENCODERMAX; ++i)
+/*	for(uint32_t i=0; i<ENCODERMAX; ++i)
 	{
 		enc[i].new_value = (READ_INT(enc[i].address) >> enc[i].offset) & 7;
 		ROTARYMOVE(enc[i].diff, enc[i].new_value, enc[i].old_value);
@@ -427,9 +426,17 @@ void encoder_handler(void)
 			enc[i].callback(enc[i].diff);
 		}
 	}
+*/
+	uint32_t encoder = READ_INT(ENCADDR_MISC);
+	
+	int8_t level = (int8_t)((encoder >> 16) & 0xFF);
+
+	if(level != 0)
+	{
+		enc[0].callback(level);
+	}
 }
 
-#endif
 
 #if 0
 uint32_t encoder_changed0;

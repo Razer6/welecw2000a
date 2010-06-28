@@ -56,7 +56,7 @@ entity LedsKeysAnalogSettings is
     oAnalogBusy     : out std_ulogic;
     oAnalogSettings : out aAnalogSettingsOut;
     oSerialClk      : out std_ulogic;
-    iResetEnc				: in std_ulogic_vector(11 downto 0));
+    iResetEnc				: in std_ulogic_vector(2 downto 0));
 end entity;
 
 architecture RTL of LedsKeysAnalogSettings is
@@ -382,7 +382,7 @@ begin
       iA          => KeyState.D0Reg(13),
       iB          => KeyState.D0Reg(12),
       oCounter    => oKeys.EN_CH3_VDIV,
-      iResetCounter => iResetEnc(7));
+      iResetCounter => iResetEnc(1));
 
   CH2_VDIV : entity DSO.NobDecoder
     port map(
@@ -392,7 +392,7 @@ begin
       iA          => KeyState.D0Reg(11),
       iB          => KeyState.D0Reg(10),
       oCounter    => oKeys.EN_CH2_VDIV,
-      iResetCounter => iResetEnc(6));
+      iResetCounter => iResetEnc(1));
 
   CH1_VDIV : entity DSO.NobDecoder
     port map(
@@ -402,7 +402,7 @@ begin
       iA          => KeyState.D0Reg(29),
       iB          => KeyState.D0Reg(28),
       oCounter    => oKeys.EN_CH1_VDIV,
-      iResetCounter => iResetEnc(5));
+      iResetCounter => iResetEnc(1));
 
   CH0_VDIV : entity DSO.NobDecoder
     port map(
@@ -412,7 +412,7 @@ begin
       iA          => KeyState.D0Reg(27),
       iB          => KeyState.D0Reg(26),
       oCounter    => oKeys.EN_CH0_VDIV,
-      iResetCounter => iResetEnc(4));
+      iResetCounter => iResetEnc(1));
 
   CH3_UPDN : entity DSO.NobDecoder
     generic map (gReverseDir => 1)
@@ -423,7 +423,7 @@ begin
       iA          => KeyState.D0Reg(15),
       iB          => KeyState.D0Reg(14),
       oCounter    => oKeys.EN_CH3_UPDN,
-      iResetCounter => iResetEnc(11));
+      iResetCounter => iResetEnc(2));
 
   CH2_UPDN : entity DSO.NobDecoder
     generic map (gReverseDir => 1)
@@ -434,7 +434,7 @@ begin
       iA          => KeyState.D0Reg(8),
       iB          => KeyState.D0Reg(9),
       oCounter    => oKeys.EN_CH2_UPDN,
-      iResetCounter => iResetEnc(10));
+      iResetCounter => iResetEnc(2));
 
   CH1_UPDN : entity DSO.NobDecoder
     generic map (gReverseDir => 1)
@@ -445,7 +445,7 @@ begin
       iA          => KeyState.D0Reg(30),
       iB          => KeyState.D0Reg(31),
       oCounter    => oKeys.EN_CH1_UPDN,
-      iResetCounter => iResetEnc(9));
+      iResetCounter => iResetEnc(2));
 
   CH0_UPDN : entity DSO.NobDecoder
     generic map (gReverseDir => 1)
@@ -456,7 +456,7 @@ begin
       iA          => KeyState.D0Reg(24),
       iB          => KeyState.D0Reg(25),
       oCounter    => oKeys.EN_CH0_UPDN,
-      iResetCounter => iResetEnc(8));
+      iResetCounter => iResetEnc(2));
 
   LEVEL : entity DSO.NobDecoder
     port map(
@@ -466,7 +466,7 @@ begin
       iA          => KeyState.D0Reg(53),
       iB          => KeyState.D0Reg(52),
       oCounter    => oKeys.EN_LEVEL,
-      iResetCounter => iResetEnc(2));
+      iResetCounter => iResetEnc(0));
 
   LEFT_RIGHT : entity DSO.NobDecoder
     port map(
@@ -476,7 +476,7 @@ begin
       iA          => KeyState.D0Reg(55),
       iB          => KeyState.D0Reg(54),
       oCounter    => oKeys.EN_LEFT_RIGHT,
-      iResetCounter => iResetEnc(1));
+      iResetCounter => iResetEnc(0));
 
   F : entity DSO.NobDecoder
     port map(
@@ -486,7 +486,7 @@ begin
       iA          => KeyState.D0Reg(51),
       iB          => KeyState.D0Reg(50),
       oCounter    => oKeys.EN_F,
-      iResetCounter => iResetEnc(3));
+      iResetCounter => iResetEnc(0));
 
   TIME_DIV : entity DSO.NobDecoder
     port map(

@@ -66,9 +66,13 @@ vcom -quiet -93 -work dso  {../../VGA/src/DoubleBufferVGA-ea.vhd}
 #vcom -quiet -93 -work dso {../../CPU/src/BootloaderROM-bin-ea.vhd}
 vcom -quiet -93 -work dso {../../CPU/src/SpecialFunctionRegister-p.vhd}
 vcom -quiet -93 -work dso {../../CPU/src/SpecialFunctionRegister-ea.vhd}
+vcom -quiet -93 -work dso {../../CPU/src/SpecialFunctionRegisterFrontPanel-p.vhd}
+vcom -quiet -93 -work dso {../../CPU/src/SpecialFunctionRegisterFrontPanel-ea.vhd}
 #vcom -quiet -93 -work dso {../../CPU/src/CPUMemoryInterface-ea.vhd}
 vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/SFR/SFR-p.vhd
 vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/SFR/SFR-ea.vhd
+vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/SFR/SFR_Frontpanel-p.vhd
+vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/SFR/SFR_Frontpanel-ea.vhd
 vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/SFR/SignalAccess-p.vhd
 vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/SFR/SignalAccess-ea.vhd
 #vcom -quiet -93 -work dso  ../../grlib-W2000A/lib/DSO/shram/shram-p.vhd
@@ -96,4 +100,4 @@ vcom -quiet -93 -work work ../../grlib-W2000A/designs/leon3-w2000a/testbench.vhd
 #vsim -t ps -suppress 3473 -gdisas=1 Testbench
 vsim -t ps -gdisas=1 -suppress 3473 Testbench
 do wave.do
-run 500 us
+run 600 us

@@ -51,19 +51,17 @@ package pSpecialFunctionRegister is
   type aSFR_in is record
                     Trigger        : aTriggerOutput;
                     --                  Uart           : aUarttoCPU;
-                    Keys           : aKeys;
                     AnalogBusy     : std_ulogic;
                   end record;
+                  
   type aSFR_out is record
                      Decimator      : aDownSampler;
                      SignalSelector : aSignalSelector;
                      ExtTriggerSrc  : aExtTriggerInput;
                      Trigger        : aTriggerInput;
                      --                  Uart            : aCPUtoUart;
-                     Leds           : aLeds;
                      nConfigADC     : std_ulogic_vector(cChannels-1 downto 0);
                      AnalogSettings : aAnalogSettings;
-                     iResetEnc		: std_ulogic_vector(11 downto 0);
                    end record;
   -- addresses
   constant cDeviceAddr             : natural := 0;
@@ -90,21 +88,7 @@ package pSpecialFunctionRegister is
   constant cTriggerStatusRegister  : natural := 22;
   constant cTriggerCurrentAddr     : natural := 23;
   constant cConfigADCEnable        : natural := 24;
-  constant cLedAddr                : natural := 25;
-  constant cKeyAddr                : natural := 26;
-  constant cEncAddrTimbase    	   : natural := 27;
-  constant cEncAddrLeftRight	   : natural := 28;
-  constant cEncAddrTriggerLevel    : natural := 29;
-  constant cEncAddrF		       : natural := 30;
-  constant cEncAddrVoltageCH0  	   : natural := 31;
-  constant cEncAddrVoltageCH1  	   : natural := 32;
-  constant cEncAddrVoltageCH2  	   : natural := 33;
-  constant cEncAddrVoltageCH3 	   : natural := 34;
-  constant cEncAddrUpDownCH0 	   : natural := 35;
-  constant cEncAddrUpDownCH1  	   : natural := 36;
-  constant cEncAddrUpDownCH2  	   : natural := 37;
-  constant cEncAddrUpDownCH3  	   : natural := 38;
-  constant cAnalogSettingsAddr     : natural := 39;
-  constant cLastAddr               : natural := 40;
+  constant cAnalogSettingsAddr     : natural := 25;
+  constant cLastAddr               : natural := 26;
   
 end package;

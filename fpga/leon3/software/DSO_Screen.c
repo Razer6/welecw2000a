@@ -256,7 +256,7 @@ void DrawPixel32(color_t color, uint32_t x, uint32_t y)
 	else
 	{
 		fp[(y*HLEN+x)/2] = (fp[(y*HLEN+x)/2] & 0xFFFF0000) | color;
-	}
+	} 
 }
 
 void DrawPixel32Clipped(color_t color, uint32_t x, uint32_t y)
@@ -265,7 +265,7 @@ void DrawPixel32Clipped(color_t color, uint32_t x, uint32_t y)
 
 	if(clippingRect != NULL && x >= clippingRect->x && x <= clippingRect->x+clippingRect->width && y >= clippingRect->y && y <= clippingRect->y+clippingRect->height)
 		return;
-
+	
 	if((x%2)==0)
 	{
 		fp[(y*HLEN+x)/2] = (fp[(y*HLEN+x)/2] & 0x0000FFFF) | (color << 16);

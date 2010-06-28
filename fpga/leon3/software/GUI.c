@@ -46,6 +46,7 @@
 
 #include "timer.h"
 
+#ifdef BOARD_COMPILATION
 
 sSubMenuList *openSubMenuList = NULL;
 sMenu *activeMenu;
@@ -614,6 +615,7 @@ void drawGrid(void)
 	}
 }
 
+#endif
 
 
 

@@ -135,6 +135,10 @@ int main (void)
 	char ack[] = "success!\n";
 	char nak[] = "failed!\n";
 
+	uint32_t tmp = READ_INT(0x80000900);
+	tmp = READ_INT(0x80000904);
+	tmp = READ_INT(0x80000908);
+
 	Analog[0].myVperDiv = 10000;
 	Analog[0].AC = 0;
 	Analog[0].Mode = normal;
@@ -150,7 +154,7 @@ int main (void)
 	/* This is a workaround to share the serial port with the debug uart 
 	 * and the generic uart on the W2000A! */
 	WaitMs(100);
-	WRITE_INT(CONFIGADCENABLE,0); /* selecting the generic uart for the W2000A */
+//	WRITE_INT(CONFIGADCENABLE,0); /* selecting the generic uart for the W2000A */
 	/*WaitMs(1000);*/
 //	while(1);
 	InitSignalCapture();
@@ -319,6 +323,7 @@ void TestRotNobs(){
 	int32_t kc = 0;	
 	int32_t move = 0;
 
+#if 0
 	if ((READ_INT(KEYADDR1) & (1 << BTN_F3)) != 0){
 		nob= 0;
 	}
@@ -372,6 +377,7 @@ void TestRotNobs(){
 		}
 		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR, '\n');*/
 	}
+#endif
 	
 }
 

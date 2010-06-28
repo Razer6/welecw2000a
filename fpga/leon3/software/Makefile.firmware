@@ -26,7 +26,7 @@ CFLAGS += -mv8                  # Use V8 ISA
 CFLAGS += -O2                   # Optimize some
 CFLAGS += -Wall                 # Enable many warnings
 CFLAGS += -Wextra               # Enable even more warnings
-CFLAGS += -Werror               # Error out on warnings
+#CFLAGS += -Werror               # Error out on warnings
 CFLAGS += -Wno-unused-parameter # Do not warn about unused function parameters
 
 # Target variables

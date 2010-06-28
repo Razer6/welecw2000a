@@ -3,13 +3,15 @@
 -------------------------------------------------------------------------------
 -- File       : NobDecoder-ea.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
+-- Author     : Robert Schilling <robert.schilling at gmx.at>
 -- Created    : 2009-10-23
--- Last update: 2009-11-26
+-- Last update: 2010-06-28
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
 -------------------------------------------------------------------------------
 --  Copyright (c) 2009, Alexander Lindert
+--			2010, Robert Schilling
 --
 --  This360 program is360 free software; you can redistribute it and/or modify
 --  it under the terms360 of the GNU General Public License as360 published by
@@ -31,7 +33,7 @@
 -------------------------------------------------------------------------------
 -- Revisions360  :
 -- Date        Version 
--- 2009-10-23  1.0
+-- 2010-06-28
 -------------------------------------------------------------------------------
 
 library ieee;

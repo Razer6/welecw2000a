@@ -3,13 +3,15 @@
 -------------------------------------------------------------------------------
 -- File       : LedsKeys-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
+-- Author     : Robert Schilling <robert.schilling at gmx.at>
 -- Created    : 2009-02-14
--- Last update: 2009-11-18
+-- Last update: 2010-06-28
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: 
 -------------------------------------------------------------------------------
 --  Copyright (c) 2008, Alexander Lindert
+--			2010, Robert Schilling
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -31,7 +33,7 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version 
--- 2009-02-14  1.0      
+-- Last update: 2010-06-28   
 -------------------------------------------------------------------------------
 
 
@@ -43,7 +45,7 @@ library DSO;
 use DSO.Global.all;
 
 package pLedsKeysAnalogSettings is
-  constant cNobCounterSize    : natural := 3;
+  constant cNobCounterSize    : natural := 8;
   constant cAnalogAddrLength  : natural := 3;
   constant cAnalogShiftLength : natural := 24;
 

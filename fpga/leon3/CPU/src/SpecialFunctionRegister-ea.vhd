@@ -78,7 +78,6 @@ architecture RTL of SpecialFunctionRegister is
   signal PrevTriggerBusy           : std_ulogic;
   signal PrevTriggerStartRecording : std_ulogic;
   signal PrevAnalogBusy            : std_ulogic;
-  signal PrevKeys : aKeys;
   signal Addr                      : natural;
 begin
   
@@ -111,11 +110,6 @@ begin
         InterruptVector(2) <= '1';
       end if;
       
-      PrevKeys <= SFRIn.Keys;
-      if SFRIn.Keys /= PrevKeys then
-        InterruptVector(3) <= '1';
-      end if;
-
 --      InterruptVector(2) <= SFRIn.KeyInterruptLH;
 --      InterruptVector(3) <= SFRIn.KeyInterruptHL;
       --  InterruptVector(4) <= SFRIn.Uart.Interrupt;
@@ -143,7 +137,6 @@ begin
   oSFRControl.ExtTriggerSrc  <= ExtTriggerSrc;
   oSFRControl.Trigger        <= Trigger;
   oSFRControl.nConfigADC     <= nConfigADC;
-  oSFRControl.Leds           <= Leds;
   oSFRControl.AnalogSettings <= AnalogSettings;
 --    end if;
 --  end process;
@@ -204,8 +197,6 @@ begin
 
       nConfigADC <= (others => cLowActive);
 
---      Leds <= (others => '0');
-
       AnalogSettings <= (
         Addr   => (others => '-'),
         Data   => (others => '-'),
@@ -217,14 +208,8 @@ begin
       Trigger.TriggerOnce           <= '0';
       Trigger.ForceIdle             <= '0';
       Trigger.SetReadOffset         <= '0';
-      Leds.SetLeds                  <= '0';
       AnalogSettings.Set            <= '0';
       AnalogSettings.Set_PWM_Offset <= '0';
-
-      -- W2000A manual switch to the debug uart (if software fails)
-      if SFRIn.Keys.BTN_F1 = '1' and SFRIn.Keys.BTN_F2 = '1' then
-        nConfigADC(0) <= cLowActive;
-      end if;
 
       if iWr = '1' then
         case Addr is
@@ -291,24 +276,6 @@ begin
             -- if SFRIn.Keys.BTN_F1 = '1' and SFRIn.Keys.BTN_F2 = '1' then
             --   nConfigADC(0) <= cLowActive;
             -- end if;
-            
-          when cLedAddr =>
-            Leds <= (
-              SetLeds        => '1',
-              LED_CH0        => iData(0),
-              LED_CH1        => iData(1),
-              LED_CH2        => iData(2),
-              LED_CH3        => iData(3),
-              LED_MATH       => iData(4),
-              LED_QUICKMEAS  => iData(5),
-              LED_CURSORS    => iData(6),
-              LED_WHEEL      => iData(7),
-              LED_PULSEWIDTH => iData(8),
-              LED_EDGE       => iData(9),
-              RUN_GREEN      => iData(10),
-              RUN_RED        => iData(11),
-              SINGLE_GREEN   => iData(12),
-              SINGLE_RED     => iData(13));
 
           when cAnalogSettingsAddr =>
             AnalogSettings.Set_PWM_Offset    <= iData(31);
@@ -375,43 +342,6 @@ begin
     end if;
   end process;
   
-  pResetEnc  : process (iClkCPU, iResetAsync)
-  begin
-    if rising_edge(iCLKCPU) then
-	   oSFRControl.iResetEnc <= (others => '0'); 
-			if(iRd = '1') then
-				case Addr is
-					when cEncAddrTimbase =>
-						oSFRControl.iResetEnc(0) <= '1';
-					when cEncAddrLeftRight =>
-						oSFRControl.iResetEnc(1) <= '1';
-					when cEncAddrTriggerLevel =>
-						oSFRControl.iResetEnc(2) <= '1';
-					when cEncAddrF =>
-						oSFRControl.iResetEnc(3) <= '1';
-					when cEncAddrVoltageCH0 =>
-						oSFRControl.iResetEnc(4) <= '1';
-					when cEncAddrVoltageCH1 =>
-						oSFRControl.iResetEnc(5) <= '1';
-					when cEncAddrVoltageCH2 =>
-						oSFRControl.iResetEnc(6) <= '1';
-					when cEncAddrVoltageCH3 =>
-						oSFRControl.iResetEnc(7) <= '1';
-					when cEncAddrUpDownCH0 =>
-						oSFRControl.iResetEnc(8) <= '1';
-					when cEncAddrUpDownCH1 =>
-						oSFRControl.iResetEnc(9) <= '1';
-					when cEncAddrUpDownCH2 =>
-						oSFRControl.iResetEnc(10) <= '1';
-					when cEncAddrUpDownCH3 =>
-						oSFRControl.iResetEnc(11) <= '1';
-					when others => null;
-				end case;
-			end if;
-		end if;
-  end process;
-
-  
   pRead : process (Addr, SFRIn, InterruptVector,
                    InterruptMask, Decimator, nConfigADC,
                    SignalSelector, Trigger, Leds, ExtTriggerSrc, AnalogSettings)
@@ -477,92 +407,6 @@ begin
           std_ulogic_vector(SFRIn.Trigger.CurrentTriggerAddr);
       when cConfigADCEnable =>
         oData(nConfigADC'range) <= nConfigADC;
-        
-      when cLedAddr =>
-        oData(0)  <= Leds.LED_CH0;
-        oData(1)  <= Leds.LED_CH1;
-        oData(2)  <= Leds.LED_CH2;
-        oData(3)  <= Leds.LED_CH3;
-        oData(4)  <= Leds.LED_MATH;
-        oData(5)  <= Leds.LED_QUICKMEAS;
-        oData(6)  <= Leds.LED_CURSORS;
-        oData(7)  <= Leds.LED_WHEEL;
-        oData(8)  <= Leds.LED_PULSEWIDTH;
-        oData(9)  <= Leds.LED_EDGE;
-        oData(10) <= Leds.RUN_GREEN;
-        oData(11) <= Leds.RUN_RED;
-        oData(12) <= Leds.SINGLE_GREEN;
-        oData(13) <= Leds.SINGLE_RED;
-
---        oData(18 downto 16) <= SFRIn.Keys.EN_TIME_DIV;
---        oData(22 downto 20) <= SFRIn.Keys.EN_LEFT_RIGHT;
---        oData(26 downto 24) <= SFRIn.Keys.EN_LEVEL;
---        oData(30 downto 28) <= SFRIn.Keys.EN_F;
---        
---      when cKeyAddr =>
---        oData(2 downto 0)   <= SFRIn.Keys.EN_CH0_UPDN;
---        oData(6 downto 4)   <= SFRIn.Keys.EN_CH1_UPDN;
---        oData(10 downto 8)  <= SFRIn.Keys.EN_CH2_UPDN;
---        oData(14 downto 12) <= SFRIn.Keys.EN_CH3_UPDN;
---        oData(18 downto 16) <= SFRIn.Keys.EN_CH0_VDIV;
---        oData(22 downto 20) <= SFRIn.Keys.EN_CH1_VDIV;
---        oData(26 downto 24) <= SFRIn.Keys.EN_CH2_VDIV;
---        oData(30 downto 28) <= SFRIn.Keys.EN_CH3_VDIV;
-        
-      when cKeyAddr =>
-        oData(0)  <= SFRIn.Keys.BTN_F1;
-        oData(1)  <= SFRIn.Keys.BTN_F2;
-        oData(2)  <= SFRIn.Keys.BTN_F3;
-        oData(3)  <= SFRIn.Keys.BTN_F4;
-        oData(4)  <= SFRIn.Keys.BTN_F5;
-        oData(5)  <= SFRIn.Keys.BTN_F6;
-        oData(6)  <= SFRIn.Keys.BTN_MATH;
-        oData(7)  <= SFRIn.Keys.BTN_CH0;
-        oData(8)  <= SFRIn.Keys.BTN_CH1;
-        oData(9)  <= SFRIn.Keys.BTN_CH2;
-        oData(10) <= SFRIn.Keys.BTN_CH3;
-        oData(11) <= SFRIn.Keys.BTN_MAINDEL;
-        oData(12) <= SFRIn.Keys.BTN_RUNSTOP;
-        oData(13) <= SFRIn.Keys.BTN_SINGLE;
-        oData(14) <= SFRIn.Keys.BTN_CURSORS;
-        oData(15) <= SFRIn.Keys.BTN_QUICKMEAS;
-        oData(16) <= SFRIn.Keys.BTN_ACQUIRE;
-        oData(17) <= SFRIn.Keys.BTN_DISPLAY;
-        oData(18) <= SFRIn.Keys.BTN_EDGE;
-        oData(19) <= SFRIn.Keys.BTN_MODECOUPLING;
-        oData(20) <= SFRIn.Keys.BTN_AUTOSCALE;
-        oData(21) <= SFRIn.Keys.BTN_SAVERECALL;
-        oData(22) <= SFRIn.Keys.BTN_QUICKPRINT;
-        oData(23) <= SFRIn.Keys.BTN_UTILITY;
-        oData(24) <= SFRIn.Keys.BTN_PULSEWIDTH;
-        oData(25) <= SFRIn.Keys.BTN_X1;
-        oData(26) <= SFRIn.Keys.BTN_X2;
-        
-      when cEncAddrTimbase =>
-				oData(SFRIn.Keys.EN_TIME_DIV'range) <= SFRIn.Keys.EN_TIME_DIV;
-			when cEncAddrLeftRight =>
-				oData(SFRIn.Keys.EN_LEFT_RIGHT'range) <= SFRIn.Keys.EN_LEFT_RIGHT;
-			when cEncAddrTriggerLevel =>
-				oData(SFRIn.Keys.EN_LEVEL'range) <= SFRIn.Keys.EN_LEVEL;
-			when cEncAddrF =>
-				oData(SFRIn.Keys.EN_F'range) <= SFRIn.Keys.EN_F;
-			when cEncAddrVoltageCH0 =>
-				oData(SFRIn.Keys.EN_CH0_VDIV'range) <= SFRIn.Keys.EN_CH0_VDIV;
-			when cEncAddrVoltageCH1 =>
-				oData(SFRIn.Keys.EN_CH1_VDIV'range) <= SFRIn.Keys.EN_CH1_VDIV;
-			when cEncAddrVoltageCH2 =>
-				oData(SFRIn.Keys.EN_CH2_VDIV'range) <= SFRIn.Keys.EN_CH2_VDIV;
-			when cEncAddrVoltageCH3 =>
-				oData(SFRIn.Keys.EN_CH3_VDIV'range) <= SFRIn.Keys.EN_CH3_VDIV;
-			when cEncAddrUpDownCH0 =>
-				oData(SFRIn.Keys.EN_CH0_UPDN'range) <= SFRIn.Keys.EN_CH0_UPDN;
-			when cEncAddrUpDownCH1 =>
-				oData(SFRIn.Keys.EN_CH1_UPDN'range) <= SFRIn.Keys.EN_CH1_UPDN;
-			when cEncAddrUpDownCH2 =>
-				oData(SFRIn.Keys.EN_CH2_UPDN'range) <= SFRIn.Keys.EN_CH2_UPDN;
-			when cEncAddrUpDownCH3 =>
-				oData(SFRIn.Keys.EN_CH3_UPDN'range) <= SFRIn.Keys.EN_CH3_UPDN;
-        
 
       when cAnalogSettingsAddr =>
         oData(30)                        <= AnalogSettings.EnableKeyClock;  -- not implemented

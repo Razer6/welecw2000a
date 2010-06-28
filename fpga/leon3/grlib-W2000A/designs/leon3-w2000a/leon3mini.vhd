@@ -53,6 +53,8 @@ use DSO.Global.all;
 --use DSO.pVGA.all;
 use DSO.pSFR.all;
 use DSO.pSpecialFunctionRegister.all;
+use DSO.pSpecialFunctionRegister_Frontpanel.all;
+use DSO.pSFR_Frontpanel.all;
 use DSO.pTrigger.all;
 use DSO.pSignalAccess.all;
 --use DSO.pSRamPriorityAccess.all;
@@ -192,6 +194,8 @@ architecture rtl of leon3mini is
   signal CPUtoTriggerMem   : aTriggerMemIn;
   signal SFRControltoCPU   : aSFR_in;
   signal SFRControlfromCPU : aSFR_out;
+  signal SFRFrontpaneltoCPU : aSFR_Frontpanel_in;
+  signal SFRFrontpanelfromCPU : aSFR_Frontpanel_out;
 
   --signal LedsfromCPU	  : aLeds;
   signal LedstoPanel	: aShiftOut;
@@ -398,16 +402,16 @@ begin
     port map (
       iClk	      => ClkCPU,
       iResetAsync     => ResetAsync,
-      iLeds	      => SFRControlfromCPU.Leds,
+      iLeds	      => SFRFrontpanelFromCPU.Leds,
       oLeds	      => LedstoPanel,
       iKeysData	      => iFPSW_DOUT,
       onFetchKeys     => KeysfromPanel,
-      oKeys	      => SFRControltoCPU.Keys,
+      oKeys	      => SFRFrontpanelToCPU.Keys,
       iCPUtoAnalog    => SFRControlfromCPU.AnalogSettings,
       oAnalogBusy     => SFRControltoCPU.AnalogBusy,
       oAnalogSettings => AnalogSettings,
       oSerialClk      => SerialClk,
-      iResetEnc => SFRControlfromCPU.iResetEnc);
+      iResetEnc => SFRFrontpanelFromCPU.iResetEnc);
 
   oFPSW_PE    <= KeysFromPanel.nFetchStrobe;
   oFPSW_CLK   <= KeysFromPanel.SerialClk;
@@ -716,6 +720,26 @@ begin
 	       iSFRControl  => SFRControltoCPU,
 	       oSFRControl  => SFRControlfromCPU);
   end generate;
+  
+  genSFRFrontPanel : if CFG_DSO_ENABLE /= 0 generate
+		SFRFront : SFR_Frontpanel
+			generic map(pindex => 7,
+			paddr => 9,
+			pmask => 16#FFF#,
+			pirq => 9)
+			port map(rst_in => rstn,
+			iResetAsync => ResetAsync,
+			clk_i => clkm,
+			clk_design_i => ClkDesign,
+			apb_i => apbi,
+			apb_o => apbo(7),
+			iSFRFrontPanel => SFRFrontpanelToCPU,
+			oSFRFrontPanel => SFRFrontpanelFromCPU);
+	end generate;
+  
+  
+  
+  
 
   vga : if CFG_VGA_ENABLE /= 0 generate
     vga0 : apbvga generic map(memtech => memtech, pindex => 5, paddr => 6)
@@ -788,10 +812,10 @@ begin
 ---  Drive unused bus elements	---------------------------------------
 -----------------------------------------------------------------------
 
-  nam1 : for i in (CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_SVGA_ENABLE+CFG_GRETH) to NAHBMST-1 generate
+  nam1 : for i in (CFG_NCPU+CFG_AHB_UART+CFG_AHB_JTAG+CFG_SVGA_ENABLE+CFG_GRETH+1) to NAHBMST-1 generate
     ahbmo(i) <= ahbm_none;
   end generate;
-  nap0 : for i in 7 to NAPBSLV-1-CFG_GRETH generate apbo(i) <= apb_none; end generate;
+  nap0 : for i in 8 to NAPBSLV-1-CFG_GRETH generate apbo(i) <= apb_none; end generate;
   nah0 : for i in 8 to NAHBSLV-1 generate ahbso(i)	    <= ahbs_none; end generate;
 
 -----------------------------------------------------------------------

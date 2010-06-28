@@ -867,6 +867,23 @@ add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrdso/sf
 add wave -noupdate -format Logic /testbench/d3/gensfrdso/sfr0/cpuinterrupt
 add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/interruptvector
 add wave -noupdate -format Literal /testbench/d3/gensfrdso/sfr0/sfr/interruptmask
+add wave -noupdate -divider {DSO SFR Frontpanel}
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/rst_in
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/iresetasync
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/clk_i
+add wave -noupdate -format Literal -expand /testbench/d3/gensfrfrontpanel/sfrfront/apb_i
+add wave -noupdate -format Literal /testbench/d3/gensfrfrontpanel/sfrfront/apb_o
+add wave -noupdate -format Literal -expand /testbench/d3/gensfrfrontpanel/sfrfront/isfrfrontpanel
+add wave -noupdate -format Literal -expand /testbench/d3/gensfrfrontpanel/sfrfront/osfrfrontpanel
+add wave -noupdate -format Literal /testbench/d3/gensfrfrontpanel/sfrfront/addr
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/rd
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/wr
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/sfr/Addr
+add wave -noupdate -format Literal -radix decimal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/idata
+add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/odata
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/cpuinterrupt
+add wave -noupdate -format Literal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/interruptvector
+add wave -noupdate -format Literal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/interruptmask
 add wave -noupdate -divider IRQ
 add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbi
 add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/apbo

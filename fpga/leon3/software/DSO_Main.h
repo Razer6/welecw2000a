@@ -101,6 +101,7 @@
 #define VGA_CONFIG_BASE_ADDR     0x80000600
 #define DEBUG_UART_BASE_ADDR     0x80000700 
 #define UART_CHCFG_BASE_ADDR     0x80000800
+#define FRONTPANEL_BASE_ADDR	 0x80000900
 
 #ifdef LEON3
 #define WRITE_INT(addr,data) (*(volatile uint32_t*)addr) = (uint32_t)data
@@ -117,6 +118,7 @@
 #define INT_DSO           5
 #define INT_DEBUG_UART    7
 #define INT_TIMER         8
+#define INT_FRONTPANEL	  9
 
 #ifdef BOARD_COMPILATION
 #define CAPTURESIZE 10000

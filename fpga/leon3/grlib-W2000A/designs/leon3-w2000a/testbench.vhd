@@ -721,7 +721,7 @@ begin
 
   sram0 : entity work.AsyncSRAM
     generic map (
-	gFileName  => "sram.bin",
+	gFileName  => "w2000a.bin",
 	gReverseEndian => true,
 	gAddrWidth => A_SRAM'length-2)
     port map (

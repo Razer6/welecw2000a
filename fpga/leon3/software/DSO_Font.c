@@ -38,6 +38,8 @@
 #include "DSO_Font.h"
 #include "DSO_Screen.h"
 
+#ifdef BOARD_COMPILATION
+
 void printStr_lcd(sFont *font, uint32_t x, uint32_t y, uint16_t color_fg, uint16_t color_bg, const char *str)
 {
 	uint16_t width = 0;
@@ -110,3 +112,5 @@ uint32_t getTextWidthi(sFont *font, int *text)
 	}
 	return textwidth;
 }
+
+#endif

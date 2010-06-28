@@ -1055,25 +1055,25 @@ void init_buttons(void)
 /*
   * Init encoders. Add for every encoder an encoder handler
   */
-#if 0
 void init_encoders(void)
 {
 	//Call this before encoder_handler()
 	init_default_enc_handlers();
 	
 	/* Voltage encoders */
-	init_enc_handler(&enc[0], KEYADDR0, EN_CH0_VDIV, set_vdiv_ch0);
-	init_enc_handler(&enc[1], KEYADDR0, EN_CH1_VDIV, set_vdiv_ch1);
+//	init_enc_handler(&enc[0], KEYADDR0, EN_CH0_VDIV, set_vdiv_ch0);
+//	init_enc_handler(&enc[1], KEYADDR0, EN_CH1_VDIV, set_vdiv_ch1);
 	
 	/* Position encoders */
 	
 	/* other encoders */
-	init_enc_handler(&enc[2],  LEDADDR, EN_LEVEL, changeTriggerLevel);
-	init_enc_handler(&enc[3],  LEDADDR, EN_TIME_DIV, setTimebase);
-	init_enc_handler(&enc[4],  LEDADDR, EN_LEFT_RIGHT, setFramePosition);
-	init_enc_handler(&enc[5],  LEDADDR, EN_F, vfValueChanged);
+	init_enc_handler(&enc[0],  LEDADDR, EN_LEVEL, changeTriggerLevel);
+//	init_enc_handler(&enc[3],  LEDADDR, EN_TIME_DIV, setTimebase);
+//	init_enc_handler(&enc[4],  LEDADDR, EN_LEFT_RIGHT, setFramePosition);
+//	init_enc_handler(&enc[5],  LEDADDR, EN_F, vfValueChanged);
 }
-#endif
+
+
 void GUI_Main(void)
 {
 	generategrid();
@@ -1154,7 +1154,21 @@ void GUI_Main(void)
 		button_handler();
 	//	encoder_handler();
 
-	//	closeSubMenuTime();
+		uint32_t encoder = READ_INT(ENCADDR_MISC);
+	
+		int32_t level = (int8_t)((encoder >> 16) & 0xFF);
+
+		rprintf("Lev: %d\n\r", level);
+		
+
+		if(level != 0)
+		{
+			changeTriggerLevel(level);
+		}
+
+		WaitMs(10);
+
+		closeSubMenuTime();
 
 		if ((READ_INT(KEYADDR) & (1 << BTN_RUNSTOP)) != 0)
 		{

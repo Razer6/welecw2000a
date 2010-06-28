@@ -67,7 +67,7 @@ void timer_interrupt(int irq)
 	*/
 
 	itoa(count++, str);
-	printStr_lcdi(&FONT_STATUS_BAR, 480, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, str);
+	//printStr_lcdi(&FONT_STATUS_BAR, 480, STATUS_BAR_START_Y, STATUS_BAR_COLOR_FG, STATUS_BAR_COLOR_BG, str);
 	timer_clear_interrupt(1);
 }
 
