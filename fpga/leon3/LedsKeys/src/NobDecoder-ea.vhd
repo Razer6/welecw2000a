@@ -46,9 +46,6 @@ use DSO.Global.all;
 use DSO.pLedsKeysAnalogSettings.all;
 
 entity NobDecoder is
-  generic (
-    gReverseDir : natural := 0;
-    g360        : natural := 0);
   port (
     signal iClk        : in  std_ulogic;
     signal iResetAsync : in  std_ulogic;
@@ -60,7 +57,8 @@ entity NobDecoder is
 end entity;
 
 architecture RTL of NobDecoder is
-signal a_in, b_in, a_old, b_old: std_ulogic;
+--signal a_in, b_in, a_old, b_old: std_ulogic;
+signal input_data : std_ulogic_vector(3 downto 0);
 signal cnt : signed(cNobCounterSize downto 0);
 signal up_down, ce : std_ulogic;
 begin
@@ -68,23 +66,26 @@ begin
 	INPUT:process(iClk, iResetAsync)
 	begin
 		if(iResetAsync = cResetActive) then
-			a_in <= '0';
-			b_in <= '0';
-			a_old <= '0';
-			b_old <= '0';
+--			a_in <= '0';
+--			b_in <= '0';
+--			a_old <= '0';
+--			b_old <= '0';
+				input_data <= (others => '0');
 		elsif(rising_edge(iClk)) then
-			a_in  <= iA;
-			a_old <= a_in;
-			b_in  <= iB;
-			b_old <= b_in;
+--			a_in  <= iA;
+--			a_old <= a_in;
+--			b_in  <= iB;
+--			b_old <= b_in;
+			input_data <= iA & iB & input_data(3 downto 2);
 		end if;
 	end process;
  
-	DECODE:process(a_in, b_in, a_old, b_old)
-	variable state: std_ulogic_vector(3 downto 0);
+--	DECODE:process(a_in, b_in, a_old, b_old)
+--	variable state: std_ulogic_vector(3 downto 0);
+	DECODE:process(input_data)
 	begin
-		state := a_in & b_in & a_old & b_old;
-		case state is
+--		state := a_in & b_in & a_old & b_old;
+		case input_data is
 			when "0001" => up_down <= '1'; ce <= '1';
 			when "0010" => up_down <= '0'; ce <= '1';
 			when "0100" => up_down <= '0'; ce <= '1'; 
@@ -114,11 +115,11 @@ begin
 			if(iResetCounter = '1') then
 				cnt <= (others => '0');
 			end if;
+			
 		end if;
 	end process;
 
-
-oCounter <= std_ulogic_vector(cnt(cnt'left downto 1));
+	oCounter <= std_ulogic_vector(cnt(cnt'left downto 1));
 
 end architecture;
 

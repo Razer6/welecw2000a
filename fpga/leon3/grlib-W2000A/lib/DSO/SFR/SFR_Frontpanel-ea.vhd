@@ -47,6 +47,7 @@ library DSO;
 use DSO.Global.all;
 use DSO.pSpecialFunctionRegister_Frontpanel.all;
 
+
 entity SFR_Frontpanel is
   generic (
     pindex : integer := 0;               -- Leon3 index
@@ -82,7 +83,7 @@ begin  -- rtl
   Rd    <= apb_i.penable and (not apb_i.pwrite) and (apb_i.psel(pindex));
   Wr    <= apb_i.penable and apb_i.pwrite and (apb_i.psel(pindex));
 
-  SFR : entity DSO.Frontpanel_SpecialFunctionRegister
+  SFR : entity DSO.SpecialFunctionRegister_Frontpanel
     port map (
       iClkCPU                 => clk_i,
       iClkDesign              => clk_design_i,

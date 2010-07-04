@@ -63,7 +63,7 @@ entity SpecialFunctionRegister_Frontpanel is
     oSFRControl   : out aSFR_Frontpanel_out);
 end entity;
 
-architecture RTL of Frontpanel_SpecialFunctionRegister is
+architecture RTL of SpecialFunctionRegister_Frontpanel is
   signal SFRFrontpanelIn           : aSFR_Frontpanel_in;
   signal InterruptMask             : std_ulogic_vector(4-1 downto 0);
   signal InterruptVector           : std_ulogic_vector(4-1 downto 0);
@@ -85,13 +85,8 @@ begin
       PrevInt <= InterruptVector;
       
       PrevKeys <= SFRFrontpanelIn.Keys;
-    --  if SFRFrontpanelIn.Keys /= PrevKeys then
-    --    InterruptVector(3) <= '1';
-    --  end if;
 
-  --    if (InterruptVector and InterruptMask) /= X"0"
-    --    and InterruptVector /= PrevInt then
-			if SFRFrontpanelIn.Keys /= PrevKeys then
+      if SFRFrontpanelIn.Keys /= PrevKeys then
         oCPUInterrupt <= '1';
       else
         oCPUInterrupt <= '0';

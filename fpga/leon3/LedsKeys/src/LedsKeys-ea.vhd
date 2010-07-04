@@ -415,7 +415,7 @@ begin
       iResetCounter => iResetEnc(1));
 
   CH3_UPDN : entity DSO.NobDecoder
-    generic map (gReverseDir => 1)
+--    generic map (gReverseDir => 1)
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
@@ -426,7 +426,7 @@ begin
       iResetCounter => iResetEnc(2));
 
   CH2_UPDN : entity DSO.NobDecoder
-    generic map (gReverseDir => 1)
+--    generic map (gReverseDir => 1)
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
@@ -437,7 +437,7 @@ begin
       iResetCounter => iResetEnc(2));
 
   CH1_UPDN : entity DSO.NobDecoder
-    generic map (gReverseDir => 1)
+--    generic map (gReverseDir => 1)
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
@@ -448,7 +448,7 @@ begin
       iResetCounter => iResetEnc(2));
 
   CH0_UPDN : entity DSO.NobDecoder
-    generic map (gReverseDir => 1)
+--    generic map (gReverseDir => 1)
     port map(
       iClk        => iClk,
       iResetAsync => iResetAsync,
