@@ -65,9 +65,6 @@ end entity;
 
 architecture RTL of SpecialFunctionRegister_Frontpanel is
   signal SFRFrontpanelIn           : aSFR_Frontpanel_in;
-  signal InterruptMask             : std_ulogic_vector(4-1 downto 0);
-  signal InterruptVector           : std_ulogic_vector(4-1 downto 0);
-  signal PrevInt                   : std_ulogic_vector(4-1 downto 0);
   signal Leds                      : aLeds;
   signal PrevKeys 								 : aKeys;
   signal Addr                      : natural;
@@ -79,11 +76,7 @@ begin
   begin
     if iResetAsync = cResetActive then
       oCPUInterrupt             <= '0';
-      InterruptVector           <= (others => '0');
-      PrevInt <= (others => '0');
     elsif rising_edge(iCLKCPU) then
-      PrevInt <= InterruptVector;
-      
       PrevKeys <= SFRFrontpanelIn.Keys;
 
       if SFRFrontpanelIn.Keys /= PrevKeys then
@@ -153,75 +146,80 @@ begin
     end if;
   end process;
   
-  pRead  : process (Addr, Leds)
+  pRead  : process (Addr, Leds, SFRFrontpanelIn, iRd)
+  --pRead : process(iClkCPU, iResetAsync)
   begin
-    oData <= (others => '0');
-		case Addr is
-			when cLedAddr =>
-				oData(0)  <= Leds.LED_CH0;
-				oData(1)  <= Leds.LED_CH1;
-				oData(2)  <= Leds.LED_CH2;
-				oData(3)  <= Leds.LED_CH3;
-				oData(4)  <= Leds.LED_MATH;
-				oData(5)  <= Leds.LED_QUICKMEAS;
-				oData(6)  <= Leds.LED_CURSORS;
-				oData(7)  <= Leds.LED_WHEEL;
-				oData(8)  <= Leds.LED_PULSEWIDTH;
-				oData(9)  <= Leds.LED_EDGE;
-				oData(10) <= Leds.RUN_GREEN;
-				oData(11) <= Leds.RUN_RED;
-				oData(12) <= Leds.SINGLE_GREEN;
-				oData(13) <= Leds.SINGLE_RED;
-						
-			when cKeyAddr =>
-				oData(0)  <= SFRFrontpanelIn.Keys.BTN_F1;
-				oData(1)  <= SFRFrontpanelIn.Keys.BTN_F2;
-				oData(2)  <= SFRFrontpanelIn.Keys.BTN_F3;
-				oData(3)  <= SFRFrontpanelIn.Keys.BTN_F4;
-				oData(4)  <= SFRFrontpanelIn.Keys.BTN_F5;
-				oData(5)  <= SFRFrontpanelIn.Keys.BTN_F6;
-				oData(6)  <= SFRFrontpanelIn.Keys.BTN_MATH;
-				oData(7)  <= SFRFrontpanelIn.Keys.BTN_CH0;
-				oData(8)  <= SFRFrontpanelIn.Keys.BTN_CH1;
-				oData(9)  <= SFRFrontpanelIn.Keys.BTN_CH2;
-				oData(10) <= SFRFrontpanelIn.Keys.BTN_CH3;
-				oData(11) <= SFRFrontpanelIn.Keys.BTN_MAINDEL;
-				oData(12) <= SFRFrontpanelIn.Keys.BTN_RUNSTOP;
-				oData(13) <= SFRFrontpanelIn.Keys.BTN_SINGLE;
-				oData(14) <= SFRFrontpanelIn.Keys.BTN_CURSORS;
-				oData(15) <= SFRFrontpanelIn.Keys.BTN_QUICKMEAS;
-				oData(16) <= SFRFrontpanelIn.Keys.BTN_ACQUIRE;
-				oData(17) <= SFRFrontpanelIn.Keys.BTN_DISPLAY;
-				oData(18) <= SFRFrontpanelIn.Keys.BTN_EDGE;
-				oData(19) <= SFRFrontpanelIn.Keys.BTN_MODECOUPLING;
-				oData(20) <= SFRFrontpanelIn.Keys.BTN_AUTOSCALE;
-				oData(21) <= SFRFrontpanelIn.Keys.BTN_SAVERECALL;
-				oData(22) <= SFRFrontpanelIn.Keys.BTN_QUICKPRINT;
-				oData(23) <= SFRFrontpanelIn.Keys.BTN_UTILITY;
-				oData(24) <= SFRFrontpanelIn.Keys.BTN_PULSEWIDTH;
-				oData(25) <= SFRFrontpanelIn.Keys.BTN_X1;
-				oData(26) <= SFRFrontpanelIn.Keys.BTN_X2;
-				
-			when cEncAddrMisc =>
-				oData(7 downto 0) <= SFRFrontpanelIn.Keys.EN_TIME_DIV;
-				oData(15 downto 8) <= SFRFrontpanelIn.Keys.EN_F;
-				oData(23 downto 16) <= SFRFrontpanelIn.Keys.EN_LEVEL;
-				oData(31 downto 24) <= SFRFrontpanelIn.Keys.EN_LEFT_RIGHT;
-						
-			when cEncAddrVoltage =>
-				oData(7 downto 0) <= SFRFrontpanelIn.Keys.EN_CH0_VDIV;
-				oData(15 downto 8) <= SFRFrontpanelIn.Keys.EN_CH1_VDIV;
-				oData(23 downto 16) <= SFRFrontpanelIn.Keys.EN_CH2_VDIV;
-				oData(31 downto 24) <= SFRFrontpanelIn.Keys.EN_CH3_VDIV;
-				
-			when cEncAddrUpDown =>
-				oData(7 downto 0) <= SFRFrontpanelIn.Keys.EN_CH0_UPDN;
-				oData(15 downto 8) <= SFRFrontpanelIn.Keys.EN_CH1_UPDN;
-				oData(23 downto 16) <= SFRFrontpanelIn.Keys.EN_CH2_UPDN;
-				oData(31 downto 24) <= SFRFrontpanelIn.Keys.EN_CH3_UPDN;
-						
-			when others => oData <= (others => '-');
-		end case;
+--		if(rising_edge(iClkCPU)) then
+--		if(iRd = '1') then
+			oData <= (others => '0');
+			case Addr is
+				when cLedAddr =>
+					oData(0)  <= Leds.LED_CH0;
+					oData(1)  <= Leds.LED_CH1;
+					oData(2)  <= Leds.LED_CH2;
+					oData(3)  <= Leds.LED_CH3;
+					oData(4)  <= Leds.LED_MATH;
+					oData(5)  <= Leds.LED_QUICKMEAS;
+					oData(6)  <= Leds.LED_CURSORS;
+					oData(7)  <= Leds.LED_WHEEL;
+					oData(8)  <= Leds.LED_PULSEWIDTH;
+					oData(9)  <= Leds.LED_EDGE;
+					oData(10) <= Leds.RUN_GREEN;
+					oData(11) <= Leds.RUN_RED;
+					oData(12) <= Leds.SINGLE_GREEN;
+					oData(13) <= Leds.SINGLE_RED;
+							
+				when cKeyAddr =>
+					oData(0)  <= SFRFrontpanelIn.Keys.BTN_F1;
+					oData(1)  <= SFRFrontpanelIn.Keys.BTN_F2;
+					oData(2)  <= SFRFrontpanelIn.Keys.BTN_F3;
+					oData(3)  <= SFRFrontpanelIn.Keys.BTN_F4;
+					oData(4)  <= SFRFrontpanelIn.Keys.BTN_F5;
+					oData(5)  <= SFRFrontpanelIn.Keys.BTN_F6;
+					oData(6)  <= SFRFrontpanelIn.Keys.BTN_MATH;
+					oData(7)  <= SFRFrontpanelIn.Keys.BTN_CH0;
+					oData(8)  <= SFRFrontpanelIn.Keys.BTN_CH1;
+					oData(9)  <= SFRFrontpanelIn.Keys.BTN_CH2;
+					oData(10) <= SFRFrontpanelIn.Keys.BTN_CH3;
+					oData(11) <= SFRFrontpanelIn.Keys.BTN_MAINDEL;
+					oData(12) <= SFRFrontpanelIn.Keys.BTN_RUNSTOP;
+					oData(13) <= SFRFrontpanelIn.Keys.BTN_SINGLE;
+					oData(14) <= SFRFrontpanelIn.Keys.BTN_CURSORS;
+					oData(15) <= SFRFrontpanelIn.Keys.BTN_QUICKMEAS;
+					oData(16) <= SFRFrontpanelIn.Keys.BTN_ACQUIRE;
+					oData(17) <= SFRFrontpanelIn.Keys.BTN_DISPLAY;
+					oData(18) <= SFRFrontpanelIn.Keys.BTN_EDGE;
+					oData(19) <= SFRFrontpanelIn.Keys.BTN_MODECOUPLING;
+					oData(20) <= SFRFrontpanelIn.Keys.BTN_AUTOSCALE;
+					oData(21) <= SFRFrontpanelIn.Keys.BTN_SAVERECALL;
+					oData(22) <= SFRFrontpanelIn.Keys.BTN_QUICKPRINT;
+					oData(23) <= SFRFrontpanelIn.Keys.BTN_UTILITY;
+					oData(24) <= SFRFrontpanelIn.Keys.BTN_PULSEWIDTH;
+					oData(25) <= SFRFrontpanelIn.Keys.BTN_X1;
+					oData(26) <= SFRFrontpanelIn.Keys.BTN_X2;
+					
+				when cEncAddrMisc =>
+					oData(7 downto 0) <= SFRFrontpanelIn.Keys.EN_TIME_DIV;
+					oData(15 downto 8) <= SFRFrontpanelIn.Keys.EN_F;
+					oData(23 downto 16) <= SFRFrontpanelIn.Keys.EN_LEVEL;
+					oData(31 downto 24) <= SFRFrontpanelIn.Keys.EN_LEFT_RIGHT;
+							
+				when cEncAddrVoltage =>
+					oData(7 downto 0) <= SFRFrontpanelIn.Keys.EN_CH0_VDIV;
+					oData(15 downto 8) <= SFRFrontpanelIn.Keys.EN_CH1_VDIV;
+					oData(23 downto 16) <= SFRFrontpanelIn.Keys.EN_CH2_VDIV;
+					oData(31 downto 24) <= SFRFrontpanelIn.Keys.EN_CH3_VDIV;
+					
+				when cEncAddrUpDown =>
+					oData(7 downto 0) <= SFRFrontpanelIn.Keys.EN_CH0_UPDN;
+					oData(15 downto 8) <= SFRFrontpanelIn.Keys.EN_CH1_UPDN;
+					oData(23 downto 16) <= SFRFrontpanelIn.Keys.EN_CH2_UPDN;
+					oData(31 downto 24) <= SFRFrontpanelIn.Keys.EN_CH3_UPDN;
+							
+				when others => oData <= (others => '-');
+			end case;
+--			end if;
+--		end if;
   end process;
     
 end architecture;

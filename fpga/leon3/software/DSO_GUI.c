@@ -1159,14 +1159,13 @@ void GUI_Main(void)
 		int32_t level = (int8_t)((encoder >> 16) & 0xFF);
 
 		rprintf("Lev: %d\n\r", level);
-		
-
+	
 		if(level != 0)
 		{
 			changeTriggerLevel(level);
 		}
 
-		WaitMs(10);
+	//	WaitMs(10);
 
 		closeSubMenuTime();
 

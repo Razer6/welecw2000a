@@ -61,6 +61,7 @@ architecture RTL of NobDecoder is
 signal input_data : std_ulogic_vector(3 downto 0);
 signal cnt : signed(cNobCounterSize downto 0);
 signal up_down, ce : std_ulogic;
+signal iResetCounterDelayed : std_logic;
 begin
 
 	INPUT:process(iClk, iResetAsync)
@@ -104,6 +105,8 @@ begin
 			cnt <= (others => '0');
 		elsif(rising_edge(iClk)) then
 			
+			iResetCounterDelayed <= iResetCounter;
+			
 			if(ce = '1') then
 				if(up_down = '1' and cnt /= ('0' & (cnt'left-1 downto 0 => '1'))) then
 					cnt <= cnt + 1;
@@ -112,7 +115,7 @@ begin
 				end if;
 			end if;
 			
-			if(iResetCounter = '1') then
+			if(iResetCounterDelayed = '1') then
 				cnt <= (others => '0');
 			end if;
 			
