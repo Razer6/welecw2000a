@@ -289,6 +289,7 @@ add wave -noupdate -format Literal /testbench/d3/frontpanel/oanalogsettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/strobe
 add wave -noupdate -format Logic /testbench/d3/frontpanel/serialclk
 add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/analogsettings
+add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/iResetEnc
 add wave -noupdate -divider {Analog Input Perivials}
 add wave -noupdate -format Logic /testbench/dac/ince
 add wave -noupdate -format Logic /testbench/dac/isck
@@ -617,6 +618,11 @@ add wave -noupdate -format Literal /testbench/d3/frontpanel/oanalogsettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/strobe
 add wave -noupdate -format Logic /testbench/d3/frontpanel/serialclk
 add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/analogsettings
+add wave -noupdate -divider EncTimeDiv
+add wave -noupdate -format Logic /testbench/d3/frontpanel/TIME_DIV/oCounter
+add wave -noupdate -format Logic /testbench/d3/frontpanel/TIME_DIV/iResetCounter
+add wave -noupdate -format Logic /testbench/d3/frontpanel/TIME_DIV/cnt
+add wave -noupdate -format Logic /testbench/d3/frontpanel/TIME_DIV/iClk
 add wave -noupdate -divider {Analog Input Perivials}
 add wave -noupdate -format Logic /testbench/dac/ince
 add wave -noupdate -format Logic /testbench/dac/isck
@@ -882,6 +888,8 @@ add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/sfr/Add
 add wave -noupdate -format Literal -radix decimal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/idata
 add wave -noupdate -format Literal -radix hexadecimal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/odata
 add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/cpuinterrupt
+add wave -noupdate -format Logic /testbench/d3/gensfrfrontpanel/sfrfront/sfr/oCPUInterrupt
+add wave -noupdate -format Literal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/readProgress
 add wave -noupdate -format Literal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/interruptvector
 add wave -noupdate -format Literal /testbench/d3/gensfrfrontpanel/sfrfront/sfr/interruptmask
 add wave -noupdate -divider IRQ

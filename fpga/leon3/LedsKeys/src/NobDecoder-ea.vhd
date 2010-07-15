@@ -57,35 +57,23 @@ entity NobDecoder is
 end entity;
 
 architecture RTL of NobDecoder is
---signal a_in, b_in, a_old, b_old: std_ulogic;
 signal input_data : std_ulogic_vector(3 downto 0);
 signal cnt : signed(cNobCounterSize downto 0);
 signal up_down, ce : std_ulogic;
-signal iResetCounterDelayed : std_logic;
+
 begin
 
 	INPUT:process(iClk, iResetAsync)
 	begin
 		if(iResetAsync = cResetActive) then
---			a_in <= '0';
---			b_in <= '0';
---			a_old <= '0';
---			b_old <= '0';
 				input_data <= (others => '0');
 		elsif(rising_edge(iClk)) then
---			a_in  <= iA;
---			a_old <= a_in;
---			b_in  <= iB;
---			b_old <= b_in;
 			input_data <= iA & iB & input_data(3 downto 2);
 		end if;
 	end process;
  
---	DECODE:process(a_in, b_in, a_old, b_old)
---	variable state: std_ulogic_vector(3 downto 0);
 	DECODE:process(input_data)
 	begin
---		state := a_in & b_in & a_old & b_old;
 		case input_data is
 			when "0001" => up_down <= '1'; ce <= '1';
 			when "0010" => up_down <= '0'; ce <= '1';
@@ -105,8 +93,6 @@ begin
 			cnt <= (others => '0');
 		elsif(rising_edge(iClk)) then
 			
-			iResetCounterDelayed <= iResetCounter;
-			
 			if(ce = '1') then
 				if(up_down = '1' and cnt /= ('0' & (cnt'left-1 downto 0 => '1'))) then
 					cnt <= cnt + 1;
@@ -115,7 +101,7 @@ begin
 				end if;
 			end if;
 			
-			if(iResetCounterDelayed = '1') then
+			if(iResetCounter = '1') then
 				cnt <= (others => '0');
 			end if;
 			

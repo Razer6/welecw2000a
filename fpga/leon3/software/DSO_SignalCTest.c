@@ -135,8 +135,8 @@ int main (void)
 	char ack[] = "success!\n";
 	char nak[] = "failed!\n";
 
-	uint32_t tmp = READ_INT(0x80000900);
-	tmp = READ_INT(0x80000904);
+	uint32_t tmp = READ_INT(0x80000908);
+	tmp = READ_INT(0x80000908);
 	tmp = READ_INT(0x80000908);
 
 	Analog[0].myVperDiv = 10000;

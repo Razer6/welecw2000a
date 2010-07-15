@@ -68,6 +68,8 @@ architecture RTL of SpecialFunctionRegister_Frontpanel is
   signal Leds                      : aLeds;
   signal PrevKeys 								 : aKeys;
   signal Addr                      : natural;
+  
+  signal readProgress : std_ulogic_vector(2 downto 0);
 begin
   
 
@@ -76,13 +78,16 @@ begin
   begin
     if iResetAsync = cResetActive then
       oCPUInterrupt             <= '0';
+      readProgress <= (others => '0');
     elsif rising_edge(iCLKCPU) then
       PrevKeys <= SFRFrontpanelIn.Keys;
+      oCPUInterrupt <= '0';
+      
+      readProgress <= readProgress(readProgress'left-1 downto 0) & iRd;
 
-      if SFRFrontpanelIn.Keys /= PrevKeys then
-        oCPUInterrupt <= '1';
-      else
-        oCPUInterrupt <= '0';
+     if SFRFrontpanelIn.Keys /= PrevKeys and readProgress(2) /= '1' then
+    --  if SFRFrontpanelIn.Keys /= PrevKeys  then
+       oCPUInterrupt <= '1';
       end if;
     end if;
   end process;
@@ -146,7 +151,7 @@ begin
     end if;
   end process;
   
-  pRead  : process (Addr, Leds, SFRFrontpanelIn, iRd)
+  pRead  : process (Addr, Leds, SFRFrontpanelIn)
   --pRead : process(iClkCPU, iResetAsync)
   begin
 --		if(rising_edge(iClkCPU)) then
