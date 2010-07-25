@@ -114,6 +114,12 @@ void rprintc(unsigned data){
 }	
 #endif
 
+#ifdef SIM_COMPILATION
+int __main__() {
+	return 0;
+}
+#endif
+
 uSample Data[CAPTURESIZE];
 
 int main (void) 
@@ -233,7 +239,10 @@ int main (void)
 	} else {
 		printf(nak);
 	}*/
-	
+	/* with filtering */
+	SetTriggerInput(2,16,FASTFS/100,FIXED_CPU_FREQUENCY,0,4,0,1,2,3);
+	ReadData = CaptureData(1000, true, false, 100, (uint32_t*)Data);
+
 	/* without filtering */
 	printf("testing FastCapture\n"); 
 	WRITE_INT(DSO_SFR_BASE_ADDR,1);
@@ -256,19 +265,19 @@ int main (void)
 	ReadData = CaptureData(1000, true, false, 100, (uint32_t*)Data);
 
 	/* with filtering */
-	SetTriggerInput(2,8,FASTFS/1,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	SetTriggerInput(2,16,FASTFS/1,FIXED_CPU_FREQUENCY,0,4,0,1,2,3);
 	ReadData = CaptureData(1000, true, false, 100, (uint32_t*)Data);
 
-	SetTriggerInput(2,8,FASTFS/2,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	SetTriggerInput(2,16,FASTFS/2,FIXED_CPU_FREQUENCY,0,4,0,1,2,3);
 	ReadData = CaptureData(1000, true, false, 100, (uint32_t*)Data);
 
-	SetTriggerInput(2,8,FASTFS/4,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	SetTriggerInput(2,16,FASTFS/4,FIXED_CPU_FREQUENCY,0,4,0,1,2,3);
 	ReadData = CaptureData(1000, true, false, 100, (uint32_t*)Data);
 
-	SetTriggerInput(2,8,FASTFS/8,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	SetTriggerInput(2,16,FASTFS/8,FIXED_CPU_FREQUENCY,0,4,0,1,2,3);
 	ReadData = CaptureData(1000, true, false, 100, (uint32_t*)Data);
 
-	SetTriggerInput(2,8,FASTFS/10,FIXED_CPU_FREQUENCY,0,0,0,1,2,3);
+	SetTriggerInput(2,16,FASTFS/10,FIXED_CPU_FREQUENCY,0,4,0,1,2,3);
 	ReadData = CaptureData(1000, true, false, CAPTURESIZE, (uint32_t*)Data);
 
 	

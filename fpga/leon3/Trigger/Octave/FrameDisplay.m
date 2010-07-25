@@ -10,6 +10,7 @@ figure
 hold on
 for i = 1:42
     FileName = sprintf('../simTopTrigger/out%d.wav',i);
+    printf(FileName);
     Y = wavread(FileName);
     disp(sprintf('Samples per Channel: %d', length(Y)));
     if mod(i,3) == 0

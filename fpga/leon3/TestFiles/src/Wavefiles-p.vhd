@@ -4,7 +4,7 @@
 -- File       : Wavefiles-p.vhd
 -- Author     : Alexander Lindert <alexander_lindert at gmx.at>
 -- Created    : 2008-08-19
--- Last update: 2008-09-19
+-- Last update: 2010-06-25
 -- Platform   : 
 -------------------------------------------------------------------------------
 -- Description: This package can read or write VHDL signals from or to wave files.
@@ -129,7 +129,7 @@ package body WaveFiles is
   begin
     file_open(FileStatus, WaveFileHandle, FileName, read_mode);
     assert(FileStatus = open_ok)
-      report "Cannot open file " & FileName & "!" severity failure;
+      report "Cannot open file " & FileName & "with filename length " & integer'image(FileName'length) &"!" severity failure;
     assert(ReadString(WaveFileHandle, "RIFF"))
       report "The file " & FileName & " is not a wave file!" severity failure;
     FileSize := ReadDWord(WaveFileHandle) +8;            -- wrong dummy access!!!

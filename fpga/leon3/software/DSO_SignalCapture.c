@@ -459,21 +459,23 @@ void SetExternalAnalogRegister(uint32_t addr, uint32_t data){
 
 
 
-/* For the analog settings only one SFR does exsist!
+/* For the analog settings only one SFR GPO does exsist!
  * The benefit of it is the low logic usage and the possibility to use
  * bits in the software which aren't known while the hardware development
  * was done!
- * The Drawback is that only the last write access could be read back and
- * other previous settings (other mux adress) are hidden! */
+ * The drawback is that nothing could be read back again and we do get only
+ * the information from one channel */
 
 uint32_t SetAnalogInputRange(uint32_t ch, SetAnalog *settings)
 {
 	uint32_t temp = 0;
-	uint32_t analogRegister;
-
+	uint32_t AnalogAddr = 0;
+	uint32_t Offset = 0;
+	static uint32_t AnalogRegister[4] = {0,0,0,0}; 
 	if(ch > CH1)
 		return FALSE;
 
+	// DAC offset
 	if(settings->DA_Offset == 0)
 	{
 		//	SetDACOffset(j,Settings[j].DA_Offset);
@@ -484,6 +486,7 @@ uint32_t SetAnalogInputRange(uint32_t ch, SetAnalog *settings)
 		SetDACOffset(ch, settings->DA_Offset);
 	}
 
+	// Voltage range
 	switch(settings->myVperDiv)
 	{
 		case 10000: temp = (1 << CH0_K1_10) | (1 << CH0_K2_10);
@@ -508,24 +511,55 @@ uint32_t SetAnalogInputRange(uint32_t ch, SetAnalog *settings)
 		break;
 	}
 
+	if (settings->BW_Limit == 1){
+		temp |= (1 << CH0_BW_Limit);
+	}	
+
+        AnalogRegister[ch] &= ~0xff;
+	AnalogRegister[ch] |= temp;
+/*	switch(ch){
+	case CH0:AnalogAddr = ANC_CH0; break;
+	case CH1:AnalogAddr = ANC_CH1; break;
+	}
+	SetExternalAnalogRegister(AnalogAddr, temp);*/
+
+	// AC/ DC coulping
+	temp = AnalogRegister[0]; //data of ANC_CH0
+	AnalogAddr = ANC_CH0;
+
+	switch(ch){
+		case CH0: Offset =  CH0_DC; break;
+		case CH1: Offset =  CH1_DC; break;
+		case CH2: Offset =  CH2_DC; break;
+		case CH3: Offset =  CH3_DC; break;
+	}
+
 	if(settings->AC == 0)
 	{
-		temp |= (1 << CH1_DC);
-	}
-
-	if(ch == CH0)
+		temp |= (1 << Offset); 
+	} 
+	else 
 	{
-		analogRegister = ANC_CH0;
+		temp &= ~(1 << Offset); 
 	}
-	else
-	{
-		analogRegister = ANC_CH1;
+	AnalogRegister[0] = temp; 
+	SetExternalAnalogRegister(AnalogAddr, temp);
+	
+	temp = AnalogRegister[1]; //data of ANC_CH1
+	AnalogAddr = ANC_CH1;
+	
+	// SRC2 MUX
+	switch(ch){
+		case CH0: Offset = CH0_SRC2_ADDR; break;
+		case CH1: Offset = CH1_SRC2_ADDR; break;
+		case CH2: Offset = CH2_SRC2_ADDR; break;
+		case CH3: Offset = CH3_SRC2_ADDR; break;
 	}
+	temp &= ~(3 << Offset);
+	temp |= ((settings->Mode & 3) << Offset);
+	SetExternalAnalogRegister(AnalogAddr, temp);
+	AnalogRegister[1] = temp; 
 
-/*	bank = SET_ANALOG(analogRegister) | temp;
-	WRITE_INT(ANALOGSETTINGSADDR, bank);
-	WaitUntilMaskedAndZero(ANALOGSETTINGSADDR, (1 << ANALOGSETTINGSBUSY));*/
-	SetExternalAnalogRegister(analogRegister, temp);
 	return TRUE;
 }
 

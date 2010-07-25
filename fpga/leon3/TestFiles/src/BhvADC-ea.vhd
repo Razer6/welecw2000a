@@ -64,8 +64,8 @@ begin
         wait for gOutputDelay;
         if iResetAsync /= cResetActive then
           ReadSample(Handle, vIntVal, vFileInfo.DataSize, vFileInfo.DataTyp);
-          vIntVal := vIntVal/vShift;
-          oData   <= std_ulogic_vector(to_signed(vIntVal, gBitWidth));
+          vIntVal := (vIntVal/vShift)+2**(gBitWidth-1);
+          oData   <= std_ulogic_vector(to_unsigned(vIntVal, gBitWidth));
         end if;
       end loop;
       file_close(Handle);

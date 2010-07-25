@@ -246,8 +246,9 @@ void GetCh(
 		case 16:
 		Gain.den *= 256;
 		for (; i < srcSamples; ++i)
-		{	
-			data = (int32_t)((src[i].c[ch] << 8) | src[i].c[ch+2]);
+		{	                  
+			data =  src[i].c[ch+2] & 0xff; // must be unsigned!!!
+			data |= (int32_t)((src[i].c[ch] << 8));
 			dst[i].i = (data*Gain.num)/Gain.den;
 		}
 		break;
@@ -698,7 +699,7 @@ static int32_t selectedTimebase = 0;
 #define DENF 1
 const sHWFilterGain HWFilterGain[] = {
 {  1,  1}, {  1,  1}, {  1,  1},   {1,  1}, // 1GS    -> 100 MS
-{  1,  1}, {  1,  1}, {NUMF,DENF}, {NUMF,DENF}, // 100 MS ->  10 MS
+{  1,  1}, {  1,  1}, {  1,  1},   {1,  1}, // 100 MS ->  10 MS
 {  1,  1}, {  1,  1}, {NUMF,DENF}, {NUMF,DENF}};// 10 MS  ->   1 MS
 
 
@@ -745,7 +746,7 @@ void setTimebase(int32_t diff)
 	HWFilters.Gain = HWFilterGain[(decimation_stages*4)+HWFilters.Stop];
 
 	updateTitleBar(TIMEBASE, &Timebase[selectedTimebase].str[0]);
-	SetTriggerInput(4,channel[0].BitMode,Timebase[selectedTimebase].Timebase,FIXED_CPU_FREQUENCY,0,HWFilters.Stop,0,1,2,3);
+	SetTriggerInput(2,channel[0].BitMode,Timebase[selectedTimebase].Timebase,FIXED_CPU_FREQUENCY,0,HWFilters.Stop,0,1,2,3);
 }
 
 void changeHWFilters(int32_t x)
@@ -1132,6 +1133,7 @@ void GUI_Main(void)
 		if ((READ_INT(KEYADDR1) & (1 << BTN_RUNSTOP)) != 0)
 		{
 			Run^= TRUE; // Toogle Run Stop	for TRUE = 1 or TRUE = -1
+			Single = FALSE;
 			CLR_LED(SINGLE_GREEN);
 			CLR_LED(SINGLE_RED);
 		

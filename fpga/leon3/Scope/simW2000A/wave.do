@@ -220,21 +220,30 @@ add wave -noupdate -format Literal -expand /testbench/d3/irqctrl/irqctrl0/r
 add wave -noupdate -format Literal /testbench/d3/irqctrl/irqctrl0/r2
 add wave -noupdate -divider {Capture Signals}
 add wave -noupdate -format Logic /testbench/resetasync
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/selector/isignalselector
 add wave -noupdate -format Analog-Step -height 40 -max 121.45600000000002 -min -128.0 -radix decimal /testbench/d3/capturesignals/adcs/iadc(0)(0)
 add wave -noupdate -format Literal -radix unsigned -expand /testbench/d3/capturesignals/adcs/iadc
 add wave -noupdate -format Analog-Step -height 40 -max 114.53700000000001 -min -128.0 -radix decimal /testbench/d3/capturesignals/adcs/odata(0)(0)
-add wave -noupdate -format Literal -radix unsigned -expand /testbench/d3/capturesignals/adcs/odata
+add wave -noupdate -format Literal -radix unsigned /testbench/d3/capturesignals/adcs/odata
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/decimatorout
+add wave -noupdate -format Literal /testbench/d3/capturesignals/decimatorout(0)(0)
+add wave -noupdate -format Literal /testbench/d3/capturesignals/selectorout(0)(0)
+add wave -noupdate -format Literal /testbench/d3/capturesignals/selectorout(2)(0)
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/selectorout
 add wave -noupdate -divider Trigger
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclk
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iclkcpu
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iresetasync
 add wave -noupdate -format Analog-Step -height 40 -max 114.53700000000001 -min -128.0 -radix decimal /testbench/d3/capturesignals/trigger/idata(0)(0)
+add wave -noupdate -format Analog-Step -height 84 -max 127.0 -min -128.0 /testbench/d3/capturesignals/trigger/idata(1)(0)
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/idata(2)(0)
+add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/idata(3)(0)
 add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/idata
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/ivalid
 add wave -noupdate -format Logic /testbench/d3/capturesignals/trigger/iexttrigger
 add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/itriggermem
 add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/otriggermem
-add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/icpuport
+add wave -noupdate -format Literal -expand /testbench/d3/capturesignals/trigger/icpuport
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/ocpuport
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/r
 add wave -noupdate -format Literal /testbench/d3/capturesignals/trigger/triggerstrobes
@@ -282,13 +291,8 @@ add wave -noupdate -format Logic /testbench/d3/frontpanel/ikeysdata
 add wave -noupdate -format Literal /testbench/d3/frontpanel/onfetchkeys
 add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/okeys
 add wave -noupdate -format Literal /testbench/d3/frontpanel/keystate
-add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/icputoanalog
-add wave -noupdate -format Literal /testbench/d3/frontpanel/analogsettings
-add wave -noupdate -format Logic /testbench/d3/frontpanel/oanalogbusy
-add wave -noupdate -format Literal /testbench/d3/frontpanel/oanalogsettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/strobe
 add wave -noupdate -format Logic /testbench/d3/frontpanel/serialclk
-add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/analogsettings
 add wave -noupdate -divider {Analog Input Perivials}
 add wave -noupdate -format Logic /testbench/dac/ince
 add wave -noupdate -format Logic /testbench/dac/isck
@@ -610,13 +614,8 @@ add wave -noupdate -format Logic /testbench/d3/frontpanel/ikeysdata
 add wave -noupdate -format Literal /testbench/d3/frontpanel/onfetchkeys
 add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/okeys
 add wave -noupdate -format Literal /testbench/d3/frontpanel/keystate
-add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/icputoanalog
-add wave -noupdate -format Literal /testbench/d3/frontpanel/analogsettings
-add wave -noupdate -format Logic /testbench/d3/frontpanel/oanalogbusy
-add wave -noupdate -format Literal /testbench/d3/frontpanel/oanalogsettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/strobe
 add wave -noupdate -format Logic /testbench/d3/frontpanel/serialclk
-add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/analogsettings
 add wave -noupdate -divider {Analog Input Perivials}
 add wave -noupdate -format Logic /testbench/dac/ince
 add wave -noupdate -format Logic /testbench/dac/isck
@@ -938,13 +937,8 @@ add wave -noupdate -format Logic /testbench/d3/frontpanel/ikeysdata
 add wave -noupdate -format Literal /testbench/d3/frontpanel/onfetchkeys
 add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/okeys
 add wave -noupdate -format Literal /testbench/d3/frontpanel/keystate
-add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/icputoanalog
-add wave -noupdate -format Literal /testbench/d3/frontpanel/analogsettings
-add wave -noupdate -format Logic /testbench/d3/frontpanel/oanalogbusy
-add wave -noupdate -format Literal /testbench/d3/frontpanel/oanalogsettings
 add wave -noupdate -format Logic /testbench/d3/frontpanel/strobe
 add wave -noupdate -format Logic /testbench/d3/frontpanel/serialclk
-add wave -noupdate -format Literal -expand /testbench/d3/frontpanel/analogsettings
 add wave -noupdate -divider {Analog Input Perivials}
 add wave -noupdate -format Logic /testbench/dac/ince
 add wave -noupdate -format Logic /testbench/dac/isck
@@ -993,8 +987,8 @@ add wave -noupdate -format Literal /testbench/ch1_regh/oq
 add wave -noupdate -format Literal -expand /testbench/ch1_regh/reg
 add wave -noupdate -format Literal /testbench/ch1_regh/shift
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {52568582 ps} 0} {{Cursor 2} {44068915 ps} 0} {{Cursor 3} {122744837 ps} 0} {{Cursor 4} {43559000 ps} 0}
-configure wave -namecolwidth 268
+WaveRestoreCursors {{Cursor 1} {751431000 ps} 0} {{Cursor 2} {314522003 ps} 0} {{Cursor 3} {692295000 ps} 0} {{Cursor 4} {615327000 ps} 0}
+configure wave -namecolwidth 374
 configure wave -valuecolwidth 180
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
@@ -1008,4 +1002,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {43857977 ps} {44510969 ps}
+WaveRestoreZoom {0 ps} {739461305 ps}
