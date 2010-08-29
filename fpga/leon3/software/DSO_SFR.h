@@ -123,8 +123,8 @@
 #define DAC_OFFSET 0
 #define DAC_CH_OFFSET 16
 #define DAC_SETT_OFFSET 20
-#define SET_OFFSET_CH0(offset) ((0x3 << DAC_CH_OFFSET) | (1 << DAC_CH_OFFSET) | (offset & 0xffff))
-#define SET_OFFSET_CH1(offset) ((0x3 << DAC_CH_OFFSET) | (offset & 0xffff))
+#define SET_OFFSET_CH0(offset) ((0x3 << DAC_SETT_OFFSET) | (1 << DAC_CH_OFFSET) | (offset & 0xffff))
+#define SET_OFFSET_CH1(offset) ((0x3 << DAC_SETT_OFFSET) | (offset & 0xffff))
 
 #define ANC_CH1       5 
 /* subset of ANC_CH1 */
