@@ -50,7 +50,6 @@
 
 sSubMenuList *openSubMenuList = NULL;
 sMenu *activeMenu;
-sSubMenu *active_sub_menu[6];
 volatile uint32_t closingTime = 0;
 
 #define CENTER(width, textlen)		((width-textlen)/2)
@@ -461,7 +460,6 @@ void updateMenu(void *menu_context)
 		for(uint32_t i=0; i<6; i++)
 		{
 			initSubMenu(menu->subMenu[i]);
-			active_sub_menu[i] = menu->subMenu[i];
 		}
 	}
 

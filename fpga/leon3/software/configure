@@ -1,16 +1,11 @@
-##!/bin/bash
+#!/bin/bash
 # Author: Alexander Lindert <alexander_lindert@gmx.at>
+#         Crazor <crazor@gmail.com>
 # Copyright 2010
 # License GPLv2
 
 echo "Open Source Digital Storage Oscilloscope configure script"
-echo "Enter software the folder location if this file was moved to an external location!"
-echo "     (eg. ../../../fpga/software)"
-echo "Default: ."
-read DSOPATH
-if [ -z "${DSOPATH}" ]; then
-	DSOPATH="."
-fi
+DSOPATH=$(dirname "${BASH_SOURCE[0]}")
 
 echo "Enter your (serial) connection to program the oscilloscope"
 echo "Some suggestions available on your system:"

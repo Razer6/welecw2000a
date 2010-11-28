@@ -13,8 +13,6 @@ CHANNELS   := 2
 PROTOCOL   := Debugger
 
 # Defines for conditional compilation
-#DSO_TARGET := W2000A
-#DSO_BOARD  := BOARD_COMPILATION
 CPU        := LEON3
 DEFINES    := $(CPU) $(DSO_TARGET) $(DSO_BOARD)
 DEFINES    := $(addprefix -D,$(DEFINES))
@@ -40,9 +38,9 @@ CFLAGS       += $(INCLUDE_DIRS)
 
 SOURCES      := $(foreach DIR, $(SOURCE_DIRS), $(wildcard $(DIR)/*.c))
 HEADERS      := $(foreach DIR, $(SOURCE_DIRS), $(wildcard $(DIR)/*.h))
-OBJ_TEMP     := $(SOURCES:$(DSOPATH)/%=%) 
+OBJ_TEMP     := $(notdir $(SOURCES)) 
 OBJS	     := $(OBJ_TEMP:%.c=%.o)
-ASMS	     := $(OBJ_ASMS:%.c=%.s)
+ASMS	     := $(OBJ_TEMP:%.c=%.s)
 OBJDIR       := objs
 
 vpath %.c $(SOURCE_DIRS)
@@ -58,7 +56,7 @@ SOF          := $(DSOPATH)/../Scope/synW2000A/W2000A.sof
 PROGRAM      := -o p\;$(SOF)
 
 # Files to be cleaned
-CLEAN := $(OBJDIR) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET) $(TARGET:.bin=.elf)
+CLEAN := $(OBJDIR) $(ASMS) $(DEPENDFILE) $(DEPENDFILE:=.bak) $(TARGET) $(TARGET:.bin=.elf) $(DUMP)
 
 # Force make to forget all its builtin rules
 .SUFFIXES:
@@ -95,17 +93,10 @@ readaddr:
 dump:
 	@$(OBJDUMP) -S $^ > $(DUMP)
 
-.PHONY: cflags
-cflags:
-	@echo "$(CFLAGS)"
-	@echo "OBJ_TEMP     := $(OBJ_TEMP)" 
-
-
 # Rules for building
 %.bin: %.elf
 	@echo " [OBJCOPY] $^"
 	@$(OBJCOPY) -O binary $^ $@
-	@$(OBJDUMP) -S $^ > $(DUMP)
 
 %.elf: $(addprefix $(OBJDIR)/,$(OBJS))
 	@echo " [LINK   ] $^"

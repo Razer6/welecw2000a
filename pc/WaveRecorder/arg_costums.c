@@ -33,19 +33,23 @@
 * Remarks		: -
 * Revision		: 0
 ****************************************************************************/ 
+#include <stdlib.h>
+#include <stdio.h>
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+#include <string.h>
+#include <ctype.h>
 #include "argtable2.h"
 #include "arg_costums.h"
-#include "stdlib.h"
-#include "string.h"
-#include "limits.h"
-#include "ctype.h"
+
+
 
 enum {EMINCOUNT=1,EMAXCOUNT,EBADINT,EOVERFLOW};
 
 
-static long int strtol0X(const char* str, const char **endptr, char X, int base)
+static uint32_t strtol0X(const char* str, const char **endptr, char X, int base)
     {
-    long int val;               /* stores result */
+    uint32_t val;               /* stores result */
     int s=1;                    /* sign is +1 or -1 */
     const char *ptr=str;        /* ptr to current position in str */
 
@@ -61,10 +65,10 @@ static long int strtol0X(const char* str, const char **endptr, char X, int base)
             ptr++;
             s=1;
             break;
-        case '-':
+/*        case '-':
             ptr++;
             s=-1;
-            break;
+            break; */
         default:
             s=1;
             break;    
@@ -88,7 +92,7 @@ static long int strtol0X(const char* str, const char **endptr, char X, int base)
     /* printf("4) %s\n",ptr); */
 
     /* attempt conversion on remainder of string using strtol() */
-    val = strtol(ptr,(char**)endptr,base);
+    val = strtoul(ptr,(char**)endptr,base);
     if (*endptr==ptr)
         {
         /* conversion failed */
@@ -148,8 +152,8 @@ int  arg_exp_scanfn(struct arg_int * parent, const char *argval)
         }
     else
         {
-        long int val;
-	long int base;
+        uint32_t val;
+	uint32_t base;
         const char *end;
 
         /* attempt to extract hex integer (eg: +0x123) from argval into val conversion */
@@ -180,38 +184,37 @@ int  arg_exp_scanfn(struct arg_int * parent, const char *argval)
             }
 	/* Safety check for integer overflow. WARNING: this check    */
         /* achieves nothing on machines where size(int)==size(long). */
-        if ( val>INT_MAX || val<INT_MIN )
+        if ( val>UINT32_MAX )
             errorcode = EOVERFLOW;
 
         /* Detect any suffixes (KB,MB,GB) and multiply argument value appropriately. */
         /* We need to be mindful of integer overflows when using such big numbers.   */
         if (detectsuffix(end,"KB"))             /* kilobytes */
             {
-            if ( val>(INT_MAX/1024) || val<(INT_MIN/1024) )
+            if ( val>(UINT32_MAX/1024))
                 errorcode = EOVERFLOW;          /* Overflow would occur if we proceed */
             else
                 val*=1024;                      /* 1KB = 1024 */
             }
         else if (detectsuffix(end,"MB"))        /* megabytes */
             {
-            if ( val>(INT_MAX/1048576) || val<(INT_MIN/1048576) )
+            if ( val>(UINT32_MAX/1048576))
                 errorcode = EOVERFLOW;          /* Overflow would occur if we proceed */
             else
                 val*=1048576;                   /* 1MB = 1024*1024 */
             }
         else if (detectsuffix(end,"GB"))        /* gigabytes */
             {
-            if ( val>(INT_MAX/1073741824) || val<(INT_MIN/1073741824) )
+            if ( val>(UINT32_MAX/1073741824))
                 errorcode = EOVERFLOW;          /* Overflow would occur if we proceed */
             else
                 val*=1073741824;                /* 1GB = 1024*1024*1024 */
             }
         else if (toupper(*end) == 'E') /* || ((base == 16) && toupper(*end) =='P')) */
 	    {
-		long int mult = 1;
-		int s = 1;
+		uint32_t mult = 1;
 		char * exp = (char *)&end[1];
-		long int exponent = strtol(exp, (char**)&end, 10);
+		uint32_t exponent = strtol(exp, (char**)&end, 10);
 /*		printf("end = %s\n",end);
 		printf("base = %ld exponent = %ld ",base, exponent);*/
 		if ((*end != '\0') || (exp == end)) 
@@ -220,27 +223,19 @@ int  arg_exp_scanfn(struct arg_int * parent, const char *argval)
                     /* all supported number formats failed */
                     return EBADINT;
                     }
-		if (exponent < 0)
-                    {
-		    s = -1;
-		    exponent = -exponent;
-		    }
 		while (exponent > 0) 
                     {
 		    exponent--;
-		    if ( mult>(INT_MAX/base) )
+		    if ( mult>(UINT32_MAX/base) )
                          errorcode = EOVERFLOW;          /* Overflow would occur if we proceed */
 		    mult *= base;					
 		    } 
-		if ((s == -1) && (mult != 0) )
-                    	val/=mult; /* return EBADINT; or we do not support base^(-exponent) */	 
-		else 
-		    {
-               	    if (mult == 0 || val>(INT_MAX/mult))
+ 
+               	    if (mult == 0 || val>(UINT32_MAX/mult))
                          errorcode = EOVERFLOW;          /* Overflow would occur if we proceed */
                     else		
                     	 val*=mult;                                     
-                    }		
+
        /*      	printf("mult = %ld\n", mult);*/
 	    } 
 	else if (!detectsuffix(end,""))  

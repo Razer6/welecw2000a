@@ -312,9 +312,6 @@ void ReceiveStringBlock (uart_regs * uart, char * c, uint32_t *size){
 
 void SendStringBlock (uart_regs * uart, char * c){
 #ifdef WINNT
-	DWORD ret = 0;
-	LPDWORD lpret = &ret;
-	DWORD written = 0;
 #else
 	uint32_t ret = 0;
 	uint32_t written = 0;
@@ -337,7 +334,6 @@ void SendBytes (uart_regs * uart, uint8_t * c, uint32_t size){
 	LPDWORD lpret = &ret;
 	DWORD written = 0;
 	DWORD error = 0;
-	DWORD txempty = 0;
 #else
 	int32_t ret = 0;
 	int32_t written = 0;
@@ -414,7 +410,7 @@ uint32_t ReceiveBytes(
 uint32_t UART_ClearRx(uart_regs * uart) {
 #ifdef WINNT
 	if (!PurgeComm(*uart,PURGE_RXABORT | PURGE_RXCLEAR)){
-		printf("IOCTL_SERIAL_PURGE error: %d\n",GetLastError());
+		printf("IOCTL_SERIAL_PURGE error: %d\n", (int)GetLastError());
 		return FALSE;
 	}	
 	return TRUE; 
