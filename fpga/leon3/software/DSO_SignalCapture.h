@@ -51,7 +51,7 @@ typedef struct
 	uint32_t myVperDiv;
 	uint32_t AC;
 	uint32_t Specific;
-	uint32_t DA_Offset;
+	int32_t DA_Offset;
 	uint32_t BW_Limit;
 	Src2 Mode;
 } SetAnalog;
@@ -96,7 +96,6 @@ uint32_t SetTrigger(const uint32_t Trigger, const uint32_t ExtTrigger,
 #endif
 
 uint32_t SetDACOffset(uint32_t Ch, int32_t Offset);
-void AddDACOffset(uint32_t Ch, int32_t Offset);
 
 /*
  uint32_t SetAnalogInputRange(

@@ -53,6 +53,7 @@ struct spwregs
 };
 
 void WaitMs(const uint32_t ms);
+void WaitUs(const uint32_t us);
 
 /* This functions are written as a work around for volatile compiler bugs.
  * TODO: They must be prooven for each compiler version to work! */

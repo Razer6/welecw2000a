@@ -44,6 +44,7 @@
 #include "DSO_ADC_Control.h"
 #include "DSO_Remote.h"
 #include "DSO_Main.h"
+#include "DSO_Signal.h"
 
 #ifdef LEON3
 #include "Leon3Uart.h"
@@ -258,11 +259,13 @@ void setTrigger(sTriggerSettings *settings)
 */
 
 /* reference time in samples*/
-uint32_t SetTrigger(const uint32_t Trigger, const uint32_t ExtTrigger,
-					const uint32_t TriggerChannel,
-					const uint32_t TriggerPrefetchSamples,
-					const int LowReference, const uint32_t LowReferenceTime,
-					const int HighReference, const uint32_t HighReferenceTime)
+uint32_t SetTrigger(
+		const uint32_t Trigger, 
+		const uint32_t ExtTrigger,
+		const uint32_t TriggerChannel,
+		const uint32_t TriggerPrefetchSamples,
+		const int LowReference, const uint32_t LowReferenceTime,
+		const int HighReference, const uint32_t HighReferenceTime)
 {
 	if(TriggerChannel > 3)
 	{
@@ -305,18 +308,20 @@ uint32_t WriteSPI24(uint32_t Muxaddr, uint32_t data){
 // All signals are inversed by transistors
 	RegValue |= (7 << ANALOGSETTINGS_MUXADDR_OFFSET);
 	RegValue &= ~(Muxaddr << ANALOGSETTINGS_MUXADDR_OFFSET);
+	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
+	WaitUs(10);
 	RegValue |= (1 << ANALOGSETTINGS_SERIALCLK); 
-	WaitMs(1);
+	WaitUs(10);
 	RegValue &= ~(1 << ANALOGSETTINGS_ENABLE); //low active chip select double inverted
 	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-	WaitMs(1);
+	WaitUs(10);
 
 // Write data
 	for (i = 0;i < 24; ++i)
 	{
 /*		RegValue |= (1 << ANALOGSETTINGS_SERIALCLK);
 		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-		WaitMs(1);*/
+		WaitUs(1);*/
 		SendCharBlock((uart_regs*)GENERIC_UART_BASE_ADDR,'\n');
 		if ((data & (1 << 23)) != 0 ){
 			RegValue &= ~(1 << ANALOGSETTINGS_DATA);
@@ -328,24 +333,24 @@ uint32_t WriteSPI24(uint32_t Muxaddr, uint32_t data){
 		}
 		data = data << 1;
 		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-		WaitMs(1);
+		WaitUs(10);
 		RegValue &= ~(1 << ANALOGSETTINGS_SERIALCLK);
 		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-		WaitMs(1);
+		WaitUs(10);
 		RegValue |= (1 << ANALOGSETTINGS_SERIALCLK);
 		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-		WaitMs(1);
+		WaitUs(10);
 	}
 // output strobe
 	RegValue |= (1 << ANALOGSETTINGS_ENABLE);
 	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-	WaitMs(1);
+	WaitUs(10);
 	RegValue &= ~(1 << ANALOGSETTINGS_SERIALCLK);
 	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-	WaitMs(1);
+	WaitUs(10);
 	RegValue |= (1 << ANALOGSETTINGS_SERIALCLK);
 	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-	WaitMs(1);
+	WaitUs(10);
 
 	return TRUE;
 }
@@ -365,14 +370,15 @@ void DisableDACs(){
 	WriteSPI24(ANC_DAC0, 0x00800000);
 	
 }
+
 #ifdef LEON3
 #include "DSO_Screen.h"
 #endif
 uint32_t SetDACOffset(uint32_t Ch, int32_t Offset){
 	uint32_t data = 0;
 #ifdef LEON3
-	DrawHLine(0x0000,200,0,65600);
-	DrawHLine(0xffff,200,0, Offset);
+/*	DrawHLine(0x0000,200,0,65600);
+	DrawHLine(0xffff,200,0, Offset);*/
 #endif	
 	switch(Ch)
 	{
@@ -388,37 +394,6 @@ uint32_t SetDACOffset(uint32_t Ch, int32_t Offset){
 	return WriteSPI24(ANC_DAC0,data);
 }
 
-uint32_t CalibrateDAC(uint32_t Ch)
-{
-	/* set the Trigger tempoarly to force triggering 
-	 * set the analog Ch tempoarly to AC 
-	 * capture data 
-	 * sum of data / data samples
-	 * set the DAC
-	 * goto capture data until sum of data is exeptable low */
-	return 0;
-}
-
-/* 12 bit DAC compability with the 16 bit DACs of this family */
-#define MIN_DAC_COUNT 256
-
-void AddDACOffset(uint32_t Ch, int32_t Offset)
-{
-	static int32_t dac[4] = {8192, 8192, 8192, 8192};
-//	static int32_t dac[4] = {-1, -1, -1, -1};
-	if((Ch < 4) && (Offset != 0))
-	{
-		dac[Ch] = dac[Ch] + (Offset * MIN_DAC_COUNT);
-		if(dac[Ch] > (32768 - 1))
-			dac[Ch] = 32768;
-		if(dac[Ch] < 0)
-			dac[Ch] = 0;
-		SetDACOffset(Ch, dac[Ch]);
-	}
-//	DisableDACs();
-}
-
-
 // All signals are inversed by transistors
 void SetExternalAnalogRegister(uint32_t addr, uint32_t data){
 	volatile uint32_t RegValue = READ_INT(ANALOGSETTINGSADDR);
@@ -428,12 +403,12 @@ void SetExternalAnalogRegister(uint32_t addr, uint32_t data){
 	RegValue &= ~(addr << ANALOGSETTINGS_MUXADDR_OFFSET);
 	RegValue |= (1 << ANALOGSETTINGS_ENABLE); // disabling output strobe
 	WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-	WaitMs(1);
+	WaitUs(10);
 // Write data
 	for (i = 0;i < 16; ++i){
 		RegValue |= (1 << ANALOGSETTINGS_SERIALCLK);
 		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-		WaitMs(1);
+		WaitUs(10);
 		if ((data & (1 << 15)) != 0 ){
 			RegValue &= ~(1 << ANALOGSETTINGS_DATA);
 		} else {	 	 
@@ -441,10 +416,10 @@ void SetExternalAnalogRegister(uint32_t addr, uint32_t data){
 		}
 		data = data << 1;
 		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-		WaitMs(1);
+		WaitUs(10);
 		RegValue &= ~(1 << ANALOGSETTINGS_SERIALCLK);
 		WRITE_INT(ANALOGSETTINGSADDR,RegValue);
-		WaitMs(1);
+		WaitUs(10);
 	}
 // output strobe
 	RegValue &= ~(1 << ANALOGSETTINGS_ENABLE);
@@ -483,7 +458,8 @@ uint32_t SetAnalogInputRange(uint32_t ch, SetAnalog *settings)
 	}
 	else
 	{
-		SetDACOffset(ch, settings->DA_Offset);
+		UpdateCalOffsetPointer(ch,settings->myVperDiv);
+	//	GUI_DACOffset(ch,0); // update DAC
 	}
 
 	// Voltage range
@@ -659,6 +635,7 @@ uint32_t * RawData)
 	if(WaitTimeoutAndNotZero(TRIGGERSTATUSREGISTER, (1 << TRIGGERRECORDINGBIT),
 								WaitTime) == FALSE)
 	{
+		WRITE_INT(LEDADDR,(3 << LED_CH0));
 		return 0;
 	}
 	StopOffset = READ_INT(TRIGGERREADOFFSETADDR);
@@ -762,13 +739,17 @@ uint32_t * RawData)
 				break;
 		}
 	}
+	WRITE_INT(LEDADDR,(15 << LED_CH0));
 	return CaptureSize;
 }
 
 /* returns read DWORDS*/
-uint32_t CaptureData(const uint32_t WaitTime, /* just a integer */
-uint32_t Start, uint32_t ForceFastMode, uint32_t CaptureSize, /* size in DWORDs*/
-uint32_t * RawData)
+uint32_t CaptureData(
+		const uint32_t WaitTime, /* just a integer */
+		uint32_t Start, 
+		uint32_t ForceFastMode, 
+		uint32_t CaptureSize, /* size in DWORDs*/
+		uint32_t * RawData)
 {
 	/* TODO Idle wait*/
 	/*	const int FMode = FastMode(SamplingFrequency,CPUFrequency);*/

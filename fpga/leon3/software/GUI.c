@@ -293,6 +293,10 @@ void closeSubMenu(void)
 /* This function simulates a timer interrupt routine. The main loop calls this
  * routine.
  */
+void closeSubMenuPressed(void * argnull)
+{
+	closeSubMenu();
+}
 
 void closeSubMenuTime(void)
 {

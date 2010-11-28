@@ -226,6 +226,7 @@ void onSubMenu(void *subMenu_context);
 void actionhandler(void);
 
 void closeSubMenuTime(void);
+void closeSubMenuPressed(void * argnull);
 
 void vfValueChanged(int32_t diff);
 

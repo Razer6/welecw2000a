@@ -72,6 +72,24 @@ void RemoteReceive(uint32_t addr, uint32_t *data, uint32_t Length){
 
 #endif
 
+void WaitUs(const uint32_t us){
+#ifdef LEON3
+#ifdef BOARD_COMPILATION
+	const uint32_t x   = FIXED_CPU_FREQUENCY/4000000;/* 1;*/
+	volatile uint32_t i = 0;
+	volatile uint32_t j = 0;
+	for(i;i< us; ++i){
+		for(j = 0; j < x; ++j);
+	}
+#endif
+#elif WINNT
+	Sleep(us/1000);
+#else
+	usleep(us);
+#endif
+}
+
+
 void WaitMs(const uint32_t ms){
 #ifdef LEON3
 #ifdef BOARD_COMPILATION

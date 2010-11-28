@@ -38,12 +38,12 @@
 #include "DSO_Main.h"
 #include "DSO_GUI.h"
 #include "DSO_Screen.h"
-#include "Filter_I8.h"
 #include "DSO_SFR.h"
 #include "DSO_SignalCapture.h"
 #include "Leon3Uart.h"
 #include "rprintf.h"
 #include "DSO_Misc.h"
+#include "DSO_Signal.h"
 #include "DSO_Remote.h"
 #include "DSO_FrontPanel.h"
 
@@ -68,7 +68,7 @@ typedef struct
 	int32_t H;
 }DispOffset;
 
-void SetAnalogOffset ();
+//void SetAnalogOffset();
 void SetTriggerLevel();
 void SetKeyFs();
 void SetVoltagePerDivision();
@@ -86,181 +86,6 @@ void setVoltagePerDiv(uint32_t ch, int32_t diff);
 
 color_t signalcolors[2] = {COLOR_R3G3B3(7,7,0), COLOR_R3G3B3(0,7,0)};
 
-typedef struct
-{
-	int32_t P;
-	int32_t C;
-}SampleRet;
-
-void DrawSample(
-		uint16_t ColorBack,
-		uint16_t ColorSignal,
-		uint32_t v,
-		SampleRet hp,
-		SampleRet hc);
-
-void DrawSignal(
-		uint32_t Voffset,
-		uSample * PrevData,
-		uSample * CurrData,
-		uint16_t PrevColor,
-		uint16_t CurrColor)
-{
-
-	register uint32_t i = SIGNAL_HSTART+1;
-	register SampleRet Prev;
-	register SampleRet Curr;
-
-	Prev.C = CurrData[SIGNAL_HSTART].i + Voffset;
-
-	if (Prev.C <= GRID_RECT_START_Y) Prev.C = GRID_RECT_START_Y+1;
-	if (Prev.C >= GRID_RECT_END_Y) Prev.C = GRID_RECT_END_Y-1;
-
-	Prev.P = PrevData[SIGNAL_HSTART].i + Voffset;
-
-	if (Prev.P <= GRID_RECT_START_Y) Prev.P = GRID_RECT_START_Y+1;
-	if (Prev.P >= GRID_RECT_END_Y) Prev.P = GRID_RECT_END_Y-1;
-
-	for (; i < SIGNAL_HSTOP; ++i)
-	{
-		/*		Prev = PrevData[i].i + Voffset;
-		 lastPrev = DrawSample(PrevColor,i,Prev,lastPrev);
-		 Curr = CurrData[i].i + Voffset;
-		 lastCurr = DrawSample(CurrColor,i,Curr,lastCurr);*/
-		Curr.P = PrevData[i].i + Voffset;
-		Curr.C = CurrData[i].i + Voffset;
-		/* avoid drawing out of grid only once per sample (return value)*/
-		if (Curr.P <= GRID_RECT_START_Y) Curr.P = GRID_RECT_START_Y+1;
-		if (Curr.P >= GRID_RECT_END_Y) Curr.P = GRID_RECT_END_Y-1;
-
-		if (Curr.C <= GRID_RECT_START_Y) Curr.C = GRID_RECT_START_Y+1;
-		if (Curr.C >= GRID_RECT_END_Y) Curr.C = GRID_RECT_END_Y-1;
-
-		DrawSample(PrevColor, CurrColor, i, Prev, Curr);
-		Prev = Curr;
-
-	}
-
-}
-
-/* drawing uninterrupted lines in a race condition framebuffer */
-void DrawSample(uint16_t ColorBack, uint16_t ColorSignal, uint32_t v, SampleRet hp, SampleRet hc)
-{
-	register uint32_t pl = 0;
-	register uint32_t ph = 0;
-	register uint32_t cl = 0;
-	register uint32_t ch = 0;
-
-	if (hp.P < hc.P)
-	{
-		pl = hp.P;
-		ph = hc.P;
-	}
-	else
-	{
-		pl = hc.P;
-		ph = hp.P;
-	}
-
-	if (hp.C < hc.C)
-	{
-		cl = hp.C;
-		ch = hc.C;
-	}
-	else
-	{
-		cl = hc.C;
-		ch = hp.C;
-	}
-
-	ClearVLineClipped(ColorBack,v,pl,ph);
-	DrawVLineClipped(ColorSignal,v,cl,ch);
-}
-
-void ConvSample (
-		int32_t * dst,
-		int32_t * src,
-		int32_t const * const fir)
-{
-
-	register int fir_idx = 0;
-	register int32_t result = 0;
-
-	for(fir_idx = 0; fir_idx < POLYPHASE_COEFFS; fir_idx+= 1)
-	{
-		result += src[fir_idx] * fir[POLYPHASE_COEFFS-1-fir_idx];
-	}
-	*dst = result/(32768);
-}
-
-void Interpolate (
-		uint32_t dstSamples,
-		uSample *Dst,
-		uSample *Src,
-		uint32_t type)
-{
-
-	register uint32_t i = 0;
-	register uint32_t j = 0;
-	register uint32_t dst_idx = 0;
-	register int32_t * fir;
-
-	register uint32_t srcSamples = dstSamples/POLYPHASES;
-
-	for (i = 0; i < srcSamples; ++i)
-	{
-		for (j = 0; j < POLYPHASES; ++j)
-		{
-			fir = (int32_t*)&Filter_I8[j][0];
-			ConvSample(&Dst[dst_idx].i,&Src[i].i,fir);
-			/*	Dst[dst_idx] = Src[i];*/
-			dst_idx++;
-		}
-	}
-}
-
-void GetCh(
-		uint32_t ch,
-		uint32_t size,
-		uSample * dst,
-		uSample * src,
-		uint32_t srcSamples,
-		sHWFilterGain AnalogGain,
-		sHWFilterGain FilterGain)
-{
-
-	register uint32_t i = 0;
-	register int32_t data = 0;
-	sHWFilterGain Gain;
-	Gain.num = -AnalogGain.num * FilterGain.num;
-	Gain.den =  AnalogGain.den * FilterGain.den;
-	switch (size)
-	{
-		case 8:
-		for (; i < srcSamples; ++i)
-		{
-			data = (int32_t)src[i].c[ch];
-			dst[i].i = (data*Gain.num)/Gain.den;
-		}
-		break;
-		case 16:
-		Gain.den *= 256;
-		for (; i < srcSamples; ++i)
-		{	                  
-			data =  src[i].c[ch+2] & 0xff; // must be unsigned!!!
-			data |= (int32_t)((src[i].c[ch] << 8));
-			dst[i].i = (data*Gain.num)/Gain.den;
-		}
-		break;
-		default:
-		for (; i < srcSamples; ++i)
-		{
-			dst[i].i = src[i].i;
-		}
-		break;
-	}
-}
-
 extern uSample Data[CAPTURESIZE];
 
 static DispOffset Offset[2];
@@ -268,6 +93,7 @@ static DispOffset Offset[2];
 typedef struct {
 	uint32_t analog;
 	sHWFilterGain Gain;
+	int32_t DACGain;
 	const char str[12];
 } sVoltagePerDiv;
 
@@ -317,6 +143,12 @@ void changeCouplingCh1(int32_t selection);
 void toggleBWLimitCh0(int32_t selection);
 void toggleBWLimitCh1(int32_t selection);
 void changeHWFilters(int32_t x);
+void CH0Offsetplus();
+void CH0Offsetminus();
+void CH1Offsetplus();
+void CH1Offsetminus();
+void changeDAC0Gain(int32_t x);
+void changeDAC1Gain(int32_t x);
 void onChannel0(void);
 void onChannel1(void);
 void change_uart(int32_t selection);
@@ -333,7 +165,7 @@ sCheckBox cbBwLimitCh0 = {"BW Limit", DEFAULT_BOUNDS_F2, 0, toggleBWLimitCh0};
 sCheckBox cbBwLimitCh1 = {"BW Limit", DEFAULT_BOUNDS_F2, 0, toggleBWLimitCh1};
 /*sCheckBox cbInvertCh0 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};
 sCheckBox cbInvertCh1 = {"Invert", DEFAULT_BOUNDS_F3, 0, NULL};*/
-sSubMenuList smlHWFilter = {"HW-Filters", DEFAULT_BOUNDS_F3, {213, SML_START_POS_Y(4), 103, SML_HEIGHT(5)}, 5, 0, changeHWFilters, 
+sSubMenuList smlHWFilter = {"HW-Filters", DEFAULT_BOUNDS_F3, {213, SML_START_POS_Y(5), 106, SML_HEIGHT(5)}, 5, 0, changeHWFilters, 
 {"None", "1G>100M", "1G>10MS", "1G>1MS", "1G>100k"}};
 
 sSubMenuList smlCoublingCh0 = {"Coupling", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 0, changeCouplingCh0, {"AC", "DC"}};
@@ -358,16 +190,30 @@ sValueField vfTest1 = {"vfTest1", DEFAULT_BOUNDS_F6, 0, 0, 10, NULL};
 sSubMenu smVfTest0 = {VALUE_FIELD, &vfTest0};
 sSubMenu smVfTest1 = {VALUE_FIELD, &vfTest1};
 
+/* alternative DAC Offset modification */
+sButton btDAC0pos = {"Offset+", DEFAULT_BOUNDS_F5, CH0Offsetplus};
+sButton btDAC0neg = {"Offset-", DEFAULT_BOUNDS_F6, CH0Offsetminus};
+sButton btDAC1pos = {"Offset+", DEFAULT_BOUNDS_F5, CH1Offsetplus};
+sButton btDAC1neg = {"Offset-", DEFAULT_BOUNDS_F6, CH1Offsetminus};
+sSubMenu smbtDAC0pos = {BUTTON, &btDAC0pos};
+sSubMenu smbtDAC0neg = {BUTTON, &btDAC0neg};
+sSubMenu smbtDAC1pos = {BUTTON, &btDAC1pos};
+sSubMenu smbtDAC1neg = {BUTTON, &btDAC1neg};
+sSubMenuList smlDAC0Gain = {"Offset Gain", DEFAULT_BOUNDS_F4, {316, SML_START_POS_Y(4), 103, SML_HEIGHT(4)}, 4, 3, changeDAC0Gain,	{"1000x", "100x", "10x", "1x"}};
+sSubMenuList smlDAC1Gain = {"Offset Gain", DEFAULT_BOUNDS_F4, {316, SML_START_POS_Y(4), 103, SML_HEIGHT(4)}, 4, 3, changeDAC1Gain,	{"1000x", "100x", "10x", "1x"}};
+sSubMenu smDAC0Gain = {SUBMENU_LIST, &smlDAC0Gain};
+sSubMenu smDAC1Gain = {SUBMENU_LIST, &smlDAC1Gain};
+
 /*
  * Menus for all channels
  */
-sMenu men_ch[] = {{{&smCoublingCh0, &smBwLimitCh0, /*&smInvertCh0,*/ &smHWFilter, NULL, &smVfTest0, &smVfTest1}, onChannel0},
-                  {{&smCoublingCh1, &smBwLimitCh1, /*&smInvertCh1,*/ &smHWFilter, NULL, NULL, NULL}, onChannel1}};
+sMenu men_ch[] = {{{&smCoublingCh0, &smBwLimitCh0, /*&smInvertCh0,*/ &smHWFilter, &smDAC0Gain, &smbtDAC0pos, &smbtDAC0neg}, onChannel0},
+                  {{&smCoublingCh1, &smBwLimitCh1, /*&smInvertCh1,*/ &smHWFilter, &smDAC1Gain, &smbtDAC1pos, &smbtDAC1neg}, onChannel1}};
 
 /*
  * Submenu items for trigger menu
  */
-sSubMenuList smlTriggerTypes = {"Trigger", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(3), 103, SML_HEIGHT(3)}, 3, 0, changeTriggerType,	{"Normal", "Glitch", "Extern"}};
+sSubMenuList smlTriggerTypes = {"Trigger", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(3), 103, SML_HEIGHT(3)}, 3, 3, changeTriggerType,	{"Normal", "Glitch", "Auto"}};
 sSubMenuList smlTriggerEdge = {"Edge", DEFAULT_BOUNDS_F2, {106, SML_START_POS_Y(2), 104, SML_HEIGHT(2)}, 2, 0, changeTriggerEdge, {"Rising", "Falling"}};
 sSubMenuList smlTriggerChannel = {"Channel", DEFAULT_BOUNDS_F3, {213, SML_START_POS_Y(2), 104, SML_HEIGHT(2)}, 2, 0, changeTriggerChannel, {"CH1", "CH2"}};
 sValueField vfTrigger = {"Level", DEFAULT_BOUNDS_F4, 0, 100, -100, NULL};
@@ -760,36 +606,30 @@ void changeHWFilters(int32_t x)
 }
 
 
-void setAnalogOffset(uint32_t ch, int32_t diff)
-{
-	channel[ch].analog.DA_Offset += diff;
-	//SetDACOffset(ch, Analog[ch].DA_Offset); //Doesn't work yet
-}
-
 /*
  * Selectable Voltage per div for Analog settings
  * TODO: correct num and den voltage range scaler
  */
 
 const sVoltagePerDiv VoltagePerDiv[] = {
-{5000000,{   1,1},"   5V/div"},
-{2000000,{   1,1},"   2V/div"},
-{1000000,{   1,1},"   1V/div"},
-{ 500000,{   1,1},"500mV/div"},
-{ 200000,{   1,1},"200mV/div"},
-{ 100000,{   1,1},"100mV/div"},
-{  50000,{   1,1}," 50mV/div"},
-{  20000,{   1,1}," 20mV/div"},
-{  10000,{   1,1}," 10mV/div"},
-{  10000,{   2,1},"  5mV/div"},
-{  10000,{   4,1},"  2mV/div"},
-{  10000,{  10,1},"  1mV/div"},
-{  10000,{  20,1},"500uV/div"},
-{  10000,{  40,1},"200uV/div"},
-{  10000,{ 100,1},"100uV/div"},
-{  10000,{ 200,1}," 50uV/div"},
-{  10000,{ 400,1}," 20uV/div"},
-{  10000,{1000,1}," 10uV/div"}};
+{5000000,{   1,1},  50,"   5V/div"},
+{2000000,{   1,1},  20,"   2V/div"},
+{1000000,{   1,1},  10,"   1V/div"},
+{ 500000,{   1,1},  50,"500mV/div"},
+{ 200000,{   1,1},  20,"200mV/div"},
+{ 100000,{   1,1},  10,"100mV/div"},
+{  50000,{   1,1},  1," 50mV/div"},
+{  20000,{   1,1},  1," 20mV/div"},
+{  10000,{   1,1},  1," 10mV/div"},
+{  10000,{   2,1},  0,"  5mV/div"},
+{  10000,{   4,1},  0,"  2mV/div"},
+{  10000,{  10,1},  0,"  1mV/div"},
+{  10000,{  20,1},  0,"500uV/div"},
+{  10000,{  40,1},  0,"200uV/div"},
+{  10000,{ 100,1},  0,"100uV/div"},
+{  10000,{ 200,1},  0," 50uV/div"},
+{  10000,{ 400,1},  0," 20uV/div"},
+{  10000,{1000,1},  0," 10uV/div"}};
 
 /*
  * This function changes the voltage per div of the selected channel.
@@ -824,6 +664,56 @@ void set_vdiv_ch0 (int32_t diff)
 void set_vdiv_ch1 (int32_t diff)
 {
 	setVoltagePerDiv(CH1, diff);
+}
+
+static int32_t DACGain[4];
+
+void setAnalogOffset(uint32_t ch, int32_t diff)
+{
+//	channel[ch].analog.DA_Offset += diff*VoltagePerDiv[(uint32_t)channel[ch].selectedVoltagePerDiv].DACGain;
+	channel[ch].analog.DA_Offset -= diff*DACGain[ch];
+
+	if(channel[ch].analog.DA_Offset > GUI_DAC_MAX)
+		channel[ch].analog.DA_Offset	 = GUI_DAC_MAX;
+	if(channel[ch].analog.DA_Offset < GUI_DAC_MIN)
+		channel[ch].analog.DA_Offset	 = GUI_DAC_MIN;
+
+	GUI_DACOffset(ch, channel[ch].analog.DA_Offset); 
+}
+
+void add_dac0_offset(int32_t diff){
+	setAnalogOffset(0,diff);
+}
+void add_dac1_offset(int32_t diff){
+	setAnalogOffset(1,diff);
+}
+void CH0Offsetplus(){
+	setAnalogOffset(0,1);
+}
+void CH0Offsetminus(){
+	setAnalogOffset(0,-1);
+}
+void CH1Offsetplus(){
+	setAnalogOffset(1,1);
+}
+void CH1Offsetminus(){
+	setAnalogOffset(1,-1);
+}
+void changeDAC0Gain(int32_t x){
+	switch(x) {
+		case 0: DACGain[0] = 1000; break;
+		case 1: DACGain[0] = 100; break;
+		case 2: DACGain[0] = 10; break;
+		default:DACGain[0] = 1; break;
+	}
+}
+void changeDAC1Gain(int32_t x){
+	switch(x) {
+		case 0: DACGain[1] = 1000; break;
+		case 1: DACGain[1] = 100; break;
+		case 2: DACGain[1] = 10; break;
+		default:DACGain[1] = 1; break;
+	}
 }
 
 #define FRAMESIZE 600
@@ -992,13 +882,6 @@ void change_uart(int32_t selection)
 	}
 }
 
-void add_dac0_offset(int32_t diff){
-	AddDACOffset(0,diff);
-}
-void add_dac1_offset(int32_t diff){
-	AddDACOffset(1,diff);
-}
-
 /*
   * Init buttons. Add for every button a button handler
   */
@@ -1020,6 +903,7 @@ void init_buttons(void)
 	init_bt_handler(&bt_handler_modecoupling, updateMenu, &menTriggerTypes);
 	init_bt_handler(&bt_handler_utility, updateMenu, &menUtility);
 	init_bt_handler(&bt_handler_quickprint, updateMenu, &menQuickPrint);
+	init_bt_handler(&bt_handler_display, closeSubMenuPressed, 0);
 }
 
 
@@ -1049,7 +933,6 @@ void init_encoders(void)
 void GUI_Main(void)
 {
 	generategrid();
-
 	uSample Ch1[2][HLEN+100];
 	uSample Ch2[2][HLEN+100];
 	uint32_t PrevBuffer = 0;
@@ -1073,7 +956,7 @@ void GUI_Main(void)
 	//	Analog[1].DA_Offset = 16384;
 	channel[1].analog.DA_Offset = 0;
 	channel[1].analog.BW_Limit = 0;
-	channel[1].BitMode = 8;
+	channel[1].BitMode = 16;
 
 	WRITE_INT(CONFIGADCENABLE,1); 
 	Offset[0].V = 128;
@@ -1109,7 +992,7 @@ void GUI_Main(void)
 	/* Set timbase, trigger and voltage per div
 	 * Also updates titlebar.
 	 */
-	setTimebase(0);
+	setTimebase(8);
 	changeTriggerEdge(0);
 	setVoltagePerDiv(CH0,0);
 	setVoltagePerDiv(CH1,0);
@@ -1117,6 +1000,7 @@ void GUI_Main(void)
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
 	WRITE_INT(LEDADDR,(1 << LED_CH3));
 	WRITE_INT(ANALOGSETTINGSADDR,(1 << ENABLEKEYCLOCK));
+//	CalibrateDAC(2);
 
 	Run = TRUE;
 	/*
