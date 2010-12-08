@@ -83,9 +83,10 @@ void UpdateCalOffsetPointer(
 		uint32_t ch,  
 		uint32_t myVperDivCurr);
 
-uint32_t CalibrateDAC(
-		uint32_t Noch);
+uint32_t CalibrateDAC();
 
 
-void GUI_DACOffset(uint32_t ch, int32_t Offset);
+void GUI_DACOffset(
+		uint32_t ch, 
+		int32_t Offset);
 

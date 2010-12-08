@@ -30,6 +30,7 @@ SOURCES      += $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.cpp))
 SOURCES      += ../../fpga/leon3/software/DSO_Remote.c
 SOURCES      += ../../fpga/leon3/software/DSO_SignalCapture.c
 SOURCES      += ../../fpga/leon3/software/DSO_Misc.c
+SOURCES      += ../../fpga/leon3/software/DSO_Signal.c
 
 HEADERS      := $(foreach DIR, $(subst :, ,$(VPATH)), $(wildcard $(DIR)/*.c))
 OBJS         := $(SOURCES:.c=.o)

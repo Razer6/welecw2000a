@@ -34,10 +34,12 @@
 #include "DSO_Main.h"
 #include "DSO_Misc.h"
 #include "DSO_Signal.h"
-#include "GUI.h"
 #include "Filter_I8.h"
 #include "DSO_SignalCapture.h"
+
+#ifdef LEON3
 #include "rprintf.h"
+#include "GUI.h"
 
 #define SIGNAL_HSTART 20
 #define SIGNAL_HSTOP  HLEN-20
@@ -122,7 +124,7 @@ void DrawSample(uint16_t ColorBack, uint16_t ColorSignal, uint32_t v, SampleRet 
 	ClearVLineClipped(ColorBack,v,pl,ph);
 	DrawVLineClipped(ColorSignal,v,cl,ch);
 }
-
+#endif
 
 int32_t Sum(
 	int32_t * src,
@@ -166,7 +168,7 @@ int32_t GetMax(
 }
 
 
-
+#ifdef LEON3
 void ConvSample (
 		int32_t * dst,
 		int32_t * src,
@@ -208,6 +210,7 @@ void Interpolate (
 		}
 	}
 }
+#endif
 
 void GetCh(
 		uint32_t ch,
@@ -292,16 +295,23 @@ void InitCalOffset() {
 	uint32_t j = 0;
 	for (;i < NO_CH; ++i){
 		for (;j < NO_ANALOGRANGES; ++j){
-			AnCalOffset[i][j] = 0;
+			AnCalOffset[i][j] = -7250;
 		}
 		myVperDiv[i] = 0; 
+		GUI_DACOffset(i, 0);
+
 	}
 }
 
 /* 12 bit DAC compability with the 16 bit DACs of this family */
 #define MIN_DAC_COUNT 4
 #define CALBUFFERSIZE 16
+
+#ifdef LEON3
 extern uSample Data[CAPTURESIZE];
+#else
+uSample Data[CAPTURESIZE];
+#endif
 
 void CalAnalogOffset(
 		uint32_t ch, 
@@ -326,10 +336,8 @@ void CalAnalogOffset(
 
 		while (read < CALBUFFERSIZE) {
 			read = CaptureData(10000,TRUE,TRUE,CALBUFFERSIZE+10, (uint32_t*)Data);
-			WRITE_INT(LEDADDR,0);
+			
 			if (read == 0) {
-				WRITE_INT(LEDADDR,0xff);
-				WaitUs(100000);
 			}
 	
 		}
@@ -341,29 +349,21 @@ void CalAnalogOffset(
  		AnCalOffset[ch][myVperDivCurr] = AnCalOffset[ch][myVperDivCurr] - step;
 		GUI_DACOffset(ch,0 /* gui offset! */); 
 		if (mean == 0) {
-			WRITE_INT(LEDADDR,0xff);
-			WaitUs(100000);
 			return;
 		}
 		if (step > 0) {
 			if (mean > 0){	
 				step = -(step/2);
-				WRITE_INT(LEDADDR,(1 << LED_CH2));
 			}
 		} else {
 			if (mean < 0){
 				step = -(step/2);
-				WRITE_INT(LEDADDR,(1 << LED_CH3));
 			}
 		}
-		//WRITE_INT(LEDADDR,(1 << LED_CH3));
 	}
-	WRITE_INT(LEDADDR,0xf0);
-//	WaitUs(10000000);
-
 }
 
-uint32_t CalibrateDAC(uint32_t NoCh)
+uint32_t CalibrateDAC()
 {
 	/* set the Trigger tempoarly to force triggering 
 	 * set the analog ch tempoarly to AC 
@@ -378,10 +378,6 @@ uint32_t CalibrateDAC(uint32_t NoCh)
 	uint32_t i = 0;
 	uint32_t j = 0;*/
 	InitCalOffset();
-/*	WRITE_INT(LEDADDR,(1 << SINGLE_RED));
-	WaitUs(1999);*/
-	if (NoCh > 2) return FALSE;
-
 /*
 As long the DC Calibration does not work it is not used
 	for (i = 0; i < NoCh; i++){
@@ -390,13 +386,12 @@ As long the DC Calibration does not work it is not used
 		}
 	}
 */
-/*	WRITE_INT(LEDADDR,(1 << SINGLE_RED));
-	WaitUs(99990000);*/
-
 	return TRUE;
 }
 
-void GUI_DACOffset(uint32_t ch, int32_t Offset)
+void GUI_DACOffset(
+		uint32_t ch, 
+		int32_t Offset)
 {
 	SetDACOffset(ch, (Offset * MIN_DAC_COUNT) + AnCalOffset[ch][myVperDiv[ch]] - GUI_DAC_MIN);	
 }

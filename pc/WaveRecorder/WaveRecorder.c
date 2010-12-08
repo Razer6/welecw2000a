@@ -204,9 +204,13 @@ const string config_baudrate_Iidentifier = "BAUD";
 const string config_plattform_identifier = "PLATTFORM";
 
 /* Default values for config options */
+#ifdef WINNT
 const string config_defaut_serial_interface = "Com4";
+#else
+const string config_defaut_serial_interface = "/dev/ttyUSB0";
+#endif
 const int32_t config_default_baudrate = 115200;
-const string config_default_plattform = "W2012";
+const string config_default_plattform = "W20x2";
 const int32_t config_default_channels = 2;
 const int32_t config_default_base_addr = RAM_BASE_ADDR;
 const int32_t config_default_stack_addr = RAM_BASE_ADDR + RAM_SIZE - 0x80;
@@ -578,7 +582,7 @@ int main(int argc, char * argv[])
 	
 	if(version->count != 0)
 	{
-		cout << "Version 0.2, compile time: " << __DATE__ << " " << __TIME__ << " (development stage)" << endl;
+		cout << "Version 0.3, compile time: " << __DATE__ << " " << __TIME__ << " (development stage)" << endl;
 		cout << "Author: Alexander Lindert" << endl;
 		cout << "\tRobert Schilling" << endl;
 		cout << "Remote control for Open Source Digital Storage Scopes" << endl;

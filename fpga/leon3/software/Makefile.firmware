@@ -74,8 +74,9 @@ clean:
 	@$(RM) -r $(CLEAN)
 
 .PHONY: upload
+
 upload: w2000a.bin
-	$(WAVEREC) -p Debugger -u $(UART) -b $(BAUD) -n $(CHANNELS) -c LoadRun --Ffile=$<
+	$(WAVEREC)  --loadrun -f $<
 
 .PHONY: program
 program: $(SOF)
@@ -83,11 +84,11 @@ program: $(SOF)
 
 .PHONY: backtrace
 backtrace: 
-	$(WAVEREC) -p Debugger -u $(UART) -b $(BAUD) -n $(CHANNELS) -c Debug 
+	$(WAVEREC) --debug 
 
 .PHONY: readaddr
 readaddr:
-	$(WAVEREC) -p Debugger -u $(UART) -b $(BAUD) -n $(CHANNELS) -c Debug --CapSize=64 --Faddr=$(LEONADDR)
+	$(WAVEREC) --readaddr -s 32 --Address=$(LEONADDR)
 
 .PHONY: dump
 dump:
@@ -97,6 +98,7 @@ dump:
 %.bin: %.elf
 	@echo " [OBJCOPY] $^"
 	@$(OBJCOPY) -O binary $^ $@
+	@$(OBJDUMP) -S $^ > $(DUMP)
 
 %.elf: $(addprefix $(OBJDIR)/,$(OBJS))
 	@echo " [LINK   ] $^"

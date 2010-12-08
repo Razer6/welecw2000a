@@ -64,9 +64,9 @@
 /* The CPU frequency must be set correctly or the function CaptureData gets sometimes crasy!*/
 #ifdef W2000A 
 /* 2 MB */
+#define RAM_SIZE             0x00200000
 #define NO_CH                2
 #define NO_ANALOGRANGES      9
-#define RAM_SIZE             0x00200000
 #define FIXED_CPU_FREQUENCY  31250000
 #define SVGA_BUFFER_BASE     (RAM_BASE_ADDR+0x00100000)
 #define FS_MAX               1000000000
@@ -74,12 +74,16 @@
 #ifdef SBX
 /* 16 MB */
 #define RAM_SIZE             0x01000000
+#define NO_CH                2
+#define NO_ANALOGRANGES      9
 #define FIXED_CPU_FREQUENCY  12500000
 #define SVGA_BUFFER_BASE     (RAM_BASE_ADDR+0x00100000)
 #define FS_MAX               100000000
 #else
 /* 2 MB */
 #define RAM_SIZE             0x00200000
+#define NO_CH                2
+#define NO_ANALOGRANGES      9
 #define FIXED_CPU_FREQUENCY  12500000
 #define SVGA_BUFFER_BASE     (RAM_BASE_ADDR+0x00100000)
 #define FS_MAX               1000000000

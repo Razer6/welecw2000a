@@ -213,7 +213,7 @@ sMenu men_ch[] = {{{&smCoublingCh0, &smBwLimitCh0, /*&smInvertCh0,*/ &smHWFilter
 /*
  * Submenu items for trigger menu
  */
-sSubMenuList smlTriggerTypes = {"Trigger", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(3), 103, SML_HEIGHT(3)}, 3, 3, changeTriggerType,	{"Normal", "Glitch", "Auto"}};
+sSubMenuList smlTriggerTypes = {"Trigger", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(3), 103, SML_HEIGHT(4)}, 3, 3, changeTriggerType,	{"Normal", "Glitch", "Auto"}};
 sSubMenuList smlTriggerEdge = {"Edge", DEFAULT_BOUNDS_F2, {106, SML_START_POS_Y(2), 104, SML_HEIGHT(2)}, 2, 0, changeTriggerEdge, {"Rising", "Falling"}};
 sSubMenuList smlTriggerChannel = {"Channel", DEFAULT_BOUNDS_F3, {213, SML_START_POS_Y(2), 104, SML_HEIGHT(2)}, 2, 0, changeTriggerChannel, {"CH1", "CH2"}};
 sValueField vfTrigger = {"Level", DEFAULT_BOUNDS_F4, 0, 100, -100, NULL};
@@ -253,7 +253,7 @@ sMenu menQuickPrint = {{&smScrShotColorBMP, &smScrShotSwBMP, &smScrShotColorPPM,
 /* 
  * Menu Items for utility menu 
  */
-sSubMenuList smlUartSelection = {"UART", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 0, change_uart, {"LEON", "FPGA"}};
+sSubMenuList smlUartSelection = {"UART", DEFAULT_BOUNDS_F1, {0, SML_START_POS_Y(2), 103, SML_HEIGHT(2)}, 2, 1, change_uart, {"LEON", "FPGA"}};
 sSubMenu smUartSelection = {SUBMENU_LIST, &smlUartSelection};
 /*
  * Uitilty menu 
@@ -435,6 +435,8 @@ void changeTriggerType(int32_t selection)
 		case 0: triggerSettings.type = NORMAL_TRIGGER; break;
 		case 1: triggerSettings.type = GLITCH_TRIGGER; break;
 		case 2: triggerSettings.type = EXTERNAL_TRIGGER; break;
+		case 3: triggerSettings.type = EXTERNAL_TRIGGER; break;
+
 		default: break;
 	}
 
@@ -930,6 +932,8 @@ void init_encoders(void)
 	init_enc_handler(&enc[5],  LEDADDR, EN_F, vfValueChanged);
 }
 
+#define MISSED_CYCLE 100
+
 void GUI_Main(void)
 {
 	generategrid();
@@ -938,9 +942,13 @@ void GUI_Main(void)
 	uint32_t PrevBuffer = 0;
 	uint32_t CurrBuffer = 1;
 	uint32_t ReadData = 0;
+	uint32_t Missed = 0;
 	uint32_t Run = TRUE;
 	uint32_t Single = FALSE;
 	int16_t x = 0;
+
+	CalibrateDAC();
+	WRITE_INT(CONFIGADCENABLE,1); /* set to debug uart */
 
 	channel[0].analog.myVperDiv = 5000000;
 	channel[0].analog.AC = 0;
@@ -958,7 +966,6 @@ void GUI_Main(void)
 	channel[1].analog.BW_Limit = 0;
 	channel[1].BitMode = 16;
 
-	WRITE_INT(CONFIGADCENABLE,1); 
 	Offset[0].V = 128;
 	Offset[1].V = VLEN-128;
 	for (x = 0; x < 2; ++x)
@@ -984,7 +991,6 @@ void GUI_Main(void)
 	init_buttons();
 	init_encoders();
 
-	WRITE_INT(LEDADDR,(1 << RUN_RED));
 
 	titleBarInit();
 	status_bar_init();
@@ -996,11 +1002,9 @@ void GUI_Main(void)
 	changeTriggerEdge(0);
 	setVoltagePerDiv(CH0,0);
 	setVoltagePerDiv(CH1,0);
-	WRITE_INT(LEDADDR,(1 << LED_CH2));
 	updateMenu(&men_ch[0]); //Activate menu for channel 0
-	WRITE_INT(LEDADDR,(1 << LED_CH3));
 	WRITE_INT(ANALOGSETTINGSADDR,(1 << ENABLEKEYCLOCK));
-//	CalibrateDAC(2);
+	CalibrateDAC();
 
 	Run = TRUE;
 	/*
@@ -1045,7 +1049,30 @@ void GUI_Main(void)
 
 		if (Run == TRUE)
 		{
+			if (triggerSettings.type == EXTERNAL_TRIGGER) {
+
+			if (Missed < MISSED_CYCLE) {
+				 SetTrigger(
+				2+triggerSettings.edge,0,triggerSettings.channel,
+				triggerSettings.prefetch, triggerSettings.level - triggerSettings.schmitt, 
+				triggerSettings.pulse, triggerSettings.level + triggerSettings.schmitt, 
+				triggerSettings.pulse);
+			} else {
+				SetTrigger(
+				0+triggerSettings.edge,0,triggerSettings.channel,
+				triggerSettings.prefetch, triggerSettings.level - triggerSettings.schmitt, 
+				triggerSettings.pulse, triggerSettings.level + triggerSettings.schmitt, 
+				triggerSettings.pulse);
+			}}
+
 			ReadData = CaptureData(1000, true, true, 32768, (uint32_t*)Data);
+			
+			if ((ReadData > 0) || (triggerSettings.type != EXTERNAL_TRIGGER)) {
+				Missed = 0;
+			} else {
+				Missed++;
+			}
+
 		}
 /*		else
 		{

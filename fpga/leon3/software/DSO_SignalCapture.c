@@ -635,7 +635,6 @@ uint32_t * RawData)
 	if(WaitTimeoutAndNotZero(TRIGGERSTATUSREGISTER, (1 << TRIGGERRECORDINGBIT),
 								WaitTime) == FALSE)
 	{
-		WRITE_INT(LEDADDR,(3 << LED_CH0));
 		return 0;
 	}
 	StopOffset = READ_INT(TRIGGERREADOFFSETADDR);
@@ -739,7 +738,6 @@ uint32_t * RawData)
 				break;
 		}
 	}
-	WRITE_INT(LEDADDR,(15 << LED_CH0));
 	return CaptureSize;
 }
 
